@@ -1,3 +1,19 @@
+-- ################################################################
+-- ⚠️  OJO CON ESTE ARCHIVO — agenda tareas que llaman a la app
+--
+-- Este .sql crea tareas automáticas (crons) que llaman a las Edge
+-- Functions del proyecto. Traía escrita adentro la URL del proyecto de
+-- Café del Desierto; el 2026-09-02, al separar la copia, se cambió por la
+-- de Llamita Plus.
+--
+-- NO correrlo "para ver qué pasa". Las tareas que agenda necesitan que las
+-- Edge Functions estén desplegadas en este proyecto (Fase 4) y que existan
+-- los secretos de Fudo, que a propósito todavía no se pusieron.
+--
+-- Si algún día hacen falta esos crons acá, se decide primero SI la copia
+-- debe sincronizar con Fudo, y recién después se corre esto.
+-- ################################################################
+
 -- ================================================================
 --  DÓNDE VA:  Supabase  ->  SQL Editor  ->  New query
 --             (pero ANTES hay dos pasos en Edge Functions, ver abajo)
@@ -99,13 +115,13 @@ select cron.unschedule('ciclo-fudo-angamos')
 select cron.schedule(
   'ciclo-fudo-plaza',
   '0,15,30,45 * * * *',
-  'select net.http_post(url := ''https://fqjdecjsbnicvyrxkxcu.supabase.co/functions/v1/fudo-ciclo?sede=plaza&origen=cron'', headers := jsonb_build_object(''Authorization'', ''Bearer sb_publishable_P5TfG3nhMG3oNT9VLs16_w_iKHvktwl'', ''Content-Type'', ''application/json''), body := ''{}''::jsonb);'
+  'select net.http_post(url := ''https://iuryhsjucblmebdogewa.supabase.co/functions/v1/fudo-ciclo?sede=plaza&origen=cron'', headers := jsonb_build_object(''Authorization'', ''Bearer sb_publishable_NxrNACdDllRjfRYeMmsGJw_sqWO0DrC'', ''Content-Type'', ''application/json''), body := ''{}''::jsonb);'
 );
 
 select cron.schedule(
   'ciclo-fudo-angamos',
   '7,22,37,52 * * * *',
-  'select net.http_post(url := ''https://fqjdecjsbnicvyrxkxcu.supabase.co/functions/v1/fudo-ciclo?sede=angamos&origen=cron'', headers := jsonb_build_object(''Authorization'', ''Bearer sb_publishable_P5TfG3nhMG3oNT9VLs16_w_iKHvktwl'', ''Content-Type'', ''application/json''), body := ''{}''::jsonb);'
+  'select net.http_post(url := ''https://iuryhsjucblmebdogewa.supabase.co/functions/v1/fudo-ciclo?sede=angamos&origen=cron'', headers := jsonb_build_object(''Authorization'', ''Bearer sb_publishable_NxrNACdDllRjfRYeMmsGJw_sqWO0DrC'', ''Content-Type'', ''application/json''), body := ''{}''::jsonb);'
 );
 
 -- QUÉ VER: dos filas, active = true, y ninguna llamada `sync-ventas-plaza`.
