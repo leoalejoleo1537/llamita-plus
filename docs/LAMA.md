@@ -788,7 +788,13 @@ es que **el pago del cierre se precargue con lo que FALTA y no con el total**:
 si eso fallara, la mesa se cobraría dos veces y se sabría al final del turno, o
 nunca.
 
-**C8 · Los tres símbolos del teléfono** bajo TOTAL. Está a medias.
+**C8 · Los tres símbolos del teléfono** bajo TOTAL. ✅ **HECHO**, y **con eso la
+F1 queda cerrada** — el detalle está arriba, en la sección propia de C8.
+
+⚠️ Esta línea decía *"está a medias"* hasta el 2026-09-03. Era la sección de
+estado que engaña de la que advierte este mismo archivo: C8 se terminó en el
+commit `b4883c6` y la línea se quedó atrás. Se corrige acá porque una sesión
+que la lea va a rehacer trabajo terminado.
 
 #### F2 · Las reglas y las palabras de Fudo — *barato, alto retorno*
 

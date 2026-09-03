@@ -8,7 +8,11 @@
 >
 > **Link fijo para guardar** (este, no el de una rama de trabajo — esa puede
 > cambiar de nombre; `master` no):
-> `https://github.com/leoalejoleo1537/inventario-mall-plaza/blob/master/docs/sql-pendientes.md`
+> `https://github.com/leoalejoleo1537/llamita-plus/blob/master/docs/sql-pendientes.md`
+>
+> ⚠️ **Corregido el 2026-09-03.** Apuntaba a `inventario-mall-plaza`, que es el
+> repositorio de Café del Desierto y quedó congelado. Este archivo es el de
+> **Llamita Plus**.
 >
 > **Las dos sesiones (Stock y Lama) agregan acá** apenas dejan un `.sql`
 > nuevo listo para correr, **con el texto completo pegado**, no solo el
@@ -21,10 +25,80 @@
 
 ## Pendientes ahora
 
-**Ninguno.** 🎉
+### [ ] 1 · `sql/2026-09-plus-donde-estamos-parados.sql` — *no escribe nada, solo mira*
 
-Cuando cualquiera de las dos sesiones deje un `.sql` nuevo, aparece acá con el
-texto completo pegado y un `[ ]` para marcar.
+> **Es una radiografía, no una operación.** Son dos `select`. No crea, no
+> borra, no modifica una sola fila. Se puede correr las veces que sea.
+
+**Por qué hace falta.** La base de Llamita Plus nació de un respaldo. Un
+respaldo copia la casa entera con los muebles adentro — pero **no copia el
+cable del timbre**: la lista de qué tablas se transmiten en vivo a los
+teléfonos. Todo está en su sitio, y cuando alguien toca la puerta, adentro no
+suena nada.
+
+Eso le importa a Lama más que a nada: dos garzones sobre la misma mesa tienen
+que verse. Si el cable no está, el segundo no ve lo que agregó el primero.
+
+**Cómo se corre:** son **2 bloques, uno por uno**. El editor de Supabase solo
+muestra el resultado del último, así que si se pegan juntos se pierde el
+primero.
+
+**Qué mirar:**
+
+| Bloque | La columna | Qué significa |
+|---|---|---|
+| 1 | `en_vivo` | `sí` = el timbre está conectado · `NO` = esa tabla no avisa a nadie |
+| 2 | `ve_lama` | que **tu** correo esté ahí con `sí`, o la pestaña Mesas no existe para vos |
+
+**Con la respuesta se decide qué arreglar.** El arreglo del timbre es de una
+línea por tabla, pero **primero hay que saber cuáles faltan** — la regla de la
+casa es que el estado de la base se consulta, no se supone.
+
+⚠️ **Si tu correo no aparece en el bloque 2, no lo agregues por tu cuenta.**
+Avisá y te paso la línea: es una fila nueva y conviene escribirla bien la
+primera vez.
+
+<details><summary>▶ Ver el SQL completo</summary>
+
+```sql
+-- ================================================================
+-- BLOQUE 1 — ¿Qué tablas están "en vivo"?
+-- ================================================================
+select
+  t.tabla,
+  case when p.tablename is null then 'NO' else 'sí' end as en_vivo,
+  t.para_que
+from (values
+        ('productos',      'Stock · el número de stock cambia solo en la lista'),
+        ('producto_lotes', 'Stock · las fechas de los sándwiches'),
+        ('repartos',       'Stock · avisa que llegó un reparto'),
+        ('reparto_items',  'Stock · las líneas de ese reparto'),
+        ('mesas',          'Lama · el plano del salón'),
+        ('cuentas',        'Lama · el color de la mesa y su total'),
+        ('cuenta_items',   'Lama · los productos de la mesa'),
+        ('comandas',       'Lama · los papeles que salieron a la cocina')
+     ) as t(tabla, para_que)
+left join pg_publication_tables p
+       on p.pubname    = 'supabase_realtime'
+      and p.schemaname = 'public'
+      and p.tablename  = t.tabla
+order by en_vivo, t.tabla;
+```
+
+```sql
+-- ================================================================
+-- BLOQUE 2 — ¿Quién puede ver el área de ventas?
+-- ================================================================
+select
+  correo,
+  nombre,
+  case when puede_lama    then 'sí' else 'NO' end as ve_lama,
+  case when puede_ajustes then 'sí' else 'NO' end as entra_a_ajustes
+from public.app_permisos
+order by puede_lama desc, correo;
+```
+
+</details>
 
 ---
 

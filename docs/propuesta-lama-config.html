@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Propuesta · Configuración de Lama (F3)</title>
+<style>
+  :root{
+    --navy:#0F1E31; --navy2:#16283F;
+    --orange:#DC4405; --orange-dark:#B93A04;
+    --bg:#E9EEF5; --card:#FDFEFF; --border:#D6DFEB;
+    --text:#121E2C; --muted:#61707F;
+    --red-bg:#FCE9E6; --red-fg:#C0392B;
+    --green-bg:#E4F1E5; --green-fg:#2E7D32;
+    --amber-bg:#FDF0DE; --amber-fg:#9C6209;
+    --gray-bg:#E1E8F1; --gray-fg:#54677D;
+    --azul-bg:#E8F0FB; --azul-fg:#2C5AA0;
+    --sec-bg:#D0DDEC; --sec-tx:#1F3A5C; --sec-line:rgba(31,58,92,.22);
+    --sec-filo:#41628C;
+    --sombra:0 2px 4px rgba(20,40,70,.04), 0 12px 26px -18px rgba(20,40,70,.34);
+    --r-card:20px; --r-sec:18px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+       background:var(--bg);color:var(--text);line-height:1.5}
+  .doc{max-width:1080px;margin:0 auto;padding:22px 16px 80px}
+
+  h1{font-size:26px;margin:0 0 4px;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 26px}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:.06em;
+     color:var(--sec-tx);background:var(--sec-bg);border-left:4px solid var(--sec-filo);
+     padding:9px 14px;border-radius:0 var(--r-sec) var(--r-sec) 0;margin:38px 0 16px}
+  h3{font-size:16px;margin:26px 0 8px}
+  p{margin:0 0 12px}
+  .nota{background:var(--card);border:1px solid var(--border);border-radius:14px;
+        padding:14px 16px;margin:0 0 18px;box-shadow:var(--sombra)}
+  .nota.ojo{background:var(--amber-bg);border-color:rgba(156,98,9,.28)}
+  .nota.si{background:var(--green-bg);border-color:rgba(46,125,50,.28)}
+  .nota b{color:var(--text)}
+  code{background:var(--gray-bg);border-radius:5px;padding:1px 5px;font-size:.9em}
+
+  /* ---------- la maqueta ---------- */
+  .marco{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);
+         box-shadow:var(--sombra);overflow:hidden;margin:0 0 10px}
+  .marco-tit{background:var(--navy);color:#fff;font-size:12px;letter-spacing:.05em;
+             text-transform:uppercase;padding:8px 14px;display:flex;
+             justify-content:space-between;align-items:center}
+  .marco-tit span{opacity:.62;text-transform:none;letter-spacing:0;font-size:11px}
+  .lienzo{padding:16px;background:var(--bg)}
+  .pie-marco{font-size:13px;color:var(--muted);margin:0 0 26px;padding:0 4px}
+
+  /* pestañas de la config */
+  .cfg-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
+  .cfg-tab{background:var(--card);border:1px solid var(--border);color:var(--muted);
+           border-radius:999px;padding:8px 16px;font-size:14px;font-weight:600;cursor:default}
+  .cfg-tab.on{background:var(--navy);border-color:var(--navy);color:#fff}
+
+  /* la lista de filas configurables */
+  .cfg-lista{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);
+             overflow:hidden;box-shadow:var(--sombra)}
+  .cfg-fila{display:flex;align-items:center;gap:12px;padding:12px 14px;
+            border-bottom:1px solid var(--border)}
+  .cfg-fila:last-child{border-bottom:none}
+  .cfg-fila.apagada{background:#F4F7FB}
+  .cfg-fila.apagada .cfg-nom{color:var(--muted);text-decoration:line-through}
+  .arr{color:var(--muted);cursor:grab;font-size:15px;flex-shrink:0;letter-spacing:-2px}
+  .cfg-nom{flex:1;font-weight:600;font-size:15px;min-width:0}
+  .cfg-sub{display:block;font-weight:400;font-size:12px;color:var(--muted);
+           text-decoration:none}
+  .pct{background:var(--amber-bg);color:var(--amber-fg);border-radius:999px;
+       padding:3px 11px;font-size:13px;font-weight:700;flex-shrink:0}
+  .pct.cero{background:var(--gray-bg);color:var(--gray-fg)}
+  .marca{background:var(--azul-bg);color:var(--azul-fg);border-radius:999px;
+         padding:3px 10px;font-size:12px;font-weight:600;flex-shrink:0}
+  .sw{width:42px;height:25px;border-radius:999px;background:var(--green-fg);
+      position:relative;flex-shrink:0}
+  .sw::after{content:"";position:absolute;top:3px;right:3px;width:19px;height:19px;
+             border-radius:50%;background:#fff}
+  .sw.off{background:#C3CDDB}
+  .sw.off::after{right:auto;left:3px}
+  .lapiz{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);
+         background:var(--card);color:var(--muted);display:flex;align-items:center;
+         justify-content:center;flex-shrink:0;font-size:15px}
+  .cfg-mas{display:flex;align-items:center;justify-content:center;gap:8px;
+           padding:13px;color:var(--orange);font-weight:700;font-size:15px;
+           background:var(--card);border-top:1px dashed var(--border)}
+
+  /* ficha de edición */
+  .ficha{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);
+         box-shadow:var(--sombra);padding:18px;max-width:420px;margin:0 auto}
+  .ficha h4{margin:0 0 16px;font-size:17px}
+  .campo{margin:0 0 14px}
+  .campo label{display:block;font-size:12px;color:var(--muted);margin:0 0 5px;
+               text-transform:uppercase;letter-spacing:.04em}
+  .campo .caja{border:1px solid var(--border);border-radius:11px;padding:10px 12px;
+               background:#fff;font-size:15px}
+  .campo .caja.gris{background:var(--gray-bg);color:var(--muted)}
+  .fila2{display:flex;gap:10px}
+  .fila2>*{flex:1}
+  .btns{display:flex;gap:10px;margin-top:18px}
+  .btn{flex:1;text-align:center;padding:12px;border-radius:12px;font-weight:700;font-size:15px}
+  .btn.pri{background:var(--orange);color:#fff}
+  .btn.sec{background:var(--card);border:1px solid var(--border);color:var(--muted)}
+
+  /* tabla comparativa */
+  table{width:100%;border-collapse:collapse;background:var(--card);
+        border:1px solid var(--border);border-radius:14px;overflow:hidden;
+        box-shadow:var(--sombra);margin:0 0 18px;font-size:14px}
+  th{background:var(--sec-bg);color:var(--sec-tx);text-align:left;padding:10px 13px;
+     font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+  td{padding:10px 13px;border-top:1px solid var(--border);vertical-align:top}
+  td.si{color:var(--green-fg);font-weight:700}
+  td.no{color:var(--red-fg);font-weight:700}
+
+  .pregunta{background:var(--azul-bg);border:1px solid rgba(44,90,160,.28);
+            border-radius:14px;padding:16px 18px;margin:0 0 16px}
+  .pregunta h4{margin:0 0 8px;font-size:16px;color:var(--azul-fg)}
+  .op{background:#fff;border:1px solid var(--border);border-radius:11px;
+      padding:11px 13px;margin:8px 0 0;font-size:14px}
+  .op b{color:var(--azul-fg)}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>Configuración de Lama</h1>
+<p class="sub">La <b>F3</b> de la ruta · propuesta para aprobar antes de escribir código · 2026-09-03</p>
+
+<div class="nota">
+  <p style="margin:0"><b>Qué resuelve.</b> Hoy los medios de pago, los motivos de
+  descuento y los motivos de anulación son listas escritas <i>dentro de la base
+  de datos</i>. Agregar uno significa que alguien corra un SQL. Esta pantalla es
+  para que los cree y edite Adriana sola, sin que nadie toque nada.</p>
+</div>
+
+<div class="nota si">
+  <p style="margin:0"><b>Las tres tablas ya existen.</b> No hace falta ni una
+  línea de SQL nuevo: <code>lama_medios_pago</code>,
+  <code>lama_motivos_descuento</code> y <code>lama_motivos_anulacion</code> se
+  crearon con sus columnas <code>orden</code> y <code>activo</code> justamente
+  previendo este momento. <b>Esto es solo pantalla.</b></p>
+</div>
+
+<div class="nota ojo">
+  <p style="margin:0"><b>Y de paso resuelve algo que estaba trabado.</b> El plan
+  decía que <i>antes de la F3</i> hacía falta que dictaras el descuento de cada
+  uno de los cinco consumos internos (administrativo, garzones, eventos, redes,
+  cumpleaños), que hoy están todos en 0. <b>Con esta pantalla ya no hace falta
+  que me los dictes: los escribís vos.</b> La dependencia se disuelve sola.</p>
+</div>
+
+<h2>1 · Dónde vive</h2>
+
+<p>Una pestaña <b>⚙ Configuración</b> dentro del área de ventas — no en Ajustes.
+Dos razones: es configuración <i>de Lama</i>, y así todo el cambio queda adentro
+de <code>view-lama</code>, sin rozar una línea de Llamita Stock.</p>
+
+<div class="marco">
+  <div class="marco-tit">El área de ventas <span>la barra de arriba</span></div>
+  <div class="lienzo">
+    <div class="cfg-tabs">
+      <div class="cfg-tab on">Mesas</div>
+      <div class="cfg-tab">⚙ Configuración</div>
+    </div>
+    <p style="margin:0;color:var(--muted);font-size:13px">El plano de mesas de
+      siempre, sin cambios. La tuerca se agrega al lado.</p>
+  </div>
+</div>
+<p class="pie-marco">La ⚙ del plano —la que ajusta el tamaño de las mesas— <b>se
+queda donde está</b>. Es otra cosa: esa es de este dispositivo, esta es del local.</p>
+
+<h2>2 · La pantalla: tres listas, una sola forma</h2>
+
+<p>Las tres cosas que hay que configurar tienen exactamente la misma forma: una
+lista de renglones que se pueden <b>renombrar, reordenar, apagar y agregar</b>.
+Entonces se construye <b>una</b> pantalla con tres pestañas, no tres pantallas.</p>
+
+<div class="marco">
+  <div class="marco-tit">⚙ Configuración <span>pestaña: Medios de pago</span></div>
+  <div class="lienzo">
+    <div class="cfg-tabs">
+      <div class="cfg-tab on">Medios de pago</div>
+      <div class="cfg-tab">Motivos de descuento</div>
+      <div class="cfg-tab">Motivos de anulación</div>
+    </div>
+
+    <div class="cfg-lista">
+      <div class="cfg-fila">
+        <div class="arr">⋮⋮</div>
+        <div class="cfg-nom">Efectivo</div>
+        <div class="sw"></div>
+        <div class="lapiz">✎</div>
+      </div>
+      <div class="cfg-fila">
+        <div class="arr">⋮⋮</div>
+        <div class="cfg-nom">Tarjeta de débito</div>
+        <div class="sw"></div>
+        <div class="lapiz">✎</div>
+      </div>
+      <div class="cfg-fila">
+        <div class="arr">⋮⋮</div>
+        <div class="cfg-nom">Tarjeta de crédito</div>
+        <div class="sw"></div>
+        <div class="lapiz">✎</div>
+      </div>
+      <div class="cfg-fila">
+        <div class="arr">⋮⋮</div>
+        <div class="cfg-nom">Consumo administrativo
+          <span class="cfg-sub">no es un cobro · se registra igual</span></div>
+        <div class="marca">no cobra</div>
+        <div class="pct cero">0 %</div>
+        <div class="sw"></div>
+        <div class="lapiz">✎</div>
+      </div>
+      <div class="cfg-fila">
+        <div class="arr">⋮⋮</div>
+        <div class="cfg-nom">Consumo garzones
+          <span class="cfg-sub">no es un cobro · se registra igual</span></div>
+        <div class="marca">no cobra</div>
+        <div class="pct">50 %</div>
+        <div class="sw"></div>
+        <div class="lapiz">✎</div>
+      </div>
+      <div class="cfg-fila apagada">
+        <div class="arr">⋮⋮</div>
+        <div class="cfg-nom">Pedidos Ya</div>
+        <div class="sw off"></div>
+        <div class="lapiz">✎</div>
+      </div>
+      <div class="cfg-mas">＋ &nbsp;Agregar un medio de pago</div>
+    </div>
+  </div>
+</div>
+
+<p class="pie-marco">El <b>50 %</b> del consumo de garzones es un ejemplo
+inventado para que se vea la píldora — hoy todos están en 0 y los ponés vos.
+El apagado (Pedidos Ya) muestra cómo se ve algo que existe pero ya no se usa.</p>
+
+<h3>Las cuatro cosas que se pueden hacer, y por qué esas</h3>
+
+<table>
+  <tr><th>Gesto</th><th>Qué hace</th><th>Por qué así</th></tr>
+  <tr>
+    <td><b>⋮⋮ arrastrar</b></td>
+    <td>cambia el orden</td>
+    <td>el orden es el de la ventana de cobro. Lo más usado arriba ahorra un toque por venta</td>
+  </tr>
+  <tr>
+    <td><b>✎ el lápiz</b></td>
+    <td>renombrar y, en los consumos, el descuento</td>
+    <td>una fila que se toca entera abre por error; el lápiz dice "acá se edita"</td>
+  </tr>
+  <tr>
+    <td><b>el interruptor</b></td>
+    <td>apaga sin borrar</td>
+    <td><b>lo importante de toda la pantalla.</b> Ver abajo</td>
+  </tr>
+  <tr>
+    <td><b>＋ agregar</b></td>
+    <td>una fila nueva</td>
+    <td>es la razón de existir de la pantalla</td>
+  </tr>
+</table>
+
+<div class="nota ojo">
+  <p><b>NO se puede borrar, y es a propósito.</b> Se apaga.</p>
+  <p style="margin:0">Un medio de pago borrado deja huérfanas las ventas viejas
+  que se cobraron con él: el arqueo del mes pasado tendría plata que no sabe de
+  dónde salió. La base misma lo impide —<code>cuenta_pagos.medio</code> apunta a
+  esta tabla—, así que un botón de borrar fallaría con un error feo en vez de
+  explicar nada. <b>Apagado significa "ya no aparece al cobrar, pero lo de antes
+  sigue cuadrando".</b> Es la misma decisión que en el inventario, donde eliminar
+  un producto tampoco borra: lo desactiva.</p>
+</div>
+
+<h2>3 · La ficha, cuando tocás el lápiz</h2>
+
+<div class="marco">
+  <div class="marco-tit">Ficha <span>un medio de pago que no cobra</span></div>
+  <div class="lienzo">
+    <div class="ficha">
+      <h4>Consumo garzones</h4>
+      <div class="campo">
+        <label>Cómo se llama</label>
+        <div class="caja">Consumo garzones</div>
+      </div>
+      <div class="fila2">
+        <div class="campo">
+          <label>¿Entra plata?</label>
+          <div class="caja gris">No · interno</div>
+        </div>
+        <div class="campo">
+          <label>Descuento</label>
+          <div class="caja">50 %</div>
+        </div>
+      </div>
+      <div class="campo" style="margin-bottom:0">
+        <label>Nombre interno</label>
+        <div class="caja gris">garzones · no se puede cambiar</div>
+      </div>
+      <div class="btns">
+        <div class="btn sec">Cancelar</div>
+        <div class="btn pri">Guardar</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="pie-marco">En un medio normal (Efectivo, Débito) la fila del medio
+solo muestra el nombre: <b>ni descuento ni "¿entra plata?"</b>, porque no
+aplican. Menos campos, menos preguntas que contestar por contestar.</p>
+
+<div class="nota">
+  <p style="margin:0 0 10px"><b>El "nombre interno" se muestra y no se deja
+  cambiar</b>, y vale explicar por qué está ahí siendo que nadie lo escribe.</p>
+  <p style="margin:0">Es el código con el que quedaron guardadas las ventas
+  viejas (<code>garzones</code>, <code>efectivo</code>). Cambiarlo rompería el
+  vínculo con todo lo ya cobrado — el mismo problema que borrar. <b>El nombre
+  visible sí se cambia libremente</b>: si mañana querés que diga "Consumo del
+  personal", lo escribís y las ventas viejas siguen atadas igual. Es la regla
+  que ya rige en el inventario: <i>las cosas se unen por identificador, nunca
+  por nombre</i>, y por eso renombrar nunca rompe nada.</p>
+</div>
+
+<h2>4 · La cuarta pestaña: lo anulado del día</h2>
+
+<p>El atlas lo llama <b>Historial de cancelaciones</b> (C2), y el arqueo lo va a
+pedir. No es configuración —es una lista— pero vive acá porque es donde alguien
+va a buscarla, y porque no justifica una pantalla propia.</p>
+
+<div class="marco">
+  <div class="marco-tit">⚙ Configuración <span>pestaña: Anulados de hoy</span></div>
+  <div class="lienzo">
+    <div class="cfg-lista">
+      <div class="cfg-fila">
+        <div class="cfg-nom">2 × Café Cortado
+          <span class="cfg-sub">Mesa 4 · 14:32 · leoalejoleo12</span></div>
+        <div class="marca">Error de registro</div>
+        <div class="pct">$5.200</div>
+      </div>
+      <div class="cfg-fila">
+        <div class="cfg-nom">1 × Selladito jamón queso
+          <span class="cfg-sub">Mesa 7 · 15:10 · leoalejoleo12 — "se cayó"</span></div>
+        <div class="marca">Otro</div>
+        <div class="pct">$4.300</div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="pie-marco">Los datos ya se guardan enteros desde el 2026-09-02
+(<code>anulado_at</code>, <code>anulado_por</code>, <code>anulado_motivo</code>,
+<code>anulado_comentario</code>). <b>Esto es solo mostrarlos.</b></p>
+
+<h2>5 · Lo que dejo AFUERA de esta entrega, y por qué</h2>
+
+<table>
+  <tr><th>Del plan de F3</th><th>¿Entra?</th><th>Por qué</th></tr>
+  <tr>
+    <td>Motivos de descuento</td><td class="si">sí</td>
+    <td rowspan="3">Las tres son la misma pantalla. Hacer una y no las otras dos sería construir el molde y usarlo una vez</td>
+  </tr>
+  <tr><td>Medios de pago</td><td class="si">sí</td></tr>
+  <tr><td>Motivos de anulación</td><td class="si">sí</td></tr>
+  <tr>
+    <td>Lo anulado del día</td><td class="si">sí</td>
+    <td>Es leer y listar. Barato, y el arqueo lo va a necesitar</td>
+  </tr>
+  <tr>
+    <td>Qué detalle lleva el ticket</td><td class="no">no</td>
+    <td>Es otra forma de pantalla (una vista previa del papel, no una lista) y
+        depende del puente de impresión, que es la F5. Construirla antes es
+        decidir a ciegas cómo se ve algo que todavía no imprime</td>
+  </tr>
+  <tr>
+    <td>La <b>posición</b> de las mesas</td><td class="no">no</td>
+    <td>Tiene una pregunta de diseño sin contestar, y está abajo</td>
+  </tr>
+</table>
+
+<div class="pregunta">
+  <h4>La única decisión que necesito de vos</h4>
+  <p style="margin:0 0 4px">Sobre la posición de las mesas. El plan lo dejó
+  anotado sin resolver, y son dos cosas muy distintas disfrazadas de una:</p>
+
+  <div class="op"><b>A · Reordenar en la grilla.</b> Las mesas siguen siendo
+  cuadraditos en filas, y vos elegís en qué orden aparecen. Se arrastra, se
+  suelta, listo. Es una tarde de trabajo.</div>
+
+  <div class="op"><b>B · Un plano de verdad.</b> Cada mesa tiene coordenadas y
+  se arrastra por un lienzo que representa el salón: la 7 queda junto a la
+  ventana y la 3 en la esquina. El garzón reconoce el salón de un vistazo en vez
+  de leer números. Es varios días, tiene su propia maqueta y necesita saber
+  además cómo se dibuja el salón.</div>
+
+  <p style="margin:12px 0 0"><b>Mi recomendación: A ahora, B nunca —
+  salvo que el salón te lo pida.</b> B es bonito y es lo que hace Fudo, pero con
+  12 mesas en un salón la grilla ordenada alcanza. B se justifica con dos
+  salones grandes y garzones nuevos que no saben dónde queda cada mesa. Si ese
+  no es tu caso, es trabajo caro que se disfruta una vez y después da lo mismo.</p>
+</div>
+
+<h2>6 · Cómo se comprueba que quedó bien</h2>
+
+<div class="nota">
+  <p style="margin:0 0 10px">Una prueba nueva, <code>lama-config.mjs</code>, con
+  lo que de verdad puede salir mal — <b>no que los botones existan</b>:</p>
+  <ul style="margin:0;padding-left:20px">
+    <li>que <b>apagar un medio lo saque de la ventana de cobro</b>, que es el
+      punto entero de apagarlo</li>
+    <li>que un medio apagado <b>siga apareciendo en una venta vieja</b> que se
+      cobró con él</li>
+    <li>que <b>renombrar no rompa nada</b>: la venta vieja sigue atada</li>
+    <li>que el orden que se arrastra sea el orden que muestra el cobro</li>
+    <li>que la pantalla <b>no exista sin <code>puede_lama</code></b> — la
+      primera prueba de Lama desde el primer día, en las dos direcciones</li>
+  </ul>
+</div>
+
+<div class="nota ojo">
+  <p style="margin:0"><b>Y el interruptor de la casa (§2.2):</b>
+  <code>LAMA_CONFIG</code>. Apagado, la pestaña ⚙ desaparece y todo vuelve
+  exactamente a como está hoy — las listas siguen viniendo de la base y el cobro
+  funciona igual. <b>Apagado no deja un hueco: deja lo anterior.</b></p>
+</div>
+
+<h2>Entonces</h2>
+<div class="nota si">
+  <p style="margin:0"><b>Si te parece bien, lo construyo así.</b> Y lo único que
+  necesito contestado es la pregunta del punto 5 — <b>A o B</b> para la posición
+  de las mesas. Todo lo demás está decidido en el plan y no lo vuelvo a abrir.</p>
+</div>
+
+</div>
+</body>
+</html>
