@@ -1,7 +1,7 @@
 {
-  "name": "Inventario Café del Desierto",
-  "short_name": "Llamita",
-  "description": "Inventario multi-sede sincronizado con Fudo",
+  "name": "Llamita Plus",
+  "short_name": "Llamita Plus",
+  "description": "Inventario y ventas multi-sede",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
