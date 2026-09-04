@@ -36,10 +36,10 @@ Eso significa dos cosas que conviene tener claras:
 | **Lama · mesas** | **100 %** | 7 de 7 | 🟢 |
 | **Lama · comanda** | **100 %** | 5 de 5 | 🟢 |
 | **Lama · cobro** | **100 %** | 8 de 8 | 🟢 cerrado con la F1 |
-| **Lama · configuración** | **0 %** | 0 de 6 | 🟡 **en curso** · maqueta aprobada |
+| **Lama · configuración** | **83 %** | 5 de 6 | 🟢 **hecha** · falta el detalle del ticket, que depende de F5 |
 | **Lama · mostrador** | **0 %** | 0 de 4 | ⬜ necesita maqueta |
 | **Lama · impresión** | **10 %** | medido, sin construir | ⬜ necesita ir al local |
-| **Lama · arqueo de caja** | **0 %** | 0 de 5 | 🔴 **bloqueado** por el atlas |
+| **Lama · arqueo de caja** | **0 %** | 0 de 5 | 🟡 **desbloqueado** · el atlas ya contestó |
 | **Conexión Lama ↔ Stock** | **0 %** | 0 de 3 | ⬜ va última a propósito |
 | **Producto multi-cliente** | **0 %** | 0 de 4 | ⬜ no empezado |
 
@@ -79,13 +79,15 @@ Ventana emergente · medios de pago · descuento (panel y cobro, un solo dueño)
 propina al 10 % que nace puesta · vuelto nunca negativo · **cobro parcial por
 producto** · la precuenta bloquea agregar · los tres símbolos del teléfono.
 
-### Lama · configuración — 0 de 6 🟡 *lo que está en curso*
+### Lama · configuración — 5 de 6 🟢 *hecha el 2026-09-04*
 
-Medios de pago · motivos de descuento · motivos de anulación · **el descuento
-de los 5 consumos internos** · lo anulado del día · qué detalle lleva el ticket.
+✅ Medios de pago · ✅ motivos de descuento · ✅ motivos de anulación ·
+✅ **el descuento de los 5 consumos internos** (los escribe Jhon en la
+pantalla) · ✅ lo anulado del día · ⬜ qué detalle lleva el ticket.
 
-**Maqueta aprobada** (`docs/propuesta-lama-config.html`). **No necesita SQL**:
-las tres tablas ya existen con sus columnas `orden` y `activo`.
+**Salió sin una línea de SQL**, como estaba previsto. Lo único que falta
+depende de **F5**: decidir qué lleva el ticket antes de que exista el puente de
+impresión es decidir a ciegas cómo se ve algo que todavía no imprime.
 
 ### Lama · mostrador — 0 de 4 ⬜
 
@@ -105,14 +107,21 @@ comprobó **en el local** que el navegador no puede tomarla — las dos puertas
 suscriba a Supabase y le pida a Windows que imprima. Va **aislado**: si falla,
 que falle solo.
 
-### Lama · arqueo de caja — 0 de 5 🔴 *bloqueado*
+### Lama · arqueo de caja — 0 de 5 🟡 *desbloqueado el 2026-09-04*
 
 Abrir y cerrar turno · efectivo contado vs. calculado · sobrantes y faltantes ·
 arqueo ciego · el informe del turno.
 
-⚠️ **Bloqueado por el atlas**, no por falta de tiempo: las tres preguntas del
-**bloque H** siguen en `⬜ PENDIENTE`. La regla es explícita — *una pregunta
-pendiente es un hueco conocido: se pregunta, no se inventa*.
+✅ **El atlas ya contestó las tres preguntas del bloque H.** Se sabe el ciclo
+completo, la fórmula del efectivo esperado, que el cierre es **irreversible**,
+que puede haber varios arqueos abiertos a la vez, y que si se olvidaron de
+abrirlo se puede abrir con hora hacia atrás.
+
+⚠️ **Pero trae una decisión para Jhon, y conviene que llegue planteada:** el
+*arqueo ciego* de Fudo es **un permiso por rol**, y Llamita no tiene roles a
+propósito (§6.1). Es el primer caso donde esa decisión cuesta algo concreto —
+no es comodidad, es control anti-fraude. Los tres caminos están en
+`docs/LAMA.md`, en la F6.
 
 ### Conexión Lama ↔ Stock — 0 de 3 ⬜
 
@@ -138,7 +147,8 @@ cliente.
 
 | Qué | Desbloquea |
 |---|---|
-| Las **3 preguntas del bloque H** por NotebookLM | el arqueo de caja, entero |
+| ~~Las 3 preguntas del bloque H~~ | ✅ **hecho el 2026-09-04** |
+| **Decidir el arqueo ciego** — Fudo lo hace con roles y Llamita no tiene | que F6 arranque sin frenarse a mitad |
 | Desplegar las **11 Edge Functions** | los crons: la foto diaria y la limpieza |
 | Una **visita al local** con el puente instalado | la impresión |
 | Aprobar la maqueta de **mostrador** cuando exista | el mostrador |

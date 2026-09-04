@@ -975,7 +975,67 @@ interruptor apagado en sus dos mitades.
 
 ---
 
-#### F3 · Las pantallas de configuración
+#### ✅ F3 · HECHA — 2026-09-04
+
+Una pestaña **⚙ Configuración** dentro del área de ventas —no en Ajustes—, con
+las tres listas y lo anulado del día. **Sin una línea de SQL**: las tres tablas
+existían desde agosto con sus columnas `orden` y `activo`, puestas justamente
+previendo este momento.
+
+**Prueba: `pruebas/lama-config.mjs`, 34 casos.**
+
+**Y de paso se disolvió una dependencia del plan:** decía que antes de la F3
+hacía falta que Jhon dictara el descuento de los cinco consumos internos.
+**Ahora los escribe él en la pantalla.**
+
+##### Las tres decisiones que vale no volver a discutir
+
+**1 · No se puede BORRAR. Se apaga.** Un medio de pago borrado deja huérfanas
+las ventas viejas que se cobraron con él: el arqueo del mes pasado tendría
+plata que no sabe de dónde salió. La base misma lo impide —`cuenta_pagos.medio`
+apunta a esa tabla—, así que un botón de borrar fallaría con un error feo en
+vez de explicar nada. Es la misma decisión que en el inventario, donde eliminar
+un producto tampoco borra: lo desactiva.
+
+**2 · Se reordena con flechas, NO arrastrando.** La maqueta mostraba un asa
+para arrastrar y se cambió a propósito: en un teléfono, arrastrar para
+reordenar falla más de lo que acierta. Dos flechas se entienden igual, no se
+equivocan nunca, y se pueden probar. Acá lo que manda es que funcione siempre.
+
+**3 · El nombre visible se cambia; el código interno NO**, y se muestra
+apagado para que se entienda por qué. Es con lo que quedaron guardadas las
+ventas viejas. Hay una prueba que mira **el `update` que sale a la base** y
+falla si el código viaja adentro.
+
+##### Dos cosas que encontró la prueba y no el ojo
+
+⚠️ **La ficha tapaba la ventana de aviso de la app.** Nació con `z-index:70` y
+`.overlay` es 50: al intentar guardar sin nombre, el *"Ponele un nombre"* se
+dibujaba **detrás** de la ficha y la pantalla quedaba trabada — el mensaje ahí,
+invisible, esperando un "Entendido" que nadie podía tocar. Un aviso que
+responde a una acción de la ficha va **arriba** de la ficha, siempre.
+
+⚠️ **El simulacro no filtraba, y por eso "Anulados de hoy" listaba la cuenta
+entera.** `.not('anulado_at','is',null)` se ignoraba, así que la prueba habría
+pasado igual sin comprobar nada — la trampa de siempre. Ahora el simulacro
+filtra de verdad y el caso se prueba en las dos direcciones: que un producto
+normal **no** se cuele, y que uno anulado sí aparezca con su motivo y su monto.
+
+##### Y un detalle de la maqueta que se corrigió al medirlo
+
+El subtítulo *"no es un cobro · se registra igual"* decía **lo mismo** que la
+píldora "no cobra" de al lado. Entre los dos apretaban el nombre hasta partirlo
+en tres líneas a 390 px. La píldora sola alcanza.
+
+**Interruptor** (§2.2): `LAMA_CONFIG`. Apagado desaparecen las pestañas y el
+área de ventas vuelve a ser exactamente lo de antes; las listas se siguen
+leyendo de la base y el cobro funciona idéntico. Probado en sus dos mitades.
+
+**Lo que quedó fuera a propósito:** *qué detalle lleva el ticket* —depende del
+puente de impresión (F5), y decidirlo antes es decidir a ciegas cómo se ve algo
+que todavía no imprime.
+
+#### F3 · Las pantallas de configuración *(la descripción original)*
 
 Que Adriana cree y edite ella, sin que nadie toque la base. **Las tablas ya
 existen todas; falta la pantalla.** El detalle está más abajo, en *Las áreas de
@@ -1000,11 +1060,39 @@ base: si falla, que falle solo. El texto ya está armado —`lamaComandaTxt` y
 `lamaPrecuentaTxt`—, así que el puente no tiene que saber nada de mesas.
 **Reimprimir un ticket** entra acá, porque sin puente no sirve de nada.
 
-#### F6 · El arqueo de caja
+#### F6 · El arqueo de caja — ✅ **DESBLOQUEADO el 2026-09-04**
 
-⚠️ **BLOQUEADO POR EL ATLAS.** El bloque **H tiene sus tres preguntas en
-`⬜ PENDIENTE`**. La regla es explícita: *una pregunta pendiente es un hueco
-conocido — se pregunta, no se inventa.* **Jhon las pasa por NotebookLM antes.**
+Jhon pasó las tres preguntas del bloque H por NotebookLM y **están contestadas
+en `docs/atlas-fudo.md`**. Lo que trajeron, y hay que leerlo antes de construir:
+
+| | |
+|---|---|
+| **Abrir** | antes de la primera venta. Se declara el **monto inicial** (el fondo de cambio) y se elige la caja |
+| **Mientras corre** | sólo las ventas **cerradas** impactan. Efectivo suma; tarjetas y transferencias tienen impacto **nulo** en el efectivo pero se registran aparte para cuadrar cupones |
+| **Cerrar** | el cajero cuenta y escribe *"según usuario"*; el sistema tiene su *"según sistema"*; la diferencia sale **verde si sobra, roja si falta** |
+| **Irreversible** | un arqueo cerrado **no se reabre jamás**. Cualquier corrección es un asiento de ajuste en el turno siguiente |
+| **Varios a la vez** | **sí**, uno por caja física |
+| **Si se olvidaron de abrirlo** | Fudo deja abrirlo **con fecha y hora hacia atrás** y arrastra las ventas de esa franja |
+
+⚠️ **EL HALLAZGO QUE ABRE UNA DECISIÓN, y lo vio Jhon: el arqueo ciego de Fudo
+es un PERMISO POR ROL.** Se apaga *"Ver «Según Sistema»"* al rol Cajero, y el
+cajero queda declarando a ciegas — que es todo el punto: sin saber cuánto
+debería haber, no puede forzar el cuadre.
+
+**Y acá Llamita no tiene con qué copiarlo.** §6.1 dice que la seguridad se
+mantiene en mínimos y que el único candado es la puerta de Ajustes; el atlas
+(A2) ya decía que los cinco roles de Fudo **no se copian**. El arqueo ciego es
+**el primer caso donde esa decisión cuesta algo concreto**, porque no es una
+comodidad: es un control anti-fraude, y un arqueo donde el cajero ve el número
+esperado es un arqueo que se puede cuadrar a mano.
+
+**No se resuelve ahora ni se decide solo.** Son tres caminos —dejarlo fuera,
+un interruptor por sede, o un permiso propio como `puede_ver_esperado`— y la
+elección es de Jhon, cuando F6 arranque. Queda anotado acá para que llegue
+planteado y no aparezca a mitad de construir.
+
+**Los datos ya están guardados:** `cuenta_pagos`, `cuenta_propinas` y las
+columnas congeladas de `cuentas` se diseñaron para alimentar esto.
 
 Lo que el atlas ya reveló de paso y hay que respetar: existe el *sobrante de
 caja en verde* (D6), **cerrar un arqueo es irreversible**, y una venta cerrada

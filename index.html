@@ -782,6 +782,94 @@
   .lama-mesa.viva{box-shadow:0 0 0 5px rgba(220,68,5,.16), 0 8px 24px -6px rgba(220,68,5,.7)}
   .lama-mesa.origen{opacity:.55;box-shadow:var(--sombra)}
 
+  /* ==========  F3 · LA CONFIGURACIÓN DE LAMA  ==========
+     Un recuadro con filas separadas por `--linea`, como el panel de la mesa.
+     Nada de tarjetas apiladas: es una lista, y las listas se leen mejor
+     seguidas que troceadas. */
+  .lama-vistas{display:flex;gap:6px;margin-bottom:12px}
+  .lama-vistas button{border:none;box-shadow:var(--sombra);background:var(--card);font:inherit;
+    font-size:13.5px;font-weight:700;color:var(--muted);padding:8px 16px;border-radius:999px;
+    cursor:pointer;white-space:nowrap;transition:transform .12s ease}
+  .lama-vistas button:active{transform:scale(.95)}
+  .lama-vistas button.on{background:var(--navy);color:#fff}
+  /* Las pestañas de adentro: qué lista se está configurando. */
+  .cfg-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 13px}
+  .cfg-tabs button{border:none;background:var(--card);box-shadow:var(--sombra);color:var(--muted);
+    font:inherit;font-size:13.5px;font-weight:700;padding:8px 15px;border-radius:999px;cursor:pointer}
+  .cfg-tabs button.on{background:var(--sec-bg);color:var(--sec-tx)}
+  .cfg-lista{background:var(--card);border-radius:var(--r-card);box-shadow:var(--sombra);
+    overflow:hidden}
+  .cfg-fila{display:flex;align-items:center;gap:9px;padding:11px 13px}
+  .cfg-fila + .cfg-fila{border-top:1px solid var(--linea)}
+  .cfg-fila.off{background:#F4F7FB}
+  .cfg-fila.off .cfg-nom b{color:var(--muted);text-decoration:line-through}
+  .cfg-nom{flex:1;min-width:0}
+  .cfg-nom b{display:block;font-size:14.5px;font-weight:700;overflow-wrap:anywhere}
+  .cfg-nom span{display:block;font-size:11.5px;color:var(--muted);margin-top:1px}
+  /* Subir y bajar. NO se arrastra: en un teléfono arrastrar para reordenar
+     falla más de lo que acierta, y acá lo que manda es que funcione siempre.
+     Dos flechas se entienden igual y no se equivocan nunca. */
+  .cfg-mover{display:flex;flex-direction:column;gap:2px;flex:0 0 auto}
+  .cfg-mover button{border:none;background:none;color:var(--muted);font:inherit;font-size:11px;
+    line-height:1;padding:3px 5px;border-radius:6px;cursor:pointer}
+  .cfg-mover button:active{background:var(--bg)}
+  .cfg-mover button[disabled]{opacity:.22;cursor:default}
+  .cfg-pct{background:var(--amber-bg);color:var(--amber-fg);border-radius:999px;
+    padding:3px 10px;font-size:12.5px;font-weight:800;flex:0 0 auto;
+    font-variant-numeric:tabular-nums}
+  .cfg-pct.cero{background:var(--gray-bg);color:var(--gray-fg)}
+  .cfg-marca{background:var(--azul-bg);color:var(--azul-fg);border-radius:999px;
+    padding:3px 9px;font-size:11.5px;font-weight:700;flex:0 0 auto}
+  /* El interruptor: apagar NO borra. Un medio borrado dejaría huérfanas las
+     ventas viejas que se cobraron con él. */
+  .cfg-sw{width:42px;height:25px;border-radius:999px;background:var(--green-fg);border:none;
+    position:relative;flex:0 0 auto;cursor:pointer;padding:0;transition:background .16s ease}
+  .cfg-sw::after{content:"";position:absolute;top:3px;left:20px;width:19px;height:19px;
+    border-radius:50%;background:#fff;transition:left .16s ease}
+  .cfg-sw.off{background:#C3CDDB}
+  .cfg-sw.off::after{left:3px}
+  .cfg-lapiz{width:34px;height:34px;border-radius:50%;border:none;background:var(--bg);
+    color:var(--muted);display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+    cursor:pointer;padding:0}
+  .cfg-lapiz svg{width:16px;height:16px;display:block}
+  .cfg-lapiz:active{transform:scale(.92)}
+  .cfg-mas{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;
+    border:none;background:var(--card);border-top:1px dashed var(--border);
+    color:var(--orange);font:inherit;font-size:14.5px;font-weight:800;padding:13px;cursor:pointer}
+  .cfg-mas:active{background:var(--bg)}
+  .cfg-vacio{padding:30px 18px;text-align:center;color:var(--muted);font-size:14px}
+  .cfg-ayuda{font-size:12.5px;color:var(--muted);margin:10px 3px 0;line-height:1.45}
+  /* La ficha de edición, emergente como la del producto. */
+  /* ⚠️ POR DEBAJO DE 50, QUE ES EL DE `.overlay`. La primera versión usaba 70
+     y tapaba la ventana de aviso de la app: al intentar guardar sin nombre, el
+     "Ponele un nombre" se dibujaba DETRÁS de la ficha y la pantalla quedaba
+     trabada — el mensaje ahí, invisible, esperando un "Entendido" que nadie
+     podía tocar. Lo encontró la prueba, no el ojo. Un aviso que responde a una
+     acción de la ficha tiene que ir ARRIBA de la ficha, siempre. */
+  .cfg-ficha{position:fixed;inset:0;z-index:45;background:rgba(15,30,49,.42);
+    backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px}
+  .cfg-ficha .caja{background:var(--card);border-radius:var(--r-card);box-shadow:var(--sombra);
+    padding:17px;width:100%;max-width:390px;max-height:88vh;overflow-y:auto}
+  .cfg-ficha h3{margin:0 0 14px;font-size:17px}
+  .cfg-campo{margin:0 0 13px}
+  .cfg-campo label{display:block;font-size:11.5px;color:var(--muted);margin:0 0 5px;
+    text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+  .cfg-campo input{width:100%;border:none;background:var(--bg);border-radius:11px;
+    padding:11px 13px;font:inherit;font-size:15px;color:var(--text)}
+  .cfg-campo .fijo{background:var(--gray-bg);color:var(--muted);border-radius:11px;
+    padding:11px 13px;font-size:14px}
+  .cfg-dos{display:flex;gap:10px}
+  .cfg-dos > *{flex:1;min-width:0}
+  /* La casilla es una FRASE, no el rótulo de un campo: sin mayúsculas ni
+     espaciado de letras, que es lo que hereda de `.cfg-campo label`. */
+  .cfg-campo label.cfg-check{display:flex;align-items:center;gap:9px;background:var(--bg);
+    border-radius:11px;padding:11px 13px;font-size:14.5px;cursor:pointer;margin:0;
+    text-transform:none;letter-spacing:0;color:var(--text);font-weight:600}
+  .cfg-check input{width:18px;height:18px;flex:0 0 auto}
+  @media (prefers-reduced-motion: reduce){
+    .cfg-sw, .cfg-sw::after, .lama-vistas button{transition:none}
+  }
+
   .lama-banda{display:flex;align-items:center;gap:10px;background:var(--orange);color:#fff;
     border-radius:11px;padding:10px 13px;margin-bottom:11px;font-size:14px;font-weight:700}
   .lama-banda .t{flex:1;line-height:1.3}
@@ -2988,7 +3076,12 @@
      pregunta personas, cliente, garzón y un comentario de mesa. Ninguna se
      mira después. Acá abrir una mesa es UN toque. -->
 <div class="wrap" id="view-lama" style="display:none">
-  <div class="lama">
+  <!-- F3 · LAS DOS VISTAS DEL ÁREA DE VENTAS: el salón y su configuración.
+       Vive acá adentro y no en Ajustes porque es configuración DE Lama, y así
+       todo el cambio queda dentro de `view-lama`. Lo pinta el JS porque
+       depende del interruptor LAMA_CONFIG. -->
+  <div class="lama-vistas" id="lama-vistas"></div>
+  <div id="lama-salon"><div class="lama">
     <div class="lama-plano">
       <div class="lama-salones" id="lama-salones"></div>
       <div class="lama-regla"><div id="lama-tam"></div>
@@ -3007,6 +3100,9 @@
   <div id="lama-pp"></div>
   <div id="lama-cob"></div>
   <div id="lama-anu"></div>
+  </div><!-- /lama-salon -->
+  <!-- F3 · La configuración. Nace vacía y escondida; la pinta lamaPintarCfg. -->
+  <div id="lama-cfg" style="display:none"></div>
 </div>
 
 <!-- ================= RECETAS ================= -->
@@ -5891,8 +5987,30 @@ function lamaAnularEngancharUnaVez(){
 function lamaPintar(){
   lamaCobrarEngancharUnaVez();
   lamaAnularEngancharUnaVez();
+  lamaPintarVistas();
+  if(LAMA_VISTA === 'cfg'){ lamaPintarCfg(); return; }
   lamaPintarPlano(); lamaPintarPanel(); lamaPintarFab();
   lamaPintarCarta(); lamaPintarPP();
+}
+
+/* F3 · LAS DOS VISTAS: el salón y la configuración.
+   Con el interruptor apagado no hay pestañas y no se ve ninguna diferencia
+   con lo de antes — §2.2: apagado deja LO ANTERIOR, no un hueco. */
+function lamaPintarVistas(){
+  const barra = $('lama-vistas'), salon = $('lama-salon'), cfg = $('lama-cfg');
+  if(!barra || !salon || !cfg) return;
+  if(!LAMA_CONFIG){
+    barra.innerHTML = ''; barra.style.display = 'none';
+    salon.style.display = ''; cfg.style.display = 'none';
+    return;
+  }
+  barra.style.display = '';
+  const enCfg = LAMA_VISTA === 'cfg';
+  barra.innerHTML =
+    `<button type="button" data-lamavista="salon" class="${enCfg?'':'on'}">Mesas</button>` +
+    `<button type="button" data-lamavista="cfg" class="${enCfg?'on':''}">⚙ Configuración</button>`;
+  salon.style.display = enCfg ? 'none' : '';
+  cfg.style.display   = enCfg ? '' : 'none';
 }
 
 /* EL TAMAÑO DE LAS MESAS — lo elige quien mira, no el código.
@@ -7117,6 +7235,16 @@ const LAMA_PROPINA_PCT = 10;
    con la precuenta impresa y nadie se entera. No queda un hueco. */
 const LAMA_PRECUENTA_BLOQUEA = true;
 
+/* F3 · EL INTERRUPTOR DE LA CONFIGURACIÓN (§2.2).
+   En `false` desaparecen las pestañas "Mesas / ⚙ Configuración" y el área de
+   ventas vuelve a ser exactamente lo de antes: el plano y su panel, sin nada
+   alrededor. Las tres listas se siguen leyendo de la base igual que siempre y
+   el cobro funciona idéntico — lo único que se pierde es poder editarlas
+   desde la pantalla. **Apagado deja lo anterior, no un hueco.**
+
+   No va en `FLAGS` a propósito: esa constante es de Stock. */
+const LAMA_CONFIG = true;
+
 const lamaTrabadaPorPrecuenta = c =>
   LAMA_PRECUENTA_BLOQUEA && !!c && c.estado === 'precuenta';
 
@@ -7853,6 +7981,226 @@ async function lamaCobrarConfirmar(boton){
 }
 
 /* ==================================================================
+   F3 · LA CONFIGURACIÓN DE LAMA
+   ==================================================================
+   Que Adriana cree y edite ella los medios de pago, los motivos de descuento
+   y los motivos de anulación, sin que nadie toque la base.
+
+   NO NECESITA UNA SOLA LÍNEA DE SQL: las tres tablas ya existen desde
+   `2026-08-lama-cierre.sql` y `2026-09-lama-anulacion.sql`, con sus columnas
+   `orden` y `activo` puestas justamente previendo este momento.
+
+   LAS TRES SON LA MISMA FORMA —una lista de renglones que se renombran, se
+   reordenan, se apagan y se agregan— así que se construye UNA pantalla con
+   tres pestañas, no tres pantallas.
+
+   ⚠️ NO SE PUEDE BORRAR, Y ES A PROPÓSITO. Se apaga. Un medio de pago borrado
+   deja huérfanas las ventas viejas que se cobraron con él: el arqueo del mes
+   pasado tendría plata que no sabe de dónde salió. La base misma lo impide
+   —`cuenta_pagos.medio` apunta a esta tabla—, así que un botón de borrar
+   fallaría con un error feo en vez de explicar nada. Es la misma decisión que
+   en el inventario, donde eliminar un producto tampoco borra: lo desactiva. */
+
+/* Las tres listas, con su tabla, sus columnas y cómo se llaman en pantalla.
+   Tenerlas en un mapa en vez de tres bloques repetidos es lo que hace que
+   agregar una cuarta lista mañana sea una entrada más, no otra pantalla. */
+const LAMA_CFG_LISTAS = {
+  medios: {
+    tabla:'lama_medios_pago', titulo:'Medios de pago',
+    cols:'codigo,nombre,orden,es_cobro,descuento_pct,activo',
+    nuevo:'Nuevo medio de pago',
+    ayuda:'Los que dicen “no cobra” no son formas de cobrar: son formas de '
+        + 'registrar que algo salió sin cobrarse. Igual entran al arqueo.',
+  },
+  descuentos: {
+    tabla:'lama_motivos_descuento', titulo:'Motivos de descuento',
+    cols:'codigo,nombre,orden,activo',
+    nuevo:'Nuevo motivo de descuento',
+    ayuda:'Es la lista que aparece al aplicar un descuento en una mesa.',
+  },
+  anulacion: {
+    tabla:'lama_motivos_anulacion', titulo:'Motivos de anulación',
+    cols:'codigo,nombre,orden,pide_comentario,activo',
+    nuevo:'Nuevo motivo de anulación',
+    ayuda:'Los que piden comentario obligan a escribir el porqué. “Otro” no '
+        + 'dice nada por sí solo, así que conviene que lo pida.',
+  },
+};
+
+let LAMA_VISTA    = 'salon';   // 'salon' | 'cfg'
+let LAMA_CFG_TAB  = 'medios';  // qué lista se está mirando
+let LAMA_CFG_DAT  = {};        // {medios:[...], descuentos:[...], anulacion:[...]}
+let LAMA_CFG_EDIT = null;      // la fila que se está editando, o {nueva:true}
+let LAMA_CFG_ERR  = null;      // si la tabla no existe todavía
+
+/* SE PIDE LA LISTA COMPLETA, apagados incluidos. Los cargadores del cobro
+   filtran `activo !== false` —y hacen bien, porque ahí se ofrece lo que se
+   puede usar— pero acá hay que ver justamente lo que está apagado para poder
+   volver a encenderlo. */
+async function lamaCfgCargar(cual){
+  const L = LAMA_CFG_LISTAS[cual]; if(!L) return;
+  LAMA_CFG_ERR = null;
+  try{
+    const r = await sb.from(L.tabla).select(L.cols).order('orden');
+    if(r.error){ LAMA_CFG_ERR = r.error.message; return; }
+    LAMA_CFG_DAT[cual] = r.data || [];
+  }catch(e){ LAMA_CFG_ERR = String(e && e.message || e); }
+}
+
+/* Al guardar un cambio hay que hacer que el COBRO se entere. Sus cargadores
+   se piden una sola vez por sesión (`if(LAMA_HAY_COBRAR !== null) return`),
+   así que sin esto el garzón sigue viendo la lista vieja hasta recargar la
+   página — y creería que la configuración no hizo nada. */
+async function lamaCfgRefrescarCobro(){
+  LAMA_HAY_COBRAR = null; LAMA_HAY_ANULAR = null;
+  await Promise.all([lamaCargarMedios(), lamaCargarMotivosAnu()]);
+}
+
+/* El código interno de una fila nueva. Sale del nombre, sin tildes ni
+   espacios, y se le agrega un número si ya existe. NUNCA se cambia después:
+   es con lo que quedaron guardadas las ventas viejas. */
+function lamaCfgCodigo(nombre, existentes){
+  let base = normNombre(nombre).replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 24);
+  if(!base) base = 'item';
+  let c = base, n = 2;
+  while(existentes.includes(c)){ c = base + '_' + n; n++; }
+  return c;
+}
+
+function lamaPintarCfg(){
+  const caja = $('lama-cfg'); if(!caja) return;
+  const tabs = Object.keys(LAMA_CFG_LISTAS).map(k =>
+    `<button type="button" data-lamacfgtab="${k}" class="${LAMA_CFG_TAB===k?'on':''}"
+      >${esc(LAMA_CFG_LISTAS[k].titulo)}</button>`).join('') +
+    `<button type="button" data-lamacfgtab="anulados" class="${LAMA_CFG_TAB==='anulados'?'on':''}"
+      >Anulados de hoy</button>`;
+
+  let cuerpo;
+  if(LAMA_CFG_TAB === 'anulados')      cuerpo = lamaCfgAnulados();
+  else if(LAMA_CFG_ERR)               cuerpo = `<div class="cfg-lista"><div class="cfg-vacio">
+      No se pudo leer esta lista.<br><span style="font-size:12.5px">${esc(LAMA_CFG_ERR)}</span></div></div>`;
+  else                                cuerpo = lamaCfgLista(LAMA_CFG_TAB);
+
+  const L = LAMA_CFG_LISTAS[LAMA_CFG_TAB];
+  caja.innerHTML = `<div class="cfg-tabs">${tabs}</div>${cuerpo}` +
+    (L ? `<p class="cfg-ayuda">${esc(L.ayuda)}</p>` : '') +
+    lamaCfgFicha();
+}
+
+function lamaCfgLista(cual){
+  const L = LAMA_CFG_LISTAS[cual];
+  const filas = LAMA_CFG_DAT[cual];
+  if(!filas) return `<div class="cfg-lista"><div class="cfg-vacio">Cargando…</div></div>`;
+  const cuerpo = filas.length ? filas.map((f, i) => {
+    const off = f.activo === false;
+    /* El descuento sólo tiene sentido en los medios que NO cobran: es cuánto
+       se le descuenta a un consumo interno. En Efectivo o Débito no aplica, y
+       mostrarlo ahí sería una pregunta que nadie tiene que contestar. */
+    const esConsumo = cual === 'medios' && f.es_cobro === false;
+    const pct = +f.descuento_pct || 0;
+    return `<div class="cfg-fila${off ? ' off' : ''}">
+      <span class="cfg-mover">
+        <button type="button" data-lamacfgsube="${esc(f.codigo)}" aria-label="Subir"${
+          i === 0 ? ' disabled' : ''}>▲</button>
+        <button type="button" data-lamacfgbaja="${esc(f.codigo)}" aria-label="Bajar"${
+          i === filas.length - 1 ? ' disabled' : ''}>▼</button>
+      </span>
+      <!-- El subtítulo "no es un cobro · se registra igual" que tenía la
+           maqueta se sacó al medirlo a 390 px: decía LO MISMO que la píldora
+           "no cobra" de al lado, y entre los dos apretaban el nombre hasta
+           partirlo en tres líneas. La píldora sola alcanza. -->
+      <span class="cfg-nom"><b>${esc(f.nombre)}</b>${
+        cual === 'anulacion' && f.pide_comentario ? '<span>pide comentario</span>' : ''}</span>
+      ${esConsumo ? `<span class="cfg-marca">no cobra</span>
+        <span class="cfg-pct${pct ? '' : ' cero'}">${fmt(pct)} %</span>` : ''}
+      <button type="button" class="cfg-sw${off ? ' off' : ''}" data-lamacfgsw="${esc(f.codigo)}"
+        role="switch" aria-checked="${off ? 'false' : 'true'}"
+        aria-label="${off ? 'Encender' : 'Apagar'} ${esc(f.nombre)}"></button>
+      <button type="button" class="cfg-lapiz" data-lamacfged="${esc(f.codigo)}"
+        aria-label="Editar ${esc(f.nombre)}">${ICONO_LAPIZ}</button>
+    </div>`;
+  }).join('') : `<div class="cfg-vacio">Todavía no hay ninguno.</div>`;
+  return `<div class="cfg-lista">${cuerpo}
+    <button type="button" class="cfg-mas" data-lamacfgnuevo="1">＋ ${esc(L.nuevo)}</button>
+  </div>`;
+}
+
+/* LO ANULADO DEL DÍA. El atlas lo llama "Historial de cancelaciones" (C2) y el
+   arqueo lo va a pedir. No es configuración —es una lista— pero vive acá
+   porque es donde alguien la va a buscar, y no justifica una pantalla propia.
+   Los datos ya se guardan enteros desde el 2026-09-02: esto sólo los muestra. */
+function lamaCfgAnulados(){
+  const filas = LAMA_CFG_DAT.anulados;
+  if(!filas) return `<div class="cfg-lista"><div class="cfg-vacio">Cargando…</div></div>`;
+  if(!filas.length) return `<div class="cfg-lista"><div class="cfg-vacio">
+    Hoy no se anuló nada.</div></div>`;
+  const hora = t => { try{ return new Date(t).toLocaleTimeString('es-CL',
+    {hour:'2-digit', minute:'2-digit'}); }catch{ return ''; } };
+  return `<div class="cfg-lista">${filas.map(f => `<div class="cfg-fila">
+    <span class="cfg-nom"><b>${fmt(f.cantidad)} × ${esc(f.nombre)}</b>
+      <span>${hora(f.anulado_at)} · ${esc(f.anulado_por || '')}${
+        f.anulado_comentario ? ' — “' + esc(f.anulado_comentario) + '”' : ''}</span></span>
+    <span class="cfg-marca">${esc(lamaMotivoAnuNom(f.anulado_motivo))}</span>
+    <span class="cfg-pct">${plata((+f.cantidad||0)*(+f.precio||0))}</span>
+  </div>`).join('')}</div>`;
+}
+
+async function lamaCfgCargarAnulados(){
+  LAMA_CFG_ERR = null;
+  try{
+    const desde = new Date(); desde.setHours(0,0,0,0);
+    const r = await sb.from('cuenta_items')
+      .select('id,nombre,cantidad,precio,anulado_at,anulado_por,anulado_motivo,anulado_comentario')
+      .not('anulado_at','is',null).gte('anulado_at', desde.toISOString())
+      .order('anulado_at', {ascending:false});
+    LAMA_CFG_DAT.anulados = r.error ? [] : (r.data || []);
+  }catch{ LAMA_CFG_DAT.anulados = []; }
+}
+
+/* LA FICHA. El nombre visible se cambia libremente; el código interno NO, y se
+   muestra apagado para que se entienda por qué. Es la regla de la casa: las
+   cosas se unen por identificador, nunca por nombre, y por eso renombrar no
+   rompe una venta vieja. */
+function lamaCfgFicha(){
+  const e = LAMA_CFG_EDIT; if(!e) return '';
+  const cual = e.lista, L = LAMA_CFG_LISTAS[cual];
+  const esConsumo = cual === 'medios' && e.es_cobro === false;
+  return `<div class="cfg-ficha" id="lama-cfg-ficha">
+    <div class="caja" role="dialog" aria-modal="true">
+      <h3>${e.nueva ? esc(L.nuevo) : esc(e.nombre)}</h3>
+      <div class="cfg-campo">
+        <label for="cfg-nombre">Cómo se llama</label>
+        <input id="cfg-nombre" value="${esc(e.nombre || '')}" placeholder="Efectivo, Cumpleaños…">
+      </div>
+      ${cual === 'medios' ? `<div class="cfg-campo">
+        <label class="cfg-check" for="cfg-cobra">
+          <input type="checkbox" id="cfg-cobra"${e.es_cobro === false ? '' : ' checked'}>
+          <span>Entra plata de verdad</span>
+        </label>
+      </div>
+      ${esConsumo ? `<div class="cfg-campo">
+        <label for="cfg-pct">Descuento de este consumo (%)</label>
+        <input id="cfg-pct" inputmode="numeric" value="${esc(String(e.descuento_pct ?? 0))}">
+      </div>` : ''}` : ''}
+      ${cual === 'anulacion' ? `<div class="cfg-campo">
+        <label class="cfg-check" for="cfg-com">
+          <input type="checkbox" id="cfg-com"${e.pide_comentario ? ' checked' : ''}>
+          <span>Pide escribir un comentario</span>
+        </label>
+      </div>` : ''}
+      ${e.nueva ? '' : `<div class="cfg-campo">
+        <label>Nombre interno</label>
+        <div class="fijo">${esc(e.codigo)} · no se puede cambiar</div>
+      </div>`}
+      <div class="mbtns">
+        <button type="button" class="btn btn-gris"   data-lamaacc="cfg-cancelar">Cancelar</button>
+        <button type="button" class="btn btn-orange" data-lamaacc="cfg-guardar">Guardar</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ==================================================================
    MOVER — la mesa entera, o algunos productos
    ==================================================================
    Existe porque el garzón se equivoca: anota en la 3 lo que era de la 7, o
@@ -7867,6 +8215,108 @@ async function lamaCobrarConfirmar(boton){
    mesa que YA está abierta: abrir es un acto de la persona, en todo momento.
    Si hay que mandar algo a una mesa libre, primero se abre y después se
    mueve — dos toques, y ninguno pasa sin querer.                       */
+
+/* ==========  F3 · LAS ACCIONES DE LA CONFIGURACIÓN  ========== */
+
+async function lamaCfgIr(vista){
+  LAMA_VISTA = vista;
+  LAMA_CFG_EDIT = null;
+  if(vista === 'cfg') await lamaCfgTab(LAMA_CFG_TAB);
+  else lamaPintar();
+}
+
+async function lamaCfgTab(cual){
+  LAMA_CFG_TAB = cual;
+  lamaPintar();                       // se pinta "Cargando…" antes de esperar
+  if(cual === 'anulados') await lamaCfgCargarAnulados();
+  else                    await lamaCfgCargar(cual);
+  lamaPintar();
+}
+
+/* SUBIR Y BAJAR. El orden es el que ve el garzón al cobrar, así que lo más
+   usado arriba ahorra un toque por venta.
+
+   Se reescribe el `orden` de TODA la lista y no sólo el de los dos que se
+   cruzan, porque las filas heredadas traen números con huecos (1, 2, 5, 9…) y
+   un intercambio a ciegas ahí adentro deja el orden peor de como estaba. */
+async function lamaCfgMover(codigo, delta){
+  const cual = LAMA_CFG_TAB, L = LAMA_CFG_LISTAS[cual];
+  const filas = LAMA_CFG_DAT[cual]; if(!L || !filas) return;
+  const i = filas.findIndex(f => f.codigo === codigo);
+  const j = i + delta;
+  if(i < 0 || j < 0 || j >= filas.length) return;
+  filas.splice(j, 0, filas.splice(i, 1)[0]);
+  lamaPintar();                       // se mueve ya; la base se pone al día atrás
+  try{
+    await Promise.all(filas.map((f, n) =>
+      sb.from(L.tabla).update({orden: n + 1}).eq('codigo', f.codigo)));
+    filas.forEach((f, n) => { f.orden = n + 1; });
+    await lamaCfgRefrescarCobro();
+  }catch(e){ avisar('No se pudo guardar el orden'); await lamaCfgTab(cual); }
+}
+
+/* APAGAR NO BORRA. Ver el comentario grande de arriba: un medio borrado deja
+   ventas viejas sin nada que las explique. */
+async function lamaCfgApagar(codigo){
+  const cual = LAMA_CFG_TAB, L = LAMA_CFG_LISTAS[cual];
+  const filas = LAMA_CFG_DAT[cual]; if(!L || !filas) return;
+  const f = filas.find(x => x.codigo === codigo); if(!f) return;
+  const ahora = f.activo === false;   // estaba apagado -> se enciende
+  f.activo = ahora;
+  lamaPintar();
+  const r = await sb.from(L.tabla).update({activo: ahora}).eq('codigo', codigo);
+  if(r.error){ f.activo = !ahora; lamaPintar(); avisar('No se pudo guardar'); return; }
+  await lamaCfgRefrescarCobro();
+}
+
+function lamaCfgAbrirFicha(codigo){
+  const cual = LAMA_CFG_TAB;
+  if(!LAMA_CFG_LISTAS[cual]) return;
+  if(codigo){
+    const f = (LAMA_CFG_DAT[cual] || []).find(x => x.codigo === codigo);
+    if(!f) return;
+    LAMA_CFG_EDIT = Object.assign({}, f, {lista:cual, nueva:false});
+  } else {
+    LAMA_CFG_EDIT = {lista:cual, nueva:true, nombre:'', es_cobro:true,
+                     descuento_pct:0, pide_comentario:false, activo:true};
+  }
+  lamaPintar();
+  const n = $('cfg-nombre'); if(n) n.focus();
+}
+
+async function lamaCfgGuardar(){
+  const e = LAMA_CFG_EDIT; if(!e) return;
+  const cual = e.lista, L = LAMA_CFG_LISTAS[cual];
+  const nombre = ($('cfg-nombre')?.value || '').trim();
+  if(!nombre){ avisar('Ponele un nombre'); return; }
+
+  const fila = {nombre};
+  if(cual === 'medios'){
+    fila.es_cobro = !!$('cfg-cobra')?.checked;
+    /* El descuento sólo existe para los consumos internos. Si el medio cobra,
+       se guarda en 0 en vez de dejar el número viejo dando vueltas: un
+       descuento invisible que igual se aplica es la peor clase de sorpresa. */
+    fila.descuento_pct = fila.es_cobro ? 0
+      : Math.max(0, Math.min(100, +($('cfg-pct')?.value || 0) || 0));
+  }
+  if(cual === 'anulacion') fila.pide_comentario = !!$('cfg-com')?.checked;
+
+  let r;
+  if(e.nueva){
+    const existentes = (LAMA_CFG_DAT[cual] || []).map(x => x.codigo);
+    fila.codigo = lamaCfgCodigo(nombre, existentes);
+    fila.orden  = (LAMA_CFG_DAT[cual] || []).length + 1;
+    fila.activo = true;
+    r = await sb.from(L.tabla).insert(fila);
+  } else {
+    r = await sb.from(L.tabla).update(fila).eq('codigo', e.codigo);
+  }
+  if(r && r.error){ avisar('No se pudo guardar: ' + r.error.message); return; }
+  LAMA_CFG_EDIT = null;
+  await lamaCfgTab(cual);
+  await lamaCfgRefrescarCobro();
+  aviso(e.nueva ? '✓ Agregado' : '✓ Guardado');
+}
 
 function lamaSalirDeMover(){
   LAMA_MODO = null; LAMA_ELEGIDOS = []; LAMA_MENU = false;
@@ -7935,6 +8385,29 @@ $('view-lama').addEventListener('click', async e => {
     lamaPintarPanelResultados();
   }
 
+  /* F3 · LA CONFIGURACIÓN. Va antes que el resto porque cuando está abierta,
+     el plano de mesas no existe en pantalla y ninguno de los manejadores de
+     abajo tiene a qué engancharse. */
+  const vi = e.target.closest('[data-lamavista]');
+  if(vi){ await lamaCfgIr(vi.dataset.lamavista); return; }
+
+  const ct = e.target.closest('[data-lamacfgtab]');
+  if(ct){ await lamaCfgTab(ct.dataset.lamacfgtab); return; }
+
+  const cs = e.target.closest('[data-lamacfgsube]');
+  if(cs){ await lamaCfgMover(cs.dataset.lamacfgsube, -1); return; }
+  const cb = e.target.closest('[data-lamacfgbaja]');
+  if(cb){ await lamaCfgMover(cb.dataset.lamacfgbaja, +1); return; }
+
+  const cw = e.target.closest('[data-lamacfgsw]');
+  if(cw){ await lamaCfgApagar(cw.dataset.lamacfgsw); return; }
+
+  const ce = e.target.closest('[data-lamacfged]');
+  if(ce){ lamaCfgAbrirFicha(ce.dataset.lamacfged); return; }
+
+  const cn = e.target.closest('[data-lamacfgnuevo]');
+  if(cn){ lamaCfgAbrirFicha(null); return; }
+
   const sa = e.target.closest('[data-lamasalon]');
   if(sa){ LAMA_SALON = sa.dataset.lamasalon; LAMA_SEL = null; LAMA_PAPEL = null; lamaPintar(); return; }
 
@@ -7993,6 +8466,8 @@ $('view-lama').addEventListener('click', async e => {
     else if(a === 'cobrar')        await lamaCerrar();
     else if(a === 'mas')           await lamaMas();
     else if(a === 'cerrar-carta')  lamaCerrarCarta();
+    else if(a === 'cfg-cancelar'){ LAMA_CFG_EDIT = null; lamaPintar(); }
+    else if(a === 'cfg-guardar')   await lamaCfgGuardar();
     /* C5 · EL DESCUENTO DESDE EL PANEL. Se edita en una copia (`LAMA_DESC`) y
        recién al Aplicar se escribe en la cuenta: así Cancelar deja las cosas
        exactamente como estaban, incluso si ya había un descuento puesto. */
