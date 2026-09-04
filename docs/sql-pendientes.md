@@ -25,7 +25,7 @@
 
 ## Pendientes ahora
 
-### [ ] 1 · `sql/2026-09-plus-encender-tiempo-real.sql` — **lo más urgente que hay**
+### [x] 1 · `sql/2026-09-plus-encender-tiempo-real.sql` — **lo más urgente que hay**
 
 > **Qué arregla, y no es un detalle de Lama: es media app.** Corriste la
 > radiografía y las ocho tablas dieron `NO`. O sea que **ahora mismo tu app no
