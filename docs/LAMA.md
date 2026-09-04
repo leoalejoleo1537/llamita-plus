@@ -97,6 +97,86 @@ menú **que ya está abierto** es mejor: comprueba que al cambiar de ancho **se
 mudó** de abajo a la cabecera **sin duplicarse**, que es lo único que este
 diseño no puede permitirse.
 
+### LA MUDANZA A AJUSTES, Y TRES ARREGLOS — 2026-09-04
+
+> Todo salió de Jhon usando la app. Otra vez.
+
+#### La configuración se fue a Ajustes → Mesas
+
+Nació dentro de la pestaña de Mesas, en una ⚙ propia. **Se mudó**, y con ella
+el control del **tamaño del plano**, que era otra tuerca al lado de los
+salones.
+
+**La razón es dónde se busca una cosa, no dónde es más fácil ponerla:** el área
+de ventas es para vender. Tener su propia tuerca adentro obligaba a acordarse
+de que hay **dos** lugares donde se configura. Ahora hay uno, y ahí adentro va
+todo lo nuevo de este apartado.
+
+**Costó poco porque no se reescribió nada**: `lamaPintarCfg` y sus acciones se
+reusan tal cual; lo único nuevo es el envoltorio y una entrada en el registro
+`AJUSTES`, que es de una línea — igual que `PASOS_SYNC`.
+
+⚠️ **Dos cosas que hubo que tocar y no eran obvias:**
+
+1. **La caché del rail de Ajustes miraba si ya se había dibujado**
+   (`dataset.hecho`). Bastaba mientras la lista fuera siempre la misma; desde
+   que "Mesas" depende de `puede_lama`, esa caché lo dejaría congelado con la
+   lista de la primera vez — y **el permiso llega DESPUÉS** de elegir la sede.
+   Ahora la caché mira **la firma de qué secciones hay**.
+2. **`.lama-tam` era un globo flotante** colgado de la tuerca del plano
+   (`position:absolute; top:40px; right:0`). Sin esa tuerca no tiene ancestro
+   posicionado, así que se anclaba a la **página**: el control aparecía
+   flotando arriba a la derecha de la pantalla, fuera de su recuadro. **Se vio
+   en la foto, no leyendo el CSS.**
+
+#### Ajustes usa la pantalla entera
+
+`#view-ajustes{max-width:none}`, igual que `#view-lama`. Antes `.wrap` la
+encerraba en 900 px y en un computador quedaba media pantalla en blanco
+mientras las tablas de adentro se apretaban. **Medido: el panel pasó de ~620 px
+a 996 px** a 1280 de ancho. El rail mide fijo, así que todo lo que se gana se
+lo lleva el contenido.
+
+#### 🐛 El − y el + de la ventana del producto NO TENÍAN MANEJADOR
+
+Jhon eligió un Agua Benedictino, tocó el producto para subirle la cantidad, y
+**el botón no hacía nada**.
+
+**La causa es una que este archivo ya conoce con otro nombre:** los atributos
+que se DIBUJAN y los que el manejador ESCUCHA se separaron. La ventana se
+dibujaba con `data-lamappmas`, que nadie escuchaba; y en el manejador vivían
+`data-lamamas` / `data-lamamenos`, que **nadie dibuja desde el 2026-09-02**,
+cuando los − + se fueron de la línea de la cuenta. **Dos mitades huérfanas que
+nunca se encontraron.** Es el mismo patrón que dejó la portada de Recetas en
+blanco por `nombreCola` (§3.5).
+
+**Y por eso las viejas se BORRARON en vez de dejarlas "por si acaso".** Un
+manejador que espera un botón inexistente es lo que hace que la próxima
+búsqueda encuentre el nombre equivocado y crea que el camino está cubierto.
+
+La cantidad se cambia **en la copia** (`LAMA_PP`) y recién viaja a la base al
+Guardar, así Cancelar deja la línea como estaba. **No baja de 1**: para sacar
+el producto está la ✕ de su fila — bajar a cero desde una ventana que dice
+"Guardar" sería quitar algo por un camino que no lo anuncia.
+
+#### Se fue la franja de "Precuenta impresa"
+
+> Jhon: *"esto el personal lo sabe bien, y podría ser redundante."*
+
+⚠️ **Esto NO deja el hueco del que advierte la F2** —un candado sin salida
+visible es una pantalla trabada— y conviene decir por qué: **el estado sigue a
+la vista sin una sola palabra.** La mesa está azul, la cabecera dice
+"Cobrando", la impresora está encendida y el + sigue ahí apagado. Y la
+explicación no desapareció: **se mudó al momento en que hace falta** — quien
+igual intente agregar recibe el aviso que dice qué hacer.
+
+Las dos comprobaciones de `lama-precuenta` que miraban la franja **cambiaron de
+objeto en vez de borrarse**: ahora miran que el estado se entienda sin ella.
+
+**Pruebas:** `lama-config` 35 · `lama-limpieza` 48. Probadas contra el código
+viejo: dan **4 rojas**, incluida *"de 1 pasó a 1"* — el bug de Jhon,
+reproducido.
+
 ### LA LIMPIEZA DEL 3 DE SEPTIEMBRE — siete correcciones, y el hogar cambia de dueño
 
 > Todas salieron de Jhon **usando la app desplegada en su teléfono**, no de

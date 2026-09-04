@@ -47,6 +47,34 @@ informar lo que cree que hizo: sólo lo que el repositorio dice que pasó.
 
 ## Las cinco secciones (todos los días)
 
+### 0 · 🔴 LO QUE JHON TIENE QUE PEGAR — antes que nada
+
+> **Esta sección va PRIMERA, arriba del semáforo, y es la única que puede
+> gritar.** Sale de un dato del propio proyecto: **el porcentaje más alto de
+> errores del desarrollo no vino del código — vino de un `.sql` que no se
+> pegó o de algo que no se habilitó en Supabase.** No por descuido: porque
+> entre tanto texto, se pasaba.
+
+**La regla, y no admite matices:**
+
+> **Si hay algo que Jhon tiene que pegar en Supabase o habilitar a mano, va
+> ACÁ ARRIBA, en rojo, con el nombre del archivo y qué desbloquea. Y si NO hay
+> nada, la sección igual aparece diciendo "nada pendiente".**
+
+Que aparezca siempre es la mitad que importa: una sección que sólo existe
+cuando hay algo es una sección que uno aprende a no buscar. Si está siempre en
+el mismo lugar, la ausencia también informa.
+
+| Qué se escribe | Cómo |
+|---|---|
+| **Nada pendiente** | 🟢 en verde, una línea, y se sigue |
+| **Hay algo pendiente** | 🔴 en rojo, arriba de todo, con **el nombre del archivo**, **qué desbloquea** y **cuánto tarda** |
+
+⚠️ **Y lo mismo vale para el chat.** Cuando una sesión deje un `.sql` nuevo,
+pida habilitar algo en Supabase, o necesite una respuesta cargada al atlas, lo
+dice **al principio del mensaje y con un encabezado que se vea**, no enterrado
+en el medio. Es la corrección de un sesgo medido, no una cortesía.
+
 ### 1 · El semáforo — se lee en 30 segundos
 
 Lo primero de la página, y tiene que alcanzar solo. Cinco líneas:

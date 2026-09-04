@@ -193,6 +193,24 @@ dos vueltas de confusión.
 lleva al final la línea que lo anota solo en `migraciones_aplicadas` (§8). Que
 el cuaderno se escriba no puede depender de que él se acuerde.
 
+### 🔴 REGLA DURA — lo que Jhon tiene que PEGAR va señalizado y va PRIMERO
+
+*(Pedido por él el 2026-09-04, y con un dato detrás: **el porcentaje más alto
+de errores del proyecto no salió del código — salió de un `.sql` que no se
+pegó, o de algo que no se habilitó en Supabase.** No por descuido suyo: porque
+entre tanto texto se pasaba.)*
+
+> **Cada vez que una sesión deje algo que él tiene que hacer a mano —pegar un
+> `.sql`, habilitar algo en Supabase, cargar una respuesta al atlas— eso va
+> AL PRINCIPIO del mensaje, con un encabezado que se vea, y también en la
+> sección 0 del informe nocturno.**
+
+Nunca en el medio de un párrafo, nunca al final, nunca mezclado con el resto
+del avance. Y **cuando no hay nada pendiente, se dice igual**: una señal que
+sólo aparece a veces es una señal que se aprende a no buscar.
+
+Es la corrección de un sesgo medido, no una cortesía.
+
 **CABECERA OBLIGATORIA EN TODO ARCHIVO QUE SE LE ENTREGUE** *(pedido por Jhon el
 2026-08-01, después de perder varias vueltas preguntando dónde se pega cada
 cosa).* Él dijo textual: *"asume que ni sé utilizar bien aún Supabase"*. Cada

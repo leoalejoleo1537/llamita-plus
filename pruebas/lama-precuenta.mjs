@@ -171,14 +171,23 @@ await abrir();
 console.log('\nLa mesa en precuenta no ofrece agregar:');
 await caso('no está el buscador del panel', async () =>
   !(await page.isVisible('#lama-qp')) || 'sigue ofreciendo buscar');
-await caso('en su lugar dice "Precuenta impresa"', async () =>
-  (await page.textContent('.lama-trabada')).includes('Precuenta impresa')
-  || 'no aparece la franja');
-/* LO QUE DE VERDAD IMPORTA: que diga cómo salir. Un candado mudo traba la
-   pantalla, y eso es peor que el problema que viene a resolver. */
-await caso('y dice CÓMO volver, no solo que no se puede', async () => {
-  const t = (await page.textContent('.lama-trabada')).replace(/\s+/g,' ');
-  return (t.includes('Ocupada') && t.includes('volvé')) || 'la franja dice: ' + t;
+/* ⚠️ ACÁ SE PROBABA QUE APARECIERA UNA FRANJA diciendo "Precuenta impresa ·
+   para agregar, volvé la mesa a Ocupada". **Esa franja se sacó el 2026-09-04**
+   a pedido de Jhon: *"esto el personal lo sabe bien, y podría ser redundante"*.
+
+   Pero lo que la franja protegía NO se puede perder — F2 lo dice: un candado
+   sin salida visible es una pantalla trabada, y eso es peor que el problema
+   que viene a resolver. Así que las dos comprobaciones cambian de objeto, no
+   desaparecen: ahora miran que **el estado se siga entendiendo sin una sola
+   palabra**, que es lo que hace que el cartel sobre. */
+await caso('el estado se ve igual: la mesa dice Cobrando', async () => {
+  const t = await page.textContent('#lama-panel');
+  return t.includes('Cobrando') || 'no se ve en qué estado está la mesa';
+});
+await caso('y no quedó ningún cartel explicando lo que el color ya dice', async () => {
+  const t = (await page.textContent('#lama-panel')).replace(/\s+/g,' ');
+  return !/Precuenta impresa|volvé la mesa a Ocupada/.test(t)
+    || 'sigue habiendo texto de más: ' + t.slice(0, 90);
 });
 await caso('el + de abajo se ve apagado', async () => {
   const c = await page.getAttribute('.lama-fab', 'class');

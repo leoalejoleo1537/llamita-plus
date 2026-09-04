@@ -135,9 +135,26 @@ async function montar({puedeLama = true, archivo = 'index.html'} = {}){
   await page.waitForTimeout(800);
 }
 
+/* A Ajustes se entra por el menú lateral, no por un botón de la barra. */
+const abrirAjustes = async () => {
+  await page.click('#btnMenu');                 await page.waitForTimeout(350);
+  await page.click('[data-accion="ajustes"]');  await page.waitForTimeout(650);
+};
+/* En Ajustes la barra de pestañas se esconde —se entró a otra zona—, así que
+   para volver a Mesas hay que salir por el botón de arriba. */
+const irAMesas = async () => {
+  if(await page.isVisible('#aj-volver')){
+    await page.click('#aj-volver'); await page.waitForTimeout(500);
+  }
+  await page.click('#tabLama'); await page.waitForTimeout(500);
+};
+
+/* La configuración se mudó a Ajustes -> Mesas el 2026-09-04. Se llega por la
+   tuerca de la barra de arriba, igual que cualquier otra zona de ajustes. */
 const irACfg = async () => {
-  await page.click('[data-lamavista="cfg"]');
-  await page.waitForTimeout(500);
+  await abrirAjustes();
+  await page.click('[data-aj="mesas"]');
+  await page.waitForTimeout(700);
 };
 
 const errores = [];
@@ -155,9 +172,11 @@ const caso = async (n, fn) => {
    ================================================================ */
 console.log('\nLA PUERTA · sin permiso no existe nada de esto:');
 await montar({puedeLama:false});
-await caso('sin `puede_lama` no hay pestaña de configuración', async () =>
-  !(await page.isVisible('[data-lamavista="cfg"]')) || 'la ve alguien sin permiso');
-await caso('ni la pantalla', async () =>
+await caso('sin `puede_lama` no hay sección Mesas en Ajustes', async () => {
+  await abrirAjustes();
+  return !(await page.isVisible('[data-aj="mesas"]')) || 'la ve alguien sin permiso';
+});
+await caso('ni la pantalla de configuración', async () =>
   !(await page.isVisible('#lama-cfg')) || 'la pantalla está abierta sin permiso');
 
 /* ================================================================
@@ -165,15 +184,25 @@ await caso('ni la pantalla', async () =>
    ================================================================ */
 console.log('\nCON permiso, la configuración está y se abre:');
 await montar({puedeLama:true});
-await caso('la pestaña ⚙ Configuración aparece', async () =>
-  (await page.isVisible('[data-lamavista="cfg"]')) || 'no aparece con el permiso puesto');
-await caso('y el área de ventas abre en Mesas, no en la configuración', async () =>
-  (await page.isVisible('#lama-salon')) && !(await page.isVisible('#lama-cfg'))
-  || 'abrió en la pantalla equivocada');
+await caso('la sección Mesas aparece en Ajustes', async () => {
+  await abrirAjustes();
+  return (await page.isVisible('[data-aj="mesas"]')) || 'no aparece con el permiso puesto';
+});
+/* ⚠️ El rail de Ajustes se cachea. Antes bastaba `dataset.hecho` porque la
+   lista era siempre la misma; desde que "Mesas" depende del permiso, esa
+   caché lo dejaría congelado con la lista de la primera vez — y el permiso
+   llega DESPUÉS de elegir la sede. */
+await caso('y el área de ventas sigue siendo sólo el plano', async () => {
+  await irAMesas();
+  const t = await page.evaluate(()=>document.getElementById('view-lama').textContent);
+  return !t.includes('Medios de pago') || 'la configuración quedó también dentro de Mesas';
+});
 
 await irACfg();
-await caso('al entrar, el plano de mesas se va', async () =>
-  !(await page.isVisible('#lama-salon')) || 'quedaron las dos pantallas encimadas');
+await caso('la configuración se ve dentro de Ajustes', async () =>
+  (await page.isVisible('#lama-cfg')) || 'no se pintó la configuración');
+await caso('y arriba está el tamaño de las mesas, que también se mudó', async () =>
+  (await page.isVisible('#lama-tam-r')) || 'no está el control del tamaño');
 await caso('están las tres listas más los anulados', async () => {
   const n = await page.evaluate(()=>document.querySelectorAll('[data-lamacfgtab]').length);
   return n === 4 || 'hay ' + n + ' pestañas';
@@ -225,7 +254,7 @@ await caso('la fila sigue ahí, tachada — apagar no es borrar', async () => {
 /* EL PUNTO ENTERO DE APAGAR ALGO. Si esto fallara, la pantalla diría que el
    medio está apagado y el garzón lo seguiría viendo al cobrar. */
 await caso('y deja de ofrecerse en la ventana de cobro', async () => {
-  await page.click('[data-lamavista="salon"]'); await page.waitForTimeout(400);
+  await irAMesas();
   await page.click('[data-lamamesa="101"]');    await page.waitForTimeout(500);
   await page.click('[data-lamaacc="cobrar"]');  await page.waitForTimeout(600);
   const hay = await page.evaluate(()=>{

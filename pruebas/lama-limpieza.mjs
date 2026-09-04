@@ -429,6 +429,98 @@ await caso('el dibujo y el clic miran la MISMA línea', async () => {
   return r === true || 'el dibujo y el manejador no coinciden';
 });
 
+/* ================================================================
+   8 · EL − Y EL + DE LA VENTANA DEL PRODUCTO — el bug del 2026-09-04
+   ================================================================
+   Jhon eligió un Agua Benedictino, tocó el producto para subirle la cantidad,
+   y el botón no hacía nada. La causa: esos dos botones **no tenían manejador**
+   — los atributos que se dibujaban (`data-lamappmas`) y los que se escuchaban
+   (`data-lamamas`) se habían separado. Dos mitades huérfanas.
+   ================================================================ */
+console.log('\n8 · El − y el + de la ventana del producto:');
+/* La sección 6 dejó la carta abierta y tapa el panel: se cierra antes de
+   seguir, o los clics de acá caen sobre ella. */
+await page.evaluate(()=>{ lamaCerrarCarta(); });
+await page.setViewportSize({width:390, height:900});
+await page.waitForTimeout(500);
+await abrirMesa2();
+
+const cantidadPP = () => page.evaluate(()=>{
+  const b = document.querySelector('.lama-pp-paso b');
+  return b ? +b.textContent.trim() : null;});
+
+await caso('la ventana del producto se abre al tocar la fila', async () => {
+  await page.click('[data-lamaprod]');
+  await page.waitForTimeout(400);
+  return (await cantidadPP()) !== null || 'no se abrió la ventana';
+});
+/* LA QUE IMPORTA. Antes esto daba 1 para siempre. */
+await caso('el + SUBE la cantidad — antes no hacía nada', async () => {
+  const antes = await cantidadPP();
+  await page.click('[data-lamappmas]'); await page.waitForTimeout(300);
+  const des = await cantidadPP();
+  return des === antes + 1 || 'de ' + antes + ' pasó a ' + des;
+});
+await caso('y el − la baja', async () => {
+  const antes = await cantidadPP();
+  await page.click('[data-lamappmenos]'); await page.waitForTimeout(300);
+  const des = await cantidadPP();
+  return des === antes - 1 || 'de ' + antes + ' pasó a ' + des;
+});
+/* No baja de 1: para SACAR el producto está la ✕ de su fila. Bajar a cero
+   desde una ventana que dice "Guardar" sería quitar algo por un camino que no
+   lo anuncia. */
+await caso('pero no baja de 1: quitar es otro gesto', async () => {
+  await page.click('[data-lamappmenos]'); await page.waitForTimeout(250);
+  await page.click('[data-lamappmenos]'); await page.waitForTimeout(250);
+  return (await cantidadPP()) === 1 || 'bajó a ' + (await cantidadPP());
+});
+await caso('el precio de arriba acompaña a la cantidad', async () => {
+  await page.click('[data-lamappmas]'); await page.waitForTimeout(300);
+  const t = await page.evaluate(()=>document.querySelector('.lama-pp-caja .pr').textContent);
+  return t.includes('11.000') || 'con 2 Affogato de $5.500 debería decir 11.000 · dice: ' + t;
+});
+/* Y NO viaja a la base hasta Guardar: la ventana trabaja sobre una copia, así
+   que Cancelar tiene que dejar la línea como estaba. */
+await caso('Cancelar no cambia la cantidad de la línea', async () => {
+  await page.click('[data-lamaacc="pp-cancelar"]'); await page.waitForTimeout(400);
+  const t = await page.evaluate(()=>{
+    const l = [...document.querySelectorAll('.lama-linea')]
+      .find(x => x.textContent.includes('Affogato'));
+    return l ? l.querySelector('.q').textContent.trim() : null;});
+  return t === '1' || 'la línea quedó en ' + t;
+});
+
+/* ================================================================
+   9 · LA FRANJA DE "PRECUENTA IMPRESA" SE FUE
+   ================================================================ */
+console.log('\n9 · Con la precuenta impresa ya no va una franja explicando:');
+await caso('no queda ningún cartel permanente', async () => {
+  await page.evaluate(()=>{
+    const c = LAMA_CUENTAS.find(x => x.mesa_id === 101);
+    if(c) c.estado = 'precuenta';
+    lamaPintar();
+  });
+  await page.waitForTimeout(400);
+  const t = await page.evaluate(()=>document.getElementById('lama-panel').textContent);
+  if(/Precuenta impresa/.test(t)) return 'sigue la franja';
+  return !/volvé la mesa a Ocupada/.test(t) || 'sigue el texto de cómo volver';
+});
+/* ⚠️ LA MITAD QUE IMPORTA: sacar el cartel no puede dejar la pantalla muda.
+   El estado se sigue viendo sin una palabra —la cabecera dice "Cobrando"— y
+   el + sigue ahí, apagado, en vez de desaparecer. */
+await caso('pero el estado se sigue viendo: la mesa dice Cobrando', async () => {
+  const t = await page.evaluate(()=>document.getElementById('lama-panel').textContent);
+  return t.includes('Cobrando') || 'no se ve en qué estado está la mesa';
+});
+await caso('y el + sigue existiendo, apagado — no desaparece', async () => {
+  const r = await page.evaluate(()=>{
+    const f = document.querySelector('.lama-fab');
+    return f ? {hay:true, trabada:f.classList.contains('trabada')} : {hay:false};});
+  if(!r.hay) return 'el + desapareció: quien lo busque va a creer que se rompió';
+  return r.trabada === true || 'el + no se ve apagado';
+});
+
 console.log('\nSin errores de JavaScript:');
 await caso('ninguno en toda la vuelta', async () =>
   errores.length === 0 || errores.join(' · '));

@@ -741,9 +741,13 @@
     width:34px;height:34px;border-radius:50%;cursor:pointer;color:var(--muted);
     font:inherit;font-size:15px;display:flex;align-items:center;justify-content:center;padding:0}
   .lama-regla .eng.on{background:var(--sec-bg);color:var(--sec-tx)}
-  .lama-tam{position:absolute;top:40px;right:0;z-index:30;background:var(--card);
-    box-shadow:0 10px 30px rgba(15,30,49,.26);border-radius:16px;padding:14px 16px;
-    width:250px;display:flex;flex-direction:column;gap:9px}
+  /* ⚠️ ERA UN GLOBO FLOTANTE colgado de la tuerca del plano (`position:absolute;
+     top:40px; right:0`). Al mudarse a Ajustes esa tuerca dejó de existir, y
+     sin un ancestro posicionado el globo se anclaba a la PÁGINA: el control
+     aparecía flotando arriba a la derecha de la pantalla, fuera de su
+     recuadro. Se vio en la foto, no leyendo el CSS.
+     Ahora es un bloque normal dentro de su tarjeta, que es su único uso. */
+  .lama-tam{display:flex;flex-direction:column;gap:9px;max-width:420px}
   .lama-tam label{font-size:11.5px;font-weight:800;letter-spacing:.5px;
     text-transform:uppercase;color:var(--muted)}
   .lama-tam input[type=range]{width:100%;accent-color:var(--orange)}
@@ -786,12 +790,6 @@
      Un recuadro con filas separadas por `--linea`, como el panel de la mesa.
      Nada de tarjetas apiladas: es una lista, y las listas se leen mejor
      seguidas que troceadas. */
-  .lama-vistas{display:flex;gap:6px;margin-bottom:12px}
-  .lama-vistas button{border:none;box-shadow:var(--sombra);background:var(--card);font:inherit;
-    font-size:13.5px;font-weight:700;color:var(--muted);padding:8px 16px;border-radius:999px;
-    cursor:pointer;white-space:nowrap;transition:transform .12s ease}
-  .lama-vistas button:active{transform:scale(.95)}
-  .lama-vistas button.on{background:var(--navy);color:#fff}
   /* Las pestañas de adentro: qué lista se está configurando. */
   .cfg-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 13px}
   .cfg-tabs button{border:none;background:var(--card);box-shadow:var(--sombra);color:var(--muted);
@@ -867,7 +865,7 @@
     text-transform:none;letter-spacing:0;color:var(--text);font-weight:600}
   .cfg-check input{width:18px;height:18px;flex:0 0 auto}
   @media (prefers-reduced-motion: reduce){
-    .cfg-sw, .cfg-sw::after, .lama-vistas button{transition:none}
+    .cfg-sw, .cfg-sw::after{transition:none}
   }
 
   .lama-banda{display:flex;align-items:center;gap:10px;background:var(--orange);color:#fff;
@@ -2114,6 +2112,13 @@
     .meta-gano{animation:none}
     .meta-lado .barra{transition:none}
   }
+  /* AJUSTES USA LA PANTALLA ENTERA, como el área de ventas (Jhon, 2026-09-04:
+     *"que no se pierda espacio a los lados"*). `.wrap` la encerraba en 900 px
+     y en un computador quedaba media pantalla en blanco mientras las tablas
+     de adentro se apretaban. El rail mide fijo y el panel es elástico, así que
+     todo el ancho que se gana se lo lleva el contenido. Es lo mismo que ya
+     hace `#view-lama`. */
+  #view-ajustes{max-width:none;padding-left:18px;padding-right:18px}
   .aj{display:flex;gap:16px;align-items:flex-start}
   .aj-rail{width:232px;flex-shrink:0;background:#fff;border-radius:14px;padding:8px;
     box-shadow:0 1px 3px rgba(15,30,49,.06);position:sticky;top:8px}
@@ -3076,17 +3081,14 @@
      pregunta personas, cliente, garzón y un comentario de mesa. Ninguna se
      mira después. Acá abrir una mesa es UN toque. -->
 <div class="wrap" id="view-lama" style="display:none">
-  <!-- F3 · LAS DOS VISTAS DEL ÁREA DE VENTAS: el salón y su configuración.
-       Vive acá adentro y no en Ajustes porque es configuración DE Lama, y así
-       todo el cambio queda dentro de `view-lama`. Lo pinta el JS porque
-       depende del interruptor LAMA_CONFIG. -->
-  <div class="lama-vistas" id="lama-vistas"></div>
-  <div id="lama-salon"><div class="lama">
+  <div class="lama">
     <div class="lama-plano">
       <div class="lama-salones" id="lama-salones"></div>
-      <div class="lama-regla"><div id="lama-tam"></div>
-        <button type="button" class="eng" id="lama-eng" data-lamaacc="tam"
-                title="Ajustar el tamaño de las mesas" aria-expanded="false">⚙</button></div>
+      <!-- ACÁ ESTABA LA TUERCA DEL TAMAÑO DE LAS MESAS, y se mudó el
+           2026-09-04 a Ajustes -> Mesas. El área de ventas es para vender:
+           tener su propia tuerca adentro obligaba a acordarse de que hay dos
+           lugares donde se configura. El tamaño sigue siendo de ESTE
+           dispositivo y se sigue guardando igual. -->
       <div id="lama-banda"></div>
       <div class="lama-mesas" id="lama-mesas"><div class="empty">Cargando…</div></div>
     </div>
@@ -3100,9 +3102,6 @@
   <div id="lama-pp"></div>
   <div id="lama-cob"></div>
   <div id="lama-anu"></div>
-  </div><!-- /lama-salon -->
-  <!-- F3 · La configuración. Nace vacía y escondida; la pinta lamaPintarCfg. -->
-  <div id="lama-cfg" style="display:none"></div>
 </div>
 
 <!-- ================= RECETAS ================= -->
@@ -5987,30 +5986,8 @@ function lamaAnularEngancharUnaVez(){
 function lamaPintar(){
   lamaCobrarEngancharUnaVez();
   lamaAnularEngancharUnaVez();
-  lamaPintarVistas();
-  if(LAMA_VISTA === 'cfg'){ lamaPintarCfg(); return; }
   lamaPintarPlano(); lamaPintarPanel(); lamaPintarFab();
   lamaPintarCarta(); lamaPintarPP();
-}
-
-/* F3 · LAS DOS VISTAS: el salón y la configuración.
-   Con el interruptor apagado no hay pestañas y no se ve ninguna diferencia
-   con lo de antes — §2.2: apagado deja LO ANTERIOR, no un hueco. */
-function lamaPintarVistas(){
-  const barra = $('lama-vistas'), salon = $('lama-salon'), cfg = $('lama-cfg');
-  if(!barra || !salon || !cfg) return;
-  if(!LAMA_CONFIG){
-    barra.innerHTML = ''; barra.style.display = 'none';
-    salon.style.display = ''; cfg.style.display = 'none';
-    return;
-  }
-  barra.style.display = '';
-  const enCfg = LAMA_VISTA === 'cfg';
-  barra.innerHTML =
-    `<button type="button" data-lamavista="salon" class="${enCfg?'':'on'}">Mesas</button>` +
-    `<button type="button" data-lamavista="cfg" class="${enCfg?'on':''}">⚙ Configuración</button>`;
-  salon.style.display = enCfg ? 'none' : '';
-  cfg.style.display   = enCfg ? '' : 'none';
 }
 
 /* EL TAMAÑO DE LAS MESAS — lo elige quien mira, no el código.
@@ -6024,7 +6001,6 @@ function lamaPintarVistas(){
    vacío: en una ventana privada o con las cookies bloqueadas, el acceso mismo
    lanza. Sin esto, el plano entero se cae por un ajuste de comodidad. */
 const LAMA_TAM_MIN = 56, LAMA_TAM_MAX = 190, LAMA_TAM_DEF = 82;
-let LAMA_TAM_ABIERTO = false;
 
 function lamaTamLeer(){
   try{
@@ -6039,28 +6015,12 @@ function lamaTamAplicar(v){
   const cont = $('lama-mesas'); if(!cont) return;
   cont.style.setProperty('--mesa', (v || lamaTamLeer()) + 'px');
 }
-function lamaPintarTam(){
-  const caja = $('lama-tam'), eng = $('lama-eng');
-  if(!caja) return;
-  if(eng) eng.classList.toggle('on', LAMA_TAM_ABIERTO);
-  if(eng) eng.setAttribute('aria-expanded', LAMA_TAM_ABIERTO ? 'true' : 'false');
-  if(!LAMA_TAM_ABIERTO){ caja.innerHTML = ''; return; }
-  const v = lamaTamLeer();
-  caja.innerHTML = `<div class="lama-tam">
-    <label for="lama-tam-r">Tamaño de las mesas</label>
-    <input type="range" id="lama-tam-r" min="${LAMA_TAM_MIN}" max="${LAMA_TAM_MAX}"
-           step="2" value="${v}">
-    <div class="pie"><span id="lama-tam-n">${v} px</span>
-      <button type="button" data-lamaacc="tam-def">Volver al normal</button></div>
-  </div>`;
-  const r = $('lama-tam-r');
-  r.addEventListener('input', () => {
-    const n = +r.value;
-    $('lama-tam-n').textContent = n + ' px';
-    lamaTamAplicar(n);          // se ve mientras se arrastra
-    lamaTamGuardar(n);
-  });
-}
+/* ACÁ ESTABA `lamaPintarTam`, y se fue el 2026-09-04 con la tuerca del plano.
+   Su contenido vive ahora en `ajMesasMontar()`. Se BORRA en vez de dejarla
+   "por si acaso": una función que nadie llama, al lado de un botón que ya no
+   se dibuja, es exactamente el par huérfano que produjo el bug de los − + de
+   la ventana del producto. `lamaTamLeer/Guardar/Aplicar` SÍ se quedan: las
+   usa el plano para aplicar el tamaño guardado. */
 
 function lamaPintarPlano(){
   const cont = $('lama-mesas'); if(!cont) return;
@@ -6513,12 +6473,20 @@ function lamaPanelBuscador(){
      muestra un camino que después se va a negar. En su lugar, una franja que
      dice por qué y —lo que importa— cómo salir. Texto corto (§2.1): quien la
      lee está de pie frente a un cliente. */
-  if(lamaTrabadaPorPrecuenta(lamaCuentaDe(LAMA_SEL))){
-    return `<div class="lama-trabada">
-      <b>Precuenta impresa</b>
-      <span>Para agregar, volvé la mesa a Ocupada con ${ICONO_IMPRESORA}</span>
-    </div>`;
-  }
+  /* CON LA PRECUENTA IMPRESA no se ofrece buscar: no se muestra un camino que
+     después se va a negar. Y NO VA NINGUNA FRANJA EN SU LUGAR (Jhon,
+     2026-09-04: *"esto el personal lo sabe bien, y podría ser redundante"*).
+
+     ⚠️ Esto NO deja el hueco del que advierte F2 —un candado sin salida
+     visible es una pantalla trabada—, y conviene decir por qué: el estado
+     sigue estando a la vista sin una sola palabra. La mesa está AZUL, la
+     impresora del panel está encendida, y el + sigue ahí apagado. Y la
+     explicación no desapareció: se mudó al momento en que hace falta. Quien
+     igual intente agregar recibe el aviso que dice qué hacer.
+
+     La franja era un cartel permanente explicando algo que el color ya dice.
+     Es §2.1: si hay que escribirlo, es que la forma ya lo resolvió. */
+  if(lamaTrabadaPorPrecuenta(lamaCuentaDe(LAMA_SEL))) return '';
   const puestos = lamaPuestos();
   /* Las cuatro más comandadas. Salen de LAMA_TOP, que se cuenta de las ventas
      de verdad; si todavía no hay historia, se usan las primeras de la carta
@@ -6689,6 +6657,17 @@ function lamaPintarPP(){
 function lamaAbrirPP(itemId){
   const it = LAMA_ITEMS.find(x => x.id === itemId); if(!it) return;
   LAMA_PP = {itemId, cantidad: +it.cantidad || 1, comentario: it.comentario || ''};
+  lamaPintarPP();
+}
+
+/* EL PASO DE LA CANTIDAD, en la copia y no en la línea.
+   No baja de 1: para SACAR el producto está la ✕ de su fila, y bajar a cero
+   desde acá sería quitar algo desde una ventana que dice "Guardar". Dos gestos
+   distintos con dos botones distintos — el mismo criterio que hizo que en la
+   carta el − se vuelva un basurero cuando de verdad va a borrar. */
+function lamaPPPaso(delta){
+  if(!LAMA_PP) return;
+  LAMA_PP.cantidad = Math.max(1, (+LAMA_PP.cantidad || 1) + delta);
   lamaPintarPP();
 }
 
@@ -8027,7 +8006,6 @@ const LAMA_CFG_LISTAS = {
   },
 };
 
-let LAMA_VISTA    = 'salon';   // 'salon' | 'cfg'
 let LAMA_CFG_TAB  = 'medios';  // qué lista se está mirando
 let LAMA_CFG_DAT  = {};        // {medios:[...], descuentos:[...], anulacion:[...]}
 let LAMA_CFG_EDIT = null;      // la fila que se está editando, o {nueva:true}
@@ -8218,19 +8196,12 @@ function lamaCfgFicha(){
 
 /* ==========  F3 · LAS ACCIONES DE LA CONFIGURACIÓN  ========== */
 
-async function lamaCfgIr(vista){
-  LAMA_VISTA = vista;
-  LAMA_CFG_EDIT = null;
-  if(vista === 'cfg') await lamaCfgTab(LAMA_CFG_TAB);
-  else lamaPintar();
-}
-
 async function lamaCfgTab(cual){
   LAMA_CFG_TAB = cual;
-  lamaPintar();                       // se pinta "Cargando…" antes de esperar
+  lamaPintarCfg();                    // se pinta "Cargando…" antes de esperar
   if(cual === 'anulados') await lamaCfgCargarAnulados();
   else                    await lamaCfgCargar(cual);
-  lamaPintar();
+  lamaPintarCfg();
 }
 
 /* SUBIR Y BAJAR. El orden es el que ve el garzón al cobrar, así que lo más
@@ -8246,7 +8217,7 @@ async function lamaCfgMover(codigo, delta){
   const j = i + delta;
   if(i < 0 || j < 0 || j >= filas.length) return;
   filas.splice(j, 0, filas.splice(i, 1)[0]);
-  lamaPintar();                       // se mueve ya; la base se pone al día atrás
+  lamaPintarCfg();                    // se mueve ya; la base se pone al día atrás
   try{
     await Promise.all(filas.map((f, n) =>
       sb.from(L.tabla).update({orden: n + 1}).eq('codigo', f.codigo)));
@@ -8263,9 +8234,9 @@ async function lamaCfgApagar(codigo){
   const f = filas.find(x => x.codigo === codigo); if(!f) return;
   const ahora = f.activo === false;   // estaba apagado -> se enciende
   f.activo = ahora;
-  lamaPintar();
+  lamaPintarCfg();
   const r = await sb.from(L.tabla).update({activo: ahora}).eq('codigo', codigo);
-  if(r.error){ f.activo = !ahora; lamaPintar(); avisar('No se pudo guardar'); return; }
+  if(r.error){ f.activo = !ahora; lamaPintarCfg(); avisar('No se pudo guardar'); return; }
   await lamaCfgRefrescarCobro();
 }
 
@@ -8280,7 +8251,7 @@ function lamaCfgAbrirFicha(codigo){
     LAMA_CFG_EDIT = {lista:cual, nueva:true, nombre:'', es_cobro:true,
                      descuento_pct:0, pide_comentario:false, activo:true};
   }
-  lamaPintar();
+  lamaPintarCfg();
   const n = $('cfg-nombre'); if(n) n.focus();
 }
 
@@ -8385,29 +8356,6 @@ $('view-lama').addEventListener('click', async e => {
     lamaPintarPanelResultados();
   }
 
-  /* F3 · LA CONFIGURACIÓN. Va antes que el resto porque cuando está abierta,
-     el plano de mesas no existe en pantalla y ninguno de los manejadores de
-     abajo tiene a qué engancharse. */
-  const vi = e.target.closest('[data-lamavista]');
-  if(vi){ await lamaCfgIr(vi.dataset.lamavista); return; }
-
-  const ct = e.target.closest('[data-lamacfgtab]');
-  if(ct){ await lamaCfgTab(ct.dataset.lamacfgtab); return; }
-
-  const cs = e.target.closest('[data-lamacfgsube]');
-  if(cs){ await lamaCfgMover(cs.dataset.lamacfgsube, -1); return; }
-  const cb = e.target.closest('[data-lamacfgbaja]');
-  if(cb){ await lamaCfgMover(cb.dataset.lamacfgbaja, +1); return; }
-
-  const cw = e.target.closest('[data-lamacfgsw]');
-  if(cw){ await lamaCfgApagar(cw.dataset.lamacfgsw); return; }
-
-  const ce = e.target.closest('[data-lamacfged]');
-  if(ce){ lamaCfgAbrirFicha(ce.dataset.lamacfged); return; }
-
-  const cn = e.target.closest('[data-lamacfgnuevo]');
-  if(cn){ lamaCfgAbrirFicha(null); return; }
-
   const sa = e.target.closest('[data-lamasalon]');
   if(sa){ LAMA_SALON = sa.dataset.lamasalon; LAMA_SEL = null; LAMA_PAPEL = null; lamaPintar(); return; }
 
@@ -8428,6 +8376,26 @@ $('view-lama').addEventListener('click', async e => {
   const pm = e.target.closest('[data-lamaprod]');
   if(pm){ lamaAbrirPP(+pm.dataset.lamaprod); return; }
 
+  /* ⚠️ EL − Y EL + DE LA VENTANA DEL PRODUCTO. Estos dos NO TENÍAN MANEJADOR:
+     se dibujaban y no hacían absolutamente nada. Lo encontró Jhon usándolo —
+     eligió un Agua Benedictino, tocó el producto para subirle la cantidad, y
+     el botón no respondía.
+
+     La causa es la de siempre en este archivo, y ya tiene nombre: los
+     atributos que se DIBUJAN y los que el manejador ESCUCHA se separaron. Acá
+     abajo vivían `data-lamamas` y `data-lamamenos`, que nadie dibuja desde que
+     los − + se fueron de la línea de la cuenta (2026-09-02); y la ventana del
+     producto se dibujó con `data-lamappmas` / `data-lamappmenos`, que nadie
+     escuchaba. Dos mitades huérfanas que nunca se encontraron.
+
+     La cantidad se cambia SOLO en `LAMA_PP` —la copia— y recién viaja a la
+     base al Guardar. Así Cancelar deja la línea como estaba, que es lo que esa
+     ventana promete. */
+  const ppm = e.target.closest('[data-lamappmas]');
+  if(ppm){ lamaPPPaso(+1); return; }
+  const ppn = e.target.closest('[data-lamappmenos]');
+  if(ppn){ lamaPPPaso(-1); return; }
+
   /* Los − y + de la carta: bajan y suben sin salir de la lista. El − busca la
      ÚLTIMA línea de ese producto que todavía no salió a la cocina; si ya
      salieron todas, no hay nada que corregir desde acá. */
@@ -8446,11 +8414,12 @@ $('view-lama').addEventListener('click', async e => {
   const ad = e.target.closest('[data-lamaadd]');
   if(ad){ await lamaAgregar(ad.dataset.lamaadd); return; }
 
-  const ms = e.target.closest('[data-lamamas]');
-  if(ms){ await lamaCantidad(+ms.dataset.lamamas, 1); return; }
-
-  const mn = e.target.closest('[data-lamamenos]');
-  if(mn){ await lamaCantidad(+mn.dataset.lamamenos, -1); return; }
+  /* ACÁ VIVÍAN `data-lamamas` y `data-lamamenos`, y se sacaron el 2026-09-04:
+     nadie los dibujaba desde que los − + se fueron de la línea de la cuenta.
+     Eran la mitad huérfana del bug de la ventana del producto — un manejador
+     esperando un botón que ya no existe, al lado de un botón sin manejador.
+     Dejarlos "por si acaso" es lo que hace que la próxima búsqueda encuentre
+     el nombre equivocado y crea que el camino está cubierto. */
 
   const qu = e.target.closest('[data-lamaquitar]');
   if(qu){ await lamaQuitar(+qu.dataset.lamaquitar); return; }
@@ -8461,13 +8430,9 @@ $('view-lama').addEventListener('click', async e => {
     if(a === 'confirmar')          await lamaConfirmar();
     else if(a === 'cancelar')      await lamaCancelar();
     else if(a === 'precuenta')     await lamaPrecuenta();
-    else if(a === 'tam')           { LAMA_TAM_ABIERTO = !LAMA_TAM_ABIERTO; lamaPintarTam(); }
-    else if(a === 'tam-def')       { lamaTamGuardar(LAMA_TAM_DEF); lamaTamAplicar(LAMA_TAM_DEF); lamaPintarTam(); }
     else if(a === 'cobrar')        await lamaCerrar();
     else if(a === 'mas')           await lamaMas();
     else if(a === 'cerrar-carta')  lamaCerrarCarta();
-    else if(a === 'cfg-cancelar'){ LAMA_CFG_EDIT = null; lamaPintar(); }
-    else if(a === 'cfg-guardar')   await lamaCfgGuardar();
     /* C5 · EL DESCUENTO DESDE EL PANEL. Se edita en una copia (`LAMA_DESC`) y
        recién al Aplicar se escribe en la cuenta: así Cancelar deja las cosas
        exactamente como estaban, incluso si ya había un descuento puesto. */
@@ -11385,6 +11350,9 @@ const ICO = {
   respaldos:'<path d="M3 6v12a9 3 0 0 0 18 0V6"></path><ellipse cx="12" cy="6" rx="9" ry="3"></ellipse><path d="M3 12a9 3 0 0 0 18 0"></path>',
   actividad:'<path d="M3 12h4l2.5 7 5-14L17 12h4"></path>',
   salud:'<path d="M12 21s-7.5-4.7-7.5-10A4.5 4.5 0 0 1 12 7.6 4.5 4.5 0 0 1 19.5 11c0 5.3-7.5 10-7.5 10z"></path>',
+  /* Mesas: una mesita vista de frente. Cuatro trazos y ninguno se cruza — la
+     misma regla que la taza que reemplazó a la canasta. */
+  mesas:'<path d="M3 9h18"></path><path d="M6 9v10"></path><path d="M18 9v10"></path><path d="M5 5h14v4H5z"></path>',
 };
 
 /* Un panel que todavía no está hecho: dice qué va a haber y no promete un
@@ -11502,7 +11470,83 @@ const AJUSTES = [
     sub:'Lo que hoy hay que preguntarle a la base con SQL.',
     render:()=>ajSaludHTML(),
     montar:()=>{ if(AJ_SALUD === null) ajUnaVez('salud', ajCargarSalud); } },
+
+  /* MESAS · toda la configuración del área de ventas, en el lugar donde se
+     busca la configuración (Jhon, 2026-09-04). Nació dentro de la pestaña de
+     Mesas y se mudó acá: el área de ventas es para vender, y tener su propia
+     tuerca adentro obligaba a acordarse de que hay DOS sitios donde se
+     configura. Acá adentro va todo lo nuevo de este apartado.
+
+     `ver()` la esconde para quien no tenga `puede_lama` —igual que la pestaña
+     de Mesas— y en Bodega, que no vende. */
+  { id:'mesas', ico:'mesas', tit:'Mesas',
+    sub:'Los medios de pago, los motivos y el tamaño del plano. Todo lo del área de ventas.',
+    ver:()=>!!(PERMISOS.puede_lama && SEDE && SEDE !== 'central'),
+    render:()=>ajMesasHTML(),
+    montar:()=>ajMesasMontar() },
 ];
+
+/* Las secciones que esta cuenta puede ver. Una sección sin `ver()` la ve
+   todo el mundo, que es como se comportaban las nueve de antes. */
+const ajVisibles = () => AJUSTES.filter(a => !a.ver || a.ver());
+
+/* ==================================================================
+   AJUSTES · MESAS — la configuración del área de ventas
+   ==================================================================
+   Todo esto vivía DENTRO de la pestaña de Mesas: la configuración en una
+   pestaña ⚙ propia, y el tamaño del plano en una tuerca al lado de los
+   salones. Se mudó acá el 2026-09-04 a pedido de Jhon.
+
+   La razón es de dónde se busca una cosa, no de dónde es más fácil ponerla:
+   el área de ventas es para vender, y tener su propia tuerca adentro obligaba
+   a acordarse de que hay DOS lugares donde se configura. Ahora hay uno.
+
+   Lo que se reusa TAL CUAL, y por eso la mudanza costó poco: `lamaPintarCfg`
+   y todas sus acciones, y el trío `lamaTamLeer/Guardar/Aplicar`. Lo único
+   nuevo es el envoltorio. */
+function ajMesasHTML(){
+  return `<div class="aj-caja">
+      <h3>Tamaño de las mesas</h3>
+      <p class="aj-nota">Es de ESTE dispositivo, no del local: cada teléfono y
+        cada computador guarda el suyo.</p>
+      <div id="aj-tam"></div>
+    </div>
+    <div class="aj-caja">
+      <h3>Medios de pago, motivos y anulados</h3>
+      <div id="lama-cfg"></div>
+    </div>`;
+}
+
+function ajMesasMontar(){
+  /* EL TAMAÑO. Acá va siempre abierto —ya estás en la pantalla que viniste a
+     usar—, así que no hace falta el interruptor de mostrar/esconder que tenía
+     al lado del plano. */
+  const caja = $('aj-tam');
+  if(caja){
+    const v = lamaTamLeer();
+    caja.innerHTML = `<div class="lama-tam">
+      <input type="range" id="lama-tam-r" min="${LAMA_TAM_MIN}" max="${LAMA_TAM_MAX}"
+             step="2" value="${v}" aria-label="Tamaño de las mesas">
+      <div class="pie"><span id="lama-tam-n">${v} px</span>
+        <button type="button" id="aj-tam-def">Volver al normal</button></div>
+    </div>`;
+    const r = $('lama-tam-r');
+    r.addEventListener('input', () => {
+      const n = +r.value;
+      $('lama-tam-n').textContent = n + ' px';
+      lamaTamAplicar(n); lamaTamGuardar(n);
+    });
+    $('aj-tam-def').addEventListener('click', () => {
+      lamaTamGuardar(LAMA_TAM_DEF); lamaTamAplicar(LAMA_TAM_DEF);
+      r.value = LAMA_TAM_DEF; $('lama-tam-n').textContent = LAMA_TAM_DEF + ' px';
+    });
+  }
+  /* LA CONFIGURACIÓN. Se reusa entera: `lamaPintarCfg` busca `#lama-cfg`, que
+     ahora vive acá. Se pide la lista antes de pintar para no dejar un
+     "Cargando…" que no se mueve. */
+  LAMA_CFG_EDIT = null;
+  lamaCfgTab(LAMA_CFG_TAB);
+}
 
 
 /* ---------------- Fudo · el modo y el reloj ----------------
@@ -13856,13 +13900,21 @@ function ajUnaVez(clave, fn){
    está encendido, que es lo único que de verdad cambia. */
 function ajPintarRail(){
   const r = $('aj-rail');
-  if(!r.dataset.hecho){
-    r.innerHTML = '<div class="aj-rail-tit">AJUSTES</div>' + AJUSTES.map(a=>`
+  const lista = ajVisibles();
+  /* ⚠️ LA CACHÉ AHORA MIRA QUÉ SECCIONES HAY, no si ya se dibujó una vez.
+     Antes bastaba con `dataset.hecho` porque la lista era siempre la misma;
+     desde que "Mesas" depende del permiso, esa caché dejaría el rail
+     congelado con la lista de la primera vez — y el permiso puede llegar
+     DESPUÉS (cargarPermisos corre al final de pickSede), o cambiar al cambiar
+     de sede. Con la firma, el rail se rehace sólo cuando de verdad cambió. */
+  const firma = lista.map(a => a.id).join(',');
+  if(r.dataset.firma !== firma){
+    r.innerHTML = '<div class="aj-rail-tit">AJUSTES</div>' + lista.map(a=>`
       <button type="button" class="aj-it" data-aj="${a.id}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICO[a.ico]}</svg>
         <span>${esc(a.tit)}</span>
       </button>`).join('');
-    r.dataset.hecho = '1';
+    r.dataset.firma = firma;
   }
   r.querySelectorAll('[data-aj]').forEach(b=>b.classList.toggle('on', b.dataset.aj === ajActual));
 }
@@ -13871,7 +13923,12 @@ function pintarAjustes(){
   ajDevolver();                 // primero a su casa: el innerHTML los borraría
   ajPintarRail();
 
-  const a = AJUSTES.find(x=>x.id===ajActual) || AJUSTES[0];
+  /* Si la sección abierta dejó de estar permitida —cambió de sede, o le
+     quitaron el permiso con la pantalla abierta— se cae a la primera visible
+     en vez de dibujar una zona que ya no corresponde. */
+  const vis = ajVisibles();
+  const a = vis.find(x=>x.id===ajActual) || vis[0] || AJUSTES[0];
+  ajActual = a.id;
   $('aj-pane').innerHTML = `
     <div class="aj-cab">
       <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICO[a.ico]}</svg></span>
@@ -13902,7 +13959,29 @@ $('overlay-fperm').addEventListener('click', e=>{
   if(fs) ajTogglePermisoFudo(fs.dataset.fpsw);
 });
 
-$('aj-pane').addEventListener('click', e=>{
+$('aj-pane').addEventListener('click', async e=>{
+  /* AJUSTES · MESAS. Estos manejadores vivían en `view-lama` y se mudaron acá
+     junto con la pantalla. Van primero porque la ficha de edición flota sobre
+     todo lo demás. */
+  const ct = e.target.closest('[data-lamacfgtab]');
+  if(ct){ await lamaCfgTab(ct.dataset.lamacfgtab); return; }
+  const cs = e.target.closest('[data-lamacfgsube]');
+  if(cs){ await lamaCfgMover(cs.dataset.lamacfgsube, -1); return; }
+  const cb = e.target.closest('[data-lamacfgbaja]');
+  if(cb){ await lamaCfgMover(cb.dataset.lamacfgbaja, +1); return; }
+  const cw = e.target.closest('[data-lamacfgsw]');
+  if(cw){ await lamaCfgApagar(cw.dataset.lamacfgsw); return; }
+  const ce = e.target.closest('[data-lamacfged]');
+  if(ce){ lamaCfgAbrirFicha(ce.dataset.lamacfged); return; }
+  const cn = e.target.closest('[data-lamacfgnuevo]');
+  if(cn){ lamaCfgAbrirFicha(null); return; }
+  const ca = e.target.closest('[data-lamaacc]');
+  if(ca){
+    const a = ca.dataset.lamaacc;
+    if(a === 'cfg-cancelar'){ LAMA_CFG_EDIT = null; lamaPintarCfg(); return; }
+    if(a === 'cfg-guardar'){ await lamaCfgGuardar(); return; }
+  }
+
   const sw = e.target.closest('[data-persona]');
   if(sw && !sw.disabled){ ajTogglePersona(sw.dataset.persona); return; }
   const sd = e.target.closest('[data-ajsede]');
