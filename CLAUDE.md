@@ -73,6 +73,7 @@ partió. Lo que quedó acá son **las reglas duras**, que sí se leen siempre.
 
 | Si vas a… | Leé ESTO antes, completo | Líneas |
 |---|---|---|
+| **entender por qué algo se publicó sin que nadie lo escribiera en el chat** | **[`docs/tareas-automaticas.md`](docs/tareas-automaticas.md)** — cinco rutinas construyen solas durante los turnos de Jhon, y una escribe el informe de las 01:00 | — |
 | **tocar cualquier cosa de Llamita Lama** | **[`docs/LAMA.md`](docs/LAMA.md)** | 427 |
 | **replicar una pantalla de Fudo** | **[`docs/atlas-fudo.md`](docs/atlas-fudo.md)** — cómo se comporta lo que estamos copiando. Lo que siga en `⬜ PENDIENTE` **se pregunta, no se inventa** | — |
 | **dejar un `.sql` nuevo listo para Jhon** | agregarlo a **[`docs/sql-pendientes.md`](docs/sql-pendientes.md)** — es el único lugar donde se sabe qué falta correr | — |
