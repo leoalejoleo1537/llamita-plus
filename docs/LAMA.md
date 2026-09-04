@@ -5,9 +5,14 @@
 > `CLAUDE.md` el 2026-08-31, cuando ese archivo pasó de 4.114 líneas a 1.751
 > para dejar de costar 69.000 tokens por sesión.
 >
-> **Las reglas duras siguen en `CLAUDE.md`** y se leen igual, siempre. Las dos
-> que más pesan acá: **§0.9 — Llamita Stock no se toca** y **§0.5 — el
-> `drop function` antes de cambiar una firma**.
+> **Las reglas duras siguen en `CLAUDE.md`** y se leen igual, siempre. La que
+> más pesa acá es **§0.5 — el `drop function` antes de cambiar una firma**.
+>
+> ⚠️ **§0.9 cambió el 2026-09-04 y hay que leerla de nuevo.** Decía *"Llamita
+> Stock no se toca"*; en esta copia **Stock sí se puede tocar**, porque ya no
+> es producción de nadie. Las menciones a §0.9 que aparecen más abajo son
+> **historia** —explican por qué una decisión de agosto se tomó así— y se
+> dejan como están. No son instrucciones para hoy.
 >
 > La estética manda desde [`DECISIONES-ESTETICA.md`](DECISIONES-ESTETICA.md).
 
@@ -342,8 +347,10 @@ nuevo"*. La puerta es `app_permisos.puede_lama`, que **nace apagada para
 todos** — hoy solo la tiene `leoalejoleo12@gmail.com`, una cuenta nueva creada
 para esto (la de Jhon no servía: hay dispositivos con su sesión abierta).
 
-⚠️ **Antes de tocar una línea, leer §0.9.** Stock no se toca. Es la regla que
-manda sobre todo lo de acá abajo.
+⚠️ **Antes de tocar una línea, leer §0.9** — que **cambió el 2026-09-04**. Acá
+Stock **sí** se puede tocar; lo que sigue valiendo es que la batería se compara
+contra una línea base de `origin/master`, y que las conexiones entre Lama y el
+inventario van al final igual (la F7 de la ruta).
 
 ### ETAPA 1, TERMINADA — al 2026-08-28
 

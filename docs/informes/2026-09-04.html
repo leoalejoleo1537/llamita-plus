@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Llamita Plus · informe del 2026-09-04</title>
+<style>
+  :root{
+    --navy:#0F1E31; --navy2:#16283F;
+    --orange:#DC4405; --orange-dark:#B93A04;
+    --bg:#E9EEF5; --card:#FDFEFF;
+    --text:#121E2C; --muted:#61707F;
+    --red-bg:#FCE9E6; --red-fg:#C0392B;
+    --green-bg:#E4F1E5; --green-fg:#2E7D32;
+    --amber-bg:#FDF0DE; --amber-fg:#9C6209;
+    --gray-bg:#E1E8F1; --gray-fg:#54677D;
+    --azul-bg:#E8F0FB; --azul-fg:#2C5AA0;
+    --sec-bg:#D0DDEC; --sec-tx:#1F3A5C; --sec-filo:#41628C;
+    --sombra:0 2px 4px rgba(20,40,70,.04), 0 12px 26px -18px rgba(20,40,70,.34);
+    --linea:rgba(31,58,92,.085);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);line-height:1.5;
+       font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  .doc{max-width:900px;margin:0 auto;padding:18px 14px 70px}
+
+  .cab{margin:0 0 20px}
+  .cab h1{font-size:22px;margin:0 0 2px;letter-spacing:-.02em}
+  .cab .f{color:var(--muted);font-size:13px}
+
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.07em;
+     color:var(--sec-tx);background:var(--sec-bg);border-left:4px solid var(--sec-filo);
+     padding:8px 13px;border-radius:0 14px 14px 0;margin:30px 0 13px}
+
+  .caja{background:var(--card);border-radius:18px;box-shadow:var(--sombra);
+        padding:15px 16px;margin:0 0 13px}
+
+  /* ---- el semáforo ---- */
+  .sem{display:flex;flex-direction:column;gap:0}
+  .sem .l{display:flex;gap:11px;align-items:flex-start;padding:11px 0}
+  .sem .l + .l{border-top:1px solid var(--linea)}
+  .sem .k{flex:0 0 96px;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;
+          color:var(--muted);font-weight:700;padding-top:2px}
+  .sem .v{flex:1;font-size:15px;min-width:0}
+  .sem .v b{font-weight:800}
+  .pill{display:inline-block;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:800}
+  .p-ok{background:var(--green-bg);color:var(--green-fg)}
+  .p-mid{background:var(--amber-bg);color:var(--amber-fg)}
+  .p-bad{background:var(--red-bg);color:var(--red-fg)}
+  .p-inf{background:var(--azul-bg);color:var(--azul-fg)}
+  .p-gris{background:var(--gray-bg);color:var(--gray-fg)}
+
+  table{width:100%;border-collapse:collapse;background:var(--card);
+        border-radius:16px;overflow:hidden;box-shadow:var(--sombra);
+        margin:0 0 13px;font-size:14px}
+  th{background:var(--sec-bg);color:var(--sec-tx);text-align:left;padding:9px 12px;
+     font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+  td{padding:9px 12px;border-top:1px solid var(--linea);vertical-align:top}
+  td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+  code{background:var(--gray-bg);border-radius:5px;padding:1px 5px;font-size:.88em}
+
+  .tres{counter-reset:t}
+  .tres .u{display:flex;gap:12px;padding:13px 0}
+  .tres .u + .u{border-top:1px solid var(--linea)}
+  .tres .n{flex:0 0 30px;height:30px;border-radius:50%;background:var(--orange);color:#fff;
+           display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px}
+  .tres .t{flex:1;min-width:0}
+  .tres .t b{display:block;font-size:15px;margin-bottom:2px}
+  .tres .t span{font-size:13.5px;color:var(--muted)}
+
+  .nota{font-size:13.5px;color:var(--muted);margin:0 0 13px;padding:0 3px}
+  .ok-linea{background:var(--green-bg);color:var(--green-fg);border-radius:14px;
+            padding:12px 15px;font-size:14px;font-weight:600;margin:0 0 13px}
+  .pie{margin-top:34px;padding-top:14px;border-top:1px solid var(--linea);
+       font-size:12px;color:var(--muted)}
+  @media (max-width:520px){
+    .sem .l{flex-direction:column;gap:2px}
+    .sem .k{flex:none}
+  }
+</style>
+</head>
+<body>
+<div class="doc">
+
+<div class="cab">
+  <h1>🦙 Llamita Plus</h1>
+  <div class="f">Informe del <b>jueves 4 de septiembre de 2026</b> · el primero</div>
+</div>
+
+<h2>1 · El semáforo</h2>
+<div class="caja sem">
+  <div class="l"><div class="k">Cómo venimos</div><div class="v">
+    <span class="pill p-mid">🟡 En construcción, y sin nada roto</span></div></div>
+  <div class="l"><div class="k">Avanzó</div><div class="v">
+    La copia quedó <b>viva y visible</b>: se publicó en Vercel, tiene su logo propio,
+    y el panel de mesas se limpió entero con siete correcciones.</div></div>
+  <div class="l"><div class="k">Bloquea</div><div class="v">
+    <b>El tiempo real está apagado en las 8 tablas.</b> Hoy la app no actualiza
+    nada sola — ni el stock, ni las fechas, ni las mesas entre dos teléfonos.
+    Se arregla pegando un SQL.</div></div>
+  <div class="l"><div class="k">Espera a vos</div><div class="v">
+    Pegar <code>sql/2026-09-plus-encender-tiempo-real.sql</code>. Es lo único.</div></div>
+  <div class="l"><div class="k">Lo próximo</div><div class="v">
+    <b>F3 · las pantallas de configuración</b> — maqueta aprobada, opción A elegida,
+    y no necesita una sola línea de SQL.</div></div>
+</div>
+
+<h2>2 · Lo que cambió</h2>
+
+<table>
+  <tr><th>Commit</th><th>Qué hizo</th><th>Qué lo cubre</th></tr>
+  <tr>
+    <td class="num"><code>f112023</code></td>
+    <td>La limpieza del panel de mesas — siete correcciones — y el hogar de la app pasa a ser Mesas</td>
+    <td><code>lama-limpieza</code> · 39 casos</td>
+  </tr>
+  <tr>
+    <td class="num"><code>8162255</code></td>
+    <td>La maqueta de F3 y la radiografía de la base nueva</td>
+    <td>sin código</td>
+  </tr>
+  <tr>
+    <td class="num"><code>5a232f5</code><br><code>63cdce1</code></td>
+    <td>El ícono nuevo: el círculo de hojas con la llama recortada, en los tres tamaños</td>
+    <td>a ojo, en el teléfono</td>
+  </tr>
+  <tr>
+    <td class="num"><code>1a646a2</code></td>
+    <td>La copia deja de apuntar a la base de Café del Desierto</td>
+    <td>comprobado con la radiografía</td>
+  </tr>
+</table>
+
+<div class="ok-linea">
+  ✓ <b>263 casos de Lama, todos verdes.</b> Y la prueba nueva se corrió contra el
+  código viejo: da <b>26 rojas</b>, cada una nombrando el defecto exacto. Una
+  prueba que no puede fallar no prueba nada.
+</div>
+
+<table>
+  <tr><th>Prueba</th><th class="num">Casos</th><th>Estado</th></tr>
+  <tr><td>lama-limpieza <span class="pill p-inf">nueva</span></td><td class="num">39</td><td>🟢</td></tr>
+  <tr><td>lama-mesas</td><td class="num">36</td><td>🟢</td></tr>
+  <tr><td>lama-mover</td><td class="num">33</td><td>🟢</td></tr>
+  <tr><td>lama-cobrar</td><td class="num">32</td><td>🟢</td></tr>
+  <tr><td>lama-ancho</td><td class="num">26</td><td>🟢</td></tr>
+  <tr><td>lama-anular</td><td class="num">24</td><td>🟢</td></tr>
+  <tr><td>lama-parcial</td><td class="num">22</td><td>🟢</td></tr>
+  <tr><td>lama-descuento</td><td class="num">21</td><td>🟢</td></tr>
+  <tr><td>lama-buscador</td><td class="num">17</td><td>🟢</td></tr>
+  <tr><td>lama-precuenta</td><td class="num">13</td><td>🟢</td></tr>
+  <tr><td><b>Total Lama</b></td><td class="num"><b>263</b></td><td>🟢</td></tr>
+  <tr>
+    <td>estetica-no-rompio-nada</td><td class="num">4 mal</td>
+    <td>🟠 <b>deuda vieja de Stock.</b> Comprobada idéntica contra
+        <code>origin/master</code>: no la causó ningún cambio de estos días</td>
+  </tr>
+</table>
+
+<h2>3 · Lo que bloquea</h2>
+
+<table>
+  <tr><th>Le toca a</th><th>Qué</th><th>Qué desbloquea</th></tr>
+  <tr>
+    <td><span class="pill p-bad">Jhon</span></td>
+    <td><b>Pegar el SQL del tiempo real.</b> Están las 8 tablas apagadas</td>
+    <td>Que la app actualice sola. Sin esto, dos garzones sobre una mesa no se ven y el cliente recibe el pedido dos veces</td>
+  </tr>
+  <tr>
+    <td><span class="pill p-mid">Jhon</span></td>
+    <td>Desplegar las <b>11 Edge Functions</b> en el proyecto nuevo (Fase 4)</td>
+    <td>Los crons: la foto diaria del inventario y la limpieza</td>
+  </tr>
+  <tr>
+    <td><span class="pill p-mid">Jhon</span></td>
+    <td>Pasar las <b>3 preguntas del bloque H</b> del atlas por NotebookLM</td>
+    <td>F6 · el arqueo de caja, hoy bloqueado</td>
+  </tr>
+  <tr>
+    <td><span class="pill p-gris">Jhon</span></td>
+    <td>Aprobar la maqueta de <b>Mostrador</b> cuando exista</td>
+    <td>F4</td>
+  </tr>
+  <tr>
+    <td><span class="pill p-ok">Claude</span></td>
+    <td><b>F3 · las pantallas de configuración</b></td>
+    <td>Que Adriana cree medios de pago y motivos sin tocar la base</td>
+  </tr>
+</table>
+
+<div class="nota">
+  <b>La foto diaria del inventario no está corriendo</b>, y conviene tenerlo
+  presente: es la red de §0.6, la regla que salió del día que Angamos quedó en
+  cero. Hoy no muerde porque nadie usa esta copia para trabajar — pero depende
+  de la Fase 4, que está en tu lista.
+</div>
+
+<h2>4 · Las tres cosas de mañana</h2>
+<div class="caja tres">
+  <div class="u"><div class="n">1</div><div class="t">
+    <b>El SQL del tiempo real</b>
+    <span>Es de tu lado y toma un minuto. Hasta que no esté, cualquier cosa que
+    se construya de Lama se prueba a medias: el comportamiento entre dos
+    teléfonos no se puede ver.</span></div></div>
+  <div class="u"><div class="n">2</div><div class="t">
+    <b>F3 · configuración de Lama</b>
+    <span>Todo lo que necesitaba está resuelto: maqueta aprobada, opción A
+    elegida, las tres tablas ya existen en la base. Cero SQL.</span></div></div>
+  <div class="u"><div class="n">3</div><div class="t">
+    <b>La maqueta de Mostrador (F4)</b>
+    <span>Tiene un costo en la base que hay que decidir antes de escribir
+    código: <code>cuentas.mesa_id</code> es obligatorio, y en mostrador hay
+    muchas ventas a la vez. La maqueta es donde se elige.</span></div></div>
+</div>
+
+<h2>5 · Riesgos nuevos</h2>
+
+<table>
+  <tr><th>Riesgo</th><th>Qué pasa</th><th>Qué lo evita</th></tr>
+  <tr>
+    <td><span class="pill p-bad">🔴</span> <b>El tiempo real apagado</b></td>
+    <td>Dos garzones sobre la misma mesa no se ven. El segundo agrega lo que el primero ya agregó</td>
+    <td>El SQL pendiente</td>
+  </tr>
+  <tr>
+    <td><span class="pill p-mid">🟠</span> <b>Correos de personas ajenas en la base</b></td>
+    <td>Nueve cuentas del equipo de Café del Desierto viajaron en la copia. Hoy no pueden entrar —sólo tus dos cuentas existen en el autenticador— pero no pueden viajar a otro cliente</td>
+    <td>El <i>"limpiar antes de vender"</i>, anotado y sin ejecutar. Requisito previo a la primera venta, no de hoy</td>
+  </tr>
+  <tr>
+    <td><span class="pill p-mid">🟠</span> <b>Una tanda automática que se cuelgue preguntando</b></td>
+    <td>La rutina despierta, pregunta algo, y espera a alguien que está trabajando. Se pierde el turno entero</td>
+    <td>Las rutinas tienen dicho que prefieran lo que pueden terminar solas, y que si topan con una decisión tuya, publiquen lo hecho y la anoten acá</td>
+  </tr>
+</table>
+
+<div class="nota">
+  Sin riesgos previos que arrastrar: este es el primer informe.
+</div>
+
+<div class="pie">
+  Informe generado el 2026-09-04 · Llamita Plus · la receta está en
+  <code>docs/informe-diario.md</code>
+</div>
+
+</div>
+</body>
+</html>

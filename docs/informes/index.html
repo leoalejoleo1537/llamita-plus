@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Llamita Plus · informes diarios</title>
+<style>
+  :root{
+    --bg:#E9EEF5; --card:#FDFEFF; --text:#121E2C; --muted:#61707F;
+    --orange:#DC4405;
+    --green-bg:#E4F1E5; --green-fg:#2E7D32;
+    --amber-bg:#FDF0DE; --amber-fg:#9C6209;
+    --red-bg:#FCE9E6; --red-fg:#C0392B;
+    --sombra:0 2px 4px rgba(20,40,70,.04), 0 12px 26px -18px rgba(20,40,70,.34);
+    --linea:rgba(31,58,92,.085);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);line-height:1.5;
+       font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  .doc{max-width:640px;margin:0 auto;padding:22px 14px 60px}
+  h1{font-size:22px;margin:0 0 3px;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:13.5px;margin:0 0 22px}
+  .lista{background:var(--card);border-radius:18px;box-shadow:var(--sombra);overflow:hidden}
+  a.fila{display:flex;align-items:center;gap:12px;padding:14px 16px;
+         text-decoration:none;color:inherit}
+  a.fila + a.fila{border-top:1px solid var(--linea)}
+  a.fila:active{background:var(--bg)}
+  .fecha{flex:1;min-width:0}
+  .fecha b{display:block;font-size:15.5px}
+  .fecha span{font-size:13px;color:var(--muted)}
+  .sem{flex:0 0 auto;border-radius:999px;padding:4px 12px;font-size:12.5px;font-weight:800}
+  .s-ok{background:var(--green-bg);color:var(--green-fg)}
+  .s-mid{background:var(--amber-bg);color:var(--amber-fg)}
+  .s-bad{background:var(--red-bg);color:var(--red-fg)}
+  .pie{margin-top:22px;font-size:12.5px;color:var(--muted);padding:0 3px}
+</style>
+</head>
+<body>
+<div class="doc">
+  <h1>🦙 Informes diarios</h1>
+  <p class="sub">Uno por día, a las 01:00. El más nuevo arriba.</p>
+
+  <div class="lista">
+    <a class="fila" href="2026-09-04.html">
+      <span class="fecha">
+        <b>jueves 4 de septiembre</b>
+        <span>El primero · la copia queda visible y el panel de mesas se limpia</span>
+      </span>
+      <span class="sem s-mid">🟡</span>
+    </a>
+  </div>
+
+  <p class="pie">Qué dice cada informe y qué deliberadamente no dice, en
+    <code>docs/informe-diario.md</code>.</p>
+</div>
+</body>
+</html>

@@ -25,10 +25,116 @@
 
 ## Pendientes ahora
 
-### [ ] 1 · `sql/2026-09-plus-donde-estamos-parados.sql` — *no escribe nada, solo mira*
+### [ ] 1 · `sql/2026-09-plus-encender-tiempo-real.sql` — **lo más urgente que hay**
+
+> **Qué arregla, y no es un detalle de Lama: es media app.** Corriste la
+> radiografía y las ocho tablas dieron `NO`. O sea que **ahora mismo tu app no
+> actualiza nada sola**.
+
+Lo que hoy NO pasa, y debería:
+
+| | |
+|---|---|
+| El stock | no cambia solo en la lista cuando alguien vende |
+| Las fechas de los sándwiches | no se actualizan solas |
+| Un reparto que llega | no avisa |
+| **Dos teléfonos sobre la misma mesa** | **no se ven entre ellos** |
+
+El último es el que muerde: si el segundo garzón no ve lo que agregó el
+primero, **el cliente recibe el pedido dos veces**.
+
+**Por qué faltaba:** el respaldo copió la casa entera con los muebles adentro,
+pero no copió el cable del timbre. Todo está en su sitio; nadie se entera de
+nada.
+
+**Cómo se corre:** **2 bloques, uno por uno** (hay un tercero opcional). El
+primero enciende, el segundo comprueba.
+
+**Qué mirar:** en el bloque 2, las **seis** primeras tienen que decir `sí`.
+`mesas` y `comandas` van a decir `NO` y **está bien**: están apagadas a
+propósito, porque la app no las escucha y encender una tabla que nadie mira
+gasta cuota a cambio de nada.
+
+<details><summary>▶ Ver el SQL completo</summary>
+
+```sql
+-- ================================================================
+-- BLOQUE 1 — Encender el timbre
+-- ================================================================
+alter publication supabase_realtime add table public.productos;
+alter publication supabase_realtime add table public.producto_lotes;
+alter publication supabase_realtime add table public.repartos;
+alter publication supabase_realtime add table public.reparto_items;
+alter publication supabase_realtime add table public.cuentas;
+alter publication supabase_realtime add table public.cuenta_items;
+```
+
+```sql
+-- ================================================================
+-- BLOQUE 2 — Comprobar que quedó encendido
+-- QUÉ VER: las seis primeras en "sí". mesas y comandas en NO está BIEN.
+-- ================================================================
+select
+  t.tabla,
+  case when p.tablename is null then 'NO' else 'sí' end as en_vivo,
+  t.para_que
+from (values
+        ('productos',      'Stock · el número de stock cambia solo en la lista'),
+        ('producto_lotes', 'Stock · las fechas de los sándwiches'),
+        ('repartos',       'Stock · avisa que llegó un reparto'),
+        ('reparto_items',  'Stock · las líneas de ese reparto'),
+        ('cuentas',        'Lama · el color de la mesa y su total'),
+        ('cuenta_items',   'Lama · los productos de la mesa'),
+        ('mesas',          'Lama · APAGADA a propósito, nadie la escucha'),
+        ('comandas',       'Lama · APAGADA a propósito, nadie la escucha')
+     ) as t(tabla, para_que)
+left join pg_publication_tables p
+       on p.pubname    = 'supabase_realtime'
+      and p.schemaname = 'public'
+      and p.tablename  = t.tabla
+order by en_vivo desc, t.tabla;
+```
+
+```sql
+-- ================================================================
+-- BLOQUE 3 — (opcional) ¿tus dos cuentas ven el área de ventas?
+-- ================================================================
+select
+  correo,
+  case when puede_lama then 'sí' else 'NO' end as ve_lama
+from public.app_permisos
+where correo in ('leoalejoleo1@gmail.com', 'leoalejoleo12@gmail.com')
+order by correo;
+```
+
+</details>
+
+**Cómo se comprueba de verdad, después de correrlo:** abrí la app en **dos
+pestañas** del navegador sobre la misma mesa. Lo que agregues en una tiene que
+aparecer solo en la otra. Si no aparece, el SQL no quedó.
+
+---
+
+### [x] 2 · `sql/2026-09-plus-donde-estamos-parados.sql` — *no escribe nada, solo mira* · **corrido el 2026-09-04**
 
 > **Es una radiografía, no una operación.** Son dos `select`. No crea, no
 > borra, no modifica una sola fila. Se puede correr las veces que sea.
+
+> ### ✅ Lo que contestó, el 2026-09-04
+>
+> **Bloque 1 · las OCHO tablas dieron `NO`.** El tiempo real no viajó en el
+> respaldo, ni para Lama ni para Stock. De ahí sale el pendiente N°1 de arriba,
+> que es el arreglo.
+>
+> **Bloque 2 · nueve cuentas en `app_permisos`**, heredadas del respaldo — el
+> equipo de Café del Desierto incluido. Sólo `leoalejoleo12@gmail.com` tenía
+> `puede_lama`. Jhon se dio acceso a sus dos cuentas después de esta foto.
+>
+> ⚠️ **Y una cosa que conviene no perder de vista:** esos correos son de
+> personas reales de Café del Desierto. Hoy no pueden entrar —sólo las dos
+> cuentas de Jhon existen en el autenticador— pero **esas filas no pueden
+> viajar a otro cliente**. Es el *"limpiar antes de vender"* del plan de
+> separación, anotado y todavía sin ejecutar.
 
 **Por qué hace falta.** La base de Llamita Plus nació de un respaldo. Un
 respaldo copia la casa entera con los muebles adentro — pero **no copia el

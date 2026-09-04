@@ -1,8 +1,65 @@
-# Inventario Café del Desierto — Archivo Madre
+# Llamita Plus — Archivo Madre
 
 > **Para Claude:** este archivo se carga solo, entero, en cada sesión. Es el hilo
 > conductor del proyecto. Si algo que vas a hacer contradice lo que dice acá,
 > detente y confírmalo con Jhon antes.
+
+---
+
+## 🔱 QUÉ ES ESTA COPIA — se lee antes que nada
+
+**Este repositorio es `llamita-plus`, y es de Jhon.** Salió el 2026-09-02 de
+`inventario-mall-plaza` —la versión que usa Café del Desierto—, del commit
+`b4883c6`. Tiene su propia base de datos (`iuryhsjucblmebdogewa`) y **ninguna
+conexión con el sistema de ellos**.
+
+**El archivo se llamaba "Inventario Café del Desierto" y ya no lo es.** Buena
+parte de lo que sigue se escribió cuando esto era el sistema en producción de
+un café que trabajaba con él todos los días. Esa historia sigue valiendo —las
+reglas duras salieron de fallas reales y no se negocian— pero **hay que leerla
+sabiendo de dónde viene**.
+
+**Lo que cambia en esta copia, y es lo único que cambia:**
+
+| | Allá (Café del Desierto) | Acá (Llamita Plus) |
+|---|---|---|
+| Quién lo usa | el equipo, todos los días | **nadie todavía** |
+| Llamita Stock | producción intocable | **se puede tocar** (ver §0.9) |
+| Qué se construye | nada, está congelado | Llamita Lama, y lo que venga |
+
+⚠️ **`inventario-mall-plaza` no se toca nunca.** Ni un commit, ni un push, ni
+un `.sql`. Si alguna sesión tiene los dos repositorios abiertos, el otro va
+**solo de lectura**.
+
+### La política de divergencia — qué pasa cuando se arregla un bug de los dos
+
+*(Escrita el 2026-09-04, que es lo que pedía la Fase 7 del plan de separación.
+Se escribe ahora y no cuando duela.)*
+
+Desde la separación, **las dos versiones se van a ir separando**, y cada
+arreglo que toque código compartido obliga a una decisión. La regla:
+
+1. **Por defecto, un arreglo se queda SOLO acá.** Llamita Plus es el producto
+   vivo; el otro está congelado a propósito.
+2. **La única razón para avisarles es que el bug les esté haciendo daño
+   AHORA** — que corrompa datos, que pierda plata, o que rompa algo que el
+   equipo usa a diario. Un bug estético o de una pantalla que no usan, no.
+3. **Y avisar no es empujar.** Se le dice a Jhon *qué* pasa, *dónde*, y con
+   qué parche; él decide si se lo lleva a ellos y **lo pega él**. Esta sesión
+   nunca escribe en el repositorio de ellos.
+4. **Se anota en `docs/bitacora.md`** con una línea: qué se arregló, si aplica
+   a los dos, y qué se decidió. Sin eso, dentro de tres meses nadie va a saber
+   por qué las dos versiones difieren en ese punto.
+
+### Anotado y NO ejecutado: limpiar antes de vender
+
+La copia se trajo **datos reales de Café del Desierto**, incluidos los correos
+de nueve personas en `app_permisos`. Hoy eso es inofensivo —sólo las dos
+cuentas de Jhon existen en el autenticador— y **sirve para desarrollar contra
+una carta y precios de verdad**.
+
+**Pero no puede viajar a otro cliente.** Es requisito previo a la primera
+venta, no una tarea de hoy.
 
 ---
 
@@ -54,7 +111,7 @@ partió. Lo que quedó acá son **las reglas duras**, que sí se leen siempre.
 | **0.6** | **El día que Angamos quedó en cero** · saca la foto antes | **siempre, antes de escribir en una sede** |
 | **0.7** | **La bodega es `central`; `bodega` es la vieja** · y las 3 reglas de esta etapa | **siempre, mientras se trabaje en bodega** |
 | **0.8** | **Antes de poner un candado, seis preguntas** | **antes de hacer algo obligatorio** |
-| **0.9** | **NO SE TOCA Llamita Stock mientras se construye Lama** | **siempre, en el chat de Lama** |
+| **0.9** | **En esta copia, Stock SÍ se puede tocar** — reescrita el 2026-09-04 | **siempre, antes de tocar Stock** |
 | 1 | Qué es esto y para quién | contexto general |
 | 2 | Estética · paleta y formas | tocar la pantalla |
 | 2.0 | Que sea bella, no solo que funcione | tocar la pantalla |
@@ -1089,62 +1146,68 @@ excepción en vez de preguntarse si existe.
 
 ---
 
-## 0.9 REGLA DURA — LLAMITA STOCK NO SE TOCA mientras se construye LAMA
+## 0.9 REGLA — tocar Llamita Stock, en esta copia, SÍ se puede
 
-> Jhon, 2026-08-27, al abrir el chat que construye el área de ventas:
-> *"lo más importante es que no se toque nada de Llamita Stock."*
+> ⚠️ **REESCRITA EL 2026-09-04.** Esta sección decía *"NO SE TOCA Llamita Stock,
+> nada, sin matices"*, y era correcta cuando se escribió: entonces este código
+> era la producción de Café del Desierto y cualquier error caía sobre gente
+> trabajando. **Acá ya no.** La copia no la usa nadie todavía, y la versión de
+> ellos quedó congelada en otro repositorio que esta sesión ni siquiera tiene.
+>
+> Se deja el porqué escrito, y no sólo la regla nueva, porque **la regla vieja
+> estaba bien y hay que saber qué la desactivó** — no fue que dejara de
+> importar, fue que cambió de dueño el código.
 
-**El proyecto tiene ahora DOS mitades, y una está en producción.**
+### La regla nueva
 
-| | |
-|---|---|
-| **Llamita Stock** | el inventario. **Lo usa el equipo todos los días.** Terminado y funcionando |
-| **Llamita Lama** | el área de ventas —mesas y comandas—. **En construcción, escondida** |
+> **En Llamita Plus, Stock se puede tocar.** No hace falta pedir permiso para
+> arreglar un bug de Stock, mover una función o mejorar una pantalla del
+> inventario.
 
-### La regla, y no admite matices
+Ya pasó y estuvo bien: el 2026-09-03 la barra de pestañas —que es Stock puro—
+cambió para que la casita del hogar lleve a Mesas.
 
-> **Mientras se construya Lama, no se toca NADA de Stock.** Ni una pantalla,
-> ni una función, ni una tabla, ni un `.sql` que ya corrió. Nada.
+### Las tres cosas que la regla vieja protegía y siguen valiendo
 
-Eso incluye lo que parece inofensivo: renombrar una variable, mover una
-función de sitio, "aprovechar y arreglar" algo que se ve mal al pasar.
-**Un cambio que no se pidió es un riesgo que nadie aceptó.**
+Que se pueda tocar no significa que dé lo mismo. Lo que sobrevive:
 
-### Por qué es tan dura, y no es paranoia
+1. **Un cambio que no se pidió sigue siendo un riesgo que nadie aceptó.** No
+   se "aprovecha y arregla" algo que se ve mal al pasar: se anota y se
+   pregunta. Lo que cambió es que ahora la respuesta puede ser que sí.
+2. **La batería se compara contra una línea base.** Antes servía para probar
+   que Lama no había tocado Stock; ahora sirve para probar que **el cambio de
+   Stock hizo lo que decía y nada más**. Sacar un `git worktree` de
+   `origin/master`, correr la batería en los dos, y comparar. Decir "no rompí
+   nada" es una intención; comparar dos corridas es un dato.
+3. **Los datos siguen siendo sagrados.** §0.2 (nunca negativo), §0.4 (un
+   perecedero entra por fechas), §0.6 (la foto antes de escribir en una sede)
+   **no se relajan ni un poco**. Esas reglas protegen el inventario, no la
+   producción de nadie.
 
-Es la lección de §0.6 llevada a su forma general. El 9 de agosto Angamos
-quedó en cero porque se escribió sobre una sede viva sin red. Acá el riesgo
-es el mismo con otra cara: **Stock está en producción y Lama no**. Si algo se
-rompe mientras se construye lo nuevo, el daño cae sobre gente que está
-trabajando, y encima nadie sabría cuál de los dos lo causó.
+### Lo que sigue prohibido, y esto no cambió
 
-Y hay una razón de método: **si Stock no se toca, cualquier cosa que falle
-en Stock NO puede ser culpa de este chat.** Eso es lo que hace que el trabajo
-sea diagnosticable. En el momento que Lama edite algo de Stock, esa certeza
-se pierde para siempre.
+- **`inventario-mall-plaza` no se toca.** Ver la sección de arriba.
+- **Correr un `.sql` en la base de ellos.** No hay ninguna razón para hacerlo
+  y esta sesión no tiene cómo.
+- **Los cuatro `.sql` con la URL vieja** ya fueron corregidos y llevan su
+  advertencia arriba. Se leen antes de correrlos.
 
-### Lo que SÍ se puede tocar
+### Las conexiones entre Stock y Lama SIGUEN yendo al final
 
-- `sql/2026-08-lama-*.sql` y cualquier `.sql` nuevo de Lama.
-- Las tablas de Lama: `mesas`, `cuentas`, `cuenta_items`, `comandas`.
-- En `index.html`, **solo** lo que está dentro de la vista `view-lama` y las
-  funciones que empiezan por `lama`.
-- `pruebas/lama-*.mjs`.
-- Esta sección del archivo madre, para anotar lo que se aprenda.
+> Jhon: *"las conexiones no las vamos a hacer hasta que el proyecto esté
+> totalmente acabado."*
 
-### Los cuatro puntos donde Lama TOCA la app de Stock, y por qué no cuentan
+**Esto no lo cambia la separación.** Que cerrar una mesa descuente el
+inventario es la razón de fondo del proyecto y aun así va última (es la **F7**
+de la ruta de `docs/LAMA.md`), con interruptor (§2.2), y sólo cuando las
+comandas sean confiables.
 
-Estos ya están escritos y **no se vuelven a modificar**:
+**Y la razón ya no es el miedo a romperle el día a alguien: es de método.**
+Hoy Lama **no toca el stock**, y eso es lo que permite abrir y cerrar mesas
+veinte veces mientras se prueba sin descuadrar nada. El día que se conecten,
+esa libertad se acaba.
 
-| Dónde | Qué hace | Por qué es seguro |
-|---|---|---|
-| la pestaña `tabLama` | un botón más en la barra | nace `display:none` |
-| `TITULOS.lama` | el subtítulo | una entrada en un mapa |
-| `pickTab` / `pickSede` | muestra y esconde `view-lama` | una línea cada uno, junto a las demás |
-| `permisosDeLaSede` | lee `puede_lama` | un campo más, `false` si no existe |
-
-Si Lama necesitara **otro** enganche en Stock, eso **se pregunta primero**.
-No se agrega y se avisa después.
+Lo mismo vale para escribirle a Fudo desde Lama y para leer recetas.
 
 ### Las conexiones entre Stock y Lama van AL FINAL
 
