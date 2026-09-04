@@ -897,7 +897,77 @@ mientras está abierto, y cómo se cierra. ¿Puede haber más de uno abierto a l
 vez, y qué pasa con las ventas de un turno que aún no se abre arqueo?
 ```
 
-⬜ PENDIENTE
+⬜ El **arqueo de caja** es el proceso que unifica los turnos contables y de auditoría de tesorería del restaurante, permitiendo controlar detalladamente todo el dinero en efectivo y los cupones electrónicos que entran y salen durante una jornada de trabajo. 
+
+A continuación, se detalla de forma minuciosa cada fase de su ciclo de vida, las reglas lógicas que lo rigen y las respuestas a las inquietudes operativas planteadas.
+
+---
+
+### **1. Apertura del Arqueo de Caja (Inicio del Turno)**
+
+La apertura debe realizarse de manera obligatoria **antes de registrar la primera venta del turno** para evitar inconsistencias en el balance. El paso a paso para abrirlo es el siguiente:
+
+1.  **Navegación:** Se ingresa al módulo de **Ventas > Arqueos de Caja**. *(Existen atajos rápidos: un botón de acceso directo desde la pestaña general de Ventas o una alerta visual en el módulo de Restaurante que avisa si no hay cajas abiertas en el momento).*
+2.  **Creación:** Se hace clic en el botón **"+ Nuevo Arqueo"**.
+3.  **Verificación Temporal:** Se comprueba que la fecha y la hora propuestas por el sistema sean correctas.
+4.  **Establecimiento del Fondo:** Se completa el campo **"Monto inicial"** indicando la cantidad exacta de dinero físico en efectivo con la que se arranca el turno (fondo de cambio).
+5.  **Selección de Caja:** Si el local cuenta con múltiples cajas registradoras creadas en el sistema, se debe desplegar el selector y elegir de forma precisa a cuál de ellas corresponde la apertura.
+6.  **Inicialización:** Se hace clic en **"Iniciar Arqueo"**.
+
+Al completarse, el sistema activa un **chip de estado** visual (indicando "Abierto") y despliega una **barra informativa** en la parte superior con los datos clave del arqueo activo (estado, hora de inicio y usuario responsable).
+
+---
+
+### **2. Transcurso del Arqueo (Operación Diaria)**
+
+Mientras el arqueo permanece en estado **"ABIERTO"**, el sistema registra y calcula transaccionalmente el dinero en efectivo que fluye físicamente por el local utilizando una ecuación matemática determinista:
+
+\\[E_{\text{esperado}} = E_{\text{inicial}} + \sum V_{\text{efectivo}} + \sum I_{\text{manuales}} - \sum E_{\text{manuales}} - \sum G_{\text{efectivo}} - \sum P_{\text{retiradas}}\\]
+
+Los eventos que impactan y lo que ocurre durante esta fase son:
+
+*   **Ventas de Salón, Mostrador y Delivery (\\(V_{\text{efectivo}}\\)):** Toda venta que se cobre utilizando el medio de pago "Efectivo" suma de forma automática en el arqueo. Sin embargo, **solo las ventas cerradas (cobradas) impactan en el arqueo**; los pedidos que se mantengan abiertos en salón o mostrador no se reflejan en el balance contable del turno activo.
+*   **Movimientos Extraordinarios de Caja (\\(I_{\text{manuales}}\\) / \\(E_{\text{manuales}}\\)):** Los flujos de efectivo que no provienen de ventas ni gastos (como agregar más billetes sencillos para cambio o hacer un retiro de seguridad por exceso de efectivo) se registran a través de la sección **"Movimientos de caja"**. Un ingreso manual incrementa el balance en tiempo real, mientras que un egreso manual lo disminuye.
+*   **Gastos de Proveedores (\\(G_{\text{efectivo}}\\)):** Si se paga a un proveedor de insumos utilizando dinero directo de la caja registradora, el gasto debe cargarse con la casilla **"Usar en arqueo"** marcada de forma explícita. De lo contrario, el sistema no restará ese dinero del cálculo final de efectivo esperado.
+*   **Tratamiento de Medios No Efectivos:** Los cobros procesados por tarjetas de débito/crédito, transferencias o Mercado Pago tienen un **impacto nulo en el efectivo del arqueo**. No obstante, se registran y acumulan digitalmente en pestañas independientes (como "Fudo Pagos") para que el cajero pueda conciliar y validar al cierre la sumatoria de sus cupones físicos frente al reporte del software.
+*   **Cuentas Corrientes de Clientes (Cta. Cte.):** Una venta cerrada bajo "Cta. Cte." no impacta en el arqueo activo al momento del consumo (puesto que es un pago diferido). El dinero **únicamente impactará en el arqueo del turno en curso cuando el cliente se acerque físicamente a abonar** su saldo pendiente y se registre la cobranza en efectivo.
+
+---
+
+### **3. Cierre del Arqueo de Caja (Finalización de Turno)**
+
+Al concluir el turno de trabajo, se debe proceder con la liquidación e informe de montos contados mediante los siguientes pasos:
+
+1.  **Acceso:** Se ingresa a **Ventas > Arqueos de Caja** y se selecciona el arqueo abierto.
+2.  **Lectura del Sistema:** El usuario visualiza la columna **"Según sistema"**, que refleja el saldo contable e ingresos que el software calculó de forma automatizada basándose en las operaciones cerradas en el transcurso del tiempo.
+3.  **Conteo Físico y Declaración:** El cajero realiza el recuento manual de todo el dinero en efectivo que hay en el cajón físico y de los comprobantes de cobro electrónico. Dichos montos contados se escriben manualmente en el apartado **"Según usuario"** para cada medio de pago correspondiente.
+4.  **Comentarios:** Se puede añadir una aclaración o justificación en caso de ser necesario (por ejemplo, si ocurrió algún imprevisto).
+5.  **Cierre Definitivo:** Se hace clic en **"Finalizar Arqueo"**.
+
+#### **Consecuencias del Cierre:**
+*   **Inmutabilidad Financiera:** Una vez cerrado, **el arqueo no puede volver a abrirse bajo ninguna circunstancia**. El sistema bloquea de manera estricta cualquier intento de insertar, actualizar o eliminar pagos, gastos o movimientos cuyas marcas de tiempo correspondan a la franja del arqueo finalizado. Cualquier corrección posterior requiere asentar un ajuste manual en el arqueo activo del turno nuevo.
+*   **Cálculo de Desviaciones:** Fudo calcula la diferencia de caja (`efectivo_declarado - efectivo_sistema`). Si lo declarado por el usuario es mayor, el desfase se asienta en color **verde como un sobrante**; si es menor, se marca en **rojo como un faltante**.
+*   **Impresión de Resumen:** Es posible hacer clic en **"Imprimir Arqueo"** para que la tiquetera física asignada al control de mesas emita un ticket físico resumido del turno.
+*   **Envío Automatizado (Plan Pro):** Si está activa la opción en *Administración > Preferencias > Arqueos de caja*, el sistema envía de manera automática un reporte detallado del arqueo por correo electrónico al administrador apenas se concreta el cierre.
+
+#### **Variante: Arqueo de Caja Ciego**
+Para evitar que los cajeros fuercen el cuadre de caja basándose en lo que dice el software, un administrador puede quitar los permisos de *"Ver 'Según Sistema' en arqueo abierto/cerrado"* en su rol. El cajero solo visualizará los campos vacíos de **"Según usuario"**. Además, se puede configurar en la sección de *Medios de pago* que los importes digitales de tarjetas se autocompleten para eliminar la necesidad de contar manualmente transacciones electrónicas al cierre, aplicando la declaración manual únicamente al efectivo físico.
+
+---
+
+### **¿Puede haber más de un arqueo de caja abierto a la vez?**
+
+**Sí, es perfectamente posible.** Fudo permite la creación y operación simultánea de múltiples terminales físicas o puntos de caja dentro de un mismo restaurante. En locales con varias estaciones independientes (por ejemplo, barra, salón principal y mostrador de delivery), cada estación puede operar bajo una **"Caja"** distinta configurada en el sistema. Al iniciar la jornada, cada cajero abre un arqueo independiente seleccionando la caja específica que le ha sido asignada, permitiendo que se ejecuten y controlen múltiples arqueos abiertos de forma paralela en el mismo período de tiempo.
+
+---
+
+### **¿Qué pasa con las ventas de un turno donde aún no se ha abierto el arqueo?**
+
+Si el personal comienza a operar y procesar transacciones antes de inaugurar formalmente el arqueo en la plataforma de Fudo, ocurre lo siguiente:
+
+*   **Registro en el Sistema:** Las ventas se guardan y procesan normalmente en la base de datos general del restaurante; los pedidos se imprimen en cocina, se emiten facturas y se descargan los ingredientes del stock.
+*   **Exclusión del Arqueo de Caja:** Las ventas cobradas durante el período en que no hubo un arqueo abierto **quedarán fuera del arqueo de caja posterior**. Cuando finalmente se abra el arqueo del turno, su saldo acumulado reflejará un faltante enorme o una discrepancia insalvable al momento del cierre, dado que esos flujos ocurrieron en un "vacío" de auditoría de caja.
+*   **Mecanismo de Solución (Apertura Retrospectiva):** Fudo incorpora una opción de contingencia para corregir esta omisión operativa. Si se olvidó abrir la caja al iniciar la jornada, el usuario puede abrir un nuevo arqueo **modificando manualmente la fecha y hora de apertura a un momento anterior** (por ejemplo, ajustando el horario de inicio a las 08:00 A.M. en lugar de las 09:30 A.M. en que se dio cuenta). Al hacerlo retrospectivamente, el sistema jalará y consolidará todas las ventas y cobros cobrados en esa franja horaria pasada para que impacten correctamente dentro del arqueo y no se generen diferencias contables.
 
 ### H2 · Cuando el efectivo no cuadra
 
@@ -907,7 +977,48 @@ calculó? ¿Qué pasa si sobra plata y qué pasa si falta? ¿Eso queda registrad
 en algún lado que un administrador pueda revisar después?
 ```
 
-⬜ PENDIENTE
+⬜ Al cerrar un arqueo de caja en Fudo, el sistema realiza una auditoría transaccional comparando de manera directa los valores teóricos registrados en el software con los valores reales declarados por el cajero.
+
+A continuación, se detalla el funcionamiento de esta comparación, el tratamiento de las discrepancias y las herramientas de revisión para el administrador.
+
+---
+
+### **Comparación entre el efectivo contado y el calculado por el sistema**
+
+El sistema contrasta dos columnas principales al momento del cierre:
+
+1. **"Según sistema" (Efectivo calculado):** Es la sumatoria teórica que el backend calcula en tiempo real basándose en la siguiente fórmula de balance:
+   \\[\text{Efectivo esperado} = \text{Monto inicial} + \sum \text{Ventas en efectivo} + \sum \text{Ingresos manuales} - \sum \text{Egresos manuales} - \sum \text{Gastos en efectivo (usar en arqueo)} - \sum \text{Propinas retiradas}\\]
+2. **"Según usuario" (Efectivo contado):** Es el valor numérico que el cajero debe ingresar de manera obligatoria en la interfaz tras realizar el conteo físico del dinero en el cajón de efectivo.
+
+| Variable de Comparación | Según Sistema | Según Usuario |
+| :--- | :--- | :--- |
+| **Origen de los datos** | Cálculo automático del sistema basado en los flujos financieros de las ventas cerradas, movimientos de caja y gastos aplicados en el turno. | Introducción manual de los montos contados físicamente por el cajero (billetes, monedas y comprobantes electrónicos). |
+| **Visibilidad del cajero** | Visible por defecto. Se oculta por completo si el administrador activa la función de **"Arqueo de caja ciego"** para evitar que el personal fuerce o "escuadre" la caja de manera artificial. | Siempre visible y editable para que el usuario declare la existencia física de los valores. |
+
+---
+
+### **¿Qué pasa si sobra o falta plata?**
+
+La diferencia se calcula mediante una resta determinista:
+\\[\text{Diferencia} = \text{Efectivo Declarado ("Según usuario")} - \text{Efectivo Estimado ("Según sistema")}\\]
+
+Cualquier desviación contable queda asentada bajo la siguiente lógica de estados:
+
+| Tipo de Desviación | Condición Matemática | Visualización en Pantalla | Acción / Corrección en el Sistema |
+| :--- | :--- | :--- | :--- |
+| **Sobrante (Sobra plata)** | El efectivo declarado es **mayor** al efectivo del sistema (`declarado > sistema`). | Se visualiza la diferencia en **color verde**. | Al ser una discrepancia registrada, el dinero extra no se borra. Si el arqueo ya se cerró, queda congelado y requiere un movimiento manual o ajuste explícito en el siguiente arqueo abierto para regularizarlo. |
+| **Faltante (Falta plata)** | El efectivo declarado es **menor** al efectivo del sistema (`declarado < sistema`). | Se visualiza la diferencia en **color rojo**. | Registra una pérdida o descuadre operativo. El sistema no permite modificar de manera retrospectiva los datos del arqueo cerrado; la pérdida debe subsanarse con un asiento de ajuste de caja en el turno activo. |
+
+---
+
+### **¿Dónde queda registrado para la revisión del Administrador?**
+
+El administrador dispone de múltiples canales de auditoría integrados para controlar estas diferencias:
+
+* **Sección "Arqueos de Caja" (Historial inmutable):** Todos los arqueos finalizados quedan registrados en la base de datos bajo el estado `CERRADO`. Fudo aplica una **regla de inmutabilidad financiera estricta**: el backend deniega cualquier petición de inserción, actualización o eliminación de pagos, movimientos o gastos correspondientes a la franja horaria de un arqueo cerrado. El administrador puede ingresar a **Ventas > Arqueos de Caja**, seleccionar cualquier turno pasado y auditar las columnas de diferencias y comentarios del cajero.
+* **Reporte automatizado por correo electrónico (Plan Pro):** Si está activa la opción en *Administración > Preferencias > Arqueos de caja > Enviar resumen por mail*, el sistema despacha de manera automática un correo detallado al administrador en el instante exacto en que el cajero presiona "Finalizar Arqueo". Este correo electrónico incluye exactamente la misma información que el comprobante de cierre físico, detallando el estado final de las diferencias de caja.
+* **Reportes Gráficos de Balance:** Las desviaciones y el saldo neto de caja impactan directamente en las gráficas de ingresos del módulo de **Indicadores > Balance**, permitiendo evaluar la evolución de los faltantes o sobrantes a lo largo del tiempo de forma diaria, semanal o mensual.
 
 ### H3 · El arqueo "ciego"
 
@@ -916,7 +1027,43 @@ en algún lado que un administrador pueda revisar después?
 no vería en un arqueo normal? ¿Para qué lo usan los locales que lo activan?
 ```
 
-⬜ PENDIENTE
+⬜ El **arqueo de caja ciego** (o *blind close*) es una herramienta de control y auditoría diseñada para garantizar la transparencia y la honestidad en el proceso de cierre de turno de un comercio. Su función principal es **ocultar la información financiera calculada por el software** para que el cajero deba declarar únicamente lo que cuenta de manera física.
+
+### **¿Quién lo activa y cómo se configura?**
+La activación y gestión del arqueo ciego la realiza un **usuario administrador o superusuario** desde el panel de control del restaurante. 
+
+La configuración se realiza de la siguiente manera:
+1. Se ingresa a la sección de **Administración > Roles de usuario**.
+2. Se selecciona el rol que se desea restringir (por ejemplo, el rol de "Cajero").
+3. Se desactivan de forma explícita dos permisos del rol: **"Ver 'Según Sistema' en arqueo abierto"** y **"Ver 'Según Sistema' en arqueo cerrado"**.
+
+*(Nota: Esta funcionalidad está disponible para las cuentas con los planes Avanzado y Pro de Fudo).*
+
+Además, el administrador puede coordinar esto con la configuración en **Administración > Medios de pago**, eligiendo qué cuentas requieren que se complete su saldo de forma manual y cuáles no. Por ejemplo, se puede desactivar la opción **"Completar saldo manualmente"** para los medios de pago electrónicos. De esta manera, al realizar un arqueo ciego, los saldos digitales de tarjetas se autocompletarán solos en el formulario del cajero, evitando que tenga que contar cupones de forma obligatoria, aplicando la declaración manual únicamente al dinero en efectivo.
+
+---
+
+### **Diferencias de visualización: Arqueo Normal vs. Arqueo Ciego**
+
+A continuación, se detalla qué ve y qué no ve el cajero en la pantalla de arqueos bajo cada modalidad:
+
+| Elemento / Sección | Visualización en un Arqueo Normal | Visualización en un Arqueo Ciego |
+| :--- | :--- | :--- |
+| **Columna "Según Sistema" (\\(E_{\text{esperado}}\\))** | **Visible.** Muestra en tiempo real la sumatoria teórica de todos los ingresos en efectivo, cobros electrónicos, movimientos manuales de caja y gastos registrados en el sistema. | **Oculta por completo.** El cajero no tiene acceso a ninguna cifra de dinero calculada o esperada por el software, tanto con el arqueo abierto como una vez que se cierra. |
+| **Formulario de Declaración ("Según Usuario")** | **Visible.** Muestra los campos para que el usuario ingrese lo que cuenta de forma física. | **Visible.** Se presenta como un **formulario de declaración vacío** donde el cajero debe tipear de forma obligatoria cada denominación de billete, moneda o comprobante físico. |
+| **Diferencias de Caja (Desviación)** | **Visible en tiempo real.** Muestra de inmediato si hay un faltante (en color rojo) o un sobrante (en color verde) comparando el conteo con el sistema. | **Oculta.** El cajero no sabe si la caja "cuadra" o si tiene diferencias antes de presionar el botón de cierre final. |
+| **Modificaciones de registros de turno** | **Bloqueadas tras el cierre.** Una vez que se cierra el arqueo, no se pueden realizar modificaciones retrospectivas. | **Bloqueadas tras el cierre.** El arqueo se guarda de forma persistente e inmutable (estado `CERRADO`) sin posibilidad de cambios futuros por parte del cajero. |
+
+---
+
+### **¿Para qué lo usan los locales que lo activan?**
+
+Los restaurantes y comercios gastronómicos activan el arqueo ciego por varias razones operacionales y de seguridad clave:
+
+*   **Evitar el "cuadre forzoso" de caja:** Cuando un cajero tiene visibilidad del dinero que el sistema calcula ("Según sistema"), existe la tentación de ajustar o "forzar" artificialmente el conteo físico para que coincida exactamente con el software. El arqueo ciego elimina este hábito, obligando al empleado a declarar únicamente lo que hay en existencia real.
+*   **Garantizar la honestidad y prevenir fraudes:** Al no saber cuánto dinero debería haber teóricamente en la caja registradora, es sumamente difícil ocultar mermas, retiros no autorizados de efectivo o manejos indebidos de dinero.
+*   **Auditorías precisas y directas:** En el momento exacto en que el cajero declara el conteo físico y hace clic en **"Finalizar Arqueo"**, la base de datos relacional calcula de manera interna e inalterable la discrepancia real (`efectivo_declarado - efectivo_sistema`). 
+*   **Notificación de control inmediata para los dueños:** Al completarse el cierre ciego, el sistema genera de forma automática un reporte detallado del turno con el balance final y lo envía directamente por correo electrónico al administrador del negocio (en cuentas Plan Pro), permitiéndole revisar desviaciones sin tener que estar físicamente en el local.
 
 > Fudo ya reveló solo (E1, D6) que existe el concepto de "sobrante de caja en
 > verde" y de declarar el efectivo a mano cuando el arqueo es ciego. Estas tres
