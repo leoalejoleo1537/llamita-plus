@@ -55,6 +55,13 @@
     /* las sombras del aire: dos capas, una fina para despegar y otra muy
        difusa para dar profundidad sin dibujar un borde */
     --sombra:0 2px 4px rgba(20,40,70,.04), 0 12px 26px -18px rgba(20,40,70,.34);
+    /* LA LÍNEA TENUE (2026-09-03, pedido de Jhon para el panel de mesas).
+       "Nada de recuadros con rebordes: la línea debe ser muy tenue, casi
+       imperceptible". No reemplaza a la sombra —las filas del inventario
+       siguen separándose con sombra—: es para cuando apilar tarjetas dentro
+       de tarjetas desperdicia espacio, que es lo que pasaba en el panel de la
+       mesa. Una raya que se nota es un reborde; esta apenas se intuye. */
+    --linea:rgba(31,58,92,.085);
     --r-card:20px; --r-sec:18px;
   }
   *{box-sizing:border-box}
@@ -689,8 +696,23 @@
      el tono fuerte de fondo en vez del suave. */
   /* EL RIEL. En el telefono, una sola columna angosta que hace scroll. En
      computador se abre en cuadricula, que es donde el plano se lee como plano. */
+  /* ⚠️ EL AIRE DE ADENTRO NO ES DECORACIÓN: ES LO QUE DEJA VER EL RESPLANDOR.
+     La mesa elegida se enciende con un halo (`box-shadow`), y una sombra se
+     dibuja FUERA del botón. Este contenedor hace scroll, y un contenedor que
+     hace scroll RECORTA todo lo que se salga de él — además, al pedir
+     `overflow-y:auto` el navegador vuelve `auto` también el eje horizontal,
+     así que recortaba por los cuatro lados.
+
+     Jhon lo describió exacto: *"el neón parece que se corta, como si su luz
+     estuviera detrás de paredes"*. Eran paredes de verdad: los bordes del
+     riel. Sin padding, el halo nace pegado al filo y muere ahí.
+
+     Los números salen de medir el halo, no de tantear: `0 0 0 5px` pide 5 px
+     por lado, y `0 8px 24px -6px` pide 6 a los lados y 14 abajo (blur/2 más
+     spread, más el desplazamiento). Con 8 y 16 sobra un poco a propósito. */
   .lama-mesas{display:grid;grid-template-columns:1fr;gap:7px;
-    max-height:74vh;overflow-y:auto;padding-right:2px;-webkit-overflow-scrolling:touch}
+    max-height:74vh;overflow-y:auto;padding:6px 8px 16px;
+    -webkit-overflow-scrolling:touch}
   /* EL TAMAÑO DE LAS MESAS, y por qué es una variable.
 
      Un `repeat(4,1fr)` reparte el ancho que haya entre cuatro columnas, así
@@ -767,7 +789,23 @@
     font-size:12.5px;font-weight:700;padding:6px 11px;border-radius:8px;cursor:pointer}
   .lama-banda button:active{transform:scale(.95)}
 
-  /* EL PANEL DE LA CUENTA */
+  /* EL PANEL DE LA CUENTA — UN RECUADRO, NO UNA PILA DE TARJETAS.
+     ---------------------------------------------------------------------
+     Hasta el 2026-09-03 esto era una tarjeta con sombra, y adentro cada línea
+     era OTRA tarjeta con su sombra, su radio y su margen — y lo pendiente iba
+     en una tercera. Tres niveles de tarjeta anidada, y cada uno cobra su
+     peaje: 8 px de margen, 13 px de padding y un radio por cada nivel. En un
+     teléfono eso es media pantalla gastada en dibujar bordes de cosas que ya
+     estaban claramente separadas.
+
+     Jhon: *"siento que estamos perdiendo mucho espacio… nada de recuadros con
+     rebordes, la línea debe ser muy tenue casi imperceptible"*.
+
+     Entonces: UN recuadro, y adentro filas separadas por `--linea`. La sombra
+     se queda sólo en el borde exterior, que es lo que despega el panel del
+     fondo de la app. Esto NO cambia la regla del inventario (§DECISIONES-
+     ESTETICA: "filas sin borde, lo que separa es la sombra"): ahí las filas
+     son tarjetas sueltas sobre el fondo, acá van dentro de un contenedor. */
   .lama-caja{background:var(--card);border:none;border-radius:var(--r-card);
     box-shadow:var(--sombra);overflow:visible;position:relative}
   .lama-cab{background:var(--red-fg);color:#fff;padding:13px 15px;display:flex;align-items:center;
@@ -827,11 +865,25 @@
   .lama-menu button[disabled]:hover{background:none}
 
   /* UNA LÍNEA = UN RENGLÓN (la regla que salió del área de reparto). */
-  /* Cada linea es una tarjeta con sombra, no una fila separada por una raya.
-     Es la regla de docs/DECISIONES-ESTETICA.md: "Filas: sin borde. Lo que
-     separa es la sombra". */
-  .lama-linea{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;margin-bottom:8px;
-    background:var(--card);border-radius:14px;box-shadow:var(--sombra)}
+  /* 2026-09-03 · DEJÓ DE SER UNA TARJETA. Antes cada línea traía fondo, radio,
+     sombra y 8 px de margen, y estando ya dentro del recuadro del panel eso
+     era una tarjeta adentro de otra: el doble de aire para separar cosas que
+     nadie estaba confundiendo. Ahora es una fila, y lo que la separa de la
+     siguiente es `--linea`, casi imperceptible.
+
+     ⚠️ LA RAYA VA ENTRE DOS FILAS, NO DEBAJO DE CADA UNA, y la diferencia no
+     es de estilo. El primer intento fue `border-bottom` en todas más un
+     `:last-child` que se la quitaba a la última — y no funcionaba dentro del
+     bloque ámbar, porque ahí la última fila NO es el último hijo: después
+     viene "Total a confirmar", que ya trae su propia línea arriba. Resultado:
+     dos rayas pegadas justo donde tenía que haber una.
+
+     Con el selector de hermano adyacente la raya sólo existe cuando hay una
+     fila ANTES, que es exactamente lo que significa "separar". No sobra al
+     final ni falta al principio, y da igual qué venga antes o después del
+     grupo. */
+  .lama-linea{display:flex;align-items:flex-start;gap:10px;padding:10px 2px}
+  .lama-linea + .lama-linea{border-top:1px solid var(--linea)}
   .lama-linea .nm{flex:1;min-width:0}
   /* EL NOMBRE SE LEE ENTERO, SIEMPRE. Antes era `nowrap` con puntos
      suspensivos y un nombre largo quedaba en "Selladito jamón que…". Ahora
@@ -997,15 +1049,26 @@
      botones. Separarlo de lo ya confirmado es lo que evita mandar de más —
      mezclado en una sola lista hay que ir línea por línea para saber qué
      falta. */
-  .lama-pend{background:var(--amber-bg);border:none;border-radius:16px;box-shadow:var(--sombra);
-    padding:13px 14px;margin-bottom:14px}
+  /* 2026-09-03 · SIN SOMBRA Y CON MENOS PADDING. El ámbar ya dice "esto es
+     otra cosa"; la sombra encima lo convertía en una tarjeta dentro de la
+     tarjeta del panel. El color hace el trabajo solo. */
+  .lama-pend{background:var(--amber-bg);border:none;border-radius:14px;
+    padding:10px 12px;margin-bottom:12px}
   .lama-pend h4{margin:0 0 2px;font-size:13px;font-weight:800;letter-spacing:.4px;
     text-transform:uppercase;color:var(--amber-fg)}
-  .lama-pend .lama-linea{background:var(--card)}
-  .lama-pend .tot{display:flex;justify-content:space-between;align-items:center;
-    margin-top:2px;padding:12px 2px 2px;
+  /* Dentro del ámbar la raya se aclara: la de la app se perdería. */
+  .lama-pend .lama-linea + .lama-linea{border-top-color:rgba(156,98,9,.16)}
+  /* ⚠️ ESTA CLASE SE LLAMABA `tot` Y ERA UN BUG, no una decisión de diseño.
+     `.tot` ya existía en Llamita Stock para las píldoras de conteo por sección
+     (`background:--gray-bg; border-radius:999px`), así que "Total a confirmar"
+     heredaba una CÁPSULA GRIS que nadie había elegido. Jhon lo vio primero:
+     *"las píldoras sirven para aislar; acá no tiene sentido aislar el precio"*.
+     Renombrada a `lama-tot` — y de paso, un nombre con prefijo no se puede
+     volver a chocar con Stock. */
+  .lama-pend .lama-tot{display:flex;justify-content:space-between;align-items:center;
+    margin-top:2px;padding:11px 2px 2px;
     font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;
-    box-shadow:0 -9px 12px -13px rgba(178,106,0,.85)}
+    border-top:1px solid rgba(156,98,9,.18)}
 
   /* LA CANASTA VACÍA. Fudo la usa y el equipo ya la reconoce: dice "acá no hay
      nada todavía" sin una sola palabra técnica. Se dibuja en SVG con el color
@@ -1027,6 +1090,11 @@
     border-radius:999px;padding:2px;background:var(--bg);box-shadow:0 0 0 3px rgba(220,68,5,.13)}
   .lama-prod .paso span{width:28px;height:28px;border-radius:50%;display:flex;
     align-items:center;justify-content:center;font-size:17px;font-weight:800;color:var(--orange)}
+  /* EN 1, EL MENOS ES UN BASURERO: lo que sigue no es restar, es sacarlo del
+     pedido. Rojo, porque en esta app el rojo es lo que quita — igual que en el
+     carrito y en el reparto, que ya usan este mismo dibujo. */
+  .lama-prod .paso span.is-trash{color:var(--red-fg)}
+  .lama-prod .paso span.is-trash svg{width:15px;height:15px;display:block}
   .lama-prod .paso b{min-width:22px;text-align:center;font-size:14.5px;font-weight:800;
     font-variant-numeric:tabular-nums}
 
@@ -2283,9 +2351,26 @@
 <div class="tabs">
   <div class="inner">
     <span class="tab-carril" id="tabCarril" aria-hidden="true"></span>
-    <button class="tab tab-icon active" data-tab="inv" aria-label="Inventario" title="Inventario">
+    <!-- ⌂ EL HOGAR DE LA APP ES MESAS (Jhon, 2026-09-03).
+         Hasta hoy esta casita llevaba al inventario, porque el inventario era
+         la app entera. Con Llamita Lama adentro eso dejó de ser cierto: lo
+         primero que abre alguien que está trabajando en el salón es el plano
+         de mesas, no la lista de stock. Fudo hace lo mismo — su pantalla de
+         inicio es el mapa del salón.
+
+         Es la MISMA pestaña de Lama, no una segunda puerta: por eso conserva
+         el id `tabLama` y toda la lógica del permiso sigue igual. Lo único
+         que cambió es que ya no dice "Mesas" en texto al final de la barra,
+         sino que es la casita del principio.
+
+         Y como nace escondida, cuando no hay permiso —o en Bodega, que no
+         vende— la barra empieza directamente en "Inventario". No queda un
+         hueco: queda lo de antes, con el inventario de primero. -->
+    <button class="tab tab-icon" data-tab="lama" id="tabLama" aria-label="Mesas" title="Mesas" style="display:none">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5.5 10v9a1 1 0 0 0 1 1H10v-6h4v6h3.5a1 1 0 0 0 1-1v-9"></path></svg>
     </button>
+    <!-- El inventario pasa a ser una sección más, como Reparto o Recetas. -->
+    <button class="tab active" data-tab="inv" id="tabInv">Inventario</button>
     <button class="tab" data-tab="reparto">Reparto <span class="tab-badge" id="repBadge" style="display:none"></span></button>
     <button class="tab" data-tab="recetas">Recetas</button>
     <!-- solo en Bodega, igual que la franja de crítico -->
@@ -2303,14 +2388,16 @@
          producto al revés. Por eso el nombre dice a dónde va. -->
     <button class="tab" data-tab="aplaza" id="tabAPlaza" style="display:none">A Mall Plaza</button>
     <button class="tab" data-tab="enlaces" id="tabEnlaces" style="display:none">Enlaces</button>
-    <!-- LLAMITA LAMA · el área de ventas, en construcción.
-         Nace escondida y solo la ve quien tenga `puede_lama` en app_permisos
-         —hoy una sola cuenta—. Jhon: "si algo falla aquí, podríamos perder o
-         entorpecer todo un día de ventas, necesito trabajar tranquilo".
+    <!-- LLAMITA LAMA · el área de ventas.
+         ACÁ IBA SU PESTAÑA DE TEXTO, y se mudó al principio de la barra
+         convertida en la casita del hogar (2026-09-03). Sigue siendo un solo
+         botón con el id `tabLama`: nace escondida y solo la ve quien tenga
+         `puede_lama` en app_permisos. Dejar dos puertas a la misma pantalla
+         —una casita y una pestaña "Mesas"— habría sido ofrecer dos veces lo
+         mismo en una barra que ya hace scroll.
          Ojo con qué es esto y qué no: es un seguro contra el resbalón, NO
          seguridad (§6.1). Quien abra las herramientas del navegador ve el
          código igual. Para que el equipo no la vea ni la pida, alcanza. -->
-    <button class="tab" data-tab="lama" id="tabLama" style="display:none">Mesas</button>
   </div>
 </div>
 
@@ -3126,6 +3213,12 @@ const SEDES = {
 const TITULOS = {inv:'Inventario', reparto:'Reparto', recepcion:'Lo que llega a bodega', envios:'Enviar a los locales', aplaza:'Enviar a Mall Plaza', hist:'Historial', recetas:'Recetas', mermas:'Mermas', enlaces:'Enlaces', lama:'Mesas', ajustes:'Ajustes'};
 let SEDE = null;
 let channel = null;
+/* Lo pide pickSede() y lo cumple aplicarPermisos(): "abrí en el hogar, que
+   ahora es Mesas". Vive acá arriba, con el estado de la app, y no abajo con
+   el resto de las variables de Lama, porque las dos funciones que lo usan
+   están en esta parte del archivo — una variable declarada 1.700 líneas
+   después de donde se usa funciona por accidente, no por diseño. */
+let LAMA_ATERRIZAR = false;
 
 let DATA = [];
 let filterState = null;
@@ -3447,8 +3540,20 @@ function aplicarPermisos(){
      corre al final de pickSede—, y si se decidiera allá la pestaña no
      aparecería hasta cambiar de sede. */
   const tl = $('tabLama');
-  if(tl) tl.style.display = (PERMISOS.puede_lama && SEDE && SEDE !== 'central') ? '' : 'none';
+  const hayLama = !!(PERMISOS.puede_lama && SEDE && SEDE !== 'central');
+  if(tl) tl.style.display = hayLama ? '' : 'none';
   if(!PERMISOS.puede_lama && vistaActual === 'lama') pickTab('inv');
+
+  /* EL ATERRIZAJE EN EL HOGAR. pickSede pidió abrir en el hogar, pero allá
+     todavía no se sabía si esta cuenta tiene Mesas; acá sí. Se cumple una
+     sola vez y solo si el garzón sigue donde lo dejó pickSede —en el
+     inventario, sin haber tocado nada—: si ya se movió a otra pestaña
+     mientras llegaban los permisos, mandarlo a Mesas sería quitarle la
+     pantalla de las manos. */
+  if(LAMA_ATERRIZAR){
+    LAMA_ATERRIZAR = false;
+    if(hayLama && vistaActual === 'inv') pickTab('lama');
+  }
 
   // si le quitaron el permiso con la pantalla abierta, se sale de ella
   if(!PERMISOS.puede_ajustes && vistaActual === 'ajustes') pickTab('inv');
@@ -3863,6 +3968,13 @@ function pickSede(s){
      permiso no llega o la lectura falla, lo que queda es escondida — que es
      el lado seguro del error. */
   $('tabLama').style.display      = 'none';
+  /* Y se pide aterrizar en el hogar. Lo cumple aplicarPermisos() cuando sepa
+     si esta cuenta tiene Mesas — acá todavía no se sabe. Es un permiso de UNA
+     sola vez, y por eso es una bandera y no una condición: cargarPermisos()
+     también corre al volver a la pestaña del navegador y al reconectar, y sin
+     la bandera cada una de esas veces arrastraría al garzón de vuelta a Mesas
+     estando en mitad de otra pantalla. */
+  LAMA_ATERRIZAR = true;
   document.querySelector('.tab[data-tab="reparto"]').style.display = s==='central' ? 'none' : '';
   MERMAS=[]; ENLACES=[]; SEDE_PROD={};
   repcCarritos={plaza:[],angamos:[]}; repcAbiertos={plaza:[],angamos:[]};
@@ -5592,6 +5704,25 @@ const ICONO_IMPRESORA =
   '<path d="M6 8V3h8v5"/><path d="M6 14H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2"/>' +
   '<rect x="6" y="12" width="8" height="5" rx="1"/></svg>';
 
+/* EL LÁPIZ, y por qué también se dibuja.
+   ---------------------------------------------------------------------------
+   Era el carácter `✎` (U+270E), y al lado del % y de la impresora se veía
+   diminuto — Jhon: *"su símbolo es muy pequeño, agrándalo al tamaño de sus
+   compañeros"*. Medido: el botón tenía EXACTAMENTE el mismo tamaño y la misma
+   `font-size` que el del %. El que era chico no era el botón: era el dibujo
+   que la tipografía del sistema le da a ese carácter, que ocupa como la mitad
+   de su caja y con un trazo más fino.
+
+   Subirle la `font-size` habría sido perseguir el síntoma: cada teléfono
+   dibuja ese carácter distinto, así que el número correcto en uno queda mal
+   en otro. Un SVG con el mismo `stroke-width` que la impresora pesa igual en
+   todas partes — que es la misma razón por la que la impresora no es un emoji. */
+const ICONO_LAPIZ =
+  '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" ' +
+  'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+  '<path d="M13.4 3.6a1.9 1.9 0 0 1 2.7 2.7L7.5 14.9l-3.5.9.9-3.5z"/>' +
+  '<path d="M12.2 4.8l3 3"/></svg>';
+
 const lamaCuentaDe = mesaId => LAMA_CUENTAS.find(c => c.mesa_id === mesaId) || null;
 const lamaMesaDe   = id     => LAMA_MESAS.find(m => m.id === id) || null;
 const plata = n => '$' + Math.round(+n || 0).toLocaleString('es-CL');
@@ -5918,7 +6049,15 @@ function lamaLinea(i){
      línea. Para cambiar la cantidad se toca la fila —se abre la ventana del
      producto, con cantidad y comentario juntos— y para sumar otro de algo que
      YA salió a la cocina está el buscador o su píldora, que crea la línea
-     nueva pendiente como manda C7. */
+     nueva pendiente como manda C7.
+
+     2026-09-03 · SE FUE EL "+ comentario" DE DEBAJO DEL NOMBRE. Estaba en
+     TODAS las líneas, tuvieran comentario o no, y era una invitación repetida
+     a algo que ya se ofrece tocando el producto. Doce productos en una mesa
+     eran doce "+ comentario" grises diciendo lo mismo. Cuando el comentario
+     existe SÍ se muestra —es lo que lee la cocina, y va en ámbar—; cuando no
+     existe, no hay nada que decir. Es §2.1: si hay que escribirlo en la
+     pantalla, es que el gesto ya estaba resuelto en otra parte. */
   return `<div class="lama-linea${anu ? ' anulada' : ''}">
     <span class="q">${fmt(i.cantidad)}</span>
     <div class="nm"${anu ? '' : ` data-lamaprod="${i.id}"`}>
@@ -5926,8 +6065,7 @@ function lamaLinea(i){
       ${anu
         ? `<span class="lama-motivo">${esc(lamaMotivoAnuNom(i.anulado_motivo))}${
             i.anulado_comentario ? ` <span class="det">· ${esc(i.anulado_comentario)}</span>` : ''}</span>`
-        : `<span class="${i.comentario ? 'con' : ''}"
-             >${i.comentario ? esc(i.comentario) : '+ comentario'}</span>`}
+        : (i.comentario ? `<span class="con">${esc(i.comentario)}</span>` : '')}
     </div>
     <span class="precio">${plata((+i.cantidad||0)*(+i.precio||0))}</span>
     ${anu ? '<span class="x" aria-hidden="true"></span>'
@@ -6023,7 +6161,7 @@ function lamaPintarPanel(){
   const pendiente = nuevos.length ? `<div class="lama-pend">
       <h4>Pendiente</h4>
       ${nuevos.map(lamaLinea).join('')}
-      <div class="tot"><span>Total a confirmar</span><span>${plata(totalNuevo)}</span></div>
+      <div class="lama-tot"><span>Total a confirmar</span><span>${plata(totalNuevo)}</span></div>
       <div class="lama-acc">
         <!-- C10 · ACÁ IBA "Cancelar", que borraba TODO lo pendiente de un
              golpe. Se sacó el 2026-09-01: la mesa no se vacía de una. Si hay
@@ -6127,7 +6265,8 @@ function lamaPintarPanel(){
           LAMA_ITEMS.length ? '' : ' disabled'}>Mover productos</button>
       </div>` : '';
   const btnLapiz = `<button type="button" data-lamaacc="menu" title="Mover la mesa o sus productos"
-              aria-haspopup="true" aria-expanded="${LAMA_MENU?'true':'false'}">✎</button>`;
+              aria-label="Mover la mesa o sus productos"
+              aria-haspopup="true" aria-expanded="${LAMA_MENU?'true':'false'}">${ICONO_LAPIZ}</button>`;
   /* La impresora: era un ✓ de "listo", que no decía lo que hace. Y es un
      interruptor: si la mesa ya está azul, la devuelve a roja. */
   const btnImpr = `<button type="button" data-lamaacc="precuenta" class="${cobrando ? 'on' : ''}"
@@ -6215,14 +6354,25 @@ function lamaCanasta(texto, boton){
    otra vez el mismo producto y confiar en que estaba sumando. */
 function lamaFilaCarta(p, puestos){
   const n = puestos[p.nombre] || 0;
+  /* EN 1, EL MENOS SE VUELVE UN BASURERO. Pedido de Jhon (2026-09-03): restar
+     de 2 a 1 y restar de 1 a 0 se ven idénticos, y no son lo mismo — el
+     segundo BORRA el producto del pedido. Un símbolo que no distingue entre
+     "uno menos" y "sacalo" hace que la diferencia se descubra después de
+     apretarlo.
+
+     No se inventa nada: `TRASH_SVG` y la clase `is-trash` ya son la
+     convención de esta casa, del carrito y del reparto. Copiarla es gratis y
+     además significa lo mismo en las cuatro pantallas. */
+  const uno = n > 0 && lamaMenosBorra(p.nombre);
   return `<button type="button" class="lama-prod${n?' puesto':''}"
             data-lamaadd="${esc(p.fudo_product_id)}">
     <span class="nm">${esc(p.nombre)}</span>
     <span class="pr">${plata(p.precio)}</span>
     ${n ? `<span class="paso">
-        <span data-lamacartamenos="${esc(p.nombre)}">−</span>
+        <span class="${uno?'is-trash':''}" data-lamacartamenos="${esc(p.nombre)}"
+              aria-label="${uno?'Quitar del pedido':'Uno menos'}">${uno?TRASH_SVG:'−'}</span>
         <b>${fmt(n)}</b>
-        <span data-lamacartamas="${esc(p.fudo_product_id)}">+</span>
+        <span data-lamacartamas="${esc(p.fudo_product_id)}" aria-label="Uno más">+</span>
       </span>`
       : '<span class="mas">+</span>'}
   </button>`;
@@ -6296,6 +6446,31 @@ function lamaPuestos(){
   const p = {};
   for(const i of LAMA_ITEMS) p[i.nombre] = (p[i.nombre] || 0) + (+i.cantidad || 0);
   return p;
+}
+
+/* SOBRE QUÉ LÍNEA ACTÚA EL − DE LA CARTA.
+   ---------------------------------------------------------------------------
+   Prefiere la ÚLTIMA que todavía no salió a la cocina; si ya salieron todas,
+   cae en la última que haya. Esto lo decidía el manejador del clic, y ahora
+   vive acá porque lo necesita también quien DIBUJA la fila: para saber si ese
+   − va a borrar (y entonces mostrar el basurero) hay que saber sobre qué
+   línea va a caer. Dos copias de esta regla se habrían separado la primera
+   vez que alguien tocara una — es la misma razón por la que el descuento
+   tiene un solo dueño. */
+function lamaBlancoDelMenos(nombre){
+  const rev = [...LAMA_ITEMS].reverse();
+  return rev.find(x => x.nombre === nombre && x.estado === 'nuevo')
+      || rev.find(x => x.nombre === nombre)
+      || null;
+}
+
+/* ¿Ese − borra el producto, o solo resta uno? Borra cuando la línea sobre la
+   que va a caer todavía no salió a la cocina y le queda una sola unidad. Si ya
+   salió, el − lleva a ANULAR —que pide motivo y deja rastro—, y eso no es un
+   basurero: es otra conversación. */
+function lamaMenosBorra(nombre){
+  const it = lamaBlancoDelMenos(nombre);
+  return !!it && it.estado === 'nuevo' && !lamaEstaAnulado(it) && (+it.cantidad || 0) <= 1;
 }
 
 function lamaListaCarta(){
@@ -7785,9 +7960,10 @@ $('view-lama').addEventListener('click', async e => {
      salieron todas, no hay nada que corregir desde acá. */
   const cm = e.target.closest('[data-lamacartamenos]');
   if(cm){
-    const nombre = cm.dataset.lamacartamenos;
-    const it = [...LAMA_ITEMS].reverse().find(x => x.nombre === nombre && x.estado === 'nuevo')
-            || [...LAMA_ITEMS].reverse().find(x => x.nombre === nombre);
+    /* La misma función que decide si acá se dibuja un basurero o un −. Si esto
+       eligiera una línea distinta de la que miró el dibujo, el basurero
+       estaría prometiendo algo que no va a pasar. */
+    const it = lamaBlancoDelMenos(cm.dataset.lamacartamenos);
     if(it) await lamaCantidad(it.id, -1);
     return;
   }

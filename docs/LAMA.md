@@ -92,6 +92,98 @@ menú **que ya está abierto** es mejor: comprueba que al cambiar de ancho **se
 mudó** de abajo a la cabecera **sin duplicarse**, que es lo único que este
 diseño no puede permitirse.
 
+### LA LIMPIEZA DEL 3 DE SEPTIEMBRE — siete correcciones, y el hogar cambia de dueño
+
+> Todas salieron de Jhon **usando la app desplegada en su teléfono**, no de
+> leer código. Es el mismo argumento del 31 de agosto, y sigue siendo el más
+> rentable que tiene el proyecto.
+
+**Prueba: `pruebas/lama-limpieza.mjs`, 39 casos**, probada en las dos
+direcciones — contra el código viejo da **26 rojas**, y cada una nombra el
+defecto exacto.
+
+#### ⌂ EL HOGAR DE LA APP AHORA ES MESAS
+
+La casita de la barra llevaba al inventario, porque el inventario **era** la
+app. Con Lama adentro eso dejó de ser cierto: quien está en el salón abre el
+plano de mesas, no la lista de stock. Fudo hace lo mismo.
+
+Es **la misma pestaña de Lama**, mudada al principio y convertida en casita —
+conserva el id `tabLama` y toda la lógica del permiso intacta. La pestaña de
+texto "Mesas" del final **se fue**: dos puertas a la misma pantalla, en una
+barra que ya hace scroll, es ofrecer dos veces lo mismo. El inventario pasó a
+ser una pestaña con su nombre, como Reparto o Recetas.
+
+⚠️ **Y apagado no deja un hueco (§2.2):** sin `puede_lama` —o en Bodega, que no
+vende— la casita no está y **la barra empieza en "Inventario"**, que es donde
+abre la app. Hay tres pruebas dedicadas sólo a eso.
+
+**El aterrizaje se cumple UNA vez.** `pickSede` levanta la bandera
+`LAMA_ATERRIZAR` y `aplicarPermisos` la baja, porque en `pickSede` todavía no
+se sabe si esta cuenta tiene Mesas. Tiene que ser una bandera y no una
+condición: `cargarPermisos()` también corre al volver a la pestaña del
+navegador y al reconectar, y sin ella cada una de esas veces arrastraría al
+garzón de vuelta a Mesas estando en mitad de otra pantalla.
+
+#### Las otras seis
+
+| Estaba mal | Cómo quedó |
+|---|---|
+| **"+ comentario" debajo de CADA producto**, tuviera comentario o no | Fuera. Doce productos eran doce invitaciones grises a algo que ya se ofrece tocando el producto (§2.1). El comentario escrito **sí** se sigue viendo, en ámbar: es lo que lee la cocina |
+| **"Total a confirmar" dentro de una cápsula gris** | Sin cápsula. Ver abajo, porque la causa no era de diseño |
+| **El lápiz ✎ se veía diminuto** al lado del % y la impresora | Pasó a SVG con el mismo trazo que la impresora |
+| **Tarjetas dentro de tarjetas** en el panel de la mesa | Un recuadro, y adentro filas separadas por `--linea`. El detalle está en `DECISIONES-ESTETICA.md` |
+| **El resplandor de la mesa elegida salía cortado** | El riel tenía `overflow` sin aire. Ver abajo |
+| **El `−` de la carta borraba el producto sin avisar** | En 1, y sólo cuando de verdad va a borrar, es un **basurero** |
+
+#### ⚠️ La cápsula del total NO era una decisión de diseño: era una colisión
+
+`.tot` **ya existía en Llamita Stock** para las píldoras de conteo por sección
+(`background:--gray-bg; border-radius:999px`). Lama nombró `tot` a su total y
+heredó una cápsula que nadie eligió. Jhon lo leyó bien mirándola: *"las
+píldoras sirven para aislar; acá no tiene sentido aislar el precio"*.
+
+Renombrada a **`lama-tot`**, y ahí está la lección que sobrevive al caso: **en
+un archivo de 14.000 líneas con un solo espacio de nombres, una clase sin
+prefijo es una colisión esperando fecha.** Hay una prueba que falla si alguien
+la devuelve a `tot` — porque el día que pase, la cápsula gris vuelve sola y sin
+que nadie haya tocado una línea de CSS.
+
+#### ⚠️ El neón cortado: eran paredes de verdad
+
+Jhon: *"parece que se corta, como si su luz estuviera detrás de paredes"*.
+**Eran paredes**: el riel de mesas hace scroll, y un contenedor que hace scroll
+recorta todo lo que se salga. Además, al pedir `overflow-y:auto` el navegador
+vuelve `auto` también el eje horizontal, así que recortaba por los cuatro
+lados. El halo tenía **0 px de aire a la izquierda**, medido.
+
+El arreglo son tres números de padding, **sacados de medir el halo y no de
+tantear**: `0 0 0 5px` pide 5 px por lado y `0 8px 24px -6px` pide 6 a los
+lados y 14 abajo. La prueba comprueba las dos mitades — que el aire alcance
+**y** que el resplandor siga existiendo, porque apagarlo también habría hecho
+desaparecer el recorte.
+
+#### El basurero sólo aparece cuando de verdad va a borrar
+
+En 1, el `−` no resta: **borra**. Un símbolo que no distingue "uno menos" de
+"sacalo" hace que la diferencia se descubra después de apretarlo. `TRASH_SVG` y
+la clase `is-trash` ya eran la convención de la casa —el carrito y el reparto
+las usan—, así que no se inventó nada.
+
+**Pero el basurero no aparece siempre que haya 1.** Si esa línea **ya salió a
+la cocina**, el `−` no borra: lleva a **anular**, que pide motivo y deja
+rastro. Prometer un basurero ahí sería prometer algo que no va a pasar. Lo
+decide `lamaMenosBorra()`, y **el dibujo y el clic preguntan a la misma
+función** (`lamaBlancoDelMenos`) — antes esa regla vivía sólo en el manejador
+del clic, y dos copias se habrían separado la primera vez que alguien tocara
+una. Es lo mismo que ya pasó con el descuento y con `lamaPropinaAlDia`.
+
+#### La decisión de las mesas: **opción A**
+
+Jhon eligió **reordenar en la grilla**, no el plano con coordenadas. Queda
+cerrado y no se vuelve a proponer: con 12 mesas en un salón, un plano con
+coordenadas es trabajo caro que se disfruta una vez.
+
 ### LA LÍNEA DEL TELÉFONO, COMO LA DE FUDO — 2026-09-02
 
 > Jhon, mirando Fudo y Lama lado a lado: *"lo que me importa es que se pueda

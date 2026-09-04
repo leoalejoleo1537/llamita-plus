@@ -12,12 +12,50 @@
 | **Barra** | **Clara**. El navy no desapareció: se mudó al texto |
 | **Título** | **La sede**, en grande. "Inventario" pasó abajo y en chico |
 | **Secciones** | **Tarjeta con filo** azul a la izquierda. El azul vuelve como señal, no como superficie |
-| **Filas** | Sin borde. Lo que separa es la sombra |
+| **Filas** | Sin borde. Lo que separa es la sombra — **salvo dentro de un contenedor**, ver abajo |
 | **Botón ⟳** | Pastilla plana que dice **Actualizar**, con el pulso. Sin relieve y sin neón |
 | **Pestañas** | El naranja **viaja** en vez de saltar |
 | **Turnos AM/PM** | Ya no son una caja gris: solo el rótulo. Envolver tarjetas en un recuadro devolvía el encajonado |
 | **Animaciones** | Filas escalonadas al abrir · el número late cuando el stock cambia solo |
 | **El "+"** | Ofrece crear desde Bodega, enlazado. Preguntando, no saltando solo |
+
+---
+
+## LA LÍNEA TENUE — el matiz que apareció el 2026-09-03
+
+> Jhon, mirando el panel de mesas en su teléfono: *"siento que estamos
+> perdiendo mucho espacio al tener la información de la mesa en una especie de
+> tarjeta… pasemos mejor a que la info esté en un recuadro. Mi regla es **nada
+> de recuadros con rebordes**: la línea debe ser muy tenue, casi
+> imperceptible."*
+
+**Esto no deroga la regla de arriba, la acota.** Las dos conviven, y lo que
+decide cuál aplica es **si la fila está suelta o adentro de algo**:
+
+| Dónde | Qué separa | Por qué |
+|---|---|---|
+| Filas **sueltas sobre el fondo** — la lista del inventario | **la sombra** | la sombra es lo que las despega del gris de la app |
+| Filas **dentro de un contenedor** — el panel de una mesa | **`--linea`** | ahí ya hay un borde exterior; otra tarjeta adentro es un marco dentro de un marco |
+
+**El problema concreto que lo destapó** fue el panel de la mesa: era una
+tarjeta, adentro cada producto era otra tarjeta, y lo pendiente una tercera.
+**Tres niveles de tarjeta anidada**, y cada nivel cobra su peaje en margen,
+padding y radio. En un teléfono eso es media pantalla gastada en dibujar la
+separación de cosas que nadie estaba confundiendo.
+
+El token es **`--linea: rgba(31,58,92,.085)`**. La prueba de que está bien
+calibrado es que hay que buscarla para verla: si se nota, es un reborde, y los
+rebordes están prohibidos desde el primer día.
+
+**Y una regla de cómo se dibuja, que costó una vuelta:** la raya va **entre**
+dos filas (`.fila + .fila{border-top}`), no debajo de cada una. Con
+`border-bottom` más un `:last-child` que se la quita a la última, basta con que
+después del grupo venga cualquier otra cosa —un total, un botón— para que la
+última fila sí sea la última visualmente pero **no** el último hijo, y queden
+dos rayas pegadas. El selector de hermano adyacente dice literalmente "hay una
+fila antes", que es lo que significa separar.
+
+---
 
 **Probado con `pruebas/estetica-no-rompio-nada.mjs`**, que existe por lo que
 Jhon pidió cuidar: *"espero esto no genere bugs en la barra de búsqueda ni en
