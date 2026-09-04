@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Propuesta · Mostrador (F4)</title>
+<style>
+  :root{
+    --navy:#0F1E31; --navy2:#16283F;
+    --orange:#DC4405; --orange-dark:#B93A04;
+    --bg:#E9EEF5; --card:#FDFEFF; --border:#D6DFEB;
+    --text:#121E2C; --muted:#61707F;
+    --red-bg:#FCE9E6; --red-fg:#C0392B;
+    --green-bg:#E4F1E5; --green-fg:#2E7D32;
+    --amber-bg:#FDF0DE; --amber-fg:#9C6209;
+    --gray-bg:#E1E8F1; --gray-fg:#54677D;
+    --azul-bg:#E8F0FB; --azul-fg:#2C5AA0;
+    --sec-bg:#D0DDEC; --sec-tx:#1F3A5C; --sec-line:rgba(31,58,92,.22);
+    --sec-filo:#41628C;
+    --sombra:0 2px 4px rgba(20,40,70,.04), 0 12px 26px -18px rgba(20,40,70,.34);
+    --r-card:20px; --r-sec:18px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+       background:var(--bg);color:var(--text);line-height:1.5}
+  .doc{max-width:1080px;margin:0 auto;padding:22px 16px 80px}
+
+  h1{font-size:26px;margin:0 0 4px;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 26px}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:.06em;
+     color:var(--sec-tx);background:var(--sec-bg);border-left:4px solid var(--sec-filo);
+     padding:9px 14px;border-radius:0 var(--r-sec) var(--r-sec) 0;margin:38px 0 16px}
+  h3{font-size:16px;margin:26px 0 8px}
+  p{margin:0 0 12px}
+  .nota{background:var(--card);border:1px solid var(--border);border-radius:14px;
+        padding:14px 16px;margin:0 0 18px;box-shadow:var(--sombra)}
+  .nota.ojo{background:var(--amber-bg);border-color:rgba(156,98,9,.28)}
+  .nota.si{background:var(--green-bg);border-color:rgba(46,125,50,.28)}
+  .nota.no{background:var(--red-bg);border-color:rgba(192,57,43,.28)}
+  .nota b{color:var(--text)}
+  code{background:var(--gray-bg);border-radius:5px;padding:1px 5px;font-size:.9em}
+
+  .marco{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);
+         box-shadow:var(--sombra);overflow:hidden;margin:0 0 10px}
+  .marco-tit{background:var(--navy);color:#fff;font-size:12px;letter-spacing:.05em;
+             text-transform:uppercase;padding:8px 14px;display:flex;
+             justify-content:space-between;align-items:center}
+  .marco-tit span{opacity:.62;text-transform:none;letter-spacing:0;font-size:11px}
+  .lienzo{padding:16px;background:var(--bg)}
+  .pie-marco{font-size:13px;color:var(--muted);margin:0 0 26px;padding:0 4px}
+
+  /* la franja Salón | Mostrador, igual que la de salones de la app */
+  .salones{display:flex;gap:6px;margin:0 0 14px}
+  .salones button{background:var(--card);border:1px solid var(--border);color:var(--muted);
+    border-radius:999px;padding:8px 18px;font-size:14px;font-weight:700;cursor:default}
+  .salones button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+
+  /* el plano, con los mismos cuadrados de la app */
+  .plano{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:7px;
+         padding:6px 8px 16px}
+  .mesa{aspect-ratio:1;border-radius:var(--r-sec);display:flex;flex-direction:column;
+        align-items:center;justify-content:center;gap:3px;font-weight:800;font-size:22px}
+  .mesa .r{font-size:11px;font-weight:700;opacity:.85;letter-spacing:.03em}
+  .mesa.libre{background:var(--green-bg);color:var(--green-fg)}
+  .mesa.ocupada{background:var(--red-fg);color:#fff}
+  .mesa.cobrando{background:var(--azul-fg);color:#fff}
+  .mesa.nueva{background:var(--card);border:1px dashed var(--border);color:var(--orange);font-size:30px}
+  .mesa.sel{box-shadow:0 0 0 5px rgba(220,68,5,.16), 0 8px 24px -6px rgba(220,68,5,.7)}
+
+  table{width:100%;table-layout:fixed;border-collapse:collapse;background:var(--card);
+        border:1px solid var(--border);border-radius:14px;overflow:hidden;
+        box-shadow:var(--sombra);margin:0 0 18px;font-size:14px}
+  th{background:var(--sec-bg);color:var(--sec-tx);text-align:left;padding:10px 13px;
+     font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+  td{padding:10px 13px;border-top:1px solid var(--border);vertical-align:top}
+  td code,.op code{overflow-wrap:anywhere}
+  th:first-child{width:38%}
+  table.pasos th:nth-child(1){width:15%}
+  table.pasos th:nth-child(3){width:26%}
+  td.si{color:var(--green-fg);font-weight:700}
+  td.no{color:var(--red-fg);font-weight:700}
+
+  .pregunta{background:var(--azul-bg);border:1px solid rgba(44,90,160,.28);
+            border-radius:14px;padding:16px 18px;margin:0 0 16px}
+  .pregunta h4{margin:0 0 8px;font-size:16px;color:var(--azul-fg)}
+  .op{background:#fff;border:1px solid var(--border);border-radius:11px;
+      padding:11px 13px;margin:8px 0 0;font-size:14px}
+  .op b{color:var(--azul-fg)}
+  .op.gana{border-color:rgba(46,125,50,.45);background:var(--green-bg)}
+  .marca{background:var(--azul-bg);color:var(--azul-fg);border-radius:999px;
+         padding:3px 10px;font-size:12px;font-weight:700;display:inline-block}
+  .marca.ok{background:var(--green-bg);color:var(--green-fg)}
+  .marca.mal{background:var(--red-bg);color:var(--red-fg)}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>Mostrador</h1>
+<p class="sub">La <b>F4</b> de la ruta · maqueta para aprobar antes de escribir código (§0.7) · 2026-09-04</p>
+
+<div class="nota">
+  <p style="margin:0"><b>Qué resuelve.</b> Un café para llevar no es una mesa.
+  Hoy, para cobrarlo, habría que abrir una mesa falsa, escribirle el consumo y
+  cerrarla — y esa mesa falsa después aparece en el plano, en el arqueo y en las
+  estadísticas como si alguien se hubiera sentado.</p>
+</div>
+
+<div class="nota ojo">
+  <p style="margin:0 0 8px"><b>Esto no es solo pantalla, y por eso hay maqueta.</b>
+  <code>cuentas.mesa_id</code> es <code>not null references mesas(id)</code>, y
+  encima está el candado <code>cuentas_una_viva_por_mesa</code>: <b>una sola
+  cuenta abierta por mesa</b>. Ese candado es correcto para el salón —dos cuentas
+  en la misma mesa significa que alguien va a pagar lo de otro— y es justamente
+  lo que <b>no</b> sirve en el mostrador, donde hay cinco pedidos a la vez.</p>
+  <p style="margin:0">Entonces la pregunta de verdad no es cómo se ve la
+  pantalla: es <b>qué le hacemos a ese candado</b>. Va primero.</p>
+</div>
+
+<h2>1 · La decisión de la base — dos caminos</h2>
+
+<div class="pregunta">
+  <h4>¿Cómo entra al sistema una venta que no tiene mesa?</h4>
+
+  <div class="op">
+    <b>Camino B · una mesa especial «Mostrador» por sede.</b> No se toca ni una
+    columna: se crea una fila en <code>mesas</code> llamada Mostrador y las
+    ventas de mostrador van ahí.
+    <p style="margin:8px 0 0"><span class="marca mal">se rompe solo</span>
+    El candado permite <b>una</b> cuenta viva por mesa. Con una sola mesa
+    Mostrador, el segundo cliente que llega mientras el primero no ha pagado
+    <b>no puede ser atendido</b>. La salida sería crear ocho mesas
+    «Mostrador 1…8» — que es exactamente la mesa falsa que esta fase viene a
+    eliminar, multiplicada por ocho, y encima ensucia el plano del salón.</p>
+  </div>
+
+  <div class="op gana">
+    <b>Camino A · <code>mesa_id</code> puede quedar vacío.</b> Una cuenta de
+    mostrador es una cuenta sin mesa. El candado se reescribe para que mire
+    <b>solo las cuentas que sí tienen mesa</b>:
+    <p style="margin:8px 0 0"><code>… on cuentas(mesa_id) where estado &lt;&gt; 'cerrada' and mesa_id is not null</code></p>
+    <p style="margin:8px 0 0"><span class="marca ok">recomendado</span>
+    El salón conserva su candado intacto —una cuenta viva por mesa, igual que
+    hoy— y el mostrador queda libre de tener las que haga falta. Ninguna mesa
+    inventada aparece en ningún lado.</p>
+  </div>
+</div>
+
+<h3>Lo que cuesta el camino A, dicho antes y no después</h3>
+
+<table>
+  <tr><th>Qué se toca</th><th>Qué pasa</th></tr>
+  <tr>
+    <td><code>alter column mesa_id drop not null</code></td>
+    <td>Es reversible mientras no haya ninguna cuenta sin mesa. Después ya no, y
+    eso hay que saberlo: es un cambio de ida.</td>
+  </tr>
+  <tr>
+    <td>El índice <code>cuentas_una_viva_por_mesa</code></td>
+    <td>Se borra y se vuelve a crear con la condición nueva. <b>El salón sigue
+    igual de protegido</b> — se comprueba intentando abrir dos cuentas en la
+    misma mesa y viendo que la base se niegue.</td>
+  </tr>
+  <tr>
+    <td><code>cuenta_abrir</code>, <code>cuenta_mover</code>, <code>items_mover</code></td>
+    <td>Hoy todas suponen que hay mesa. Se reemplazan, y <b>con un
+    <code>drop</code> por cada firma vieja</b> (§0.5): dos funciones del mismo
+    nombre conviviendo es lo que dejó el sistema 15 horas sin descontar.</td>
+  </tr>
+  <tr>
+    <td>La pantalla</td>
+    <td><code>lamaCuentaDe(mesa_id)</code> busca por mesa. Las de mostrador se
+    buscan por otro lado; el resto de la cuenta —carta, comanda, precuenta,
+    cobro, anular, descuento— <b>no cambia en nada</b>, porque nunca miró la mesa.</td>
+  </tr>
+</table>
+
+<div class="nota si">
+  <p style="margin:0"><b>Lo que NO hay que construir de nuevo, y es casi todo.</b>
+  Una venta de mostrador es una <code>cuenta</code> como cualquier otra: mismos
+  productos, misma comanda a la cocina, misma precuenta, mismo cobro, mismos
+  medios de pago, mismo arqueo. La F4 no agrega un flujo — le saca un requisito
+  a uno que ya existe.</p>
+</div>
+
+<h2>2 · La pantalla — el mostrador es otro «salón»</h2>
+
+<p>La franja de salones ya existe en la app (hoy no se dibuja porque solo hay
+uno). <b>Mostrador entra ahí</b>: se toca y el plano de mesas se reemplaza por
+los pedidos abiertos, con los mismos cuadrados y los mismos colores.</p>
+
+<div class="marco">
+  <div class="marco-tit">Mesas <span>franja: Salón</span></div>
+  <div class="lienzo">
+    <div class="salones"><button class="on">Salón</button><button>Mostrador</button></div>
+    <div class="plano">
+      <div class="mesa libre">1</div>
+      <div class="mesa ocupada">2</div>
+      <div class="mesa libre">3</div>
+      <div class="mesa cobrando">4</div>
+      <div class="mesa libre">5</div>
+      <div class="mesa libre">6</div>
+    </div>
+  </div>
+</div>
+<p class="pie-marco">El salón, exactamente como hoy. Lo único nuevo es el botón
+de al lado.</p>
+
+<div class="marco">
+  <div class="marco-tit">Mesas <span>franja: Mostrador</span></div>
+  <div class="lienzo">
+    <div class="salones"><button>Salón</button><button class="on">Mostrador</button></div>
+    <div class="plano">
+      <div class="mesa ocupada sel">7<span class="r">MOSTRADOR</span></div>
+      <div class="mesa ocupada">8<span class="r">MOSTRADOR</span></div>
+      <div class="mesa cobrando">9<span class="r">MOSTRADOR</span></div>
+      <div class="mesa nueva">+</div>
+    </div>
+  </div>
+</div>
+<p class="pie-marco">Tres pedidos vivos y el <b>+</b> que abre uno nuevo. Rojo =
+tiene consumo · azul = precuenta impresa, igual que en el salón. El que está
+elegido lleva el mismo halo naranja.</p>
+
+<h3>Por qué así y no una pantalla aparte</h3>
+
+<table>
+  <tr><th>Decisión</th><th>Por qué</th></tr>
+  <tr>
+    <td>Reusar el plano</td>
+    <td>Los cuadrados, los colores, el halo del elegido, el panel de la cuenta y
+    el <b>+</b> ya están construidos y probados. Una pantalla nueva sería el
+    mismo dibujo escrito dos veces, y dos copias se desincronizan.</td>
+  </tr>
+  <tr>
+    <td>Nada de números de mesa</td>
+    <td>Un pedido de mostrador <b>no ocupa un lugar físico</b>. Su número es un
+    correlativo del día, para poder nombrarlo en voz alta: «el 9 está listo».</td>
+  </tr>
+  <tr>
+    <td>Sin cuadro «libre»</td>
+    <td>En el salón las mesas existen aunque estén vacías. En el mostrador no hay
+    nada que exista antes del pedido: por eso solo se ven los vivos y un <b>+</b>.</td>
+  </tr>
+  <tr>
+    <td>La precuenta sigue disponible, pero no obligatoria</td>
+    <td>En mostrador casi siempre se cobra de una. El camino corto es
+    <b>+ → productos → Cobrar</b>. El botón de imprimir el detalle queda igual
+    para quien lo pida.</td>
+  </tr>
+</table>
+
+<h2>3 · Las tres preguntas que necesitan tu respuesta</h2>
+
+<div class="pregunta">
+  <h4>1 · El número del pedido, ¿de dónde sale?</h4>
+  <div class="op gana"><b>Propuesta: un correlativo del día, por sede</b>, que
+  arranca en 1 cada mañana. Se guarda en la cuenta al abrirla, así que
+  <b>no se renumera</b> cuando uno cobra y desaparece. Cuesta una columna nueva.</div>
+  <div class="op">La alternativa —contarlos en el momento— no cuesta columna,
+  pero los números <b>bailan</b>: si cobrás el 2, el 3 pasa a ser 2 y el cliente
+  que estaba esperando el 3 ya no existe. No sirve para llamar en voz alta.</div>
+</div>
+
+<div class="pregunta">
+  <h4>2 · ¿La comanda de mostrador va a la cocina igual?</h4>
+  <div class="op gana"><b>Propuesta: sí, idéntica</b>, con el número del pedido
+  bien grande arriba en vez del número de mesa. Un café para llevar también se
+  prepara.</div>
+  <div class="op">Si hay productos que no pasan por cocina —una botella de la
+  vitrina— eso es un asunto de <b>qué imprime cada comanda</b>, que es F5. Acá
+  no se decide.</div>
+</div>
+
+<div class="pregunta">
+  <h4>3 · ¿Mostrador se puede apagar? <span class="marca">§2.2</span></h4>
+  <div class="op gana"><b>Propuesta: sí, un interruptor <code>LAMA_MOSTRADOR</code></b>,
+  y apagado <b>desaparece la franja</b> y el área de ventas queda exactamente como
+  antes — no como un hueco. Las cuentas de mostrador que ya existan
+  <b>no se borran</b>: dejan de mostrarse.</div>
+  <div class="op">Ojo con una asimetría honesta: el cambio en la base
+  <b>no</b> se apaga con el interruptor. El candado nuevo protege el salón igual
+  que el viejo, así que apagar la pantalla deja la base sana; pero volver
+  <code>mesa_id</code> a <code>not null</code> ya no se puede si hay ventas de
+  mostrador guardadas. Es lo mismo que pasó con cualquier tabla nueva, y por eso
+  se dice ahora.</div>
+</div>
+
+<h2>4 · Qué se construye, en orden</h2>
+
+<table class="pasos">
+  <tr><th>Paso</th><th>Qué</th><th>Quién</th></tr>
+  <tr><td>1</td><td>El <code>.sql</code>: <code>mesa_id</code> opcional, el
+    candado reescrito, el correlativo, y las funciones con su
+    <code>drop</code> por firma</td><td>lo pega Jhon</td></tr>
+  <tr><td>2</td><td>La franja Salón · Mostrador y el plano de pedidos</td><td>Claude</td></tr>
+  <tr><td>3</td><td>Abrir, agregar, cobrar y cerrar un pedido de mostrador</td><td>Claude</td></tr>
+  <tr><td>4</td><td>La batería: que el salón <b>siga negándose</b> a dos cuentas
+    en la misma mesa, y que el mostrador acepte varias a la vez</td><td>Claude</td></tr>
+</table>
+
+<div class="nota no">
+  <p style="margin:0"><b>Nada de esto se escribe hasta que apruebes esta hoja.</b>
+  Es la regla §0.7 del proyecto, y la vez que se saltó se perdió el trabajo
+  entero.</p>
+</div>
+
+</div>
+</body>
+</html>

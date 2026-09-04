@@ -1133,6 +1133,43 @@ una mesa especial "Mostrador" por sede— **se deciden con maqueta antes de
 escribir código** (§0.7), porque tocan el candado `cuentas_una_viva_por_mesa`:
 en mostrador hay muchas ventas a la vez y ese índice único las prohibiría.
 
+##### ✅ La maqueta ya está escrita — 2026-09-04
+
+**[`docs/propuesta-lama-mostrador.html`](propuesta-lama-mostrador.html)**, y se
+abre desde el link de Vercel como cualquier página del proyecto. **Nada de F4 se
+escribe hasta que Jhon la apruebe.**
+
+**Lo que la maqueta compara, y a qué llega:**
+
+| Camino | Qué pasa |
+|---|---|
+| Una mesa especial "Mostrador" por sede | **se rompe solo.** El candado deja UNA cuenta viva por mesa, así que el segundo cliente no puede ser atendido. La salida sería crear "Mostrador 1…8" — la mesa falsa que esta fase viene a eliminar, multiplicada por ocho |
+| **`mesa_id` puede quedar vacío** ⬅️ propuesto | El candado se reescribe con `and mesa_id is not null`: **el salón conserva su protección intacta** y el mostrador queda libre de tener las que haga falta |
+
+**En pantalla, el mostrador es otro "salón".** La franja de salones ya existe
+(hoy no se dibuja porque solo hay uno): se le agrega *Mostrador*, y el plano se
+reemplaza por los pedidos vivos con **los mismos cuadrados y los mismos
+colores**, más un `+`. No hay cuadro "libre" porque un pedido no existe antes de
+que alguien lo abra.
+
+**Lo que NO se construye de nuevo, y es casi todo:** una venta de mostrador es
+una `cuenta` igual a las demás — misma carta, misma comanda, misma precuenta,
+mismo cobro, mismo arqueo. **La F4 no agrega un flujo: le saca un requisito a
+uno que ya existe.**
+
+**Las tres preguntas que la maqueta le deja a Jhon:**
+
+1. **El número del pedido** — se propone un correlativo del día por sede,
+   **guardado** al abrir (cuesta una columna). Contarlos en el momento no cuesta
+   nada pero los números **bailan** al cobrar uno, y entonces no sirven para
+   llamar en voz alta.
+2. **La comanda de mostrador** — se propone idéntica, con el número del pedido
+   donde iba el de la mesa.
+3. **El interruptor `LAMA_MOSTRADOR`** (§2.2) — apagado desaparece la franja y
+   el área vuelve a ser exactamente lo de antes. ⚠️ **Con una asimetría dicha en
+   voz alta:** el cambio de la base no se apaga. Volver `mesa_id` a `not null`
+   deja de ser posible en cuanto exista una venta de mostrador guardada.
+
 #### F5 · El puente de impresión — *aislado, y hay que ir al local*
 
 Ya está **medido, no supuesto** (§2.3). Va **aislado**, sin tocar la app ni la
@@ -1195,7 +1232,7 @@ en `/caja` — se hacen el día que Lama se muestre, no antes.
 | Cuándo | Qué |
 |---|---|
 | antes de **F3** | **El descuento de cada uno de los 5 consumos** (administrativo, garzones, eventos, redes, cumpleaños). Hoy son todos 0 |
-| antes de **F4** | Aprobar la maqueta de Mostrador |
+| antes de **F4** | Aprobar **[la maqueta de Mostrador](propuesta-lama-mostrador.html)** — ya escrita, con tres preguntas adentro |
 | antes de **F6** | Las **tres respuestas del bloque H** del atlas, por NotebookLM |
 | cuando pueda | Una visita al local para instalar el puente (**F5**) |
 
@@ -1468,3 +1505,19 @@ poder crearlas ella:
 4. **Qué detalle lleva el ticket** — editable, con su propia pantalla. Sale de A2
 5. **El tamaño y la POSICIÓN de las mesas.** El tamaño ya se ajusta con el ⚙ del plano (2026-08-31, por dispositivo). Falta la posición, y primero hay que decidir qué significa: ¿reordenar las mesas en la grilla, o un plano de verdad con coordenadas, donde la mesa 7 esté junto a la ventana?
 6. ~~**Dónde queda registrada la anulación**~~ — **resuelto el 2026-09-01**: en las columnas `anulado_at`, `anulado_por`, `anulado_motivo` y `anulado_comentario` de `cuenta_items`, y los motivos en `lama_motivos_anulacion`. **Lo que falta es la pantalla** para que Adriana cree motivos nuevos, y un listado de lo anulado del día para el arqueo.
+
+---
+
+## 🔴 PREGUNTAS QUE ESPERAN A JHON
+
+> **Acá abajo, siempre.** Es el único lugar donde una sesión autónoma deja lo
+> que no puede decidir sola, y de donde el informe de la 01:00 saca la línea
+> *"la decisión que espera respuesta tuya"*. Una pregunta contestada se borra
+> de acá y su respuesta se escribe donde corresponda — esta lista **no es un
+> historial**, es una bandeja de entrada.
+
+| Qué | Dónde está planteada | Qué desbloquea |
+|---|---|---|
+| **Aprobar la maqueta de Mostrador**, y contestar sus tres preguntas: el número del pedido, la comanda, y el interruptor | [`docs/propuesta-lama-mostrador.html`](propuesta-lama-mostrador.html) · resumidas en la **F4** de arriba | **F4 entero.** Nada se escribe hasta que la apruebes (§0.7) |
+| **El arqueo ciego**: Fudo lo hace con un permiso por rol y Llamita no tiene roles a propósito (§6.1). Tres caminos: dejarlo fuera, un interruptor por sede, o un permiso propio | la **F6** de arriba | que F6 arranque sin que la decisión aparezca a mitad de construir |
+| **Una visita al local** para instalar el puente de impresión | §2.3 de `CLAUDE.md` | **F5**, y con ella el detalle del ticket que dejó a F3 en 5 de 6 |
