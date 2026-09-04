@@ -91,7 +91,7 @@ Cada fila dice **qué**, **por qué está frenado**, y **qué desbloquea**.
 **La mejor pregunta de la plantilla de GPT, conservada tal cual.** Obliga a
 priorizar en vez de listar. Tres, con una línea de por qué cada una.
 
-### 5 · Riesgos NUEVOS
+### 5 · Riesgos NUEVOS · *(antes del cierre)*
 
 Sólo los nuevos. Los ya anotados se **cuentan** (*"7 riesgos abiertos, ver
 `docs/LAMA.md`"*), no se repiten.
@@ -101,6 +101,29 @@ Por riesgo: qué puede pasar · qué tan grave · qué lo dispararía · qué lo
 Buena fuente: los casos límite que la plantilla de GPT lista bien —doble
 cierre, pago parcial más descuento, anulación, concurrencia, sin conexión—.
 Se revisan de a poco, no todos cada día.
+
+### 6 · El cuadro de avance por área — **cierra el informe**
+
+*(Pedido por Jhon el 2026-09-04.)* La tabla de cuánto llevamos y cuánto falta,
+segmentada por área: inventario, bodega, mesas, comanda, cobro, configuración,
+mostrador, impresión, arqueo, la conexión con Stock, y el producto
+multi-cliente.
+
+⚠️ **NO se recalcula ni se reinventa cada noche. Se LEE de
+[`docs/avance-por-area.md`](avance-por-area.md), que es la fuente**, y se pinta
+como tabla. Dos copias del mismo estado se desincronizan — es el mismo error
+que este informe entero viene a evitar.
+
+Si durante el día una etapa cambió de estado, **se actualiza primero el
+documento fuente y después se pinta**. Nunca al revés.
+
+⚠️ **Los porcentajes llevan su cuenta al lado** (`6 de 7`), siempre. Miden
+piezas terminadas sobre piezas previstas, no código ni esfuerzo. Un número sin
+su cuenta a la vista se lee como medido cuando es una impresión.
+
+**No hay un "avance total del proyecto", y es a propósito:** un número único
+mezcla terminar un botón con construir el arqueo de caja, y esconde justo lo
+que hay que ver.
 
 ---
 

@@ -25,11 +25,22 @@
 
 ## Pendientes ahora
 
-### [ ] 1 · `sql/2026-09-plus-encender-tiempo-real.sql` — **lo más urgente que hay**
+**Ninguno.** 🎉
 
-> **Qué arregla, y no es un detalle de Lama: es media app.** Corriste la
-> radiografía y las ocho tablas dieron `NO`. O sea que **ahora mismo tu app no
-> actualiza nada sola**.
+Cuando cualquiera de las dos sesiones deje un `.sql` nuevo, aparece acá con el
+texto completo pegado y un `[ ]` para marcar.
+
+---
+
+## Historial reciente
+
+### [x] `sql/2026-09-plus-encender-tiempo-real.sql` — **corrido el 2026-09-04** ✅
+
+> **Comprobado**: las seis tablas en `sí`, y `mesas`/`comandas` en `NO` como
+> corresponde. **La app volvió a actualizarse sola.**
+
+> **Qué arreglaba, y no era un detalle de Lama: era media app.** Las ocho
+> tablas daban `NO`, o sea que la app **no actualizaba nada sola**.
 
 Lo que hoy NO pasa, y debería:
 

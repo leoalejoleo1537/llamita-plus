@@ -238,6 +238,69 @@
   Sin riesgos previos que arrastrar: este es el primer informe.
 </div>
 
+<h2>6 · Cuánto llevamos, por área</h2>
+
+<div class="nota">
+  Los porcentajes miden <b>piezas terminadas sobre piezas previstas</b> — la
+  cuenta va al lado de cada uno. No miden código ni esfuerzo. Y no hay un
+  “avance total del proyecto” a propósito: un número único mezclaría terminar un
+  botón con construir el arqueo de caja.
+</div>
+
+<table>
+  <tr><th>Área</th><th class="num">Avance</th><th>Dónde está</th></tr>
+  <tr>
+    <td>🟢 <b>Stock · inventario</b></td><td class="num">100 %<br><span style="color:var(--muted);font-size:12px">9 de 9</span></td>
+    <td>Terminado y en producción hace meses</td>
+  </tr>
+  <tr>
+    <td>🟢 <b>Stock · bodega y reparto</b></td><td class="num">86 %<br><span style="color:var(--muted);font-size:12px">6 de 7</span></td>
+    <td>Falta el relleno automático desde el crítico</td>
+  </tr>
+  <tr>
+    <td>🟢 <b>Lama · mesas</b></td><td class="num">100 %<br><span style="color:var(--muted);font-size:12px">7 de 7</span></td>
+    <td>Cerrado con el reordenar en grilla (opción A)</td>
+  </tr>
+  <tr>
+    <td>🟢 <b>Lama · comanda</b></td><td class="num">100 %<br><span style="color:var(--muted);font-size:12px">5 de 5</span></td>
+    <td>Lo comandado no se edita, se anula con motivo</td>
+  </tr>
+  <tr>
+    <td>🟢 <b>Lama · cobro</b></td><td class="num">100 %<br><span style="color:var(--muted);font-size:12px">8 de 8</span></td>
+    <td>Cerrado con la F1: parcial, descuento, propina, vuelto</td>
+  </tr>
+  <tr>
+    <td>🟡 <b>Lama · configuración</b></td><td class="num">0 %<br><span style="color:var(--muted);font-size:12px">0 de 6</span></td>
+    <td><b>Lo que está en curso.</b> Maqueta aprobada y no necesita SQL</td>
+  </tr>
+  <tr>
+    <td>⬜ <b>Lama · mostrador</b></td><td class="num">0 %<br><span style="color:var(--muted);font-size:12px">0 de 4</span></td>
+    <td>Necesita maqueta: toca el candado de una cuenta viva por mesa</td>
+  </tr>
+  <tr>
+    <td>⬜ <b>Lama · impresión</b></td><td class="num">10 %<br><span style="color:var(--muted);font-size:12px">medido</span></td>
+    <td>Lo difícil ya se midió <b>en el local</b>. Falta el puente, y una visita</td>
+  </tr>
+  <tr>
+    <td>🔴 <b>Lama · arqueo de caja</b></td><td class="num">0 %<br><span style="color:var(--muted);font-size:12px">0 de 5</span></td>
+    <td><b>Bloqueado por el atlas</b>, no por falta de tiempo: las 3 preguntas del bloque H</td>
+  </tr>
+  <tr>
+    <td>⬜ <b>Conexión Lama ↔ Stock</b></td><td class="num">0 %<br><span style="color:var(--muted);font-size:12px">0 de 3</span></td>
+    <td>Va última a propósito. Hoy Lama no toca el stock, y eso es lo que deja probar libre</td>
+  </tr>
+  <tr>
+    <td>⬜ <b>Producto multi-cliente</b></td><td class="num">0 %<br><span style="color:var(--muted);font-size:12px">0 de 4</span></td>
+    <td>La primera pieza son <b>dos líneas</b>: la dirección de la base está escrita dentro del código</td>
+  </tr>
+</table>
+
+<div class="nota">
+  El detalle de qué piezas cuenta cada área está en
+  <code>docs/avance-por-area.md</code>, que es la fuente. Este cuadro la pinta;
+  no la recalcula.
+</div>
+
 <div class="pie">
   Informe generado el 2026-09-04 · Llamita Plus · la receta está en
   <code>docs/informe-diario.md</code>
