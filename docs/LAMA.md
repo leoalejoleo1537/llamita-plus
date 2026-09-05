@@ -814,12 +814,18 @@ sirve, no se copia — y se dice por qué. Esta tabla es el corazón de la ruta.
 | Lo comandado no se edita, **se anula con motivo** | C2 | ✅ |
 | Precuenta imprime y cambia el color | B1 | ✅ |
 | Mover productos y mover la mesa | B4 | ✅ |
-| Pago parcial **por producto** · verde lo pagado, ámbar lo pendiente | D2 | ⬜ **F1** |
-| Descuento con el ícono `%` | D3 | ⬜ **F1** |
-| **La precuenta bloquea agregar** | E1 | ⬜ **F2** |
-| Las palabras exactas de los botones | F1 | ⬜ **F2** |
-| Mostrador — vender sin mesa | A1 | ⬜ **F4** |
-| Reimprimir un ticket | B3 | ⬜ **F5** |
+| Pago parcial **por producto** · verde lo pagado, ámbar lo pendiente | D2 | ✅ F1 · `lama-parcial`, 22 casos |
+| Descuento con el ícono `%` | D3 | ✅ F1 · `lama-descuento`, 21 casos |
+| **La precuenta bloquea agregar** | E1 | ✅ F2 · `lama-precuenta`, 13 casos |
+| Las palabras exactas de los botones | F1 | ✅ F2 · el paso de vocabulario, más abajo |
+| Mostrador — vender sin mesa | A1 | ⬜ **F4** · maqueta escrita, espera aprobación |
+| Reimprimir un ticket | B3 | ⬜ **F5** · necesita el puente |
+
+> ⚠️ **Las cuatro primeras decían ⬜ hasta el 2026-09-05**, con F1 y F2 cerradas
+> desde el 2 de septiembre. **Se comprobó una por una antes de tocarlas** —
+> corriendo las pruebas, no leyendo el plan— porque es exactamente el error que
+> más caro sale acá: un documento que manda a rehacer lo que ya está hecho.
+> Es la misma clase de deriva que el *"C8 está a medias"*.
 
 **NO se copia, y cada una tiene su razón:**
 

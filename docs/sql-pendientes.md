@@ -25,7 +25,76 @@
 
 ## Pendientes ahora
 
-**Ninguno.** 🎉
+### [ ] `sql/2026-09-plus-comprobacion-fase6.sql` — cierra la separación
+
+> **No escribe nada. Son dos `select`.** Se puede correr las veces que sea.
+
+**Por qué importa, y no es burocracia.** El `README.md` decía que la copia está
+separada, y **todo indica que sí** — el código no nombra el proyecto de ellos por
+ninguna parte, y la app corre contra la base nueva. Pero eso son indicios, no la
+comprobación. **La Fase 6 del plan de separación nunca se corrió**, y el propio
+plan la llama *"la fase más importante: creo que quedó separado no es una
+respuesta"*.
+
+**Cómo se corre:** **2 bloques, uno por uno.** El editor de Supabase solo muestra
+el resultado del último, así que juntos se pierde el primero.
+
+**Qué mirar:**
+
+| Bloque | Qué ver | Qué significa |
+|---|---|---|
+| 1 | **CERO filas** | ningún cron llama a la casa de Café del Desierto |
+| 2 | **44 · 76 · 60 · 5 · 1434** | el respaldo llegó completo. Si algún número es **menor**, avisá |
+
+⚠️ **Los `crons` pueden dar 0 y está bien:** no viajaron en el respaldo, se
+rehacen cuando estén desplegadas las Edge Functions.
+
+<details><summary>▶ Ver el SQL completo</summary>
+
+```sql
+-- ================================================================
+-- BLOQUE 1 — ¿Algún cron sigue llamando al proyecto viejo?
+-- QUÉ VER: CERO FILAS. Si aparece alguna, avisá antes de tocar nada.
+-- ================================================================
+select jobname, left(command, 120) as empieza_asi
+  from cron.job
+ where command like '%fqjdecjsbnicvyrxkxcu%';
+```
+
+```sql
+-- ================================================================
+-- BLOQUE 2 — ¿El respaldo llegó completo?
+-- QUÉ VER: 44 tablas · 76 funciones · 60 políticas · 5 crons · 1434 productos.
+-- ================================================================
+select
+  (select count(*) from information_schema.tables where table_schema='public') as tablas,
+  (select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+    where n.nspname='public') as funciones,
+  (select count(*) from pg_policies where schemaname='public') as politicas,
+  (select count(*) from cron.job) as crons,
+  (select count(*) from public.productos) as productos;
+```
+
+</details>
+
+---
+
+### [ ] Y una prueba que NO es SQL — la que de verdad prueba
+
+**Es el punto (c) de la Fase 6, y ningún `select` lo reemplaza.** Tarda dos
+minutos y no necesita herramientas de desarrollador:
+
+1. En **la app nueva**, crear un producto llamado **`ZZZ PRUEBA COPIA`**.
+2. Abrir el **editor de tablas** de Supabase, tabla `productos`, y buscarlo:
+   - en el proyecto **nuevo** (`iuryhsjucblmebdogewa`) → **tiene que aparecer**
+   - en el proyecto **viejo** (`fqjdecjsbnicvyrxkxcu`) → **NO puede aparecer**
+3. Borrarlo de la base nueva.
+
+⚠️ **Si aparece en los dos, o solo en el viejo: parar todo y avisar.** Es
+literalmente lo que pediste el primer día — *"si aparece en la de ellos, paramos
+todo"*.
+
+---
 
 Cuando cualquiera de las dos sesiones deje un `.sql` nuevo, aparece acá con el
 texto completo pegado y un `[ ]` para marcar.
