@@ -25,54 +25,55 @@
 
 ## Pendientes ahora
 
-### [ ] `sql/2026-09-plus-comprobacion-fase6.sql` — cierra la separación
+### [ ] `sql/2026-09-plus-comprobacion-fase6.sql` — **corregido el 2026-09-05**
 
-> **No escribe nada. Son dos `select`.** Se puede correr las veces que sea.
+> **No escribe nada. Es un `select`.** Se puede correr las veces que sea.
 
-**Por qué importa, y no es burocracia.** El `README.md` decía que la copia está
-separada, y **todo indica que sí** — el código no nombra el proyecto de ellos por
-ninguna parte, y la app corre contra la base nueva. Pero eso son indicios, no la
-comprobación. **La Fase 6 del plan de separación nunca se corrió**, y el propio
-plan la llama *"la fase más importante: creo que quedó separado no es una
-respuesta"*.
+🔴 **Se rompió tres veces por el mismo error, y era mío: preguntaba por
+`cron.job`.** `pg_cron` es una extensión de Postgres, y en este proyecto **no
+está instalada** — el respaldo no la trajo. Postgres analiza la sentencia entera
+antes de ejecutarla, así que una tabla que no existe **mata el bloque completo**,
+aunque el resto esté perfecto. Es la §0.1.9 del archivo madre.
 
-**Cómo se corre:** **2 bloques, uno por uno.** El editor de Supabase solo muestra
-el resultado del último, así que juntos se pierde el primero.
+**Y el error ya contestó la pregunta:** sin `pg_cron` no existe ningún cron en
+esta base, así que **ninguno puede estar llamando al proyecto de Café del
+Desierto**. El punto (a) de la Fase 6 queda cerrado. ✅
 
-**Qué mirar:**
+**Lo que queda por comprobar es mejor que un conteo.** El conteo a secas decía
+*"faltan 31 funciones"* sin decir cuáles, y encima nuestras propias notas no se
+ponían de acuerdo sobre la vara (el plan dice 76, el `README` dice 45 verificadas
+contra el original). **Este `select` pregunta por las 33 funciones que la app
+llama de verdad**, una por una.
 
-| Bloque | Qué ver | Qué significa |
-|---|---|---|
-| 1 | **CERO filas** | ningún cron llama a la casa de Café del Desierto |
-| 2 | **44 · 76 · 60 · 5 · 1434** | el respaldo llegó completo. Si algún número es **menor**, avisá |
-
-⚠️ **Los `crons` pueden dar 0 y está bien:** no viajaron en el respaldo, se
-rehacen cuando estén desplegadas las Edge Functions.
+**Qué mirar:** la columna `esta` tiene que decir **`sí` en las 33 filas**. Si
+alguna dice `FALTA`, esa es la que hay que rehacer — y sabemos exactamente cuál.
 
 <details><summary>▶ Ver el SQL completo</summary>
 
 ```sql
--- ================================================================
--- BLOQUE 1 — ¿Algún cron sigue llamando al proyecto viejo?
--- QUÉ VER: CERO FILAS. Si aparece alguna, avisá antes de tocar nada.
--- ================================================================
-select jobname, left(command, 120) as empieza_asi
-  from cron.job
- where command like '%fqjdecjsbnicvyrxkxcu%';
-```
-
-```sql
--- ================================================================
--- BLOQUE 2 — ¿El respaldo llegó completo?
--- QUÉ VER: 44 tablas · 76 funciones · 60 políticas · 5 crons · 1434 productos.
--- ================================================================
 select
-  (select count(*) from information_schema.tables where table_schema='public') as tablas,
-  (select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace
-    where n.nspname='public') as funciones,
-  (select count(*) from pg_policies where schemaname='public') as politicas,
-  (select count(*) from cron.job) as crons,
-  (select count(*) from public.productos) as productos;
+  f.nombre,
+  case when p.proname is null then 'FALTA' else 'sí' end as esta
+from (values
+   ('cuenta_abrir'),('mesa_abrir'),('cuenta_agregar'),('cuenta_confirmar'),
+   ('cuenta_recalcular'),('cuenta_precuenta'),('cuenta_cerrar'),('cuenta_cobrar'),
+   ('cuenta_cobrar_parcial'),('cuenta_pago_parcial_deshacer'),('cuenta_mover'),
+   ('items_mover'),('item_anular'),
+   ('mermar'),('deshacer_merma'),('registrar_entrada'),('deshacer_entrada'),
+   ('fusionar_productos'),('deshacer_fusion'),('restaurar_sede'),
+   ('deshacer_restauracion'),('crear_producto_enlazado'),
+   ('reparto_recibir'),('reparto_cerrar'),('reparto_rechazar'),
+   ('reparto_deshacer'),('reparto_descontar_bodega'),
+   ('historial_dias'),('fotos_por_dia'),('meta_avance'),('recetas_rotas'),
+   ('franquicia_linea_lista'),('franquicia_linea_no_hay')
+) as f(nombre)
+left join (
+  select distinct p.proname
+    from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'public'
+) p on p.proname = f.nombre
+order by esta, f.nombre;
 ```
 
 </details>

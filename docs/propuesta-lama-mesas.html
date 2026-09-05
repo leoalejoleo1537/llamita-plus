@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Propuesta &middot; El plano de mesas (F4)</title>
+<style>
+  :root{
+    --navy:#0F1E31; --navy2:#16283F;
+    --orange:#DC4405; --orange-dark:#B93A04;
+    --bg:#E9EEF5; --card:#FDFEFF; --border:#D6DFEB;
+    --text:#121E2C; --muted:#61707F;
+    --red-bg:#FCE9E6; --red-fg:#C0392B;
+    --green-bg:#E4F1E5; --green-fg:#2E7D32;
+    --amber-bg:#FDF0DE; --amber-fg:#9C6209;
+    --gray-bg:#E1E8F1; --gray-fg:#54677D;
+    --azul-bg:#E8F0FB; --azul-fg:#2C5AA0;
+    --sec-bg:#D0DDEC; --sec-tx:#1F3A5C; --sec-line:rgba(31,58,92,.22);
+    --sec-filo:#41628C;
+    --sombra:0 2px 4px rgba(20,40,70,.04), 0 12px 26px -18px rgba(20,40,70,.34);
+    --r-card:20px; --r-sec:18px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+       background:var(--bg);color:var(--text);line-height:1.5}
+  .doc{max-width:1080px;margin:0 auto;padding:22px 16px 80px}
+
+  h1{font-size:26px;margin:0 0 4px;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 26px}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:.06em;
+     color:var(--sec-tx);background:var(--sec-bg);border-left:4px solid var(--sec-filo);
+     padding:9px 14px;border-radius:0 var(--r-sec) var(--r-sec) 0;margin:38px 0 16px}
+  h3{font-size:16px;margin:26px 0 8px}
+  p{margin:0 0 12px}
+  .nota{background:var(--card);border:1px solid var(--border);border-radius:14px;
+        padding:14px 16px;margin:0 0 18px;box-shadow:var(--sombra)}
+  .nota.ojo{background:var(--amber-bg);border-color:rgba(156,98,9,.28)}
+  .nota.si{background:var(--green-bg);border-color:rgba(46,125,50,.28)}
+  .nota.no{background:var(--red-bg);border-color:rgba(192,57,43,.28)}
+  .nota b{color:var(--text)}
+  code{background:var(--gray-bg);border-radius:5px;padding:1px 5px;font-size:.9em}
+
+  .marco{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);
+         box-shadow:var(--sombra);overflow:hidden;margin:0 0 10px}
+  .marco-tit{background:var(--navy);color:#fff;font-size:12px;letter-spacing:.05em;
+             text-transform:uppercase;padding:8px 14px;display:flex;
+             justify-content:space-between;align-items:center}
+  .marco-tit span{opacity:.62;text-transform:none;letter-spacing:0;font-size:11px}
+  .lienzo{padding:16px;background:var(--bg)}
+  .pie-marco{font-size:13px;color:var(--muted);margin:0 0 26px;padding:0 4px}
+
+  /* la franja Salón | Mostrador, igual que la de salones de la app */
+  .salones{display:flex;gap:6px;margin:0 0 14px}
+  .salones button{background:var(--card);border:1px solid var(--border);color:var(--muted);
+    border-radius:999px;padding:8px 18px;font-size:14px;font-weight:700;cursor:default}
+  .salones button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+
+  /* el plano, con los mismos cuadrados de la app */
+  .plano{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:7px;
+         padding:6px 8px 16px}
+  .mesa{aspect-ratio:1;border-radius:var(--r-sec);display:flex;flex-direction:column;
+        align-items:center;justify-content:center;gap:3px;font-weight:800;font-size:22px}
+  .mesa .r{font-size:11px;font-weight:700;opacity:.85;letter-spacing:.03em}
+  .mesa.libre{background:var(--green-bg);color:var(--green-fg)}
+  .mesa.ocupada{background:var(--red-fg);color:#fff}
+  .mesa.cobrando{background:var(--azul-fg);color:#fff}
+  .mesa.nueva{background:var(--card);border:1px dashed var(--border);color:var(--orange);font-size:30px}
+  .mesa.sel{box-shadow:0 0 0 5px rgba(220,68,5,.16), 0 8px 24px -6px rgba(220,68,5,.7)}
+
+  table{width:100%;table-layout:fixed;border-collapse:collapse;background:var(--card);
+        border:1px solid var(--border);border-radius:14px;overflow:hidden;
+        box-shadow:var(--sombra);margin:0 0 18px;font-size:14px}
+  th{background:var(--sec-bg);color:var(--sec-tx);text-align:left;padding:10px 13px;
+     font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+  td{padding:10px 13px;border-top:1px solid var(--border);vertical-align:top}
+  td code,.op code{overflow-wrap:anywhere}
+  th:first-child{width:38%}
+  table.pasos th:nth-child(1){width:15%}
+  table.pasos th:nth-child(3){width:26%}
+  td.si{color:var(--green-fg);font-weight:700}
+  td.no{color:var(--red-fg);font-weight:700}
+
+  .pregunta{background:var(--azul-bg);border:1px solid rgba(44,90,160,.28);
+            border-radius:14px;padding:16px 18px;margin:0 0 16px}
+  .pregunta h4{margin:0 0 8px;font-size:16px;color:var(--azul-fg)}
+  .op{background:#fff;border:1px solid var(--border);border-radius:11px;
+      padding:11px 13px;margin:8px 0 0;font-size:14px}
+  .op b{color:var(--azul-fg)}
+  .op.gana{border-color:rgba(46,125,50,.45);background:var(--green-bg)}
+  .marca{background:var(--azul-bg);color:var(--azul-fg);border-radius:999px;
+         padding:3px 10px;font-size:12px;font-weight:700;display:inline-block}
+  .marca.ok{background:var(--green-bg);color:var(--green-fg)}
+  .marca.mal{background:var(--red-bg);color:var(--red-fg)}
+</style><style>
+  /* ---------- secciones en tarjetas de color suave ---------- */
+  .secs{display:flex;flex-direction:column;gap:10px}
+  .sec{border-radius:16px;padding:10px 12px 12px}
+  .sec-cab{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:13px;
+    font-weight:800;letter-spacing:.02em}
+  .sec-cab .cuenta{font-weight:600;opacity:.7;font-size:12px}
+  .sec-cab .mano{margin-left:auto;opacity:.5;letter-spacing:-2px;font-size:14px}
+  .sec.a{background:#E9F1FC;color:#2C5AA0}
+  .sec.b{background:#E6F2E8;color:#2E7D32}
+  .sec.c{background:#FBF0DC;color:#9C6209}
+  .sec.d{background:#F1EAF7;color:#6B4B8F}
+  .sec.e{background:#E4E9F0;color:#54677D}
+  .rej{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:6px}
+  .m{aspect-ratio:1;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:19px;background:#E4F1E5;color:#2E7D32}
+  .m.ocupada{background:var(--red-fg);color:#fff}
+  .m.cobrando{background:var(--azul-fg);color:#fff}
+  .m.redonda{border-radius:50%}
+  .m.larga{aspect-ratio:2/1;border-radius:14px}
+  .m.fantasma{background:transparent;border:1px dashed currentColor;opacity:.5;font-size:24px}
+  .m .mano{position:relative;font-size:11px;opacity:.6}
+  .paginas{display:flex;gap:6px;margin:0 0 12px;align-items:center}
+  .paginas button{background:var(--card);border:1px solid var(--border);color:var(--muted);
+    border-radius:999px;padding:7px 16px;font-size:14px;font-weight:700;cursor:default}
+  .paginas button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+  .paginas .lapiz{margin-left:auto;width:34px;height:34px;border-radius:50%;
+    border:1px solid var(--border);background:var(--card);color:var(--muted);
+    display:flex;align-items:center;justify-content:center;font-size:15px}
+  .ed{background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:11px 13px;margin:8px 0 0;font-size:14px;display:flex;gap:10px;align-items:center}
+  .ed .ico{width:30px;height:30px;border-radius:9px;background:var(--gray-bg);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px}
+  .cinta{background:var(--orange);color:#fff;border-radius:14px;padding:10px 14px;
+    font-weight:700;font-size:14px;display:flex;gap:10px;align-items:center;margin:0 0 12px}
+  .cinta .x{margin-left:auto;opacity:.85}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>El plano de mesas</h1>
+<p class="sub">La <b>F4</b>, reescrita con tus respuestas del 2026-09-05 &middot; maqueta para aprobar antes de escribir c&oacute;digo (&sect;0.7)</p>
+
+<div class="nota si">
+  <p style="margin:0 0 8px"><b>Elegiste el Camino B, y ten&iacute;as raz&oacute;n
+  vos.</b> Yo hab&iacute;a escrito que una mesa &laquo;Mostrador&raquo; <i>se
+  rompe sola</i> porque el segundo cliente no podr&iacute;a ser atendido. Vos
+  contestaste que <b>eso no es un defecto: es la regla</b> &mdash; la mesa 12 es
+  para llevar y <b>se cobra al instante</b>, as&iacute; que nunca hay dos pedidos
+  para llevar vivos a la vez.</p>
+  <p style="margin:0">Es la &sect;0.1.8 del archivo madre en carne propia:
+  <b>razon&eacute; sobre el sistema en vez de preguntar c&oacute;mo trabaja la
+  gente</b>. La carta del caf&eacute; no est&aacute; en la base de datos.</p>
+</div>
+
+<div class="nota">
+  <p style="margin:0"><b>Y eso cambia el tama&ntilde;o de la fase entera.</b>
+  Vender para llevar <b>no necesita ni una l&iacute;nea de SQL</b>: la mesa ya
+  existe, el candado est&aacute; bien como est&aacute;, y el equipo ya sabe
+  hacerlo. Lo que s&iacute; hay que construir es lo que pediste despu&eacute;s
+  &mdash; <b>el plano editable, con p&aacute;ginas y secciones</b>. Esta hoja es
+  sobre eso.</p>
+</div>
+
+<h2>1 &middot; Mall Plaza, tal como es hoy</h2>
+
+<table>
+  <tr><th>Mesas</th><th>Qu&eacute; son</th></tr>
+  <tr><td><b>1 a 10</b></td><td>Las mesas reales del sal&oacute;n. La arquitectura es de <b>isla</b>: la cafeter&iacute;a en el centro y <b>dos alas de 5</b></td></tr>
+  <tr><td><b>11 y 12</b></td><td>Para llevar. La 12 se cobra al instante, y hasta que se cierre no se atiende otro para llevar</td></tr>
+  <tr><td><b>13 a 20</b></td><td>La barra</td></tr>
+  <tr><td><b>20</b></td><td>Administraci&oacute;n. <b>Todo lo que pide administraci&oacute;n se comanda ac&aacute;</b>, sea para llevar o para servir</td></tr>
+</table>
+
+<div class="nota ojo">
+  <p style="margin:0"><b>Y la nota que decide el dise&ntilde;o entero:</b> las
+  mesas <b>11 y 12 muchas veces las usan para la barra</b>. O sea que ninguna de
+  estas agrupaciones es fija. Por eso las secciones se <b>editan</b>, no se
+  escriben en el c&oacute;digo &mdash; es la &sect;0.8: <i>esto describe lo que
+  pasa casi siempre, no lo que pasa sin excepci&oacute;n</i>.</p>
+</div>
+
+<h2>2 &middot; El modelo: p&aacute;ginas &rarr; secciones &rarr; mesas</h2>
+
+<table>
+  <tr><th>Nivel</th><th>Qu&eacute; es</th></tr>
+  <tr><td><b>P&aacute;gina</b></td><td>Los botones de arriba. Hoy ser&iacute;an <i>Sal&oacute;n</i> y <i>Mostrador</i>, pero <b>se crean y se borran</b>: no est&aacute;n escritas en el c&oacute;digo</td></tr>
+  <tr><td><b>Secci&oacute;n</b></td><td>Una tarjeta de color suave dentro de una p&aacute;gina: <i>Ala izquierda</i>, <i>Ala derecha</i>, <i>Barra</i>, <i>Para llevar</i>, <i>Administraci&oacute;n</i></td></tr>
+  <tr><td><b>Mesa</b></td><td>El cuadrado de siempre, con su n&uacute;mero y su color por estado</td></tr>
+</table>
+
+<p><b>Dos niveles y no m&aacute;s</b>, y es a prop&oacute;sito: con tres, el
+plano deja de leerse de un vistazo &mdash; que es lo &uacute;nico que tiene que
+hacer un plano de mesas en el mes&oacute;n.</p>
+
+<h2>3 &middot; La pantalla, mirando</h2>
+
+<div class="marco">
+  <div class="marco-tit">Mesas <span>p&aacute;gina: Sal&oacute;n</span></div>
+  <div class="lienzo">
+    <div class="paginas"><button class="on">Sal&oacute;n</button><button>Mostrador</button><div class="lapiz">&#9998;</div></div>
+    <div class="secs">
+      <div class="sec a">
+        <div class="sec-cab">Ala izquierda <span class="cuenta">2 de 5 ocupadas</span></div>
+        <div class="rej">
+          <div class="m">1</div><div class="m ocupada">2</div><div class="m">3</div>
+          <div class="m cobrando">4</div><div class="m">5</div>
+        </div>
+      </div>
+      <div class="sec b">
+        <div class="sec-cab">Ala derecha <span class="cuenta">libre</span></div>
+        <div class="rej">
+          <div class="m">6</div><div class="m">7</div><div class="m">8</div>
+          <div class="m">9</div><div class="m">10</div>
+        </div>
+      </div>
+      <div class="sec c">
+        <div class="sec-cab">Barra <span class="cuenta">1 de 7 ocupada</span></div>
+        <div class="rej">
+          <div class="m">13</div><div class="m">14</div><div class="m ocupada">15</div>
+          <div class="m">16</div><div class="m">17</div><div class="m">18</div><div class="m">19</div>
+        </div>
+      </div>
+      <div class="sec d">
+        <div class="sec-cab">Administraci&oacute;n</div>
+        <div class="rej"><div class="m larga">20</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="pie-marco">Los colores de las tarjetas son <b>suaves y no compiten</b>
+con los de estado: verde libre, rojo ocupada, azul con precuenta. La
+<b>&#9998;</b> de arriba a la derecha entra al modo edici&oacute;n.</p>
+
+<div class="marco">
+  <div class="marco-tit">Mesas <span>p&aacute;gina: Mostrador</span></div>
+  <div class="lienzo">
+    <div class="paginas"><button>Sal&oacute;n</button><button class="on">Mostrador</button><div class="lapiz">&#9998;</div></div>
+    <div class="secs">
+      <div class="sec e">
+        <div class="sec-cab">Para llevar <span class="cuenta">se cobra al instante</span></div>
+        <div class="rej"><div class="m">11</div><div class="m ocupada">12</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="pie-marco">Las mismas mesas de siempre, en su propia p&aacute;gina. El
+d&iacute;a que las 11 y 12 se usen como barra, <b>se arrastran a la secci&oacute;n
+Barra y listo</b> &mdash; no hace falta llamar a nadie.</p>
+
+<h2>4 &middot; El modo edici&oacute;n</h2>
+
+<div class="marco">
+  <div class="marco-tit">Mesas <span>editando</span></div>
+  <div class="lienzo">
+    <div class="cinta"><span>Editando el plano</span><span class="x">&#10005; Listo</span></div>
+    <div class="secs">
+      <div class="sec a">
+        <div class="sec-cab">Ala izquierda <span class="mano">&#8942;&#8942;</span></div>
+        <div class="rej">
+          <div class="m">1</div><div class="m">2</div><div class="m">3</div>
+          <div class="m">4</div><div class="m">5</div><div class="m fantasma">+</div>
+        </div>
+      </div>
+      <div class="sec b">
+        <div class="sec-cab">Ala derecha <span class="mano">&#8942;&#8942;</span></div>
+        <div class="rej">
+          <div class="m">6</div><div class="m">7</div><div class="m">8</div>
+          <div class="m">9</div><div class="m">10</div><div class="m fantasma">+</div>
+        </div>
+      </div>
+    </div>
+    <div class="ed"><div class="ico">+</div><div>Agregar una secci&oacute;n a esta p&aacute;gina</div></div>
+    <div class="ed"><div class="ico">+</div><div>Agregar una p&aacute;gina</div></div>
+  </div>
+</div>
+
+<table>
+  <tr><th>Gesto</th><th>Qu&eacute; hace</th></tr>
+  <tr><td>Tocar una mesa</td><td>abre su ficha: <b>n&uacute;mero, forma, tama&ntilde;o</b>, y quitarla</td></tr>
+  <tr><td>Arrastrarla</td><td>la mueve dentro de la secci&oacute;n, o <b>a otra secci&oacute;n</b></td></tr>
+  <tr><td>El <b>+</b> fantasma</td><td>agrega una mesa a esa secci&oacute;n, con el siguiente n&uacute;mero libre</td></tr>
+  <tr><td>Tocar el nombre de la secci&oacute;n</td><td>renombrarla, cambiarle el color, o borrarla</td></tr>
+  <tr><td>El <b>&#8942;&#8942;</b> de la secci&oacute;n</td><td>reordena las secciones entre s&iacute;</td></tr>
+</table>
+
+<div class="nota ojo">
+  <p style="margin:0 0 8px"><b>Quitar una mesa NO la borra.</b> Una mesa con
+  historial no se puede borrar &mdash; hay cuentas, comandas y ventas colgando de
+  ella, igual que pasa con los productos en Stock (&sect;0.6.3). <b>Se
+  desactiva</b>: desaparece del plano y su historia queda intacta.</p>
+  <p style="margin:0">Y <b>una mesa con la cuenta abierta no se puede quitar ni
+  mover de p&aacute;gina</b>. Eso s&iacute; es un candado de los que protegen
+  datos: mover el piso mientras alguien est&aacute; sentado es c&oacute;mo se
+  pierde una cuenta.</p>
+</div>
+
+<h2>5 &middot; Lo que cuesta en la base</h2>
+
+<table>
+  <tr><th>Qu&eacute;</th><th>Por qu&eacute;</th></tr>
+  <tr><td><code>lama_areas</code> &mdash; tabla nueva</td>
+      <td>Sede, nombre, color, orden, y <b>un padre</b>. Sin padre es una p&aacute;gina; con padre, una secci&oacute;n dentro de ella. Un solo dise&ntilde;o para los dos niveles</td></tr>
+  <tr><td><code>mesas.area_id</code></td>
+      <td>Reemplaza a <code>salon</code>, que hoy es un texto suelto y solo alcanza para un nivel. <b>La columna vieja se queda quieta</b> mientras se comprueba, y se saca despu&eacute;s</td></tr>
+  <tr><td><code>mesas.forma</code> y <code>mesas.tam</code></td>
+      <td>Cuadrada, redonda o larga; chica, normal o grande. <b>Por mesa</b> &mdash; el deslizador de tama&ntilde;o que ya existe sigue siendo el zoom de ese tel&eacute;fono, que es otra cosa</td></tr>
+</table>
+
+<div class="nota ojo">
+  <p style="margin:0 0 8px">⚠️ <b>Y una restricci&oacute;n que hay que cambiar,
+  dicha antes y no despu&eacute;s.</b> Hoy la base exige que el n&uacute;mero sea
+  &uacute;nico <b>por sal&oacute;n</b> (<code>mesas_una_por_salon</code>). Con
+  secciones eso permitir&iacute;a <b>dos mesas 12</b> en el mismo local, una en
+  cada secci&oacute;n &mdash; y ah&iacute; el garz&oacute;n lleva el pedido a la
+  mesa equivocada.</p>
+  <p style="margin:0">Pasa a ser <b>&uacute;nico por sede</b>, que es como
+  ustedes las nombran de verdad: la 12 es la 12 en todo Mall Plaza.
+  <b>El <code>.sql</code> comprueba primero que hoy no haya n&uacute;meros
+  repetidos entre salones</b>, y si los hay, se detiene y avisa en vez de
+  romperse a mitad.</p>
+</div>
+
+<h2>6 &middot; Tus respuestas, ya incorporadas</h2>
+
+<table>
+  <tr><th>Pregunta</th><th>Qued&oacute; as&iacute;</th></tr>
+  <tr><td><b>El n&uacute;mero del pedido</b></td>
+      <td><b>No existe.</b> Los para llevar se reconocen por la hora y porque ustedes saben de qui&eacute;n es; los de mesa van al n&uacute;mero de la mesa. <b>Se cae la columna que iba a proponer</b> &mdash; menos trabajo y menos cosa que mantener</td></tr>
+  <tr><td><b>La comanda</b></td>
+      <td>Una sola impresora y un solo sitio: de ah&iacute; sale la comida y la bebida. Y son <b>tres tipos</b> &mdash; el pedido, la precuenta para el cliente, y la reimpresi&oacute;n de una anulaci&oacute;n que muestra <b>solo el producto anulado</b>. Anotado para <b>F5</b>, con tus ejemplos cuando los mandes</td></tr>
+  <tr><td><b>&iquest;Se puede apagar?</b></td>
+      <td>S&iacute;, y m&aacute;s: <b>todo el plano es editable</b>. Una p&aacute;gina que no se usa se borra; el modo edici&oacute;n entero vive detr&aacute;s de un interruptor (&sect;2.2)</td></tr>
+</table>
+
+<h2>7 &middot; Qu&eacute; se construye, en orden</h2>
+
+<table class="pasos">
+  <tr><th>Paso</th><th>Qu&eacute;</th><th>Qui&eacute;n</th></tr>
+  <tr><td>1</td><td>El <code>.sql</code>: <code>lama_areas</code>, <code>mesas.area_id</code>, el n&uacute;mero &uacute;nico por sede, y las mesas de hoy repartidas en sus secciones</td><td>lo pega Jhon</td></tr>
+  <tr><td>2</td><td>El plano con p&aacute;ginas y secciones &mdash; solo mirar</td><td>Claude</td></tr>
+  <tr><td>3</td><td>El modo edici&oacute;n: crear, renombrar, reordenar, mover, quitar</td><td>Claude</td></tr>
+  <tr><td>4</td><td>Forma y tama&ntilde;o por mesa</td><td>Claude</td></tr>
+  <tr><td>5</td><td>La bater&iacute;a: que una mesa con cuenta abierta <b>no se pueda</b> quitar ni mover, y que quitar sea desactivar</td><td>Claude</td></tr>
+</table>
+
+<div class="nota no">
+  <p style="margin:0"><b>Nada de esto se escribe hasta que apruebes esta hoja.</b>
+  Lo &uacute;nico que me falta saber es c&oacute;mo quer&eacute;s que queden
+  repartidas las mesas <b>de Angamos</b>, si es que ah&iacute; tambi&eacute;n hay
+  secciones. Si no me dec&iacute;s nada, arrancan todas en una sola secci&oacute;n
+  llamada &laquo;Sal&oacute;n&raquo; y las mov&eacute;s vos en dos minutos.</p>
+</div>
+
+</div>
+</body>
+</html>

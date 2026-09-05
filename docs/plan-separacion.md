@@ -95,13 +95,24 @@ llegó completo.
 | | |
 |---|---|
 | Tablas | **44** |
-| Funciones | **76** |
+| Funciones | **76** ⚠️ *ver la nota* |
 | Políticas | **60** |
 | Crons | **5** |
 | Productos | **1.434** |
 
 Versión entregada a Café del Desierto: commit **`b4883c6`**, base
 **`fqjdecjsbnicvyrxkxcu`**.
+
+> ⚠️ **El 76 quedó en duda el 2026-09-05.** El `README.md` de la copia dice
+> **45** funciones *"verificado contra el original"*, y la medición en la copia
+> dio exactamente **44 · 45 · 60 · 1434** — o sea clava los otros tres números.
+> **No se puede saber cuál de los dos documentos tiene razón sin consultar la
+> base de ellos, y esa no se toca.**
+>
+> Por eso la comprobación (b) dejó de ser un conteo: ahora
+> `sql/2026-09-plus-comprobacion-fase6.sql` pregunta **por las 33 funciones que
+> la app llama de verdad**, una por una. Un conteo que no cuadra no dice cuál
+> falta.
 
 ---
 
@@ -183,8 +194,10 @@ select
   (select count(*) from public.productos) as productos;
 ```
 
-**Qué ver:** 44 · 76 · 60 · 5 · 1434. Si algún número es menor, el respaldo no
-llegó completo y hay que rehacerlo antes de seguir.
+**Qué ver:** ⚠️ **esta comprobación quedó reemplazada** — ver la nota de LA VARA.
+El conteo de funciones no tiene una vara confiable, y el de crons no aplica
+porque `pg_cron` no está instalada. La comprobación vigente es
+`sql/2026-09-plus-comprobacion-fase6.sql`.
 
 **c) La prueba de punta a punta, sin herramientas de desarrollador:** en la app
 **nueva**, crear un producto con un nombre inconfundible (`ZZZ PRUEBA COPIA`).
@@ -237,7 +250,7 @@ Si aparece en los dos, o solo en el viejo, la Fase 3 quedó mal. **Parar.**
 ## SI ALGO NO CALZA — cuándo parar y preguntar
 
 - El respaldo falla al restaurarse con errores que no se entienden.
-- Los números de la Fase 6 (b) no coinciden con 44 · 76 · 60 · 5 · 1434.
+- Alguna de las 33 funciones que la app llama dice `FALTA` en la comprobación de la Fase 6.
 - La comprobación (c) muestra el producto de prueba en la base **vieja**.
 
 En cualquiera de los tres: **parar, no improvisar, y avisar.** Ninguno de los

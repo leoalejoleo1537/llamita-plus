@@ -1139,42 +1139,75 @@ una mesa especial "Mostrador" por sede— **se deciden con maqueta antes de
 escribir código** (§0.7), porque tocan el candado `cuentas_una_viva_por_mesa`:
 en mostrador hay muchas ventas a la vez y ese índice único las prohibiría.
 
-##### ✅ La maqueta ya está escrita — 2026-09-04
+##### ✅ CONTESTADA POR JHON — 2026-09-05. Y me corrigió
 
-**[`docs/propuesta-lama-mostrador.html`](propuesta-lama-mostrador.html)**, y se
-abre desde el link de Vercel como cualquier página del proyecto. **Nada de F4 se
-escribe hasta que Jhon la apruebe.**
+**Eligió el Camino B**, y la objeción que yo le había puesto **no aplicaba**.
 
-**Lo que la maqueta compara, y a qué llega:**
+Yo escribí que una mesa "Mostrador" *se rompe sola* porque el segundo cliente no
+podría ser atendido. Él contestó que **eso no es un defecto: es la regla**. En
+Mall Plaza la **mesa 12 es para llevar y se cobra al instante**, así que nunca
+hay dos pedidos para llevar vivos a la vez. Es una regla organizacional que ya
+existe y que la gente ya sabe.
 
-| Camino | Qué pasa |
+⚠️ **Es la §0.1.8 en carne propia: razoné sobre el sistema en vez de preguntar
+cómo trabaja la gente.** Ninguna consulta SQL habría dicho que la 12 se cobra
+al instante — eso vive en la cabeza del equipo, no en la base.
+
+**Consecuencia, y es grande: vender para llevar no necesita ni una línea de
+SQL.** `cuentas.mesa_id` no se toca, el candado `cuentas_una_viva_por_mesa`
+queda como está, y las funciones tampoco cambian. **La hoja de Mostrador se
+borró** (vivía en `docs/propuesta-lama-mostrador.html`) porque proponía
+exactamente lo contrario de lo decidido, y un documento que contradice es peor
+que ninguno.
+
+##### Lo que SÍ hay que construir: el plano editable
+
+**[`docs/propuesta-lama-mesas.html`](propuesta-lama-mesas.html)** — la maqueta
+nueva, y lo que él pidió en la misma respuesta.
+
+**Mall Plaza, tal como es:**
+
+| Mesas | Qué son |
 |---|---|
-| Una mesa especial "Mostrador" por sede | **se rompe solo.** El candado deja UNA cuenta viva por mesa, así que el segundo cliente no puede ser atendido. La salida sería crear "Mostrador 1…8" — la mesa falsa que esta fase viene a eliminar, multiplicada por ocho |
-| **`mesa_id` puede quedar vacío** ⬅️ propuesto | El candado se reescribe con `and mesa_id is not null`: **el salón conserva su protección intacta** y el mostrador queda libre de tener las que haga falta |
+| **1 a 10** | El salón. Arquitectura de **isla**: la cafetería al centro y **dos alas de 5** |
+| **11 y 12** | Para llevar. La 12 se cobra al instante |
+| **13 a 20** | La barra |
+| **20** | **Administración** — todo lo que pide administración se comanda ahí, sea para llevar o para servir |
 
-**En pantalla, el mostrador es otro "salón".** La franja de salones ya existe
-(hoy no se dibuja porque solo hay uno): se le agrega *Mostrador*, y el plano se
-reemplaza por los pedidos vivos con **los mismos cuadrados y los mismos
-colores**, más un `+`. No hay cuadro "libre" porque un pedido no existe antes de
-que alguien lo abra.
+⚠️ **Y la nota que decide el diseño entero: las 11 y 12 muchas veces se usan
+para la barra.** Ninguna agrupación es fija. Por eso **las secciones se editan,
+no se escriben en el código** — §0.8: *esto describe lo que pasa casi siempre,
+no lo que pasa sin excepción*.
 
-**Lo que NO se construye de nuevo, y es casi todo:** una venta de mostrador es
-una `cuenta` igual a las demás — misma carta, misma comanda, misma precuenta,
-mismo cobro, mismo arqueo. **La F4 no agrega un flujo: le saca un requisito a
-uno que ya existe.**
+**El modelo: páginas → secciones → mesas.** La página es el botón de arriba
+(Salón, Mostrador, y las que él cree); la sección es una tarjeta de color suave
+dentro de una página (Ala izquierda, Barra, Para llevar…); la mesa es el
+cuadrado de siempre. **Dos niveles y no más**, porque con tres el plano deja de
+leerse de un vistazo.
 
-**Las tres preguntas que la maqueta le deja a Jhon:**
+**Lo que cuesta en la base:** una tabla `lama_areas` (con un padre: sin padre es
+página, con padre es sección), `mesas.area_id` en reemplazo de `salon`, y
+`mesas.forma`/`mesas.tam`.
 
-1. **El número del pedido** — se propone un correlativo del día por sede,
-   **guardado** al abrir (cuesta una columna). Contarlos en el momento no cuesta
-   nada pero los números **bailan** al cobrar uno, y entonces no sirven para
-   llamar en voz alta.
-2. **La comanda de mostrador** — se propone idéntica, con el número del pedido
-   donde iba el de la mesa.
-3. **El interruptor `LAMA_MOSTRADOR`** (§2.2) — apagado desaparece la franja y
-   el área vuelve a ser exactamente lo de antes. ⚠️ **Con una asimetría dicha en
-   voz alta:** el cambio de la base no se apaga. Volver `mesa_id` a `not null`
-   deja de ser posible en cuanto exista una venta de mostrador guardada.
+⚠️ **Y una restricción que hay que cambiar:** hoy el número es único **por
+salón**. Con secciones, eso permitiría **dos mesas 12** en el mismo local y el
+garzón llevaría el pedido a la equivocada. Pasa a ser **único por sede**, que es
+como las nombran de verdad. **El `.sql` comprueba primero** que no haya números
+repetidos entre salones, y si los hay se detiene y avisa en vez de romperse a
+mitad (§0.5).
+
+**Dos candados que sí protegen datos:** quitar una mesa **no la borra**, la
+desactiva (tiene cuentas y ventas colgando, igual que los productos en Stock); y
+**una mesa con la cuenta abierta no se puede quitar ni mover de página** —
+mover el piso mientras alguien está sentado es cómo se pierde una cuenta.
+
+##### Sus tres respuestas, y lo que cambió cada una
+
+| Pregunta | Respuesta |
+|---|---|
+| **El número del pedido** | **No existe.** Nadie llama "número 7": los para llevar se reconocen por la hora y porque el equipo sabe de quién son; los de mesa van al número de la mesa. **Se cae la columna que iba a proponer** |
+| **La comanda** | Una sola impresora, un solo sitio, comida y bebida juntas. Y son **tres tipos** → anotado en **F5** |
+| **¿Se puede apagar?** | Sí, y más: **todo el plano es editable** — agregar y quitar mesas, moverlas de sección, cambiar forma y tamaño, crear secciones dentro de páginas |
 
 #### F5 · El puente de impresión — *aislado, y hay que ir al local*
 
@@ -1182,6 +1215,26 @@ Ya está **medido, no supuesto** (§2.3). Va **aislado**, sin tocar la app ni la
 base: si falla, que falle solo. El texto ya está armado —`lamaComandaTxt` y
 `lamaPrecuentaTxt`—, así que el puente no tiene que saber nada de mesas.
 **Reimprimir un ticket** entra acá, porque sin puente no sirve de nada.
+
+##### Las TRES comandas — dicho por Jhon el 2026-09-05
+
+**Una sola impresora y un solo sitio**: de ahí sale la comida y la bebida. No
+hay una impresora de barra y otra de cocina, así que el puente no tiene que
+decidir a dónde manda nada.
+
+| # | Qué es | Qué lleva |
+|---|---|---|
+| 1 | **La comanda del pedido** | los productos que hay que sacar, **con sus comentarios** si los tienen |
+| 2 | **La precuenta** | el detalle con precios, la propina y lo demás. **Es para el cliente** |
+| 3 | **La anulación** | se reimprime, y muestra **solo el producto anulado** |
+
+⚠️ **La tercera es la que no estaba prevista** y cambia el diseño: anular no es
+solo escribir en la base, **es un papel que sale**. Sin eso la cocina sigue
+preparando lo que ya no va.
+
+**Jhon va a mandar ejemplos de las tres** para replicarlas cuando se conecte la
+impresora. Hasta entonces, `lamaComandaTxt` y `lamaPrecuentaTxt` cubren las dos
+primeras y **falta la tercera**.
 
 #### F6 · El arqueo de caja — ✅ **DESBLOQUEADO el 2026-09-04**
 
@@ -1240,11 +1293,13 @@ puntos sí los cumple, uno por uno.
    Caja**, con su debilidad dicha en voz alta: quien entra a Ajustes puede
    apagarlo. Pero esa *es* la línea de seguridad del proyecto (§6.1), y agregar
    roles solo para esto sería construir un sistema de permisos por una casilla.
-2. ⚠️ **¿Cuántas cajas físicas hay en cada local?** **Es la que no puede
-   esperar**, porque cambia la forma de la tabla y después se paga migrando
-   datos. Se propone **una caja por sede** — en Llamita no existe el concepto de
-   terminal, un garzón cobra desde su teléfono, así que un arqueo por sede no
-   tiene ambigüedad y varios sí la tendrían.
+2. ✅ **¿Cuántas cajas físicas hay en cada local? CONTESTADA el 2026-09-05:
+   una, y solamente una.** *"a esta caja física es la que se le debe hacer
+   arqueo, es decir en esta ingresa el dinero, egresa en concepto de compras o
+   egresos"*. La tabla queda cerrada: **el arqueo es de la sede**, sin selector
+   de caja y sin ambigüedad. Y confirma el diseño de los movimientos manuales —
+   una compra pagada del cajón es un **egreso**, que es exactamente lo que la
+   maqueta propone en vez de inventar un módulo de gastos.
 3. **Quién abre y cierra.** Se propone **cualquiera que entre a Lama**, con el
    nombre escrito (§0.65). El control no es impedir: es que quede registrado
    quién cerró y con qué diferencia.
@@ -1273,7 +1328,7 @@ en `/caja` — se hacen el día que Lama se muestre, no antes.
 | Cuándo | Qué |
 |---|---|
 | antes de **F3** | **El descuento de cada uno de los 5 consumos** (administrativo, garzones, eventos, redes, cumpleaños). Hoy son todos 0 |
-| antes de **F4** | Aprobar **[la maqueta de Mostrador](propuesta-lama-mostrador.html)** — ya escrita, con tres preguntas adentro |
+| antes de **F4** | Aprobar **[la maqueta del plano de mesas](propuesta-lama-mesas.html)**, y decir cómo se reparten las mesas de **Angamos** |
 | antes de **F6** | Las **tres respuestas del bloque H** del atlas, por NotebookLM |
 | cuando pueda | Una visita al local para instalar el puente (**F5**) |
 
@@ -1559,6 +1614,6 @@ poder crearlas ella:
 
 | Qué | Dónde está planteada | Qué desbloquea |
 |---|---|---|
-| **Aprobar la maqueta de Mostrador**, y contestar sus tres preguntas: el número del pedido, la comanda, y el interruptor | [`docs/propuesta-lama-mostrador.html`](propuesta-lama-mostrador.html) · resumidas en la **F4** de arriba | **F4 entero.** Nada se escribe hasta que la apruebes (§0.7) |
-| **Aprobar la maqueta del Arqueo de caja**, y contestar sus tres preguntas. ⚠️ **La de cuántas cajas físicas hay por local es la urgente**: cambia la forma de la tabla | [`docs/propuesta-lama-arqueo.html`](propuesta-lama-arqueo.html) · resumidas en la **F6** de arriba | **F6 entero** |
+| **Aprobar la maqueta del plano de mesas** — páginas, secciones y modo edición. Y decirme **cómo se reparten las mesas de Angamos**, si es que allá también hay secciones | [`docs/propuesta-lama-mesas.html`](propuesta-lama-mesas.html) · resumida en la **F4** de arriba | **F4 entero.** Nada se escribe hasta que la apruebes (§0.7) |
+| **Aprobar la maqueta del Arqueo de caja**. ✅ La urgente ya está contestada (una caja por local); quedan dos que **no bloquean**: el arqueo ciego y quién abre y cierra | [`docs/propuesta-lama-arqueo.html`](propuesta-lama-arqueo.html) · resumidas en la **F6** de arriba | **F6 entero** |
 | **Una visita al local** para instalar el puente de impresión | §2.3 de `CLAUDE.md` | **F5**, y con ella el detalle del ticket que dejó a F3 en 5 de 6 |

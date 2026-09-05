@@ -37,9 +37,9 @@ Eso significa dos cosas que conviene tener claras:
 | **Lama · comanda** | **100 %** | 5 de 5 | 🟢 |
 | **Lama · cobro** | **100 %** | 8 de 8 | 🟢 cerrado con la F1 |
 | **Lama · configuración** | **83 %** | 5 de 6 | 🟢 **hecha** · falta el detalle del ticket, que depende de F5 |
-| **Lama · mostrador** | **0 %** | 0 de 4 | 🟡 **maqueta escrita** · espera tu visto bueno |
+| **Lama · el plano de mesas** | **0 %** | 0 de 5 | 🟡 **maqueta escrita** · espera tu visto bueno |
 | **Lama · impresión** | **10 %** | medido, sin construir | ⬜ necesita ir al local |
-| **Lama · arqueo de caja** | **0 %** | 0 de 5 | 🟡 **maqueta escrita** · espera tu visto bueno |
+| **Lama · arqueo de caja** | **0 %** | 0 de 5 | 🟡 **maqueta escrita** · una caja por local, ya confirmado |
 | **Conexión Lama ↔ Stock** | **0 %** | 0 de 3 | ⬜ va última a propósito |
 | **Producto multi-cliente** | **0 %** | 0 de 4 | ⬜ no empezado |
 
@@ -89,17 +89,18 @@ pantalla) · ✅ lo anulado del día · ⬜ qué detalle lleva el ticket.
 depende de **F5**: decidir qué lleva el ticket antes de que exista el puente de
 impresión es decidir a ciegas cómo se ve algo que todavía no imprime.
 
-### Lama · mostrador — 0 de 4 🟡
+### Lama · el plano de mesas — 0 de 5 🟡
 
-Vender sin mesa · varias ventas a la vez · cobro directo · el ticket.
+Páginas · secciones en tarjetas · modo edición · forma y tamaño por mesa · los
+candados de una mesa con cuenta abierta.
 
-**La maqueta ya está escrita** y espera tu visto bueno:
-[`docs/propuesta-lama-mostrador.html`](propuesta-lama-mostrador.html). Sigue en
-0 de 4 a propósito — una maqueta no es una pieza construida.
+✅ **Vender para llevar dejó de ser un problema el 2026-09-05.** Jhon eligió la
+mesa especial, y la objeción técnica no aplicaba: la mesa 12 se cobra al
+instante, así que nunca hay dos para llevar a la vez. **Eso no cuesta ni una
+línea de SQL.**
 
-⚠️ **Tiene un costo en la base**, y la maqueta lo compara: `cuentas.mesa_id` es
-obligatorio y el candado `cuentas_una_viva_por_mesa` prohíbe dos cuentas vivas
-en la misma mesa — en mostrador hay muchas a la vez.
+**Lo que sí hay que construir es el plano editable**, y su maqueta espera visto
+bueno: [`docs/propuesta-lama-mesas.html`](propuesta-lama-mesas.html).
 
 ### Lama · impresión — medido, sin construir ⬜
 
@@ -159,4 +160,4 @@ cliente.
 | **Decidir el arqueo ciego** — Fudo lo hace con roles y Llamita no tiene | que F6 arranque sin frenarse a mitad |
 | Desplegar las **11 Edge Functions** | los crons: la foto diaria y la limpieza |
 | Una **visita al local** con el puente instalado | la impresión |
-| Aprobar la maqueta de **mostrador** ([ya está escrita](propuesta-lama-mostrador.html)) | el mostrador |
+| Aprobar la maqueta del **plano de mesas** ([ya está escrita](propuesta-lama-mesas.html)) | el plano editable |

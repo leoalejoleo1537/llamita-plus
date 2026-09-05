@@ -55,13 +55,29 @@ El plan completo está en **[`docs/plan-separacion.md`](docs/plan-separacion.md)
 |---|---|
 | **El código no nombra el proyecto de ellos** | ✅ cero resultados en `index.html` y en los 128 `.sql` |
 | **La app corre contra la base nueva** | ✅ Jhon entra, ve sus datos, y el `.sql` del tiempo real hizo efecto |
-| **(a) Ningún cron apunta al proyecto viejo** | ⬜ los crons no viajaron en el respaldo, así que hay poco que apuntar — igual **hay que mirarlo**, no suponerlo |
-| **(b) Los números de la estructura** — 44 · 76 · 60 · 5 · 1434 | ⬜ sin correr |
+| **(a) Ningún cron apunta al proyecto viejo** | ✅ **2026-09-05** · `pg_cron` **no está instalada** en este proyecto, así que no existe ni un cron. Nada puede llamar a la casa de ellos |
+| **(b) Los números de la estructura** | 🟡 **medido**: 44 tablas · **45** funciones · 60 políticas · 1.434 productos. Tres de cuatro clavados; el de funciones **no tiene una vara confiable** — ver abajo |
 | **(c) El producto `ZZZ PRUEBA COPIA`** — que aparezca acá y **no** allá | ⬜ **es la prueba que de verdad prueba**, y no está hecha |
 
 ⚠️ **La (c) es la que importa** y las otras dos no la reemplazan. Mientras no
 esté, lo honesto es decir *"todo indica que quedó separado"*, no *"está
 comprobado"*.
+
+#### El número de funciones: dos documentos nuestros no coinciden
+
+`docs/plan-separacion.md` dice que el original tenía **76** funciones; este mismo
+`README` dice **45**, *"verificado contra el original"*. **Las dos no pueden ser
+ciertas**, y desde acá no se puede saber cuál lo es: la base de Café del Desierto
+no se toca.
+
+Lo medido el 2026-09-05 en la copia da **45**, y clava los otros tres números.
+Eso hace probable que 45 sea la vara buena y 76 un conteo hecho de otra forma —
+**pero probable no es comprobado**.
+
+✅ **Por eso se cambió la comprobación por una que sí sirve:** en vez de un
+conteo, `sql/2026-09-plus-comprobacion-fase6.sql` pregunta **una por una por las
+33 funciones que la app llama de verdad**. Un conteo que no cuadra no dice cuál
+falta; esta lista sí.
 
 **Además de la Fase 4, quedaron cuatro cosas que a propósito no viajaron en el
 respaldo** y hay que rehacer en el proyecto nuevo cuando toque:
