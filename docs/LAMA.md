@@ -1208,6 +1208,41 @@ un interruptor por sede, o un permiso propio como `puede_ver_esperado`— y la
 elección es de Jhon, cuando F6 arranque. Queda anotado acá para que llegue
 planteado y no aparezca a mitad de construir.
 
+##### ✅ La maqueta ya está escrita — 2026-09-05
+
+**[`docs/propuesta-lama-arqueo.html`](propuesta-lama-arqueo.html)**. Traduce el
+bloque H del atlas a lo que Llamita puede hacer, y **marca dónde nos separamos
+a propósito**. Nada de F6 se escribe hasta que Jhon la apruebe.
+
+**Lo que la maqueta decide, y por qué:**
+
+| | |
+|---|---|
+| **La cuenta** | monto inicial + efectivo cobrado ± movimientos de mano. **Los gastos a proveedor y las propinas retiradas quedan fuera**: Llamita no tiene módulo de gastos, e inventarlo dentro del arqueo sería construir dos cosas escondidas en una tercera. Un pago sacado del cajón se anota como **egreso manual con su nota** — es la misma plata saliendo |
+| **Los medios que no son efectivo** | van abajo y en gris. No suman al cajón, pero al cierre se cuadran los cupones contra ellos |
+| **Se guarda** | `lama_arqueos` y `lama_caja_movimientos`, **y nada más**. Las ventas ya están en `cuentas`, los pagos en `cuenta_pagos` y las propinas en `cuenta_propinas`: el arqueo los **lee**, no los copia |
+| **La diferencia se congela** al cerrar | misma razón que el total de `cuentas`: el arqueo de dentro de seis meses no tiene por qué volver a sumar seis meses de líneas |
+| **Cerrar es irreversible** | y es un candado **legítimo** — de los que protegen los datos (§0.8). Con el arqueo cerrado no se puede anular una venta de esa franja (atlas E2). La corrección es la de la contabilidad de siempre: **un ajuste en el turno siguiente**. Se corrige sumando, nunca borrando |
+
+⚠️ **Ese candado no cumple el punto 6 de §0.8 —no se puede apagar—, y está
+dicho en la maqueta**, igual que el tope en cero del inventario. Los otros cinco
+puntos sí los cumple, uno por uno.
+
+**Las tres preguntas que la maqueta le deja a Jhon:**
+
+1. **El arqueo ciego.** Se propone **un interruptor por sede, en Ajustes →
+   Caja**, con su debilidad dicha en voz alta: quien entra a Ajustes puede
+   apagarlo. Pero esa *es* la línea de seguridad del proyecto (§6.1), y agregar
+   roles solo para esto sería construir un sistema de permisos por una casilla.
+2. ⚠️ **¿Cuántas cajas físicas hay en cada local?** **Es la que no puede
+   esperar**, porque cambia la forma de la tabla y después se paga migrando
+   datos. Se propone **una caja por sede** — en Llamita no existe el concepto de
+   terminal, un garzón cobra desde su teléfono, así que un arqueo por sede no
+   tiene ambigüedad y varios sí la tendrían.
+3. **Quién abre y cierra.** Se propone **cualquiera que entre a Lama**, con el
+   nombre escrito (§0.65). El control no es impedir: es que quede registrado
+   quién cerró y con qué diferencia.
+
 **Los datos ya están guardados:** `cuenta_pagos`, `cuenta_propinas` y las
 columnas congeladas de `cuentas` se diseñaron para alimentar esto.
 
@@ -1519,5 +1554,5 @@ poder crearlas ella:
 | Qué | Dónde está planteada | Qué desbloquea |
 |---|---|---|
 | **Aprobar la maqueta de Mostrador**, y contestar sus tres preguntas: el número del pedido, la comanda, y el interruptor | [`docs/propuesta-lama-mostrador.html`](propuesta-lama-mostrador.html) · resumidas en la **F4** de arriba | **F4 entero.** Nada se escribe hasta que la apruebes (§0.7) |
-| **El arqueo ciego**: Fudo lo hace con un permiso por rol y Llamita no tiene roles a propósito (§6.1). Tres caminos: dejarlo fuera, un interruptor por sede, o un permiso propio | la **F6** de arriba | que F6 arranque sin que la decisión aparezca a mitad de construir |
+| **Aprobar la maqueta del Arqueo de caja**, y contestar sus tres preguntas. ⚠️ **La de cuántas cajas físicas hay por local es la urgente**: cambia la forma de la tabla | [`docs/propuesta-lama-arqueo.html`](propuesta-lama-arqueo.html) · resumidas en la **F6** de arriba | **F6 entero** |
 | **Una visita al local** para instalar el puente de impresión | §2.3 de `CLAUDE.md` | **F5**, y con ella el detalle del ticket que dejó a F3 en 5 de 6 |

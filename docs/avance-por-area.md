@@ -39,7 +39,7 @@ Eso significa dos cosas que conviene tener claras:
 | **Lama · configuración** | **83 %** | 5 de 6 | 🟢 **hecha** · falta el detalle del ticket, que depende de F5 |
 | **Lama · mostrador** | **0 %** | 0 de 4 | 🟡 **maqueta escrita** · espera tu visto bueno |
 | **Lama · impresión** | **10 %** | medido, sin construir | ⬜ necesita ir al local |
-| **Lama · arqueo de caja** | **0 %** | 0 de 5 | 🟡 **desbloqueado** · el atlas ya contestó |
+| **Lama · arqueo de caja** | **0 %** | 0 de 5 | 🟡 **maqueta escrita** · espera tu visto bueno |
 | **Conexión Lama ↔ Stock** | **0 %** | 0 de 3 | ⬜ va última a propósito |
 | **Producto multi-cliente** | **0 %** | 0 de 4 | ⬜ no empezado |
 
@@ -121,11 +121,15 @@ completo, la fórmula del efectivo esperado, que el cierre es **irreversible**,
 que puede haber varios arqueos abiertos a la vez, y que si se olvidaron de
 abrirlo se puede abrir con hora hacia atrás.
 
-⚠️ **Pero trae una decisión para Jhon, y conviene que llegue planteada:** el
-*arqueo ciego* de Fudo es **un permiso por rol**, y Llamita no tiene roles a
-propósito (§6.1). Es el primer caso donde esa decisión cuesta algo concreto —
-no es comodidad, es control anti-fraude. Los tres caminos están en
-`docs/LAMA.md`, en la F6.
+**La maqueta ya está escrita** y espera tu visto bueno:
+[`docs/propuesta-lama-arqueo.html`](propuesta-lama-arqueo.html). Sigue en 0 de 5
+a propósito — una maqueta no es una pieza construida.
+
+⚠️ **Trae tres preguntas para Jhon**, y una es urgente: **cuántas cajas físicas
+hay en cada local**, porque cambia la forma de la tabla y después se paga
+migrando datos. Las otras dos son el *arqueo ciego* —que en Fudo es un permiso
+por rol y Llamita no tiene roles a propósito (§6.1)— y quién puede abrir y
+cerrar.
 
 ### Conexión Lama ↔ Stock — 0 de 3 ⬜
 

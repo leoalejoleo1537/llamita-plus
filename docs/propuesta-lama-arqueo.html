@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Propuesta &middot; Arqueo de caja (F6)</title>
+<style>
+  :root{
+    --navy:#0F1E31; --navy2:#16283F;
+    --orange:#DC4405; --orange-dark:#B93A04;
+    --bg:#E9EEF5; --card:#FDFEFF; --border:#D6DFEB;
+    --text:#121E2C; --muted:#61707F;
+    --red-bg:#FCE9E6; --red-fg:#C0392B;
+    --green-bg:#E4F1E5; --green-fg:#2E7D32;
+    --amber-bg:#FDF0DE; --amber-fg:#9C6209;
+    --gray-bg:#E1E8F1; --gray-fg:#54677D;
+    --azul-bg:#E8F0FB; --azul-fg:#2C5AA0;
+    --sec-bg:#D0DDEC; --sec-tx:#1F3A5C; --sec-line:rgba(31,58,92,.22);
+    --sec-filo:#41628C;
+    --sombra:0 2px 4px rgba(20,40,70,.04), 0 12px 26px -18px rgba(20,40,70,.34);
+    --r-card:20px; --r-sec:18px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+       background:var(--bg);color:var(--text);line-height:1.5}
+  .doc{max-width:1080px;margin:0 auto;padding:22px 16px 80px}
+
+  h1{font-size:26px;margin:0 0 4px;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 26px}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:.06em;
+     color:var(--sec-tx);background:var(--sec-bg);border-left:4px solid var(--sec-filo);
+     padding:9px 14px;border-radius:0 var(--r-sec) var(--r-sec) 0;margin:38px 0 16px}
+  h3{font-size:16px;margin:26px 0 8px}
+  p{margin:0 0 12px}
+  .nota{background:var(--card);border:1px solid var(--border);border-radius:14px;
+        padding:14px 16px;margin:0 0 18px;box-shadow:var(--sombra)}
+  .nota.ojo{background:var(--amber-bg);border-color:rgba(156,98,9,.28)}
+  .nota.si{background:var(--green-bg);border-color:rgba(46,125,50,.28)}
+  .nota.no{background:var(--red-bg);border-color:rgba(192,57,43,.28)}
+  .nota b{color:var(--text)}
+  code{background:var(--gray-bg);border-radius:5px;padding:1px 5px;font-size:.9em}
+
+  .marco{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);
+         box-shadow:var(--sombra);overflow:hidden;margin:0 0 10px}
+  .marco-tit{background:var(--navy);color:#fff;font-size:12px;letter-spacing:.05em;
+             text-transform:uppercase;padding:8px 14px;display:flex;
+             justify-content:space-between;align-items:center}
+  .marco-tit span{opacity:.62;text-transform:none;letter-spacing:0;font-size:11px}
+  .lienzo{padding:16px;background:var(--bg)}
+  .pie-marco{font-size:13px;color:var(--muted);margin:0 0 26px;padding:0 4px}
+
+  /* la franja Salón | Mostrador, igual que la de salones de la app */
+  .salones{display:flex;gap:6px;margin:0 0 14px}
+  .salones button{background:var(--card);border:1px solid var(--border);color:var(--muted);
+    border-radius:999px;padding:8px 18px;font-size:14px;font-weight:700;cursor:default}
+  .salones button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+
+  /* el plano, con los mismos cuadrados de la app */
+  .plano{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:7px;
+         padding:6px 8px 16px}
+  .mesa{aspect-ratio:1;border-radius:var(--r-sec);display:flex;flex-direction:column;
+        align-items:center;justify-content:center;gap:3px;font-weight:800;font-size:22px}
+  .mesa .r{font-size:11px;font-weight:700;opacity:.85;letter-spacing:.03em}
+  .mesa.libre{background:var(--green-bg);color:var(--green-fg)}
+  .mesa.ocupada{background:var(--red-fg);color:#fff}
+  .mesa.cobrando{background:var(--azul-fg);color:#fff}
+  .mesa.nueva{background:var(--card);border:1px dashed var(--border);color:var(--orange);font-size:30px}
+  .mesa.sel{box-shadow:0 0 0 5px rgba(220,68,5,.16), 0 8px 24px -6px rgba(220,68,5,.7)}
+
+  table{width:100%;table-layout:fixed;border-collapse:collapse;background:var(--card);
+        border:1px solid var(--border);border-radius:14px;overflow:hidden;
+        box-shadow:var(--sombra);margin:0 0 18px;font-size:14px}
+  th{background:var(--sec-bg);color:var(--sec-tx);text-align:left;padding:10px 13px;
+     font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+  td{padding:10px 13px;border-top:1px solid var(--border);vertical-align:top}
+  td code,.op code{overflow-wrap:anywhere}
+  th:first-child{width:38%}
+  table.pasos th:nth-child(1){width:15%}
+  table.pasos th:nth-child(3){width:26%}
+  td.si{color:var(--green-fg);font-weight:700}
+  td.no{color:var(--red-fg);font-weight:700}
+
+  .pregunta{background:var(--azul-bg);border:1px solid rgba(44,90,160,.28);
+            border-radius:14px;padding:16px 18px;margin:0 0 16px}
+  .pregunta h4{margin:0 0 8px;font-size:16px;color:var(--azul-fg)}
+  .op{background:#fff;border:1px solid var(--border);border-radius:11px;
+      padding:11px 13px;margin:8px 0 0;font-size:14px}
+  .op b{color:var(--azul-fg)}
+  .op.gana{border-color:rgba(46,125,50,.45);background:var(--green-bg)}
+  .marca{background:var(--azul-bg);color:var(--azul-fg);border-radius:999px;
+         padding:3px 10px;font-size:12px;font-weight:700;display:inline-block}
+  .marca.ok{background:var(--green-bg);color:var(--green-fg)}
+  .marca.mal{background:var(--red-bg);color:var(--red-fg)}
+</style>
+<style>
+  .caja-tarj{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);
+    box-shadow:var(--sombra);padding:16px;max-width:430px;margin:0 auto}
+  .caja-tarj h4{margin:0 0 4px;font-size:17px}
+  .caja-tarj .cab{color:var(--muted);font-size:13px;margin:0 0 14px}
+  .ren{display:flex;align-items:center;gap:10px;padding:9px 2px;font-size:15px}
+  .ren + .ren{border-top:1px solid rgba(31,58,92,.085)}
+  .ren .n{flex:1}
+  .ren .v{font-weight:700;font-variant-numeric:tabular-nums}
+  .ren .v.gris{color:var(--muted);font-weight:600}
+  .tot{margin-top:10px;padding:11px 13px;border-radius:14px;background:var(--gray-bg);
+    display:flex;gap:10px;align-items:center;font-weight:800;font-size:16px}
+  .tot .n{flex:1}
+  .tot.verde{background:var(--green-bg);color:var(--green-fg)}
+  .tot.rojo{background:var(--red-bg);color:var(--red-fg)}
+  .tot.oculto{background:var(--azul-bg);color:var(--azul-fg);font-weight:700;font-size:14px}
+  .campo{margin:0 0 12px}
+  .campo label{display:block;font-size:12px;color:var(--muted);margin:0 0 5px;
+    text-transform:uppercase;letter-spacing:.04em}
+  .campo .cj{border:1px solid var(--border);border-radius:11px;padding:10px 12px;
+    background:#fff;font-size:16px;font-variant-numeric:tabular-nums}
+  .campo .cj.vacio{color:#B9C4D2}
+  .btns{display:flex;gap:10px;margin-top:16px}
+  .btn{flex:1;text-align:center;padding:12px;border-radius:12px;font-weight:700;font-size:15px}
+  .btn.pri{background:var(--orange);color:#fff}
+  .btn.sec{background:var(--card);border:1px solid var(--border);color:var(--muted)}
+  .aviso{display:flex;gap:10px;align-items:center;background:var(--amber-bg);
+    color:var(--amber-fg);border-radius:14px;padding:12px 14px;font-weight:700;font-size:14px;
+    max-width:430px;margin:0 auto}
+  .aviso .b{background:var(--amber-fg);color:#fff;border-radius:999px;padding:6px 14px;
+    font-size:13px;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>Arqueo de caja</h1>
+<p class="sub">La <b>F6</b> de la ruta &middot; maqueta para aprobar antes de escribir c&oacute;digo (&sect;0.7) &middot; 2026-09-05</p>
+
+<div class="nota">
+  <p style="margin:0"><b>Qu&eacute; resuelve.</b> Hoy Llamita cobra, pero no sabe
+  cu&aacute;nta plata deber&iacute;a haber en el caj&oacute;n al final del turno.
+  El arqueo es la pieza que cierra el d&iacute;a: se declara con cu&aacute;nto se
+  arranca, el sistema suma lo que se cobr&oacute; en efectivo, el cajero cuenta,
+  y la diferencia queda escrita para siempre.</p>
+</div>
+
+<div class="nota si">
+  <p style="margin:0"><b>El atlas ya lo contest&oacute; entero</b> (bloque H, las
+  tres preguntas que pasaste por NotebookLM el 2026-09-04). Esta maqueta no
+  inventa nada: traduce lo que Fudo hace a lo que Llamita puede hacer, y marca
+  <b>d&oacute;nde nos separamos a prop&oacute;sito</b>.</p>
+</div>
+
+<h2>1 &middot; La cuenta, y nada m&aacute;s que la cuenta</h2>
+
+<p>Fudo calcula el efectivo esperado as&iacute;:</p>
+
+<div class="caja-tarj" style="margin-bottom:14px">
+  <div class="ren"><span class="n">Monto inicial <i>(el fondo de cambio)</i></span><span class="v">+</span></div>
+  <div class="ren"><span class="n">Ventas cobradas en efectivo</span><span class="v">+</span></div>
+  <div class="ren"><span class="n">Ingresos manuales <i>(entra sencillo)</i></span><span class="v">+</span></div>
+  <div class="ren"><span class="n">Egresos manuales <i>(retiro de seguridad)</i></span><span class="v">&minus;</span></div>
+  <div class="ren"><span class="n">Gastos a proveedor pagados de la caja</span><span class="v gris">&minus;</span></div>
+  <div class="ren"><span class="n">Propinas retiradas</span><span class="v gris">&minus;</span></div>
+</div>
+
+<div class="nota ojo">
+  <p style="margin:0 0 8px"><b>Las dos &uacute;ltimas quedan fuera, y hay que
+  decirlo ahora.</b> Llamita <b>no tiene m&oacute;dulo de gastos</b> ni registro
+  de retiro de propinas. Inventarlos para el arqueo ser&iacute;a construir dos
+  cosas nuevas escondidas dentro de una tercera.</p>
+  <p style="margin:0"><b>Y no hace falta:</b> un pago a proveedor sacado del
+  caj&oacute;n se registra como un <b>egreso manual</b> con su nota. Es la misma
+  plata saliendo, anotada por quien la sac&oacute;. El d&iacute;a que exista un
+  m&oacute;dulo de gastos de verdad, se conecta.</p>
+</div>
+
+<p><b>Lo que S&Iacute; entra, y es lo que importa:</b> las tarjetas y las
+transferencias <b>no tocan el efectivo</b> &mdash;impacto nulo, dice el
+atlas&mdash; pero se cuentan aparte, para que al cierre se puedan cuadrar los
+cupones contra lo que dice el sistema.</p>
+
+<h2>2 &middot; La pantalla, en cuatro momentos</h2>
+
+<h3>a &middot; No hay caja abierta</h3>
+<div class="marco">
+  <div class="marco-tit">Mesas <span>la franja de arriba</span></div>
+  <div class="lienzo">
+    <div class="aviso"><span class="n" style="flex:1">La caja del turno no est&aacute; abierta</span><span class="b">Abrir</span></div>
+  </div>
+</div>
+<p class="pie-marco">Un aviso, no un candado: <b>se puede vender igual</b>. Fudo
+hace lo mismo, y es lo correcto &mdash; una caja sin abrir no puede ser motivo
+para que un cliente no sea atendido. Lo que s&iacute; hace es avisar, porque una
+venta cobrada sin arqueo abierto queda fuera del cuadre.</p>
+
+<h3>b &middot; Abrir</h3>
+<div class="marco">
+  <div class="marco-tit">Abrir la caja</div>
+  <div class="lienzo">
+    <div class="caja-tarj">
+      <h4>Abrir la caja</h4>
+      <p class="cab">Hoy 09:12 &middot; Mall Plaza</p>
+      <div class="campo">
+        <label>Monto inicial &mdash; el fondo de cambio</label>
+        <div class="cj">$ 30.000</div>
+      </div>
+      <div class="btns"><div class="btn sec">Cancelar</div><div class="btn pri">Abrir</div></div>
+    </div>
+  </div>
+</div>
+<p class="pie-marco">Un campo. Nada m&aacute;s. La hora la pone el sistema
+&mdash;y se puede corregir hacia atr&aacute;s, que es la salida de Fudo para
+cuando alguien se olvid&oacute; de abrirla.</p>
+
+<h3>c &middot; La caja abierta, durante el turno</h3>
+<div class="marco">
+  <div class="marco-tit">Caja <span>abierta desde las 09:12</span></div>
+  <div class="lienzo">
+    <div class="caja-tarj">
+      <h4>Caja abierta</h4>
+      <p class="cab">Desde las 09:12 &middot; la abri&oacute; Adriana</p>
+      <div class="ren"><span class="n">Monto inicial</span><span class="v">$ 30.000</span></div>
+      <div class="ren"><span class="n">Efectivo cobrado &middot; 34 ventas</span><span class="v">$ 218.400</span></div>
+      <div class="ren"><span class="n">Ingresos y egresos &middot; 2</span><span class="v">&minus; $ 12.000</span></div>
+      <div class="tot"><span class="n">Deber&iacute;a haber</span><span>$ 236.400</span></div>
+      <div class="ren"><span class="n">D&eacute;bito</span><span class="v gris">$ 141.900</span></div>
+      <div class="ren"><span class="n">Transferencia</span><span class="v gris">$ 38.000</span></div>
+      <div class="btns"><div class="btn sec">Movimiento</div><div class="btn pri">Cerrar caja</div></div>
+    </div>
+  </div>
+</div>
+<p class="pie-marco">Los medios que no son efectivo van <b>abajo y en gris</b>:
+no suman al caj&oacute;n, pero al cierre hay que cuadrar los cupones contra
+ellos.</p>
+
+<h3>d &middot; Cerrar &mdash; el cajero declara</h3>
+<div class="marco">
+  <div class="marco-tit">Cerrar la caja <span>seg&uacute;n usuario</span></div>
+  <div class="lienzo">
+    <div class="caja-tarj">
+      <h4>Cont&aacute; el caj&oacute;n</h4>
+      <p class="cab">Escrib&iacute; lo que hay de verdad</p>
+      <div class="campo"><label>Efectivo contado</label><div class="cj vacio">$</div></div>
+      <div class="campo"><label>D&eacute;bito &middot; cupones</label><div class="cj">$ 141.900</div></div>
+      <div class="campo"><label>Comentario <i>(opcional)</i></label><div class="cj vacio">Si pas&oacute; algo raro, ac&aacute;</div></div>
+      <div class="tot oculto">La diferencia se ve reci&eacute;n al cerrar</div>
+      <div class="btns"><div class="btn sec">Volver</div><div class="btn pri">Cerrar caja</div></div>
+    </div>
+  </div>
+</div>
+<p class="pie-marco">As&iacute; se ve <b>con el arqueo ciego encendido</b>: el
+campo del efectivo llega vac&iacute;o y no se muestra cu&aacute;nto
+deber&iacute;a haber. Los cupones de d&eacute;bito vienen llenos, porque contar
+un papel que el sistema ya sabe no controla nada &mdash; es la propia
+recomendaci&oacute;n de Fudo.</p>
+
+<div class="marco">
+  <div class="marco-tit">Caja cerrada <span>el resultado</span></div>
+  <div class="lienzo">
+    <div class="caja-tarj">
+      <h4>Caja cerrada</h4>
+      <p class="cab">09:12 &rarr; 15:38 &middot; la cerr&oacute; Adriana</p>
+      <div class="ren"><span class="n">Seg&uacute;n el sistema</span><span class="v">$ 236.400</span></div>
+      <div class="ren"><span class="n">Contado</span><span class="v">$ 234.900</span></div>
+      <div class="tot rojo"><span class="n">Falta</span><span>$ 1.500</span></div>
+    </div>
+  </div>
+</div>
+<p class="pie-marco">Verde si sobra, rojo si falta &mdash; los colores de la
+casa y los de Fudo coinciden. <b>Y ac&aacute; se termina:</b> un arqueo cerrado
+no se reabre jam&aacute;s.</p>
+
+<h2>3 &middot; Lo que se guarda</h2>
+
+<table>
+  <tr><th>Tabla</th><th>Qu&eacute; guarda</th></tr>
+  <tr><td><code>lama_arqueos</code></td><td>Un turno de caja: sede, monto inicial, qui&eacute;n y cu&aacute;ndo abri&oacute;, qui&eacute;n y cu&aacute;ndo cerr&oacute;, lo declarado por medio, el comentario, y la diferencia congelada</td></tr>
+  <tr><td><code>lama_caja_movimientos</code></td><td>Los ingresos y egresos de mano: monto, si entra o sale, la nota, y qui&eacute;n lo hizo</td></tr>
+  <tr><td>Nada m&aacute;s</td><td>Las ventas ya est&aacute;n en <code>cuentas</code>, los pagos en <code>cuenta_pagos</code> y las propinas en <code>cuenta_propinas</code>. <b>Se dise&ntilde;aron para esto</b> &mdash; el arqueo los lee, no los copia</td></tr>
+</table>
+
+<div class="nota">
+  <p style="margin:0"><b>La diferencia se congela al cerrar</b>, aunque se pueda
+  recalcular. Es la misma raz&oacute;n por la que <code>cuentas</code> congela su
+  total: el arqueo de dentro de seis meses no tiene por qu&eacute; volver a sumar
+  seis meses de l&iacute;neas, y si ma&ntilde;ana cambia un precio, el martes
+  pasado sigue diciendo lo que dec&iacute;a.</p>
+</div>
+
+<h2>4 &middot; El candado que S&Iacute; corresponde</h2>
+
+<div class="nota ojo">
+  <p style="margin:0 0 8px"><b>Cerrar un arqueo es irreversible, y eso es un
+  candado leg&iacute;timo</b> &mdash; de los que protegen los datos, no una forma
+  de trabajar (&sect;0.8). Con el arqueo cerrado ya no se puede anular una venta
+  de esa franja: el atlas lo dice (E2) y la raz&oacute;n es obvia, porque
+  cambiar&iacute;a un n&uacute;mero que ya se declar&oacute; y se firm&oacute;.</p>
+  <p style="margin:0">La correcci&oacute;n existe y es la de siempre en
+  contabilidad: <b>un movimiento de ajuste en el turno siguiente</b>. Se corrige
+  sumando, nunca borrando.</p>
+</div>
+
+<p>Y por las seis preguntas de &sect;0.8, dicho una por una: es <b>sin
+excepci&oacute;n</b> (no &quot;casi siempre&quot;), <b>protege los datos</b>, la
+excepci&oacute;n leg&iacute;tima que se busc&oacute; &mdash;me equivoqu&eacute;
+al declarar&mdash; <b>tiene salida sin abrir nada</b>, <b>avisa</b> en vez de
+hacer algo raro en silencio, <b>se decidi&oacute; para este caso</b>, y lo
+&uacute;nico que no cumple es el punto 6: <b>no se puede apagar</b>, igual que el
+tope en cero del inventario.</p>
+
+<h2>5 &middot; Las tres preguntas que necesitan tu respuesta</h2>
+
+<div class="pregunta">
+  <h4>1 &middot; El arqueo ciego &mdash; el punto que traj&iacute;ste vos</h4>
+  <p style="margin:0 0 4px">Fudo lo hace <b>quit&aacute;ndole un permiso al rol
+  Cajero</b>. Llamita <b>no tiene roles</b>, y no por descuido: &sect;6.1 dice que
+  la seguridad se mantiene en m&iacute;nimos y que el &uacute;nico candado real
+  es la puerta de Ajustes. Este es el primer caso donde esa decisi&oacute;n
+  cuesta algo concreto, porque el arqueo ciego <b>no es una comodidad: es un
+  control anti-fraude</b>.</p>
+  <div class="op gana"><b>Propuesta: un interruptor por sede, en Ajustes &rarr;
+  Caja.</b> Encendido, el cajero declara a ciegas. Apagado, ve todo &mdash; que
+  es exactamente lo de hoy, o sea un apagado que no deja hueco (&sect;2.2).
+  <p style="margin:8px 0 0"><b>Su debilidad, dicha en voz alta:</b> quien entra
+  a Ajustes puede apagarlo. Pero esa <i>es</i> la l&iacute;nea de seguridad del
+  proyecto entero, y agregar roles solo para esto ser&iacute;a construir un
+  sistema de permisos completo por una casilla.</p></div>
+  <div class="op"><b>Las otras dos:</b> dejarlo fuera por ahora &mdash;el arqueo
+  funciona igual, con menos control&mdash;; o un permiso propio
+  <code>puede_ver_esperado</code> en <code>app_permisos</code>, que es media
+  hora m&aacute;s de trabajo y abre la puerta a los roles por la ventana.</div>
+</div>
+
+<div class="pregunta">
+  <h4>2 &middot; &iquest;Cu&aacute;ntas cajas f&iacute;sicas hay en cada local?</h4>
+  <p style="margin:0 0 4px">Fudo permite varios arqueos abiertos a la vez, uno
+  por caja registradora. Eso funciona all&aacute; porque cada venta sabe en
+  qu&eacute; terminal se hizo. <b>En Llamita no existe el concepto de terminal</b>:
+  un garz&oacute;n cobra desde su tel&eacute;fono.</p>
+  <div class="op gana"><b>Propuesta: una caja por sede.</b> El arqueo es de la
+  sede y toma todas las ventas cobradas en su franja. Simple, sin ambig&uuml;edad,
+  y es lo que un caf&eacute; con un solo caj&oacute;n necesita.</div>
+  <div class="op">Si en alg&uacute;n local hay <b>dos cajones separados</b> que
+  se cuadran por separado, dec&iacute;melo ahora: cambia la tabla, y agregarlo
+  despu&eacute;s es migrar datos en vez de crear una columna.</div>
+</div>
+
+<div class="pregunta">
+  <h4>3 &middot; &iquest;Qui&eacute;n puede abrir y cerrar la caja?</h4>
+  <div class="op gana"><b>Propuesta: cualquiera que entre a Lama</b>, y queda
+  escrito qui&eacute;n lo hizo. Es la doctrina de &sect;0.65 &mdash;un permiso
+  pensado para una acci&oacute;n no se hereda a otra&mdash; y lo que evita el
+  desastre operativo de que el turno no pueda cerrar porque falt&oacute; la
+  persona con el bot&oacute;n.</div>
+  <div class="op">El control no es impedir: es que <b>el nombre quede
+  escrito</b>. Un arqueo cerrado dice qui&eacute;n lo cerr&oacute; y con
+  qu&eacute; diferencia, y eso no se borra.</div>
+</div>
+
+<h2>6 &middot; Qu&eacute; se construye, en orden</h2>
+
+<table class="pasos">
+  <tr><th>Paso</th><th>Qu&eacute;</th><th>Qui&eacute;n</th></tr>
+  <tr><td>1</td><td>El <code>.sql</code>: las dos tablas, y el candado que impide anular una venta de un arqueo cerrado</td><td>lo pega Jhon</td></tr>
+  <tr><td>2</td><td>Abrir la caja y el aviso cuando no hay ninguna</td><td>Claude</td></tr>
+  <tr><td>3</td><td>La tarjeta del turno y los movimientos de mano</td><td>Claude</td></tr>
+  <tr><td>4</td><td>Cerrar, con el interruptor del arqueo ciego en sus dos posiciones</td><td>Claude</td></tr>
+  <tr><td>5</td><td>El historial de arqueos, que no se puede tocar</td><td>Claude</td></tr>
+</table>
+
+<div class="nota no">
+  <p style="margin:0"><b>Nada de esto se escribe hasta que apruebes esta hoja.</b>
+  Y de las tres preguntas, <b>la 2 es la que no puede esperar</b>: una caja o
+  varias cambia la forma de la tabla, y eso despu&eacute;s se paga migrando
+  datos.</p>
+</div>
+
+</div>
+</body>
+</html>
