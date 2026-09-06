@@ -91,6 +91,13 @@ order by esta, f.nombre;
 
 ---
 
+> **El resultado tal cual salió** lo pegó Jhon acá el 2026-09-05, y se resume
+> arriba en vez de dejar el volcado entero: 33 filas de JSON en el archivo que
+> se lee para saber *qué falta correr* lo vuelven ilegible. **Queda en la
+> historia de git**, en el commit `4c450ac`, si alguna vez hay que mirarlo
+> literal.
+
+
 ### [ ] La prueba `ZZZ PRUEBA COPIA` — falta rematarla
 
 **Lo que ya pasó el 2026-09-05:** creaste el producto en Llamita Plus, **apareció
