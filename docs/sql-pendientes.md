@@ -25,7 +25,7 @@
 
 ## Pendientes ahora
 
-### [ ] `sql/2026-09-plus-comprobacion-fase6.sql` — **corregido el 2026-09-05**
+### [x] `sql/2026-09-plus-comprobacion-fase6.sql` — **corrido el 2026-09-05** ✅
 
 > **No escribe nada. Es un `select`.** Se puede correr las veces que sea.
 
@@ -39,13 +39,24 @@ aunque el resto esté perfecto. Es la §0.1.9 del archivo madre.
 esta base, así que **ninguno puede estar llamando al proyecto de Café del
 Desierto**. El punto (a) de la Fase 6 queda cerrado. ✅
 
+> ### ✅ Lo que contestó
+>
+> **Las 32 funciones que la app llama están puestas.** La lista traía una fila
+> de más —`cuenta_abrir`— que dio `FALTA`, y **era un error mío**: esa función
+> no existe ni la llama nadie. La que abre una mesa se llama **`mesa_abrir`**, y
+> esa sí está. La escribí de memoria en vez de sacarla del código, que es
+> exactamente la §0.1.9 del archivo madre. Ya está sacada de la lista.
+>
+> **Con esto la estructura queda comprobada** de la única forma que sirve: por
+> nombre, no por conteo.
+
 **Lo que queda por comprobar es mejor que un conteo.** El conteo a secas decía
 *"faltan 31 funciones"* sin decir cuáles, y encima nuestras propias notas no se
 ponían de acuerdo sobre la vara (el plan dice 76, el `README` dice 45 verificadas
 contra el original). **Este `select` pregunta por las 33 funciones que la app
 llama de verdad**, una por una.
 
-**Qué mirar:** la columna `esta` tiene que decir **`sí` en las 33 filas**. Si
+**Qué mirar:** la columna `esta` tiene que decir **`sí` en las 32 filas**. Si
 alguna dice `FALTA`, esa es la que hay que rehacer — y sabemos exactamente cuál.
 
 <details><summary>▶ Ver el SQL completo</summary>
@@ -55,7 +66,7 @@ select
   f.nombre,
   case when p.proname is null then 'FALTA' else 'sí' end as esta
 from (values
-   ('cuenta_abrir'),('mesa_abrir'),('cuenta_agregar'),('cuenta_confirmar'),
+   ('mesa_abrir'),('cuenta_agregar'),('cuenta_confirmar'),
    ('cuenta_recalcular'),('cuenta_precuenta'),('cuenta_cerrar'),('cuenta_cobrar'),
    ('cuenta_cobrar_parcial'),('cuenta_pago_parcial_deshacer'),('cuenta_mover'),
    ('items_mover'),('item_anular'),
@@ -80,20 +91,41 @@ order by esta, f.nombre;
 
 ---
 
-### [ ] Y una prueba que NO es SQL — la que de verdad prueba
+### [ ] La prueba `ZZZ PRUEBA COPIA` — falta rematarla
 
-**Es el punto (c) de la Fase 6, y ningún `select` lo reemplaza.** Tarda dos
-minutos y no necesita herramientas de desarrollador:
+**Lo que ya pasó el 2026-09-05:** creaste el producto en Llamita Plus, **apareció
+en la app**, y **NO apareció en Llamita Stock**. Eso ya es una señal fuerte.
 
-1. En **la app nueva**, crear un producto llamado **`ZZZ PRUEBA COPIA`**.
-2. Abrir el **editor de tablas** de Supabase, tabla `productos`, y buscarlo:
-   - en el proyecto **nuevo** (`iuryhsjucblmebdogewa`) → **tiene que aparecer**
-   - en el proyecto **viejo** (`fqjdecjsbnicvyrxkxcu`) → **NO puede aparecer**
-3. Borrarlo de la base nueva.
+⚠️ **Pero no lo encontraste en el editor de tablas, y eso NO significa que no
+esté: el editor muestra de a 100 filas.** Hay 1.434 productos, así que
+`ZZZ PRUEBA COPIA` está en alguna página que no miraste. **No es una
+coincidencia, es la paginación** — y por eso no se puede concluir nada de no
+haberlo visto ahí.
 
-⚠️ **Si aparece en los dos, o solo en el viejo: parar todo y avisar.** Es
-literalmente lo que pediste el primer día — *"si aparece en la de ellos, paramos
-todo"*.
+**Cómo se remata, y son dos consultas de una línea.** La primera va en
+**Llamita Plus**, la segunda en el proyecto **viejo**. Las dos son `select`:
+**no escriben ni una fila**.
+
+```sql
+-- ACÁ, en llamita-plus (iuryhsjucblmebdogewa)
+-- QUÉ VER: la fila. Si no aparece, avisá — algo raro pasa.
+select id, producto, sede, activo from public.productos
+ where producto ilike '%ZZZ%';
+```
+
+```sql
+-- ALLÁ, en el proyecto de Café del Desierto (fqjdecjsbnicvyrxkxcu)
+-- QUÉ VER: CERO FILAS. Si aparece algo, parar todo y avisar.
+select id, producto, sede from public.productos
+ where producto ilike '%ZZZ%';
+```
+
+⚠️ **La segunda es la única vez que se toca la base de ellos, y es de solo
+lectura** — la pide el propio plan de separación, punto (c) de la Fase 6.
+**No corras nada más ahí.**
+
+**Y cuando las dos den lo esperado:** borrá el producto de prueba en Llamita
+Plus, desde la app, como cualquier otro.
 
 ---
 

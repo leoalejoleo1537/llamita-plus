@@ -8,6 +8,53 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-09-05** — **En el computador, la barra de pestañas se PARÓ.** Jhon:
+  *"ampliame la pantalla para el pc de todo Llamita Plus… manten siempre
+  desplegado el panel de la izquierda, mete ahi recetas y mermas"*.
+
+  **El diagnóstico, que es más simple que el pedido:** en el teléfono la barra
+  horizontal es lo correcto, porque lo único que sobra es el ancho. En un
+  computador sobra ancho y falta altura, y esa misma barra **obliga a
+  deslizarla** para llegar a "Recetas" o "Mermas" **teniendo media pantalla
+  vacía al costado**. No era que faltara un panel: era la barra en el eje
+  equivocado.
+
+  Entonces, de 1080 px para arriba: la barra se convierte en un **riel fijo a
+  la izquierda** con todas las secciones a la vista, el contenido pasa de 900
+  a 1240 px, y **de 1400 para arriba el inventario y las barras de Recetas se
+  parten en dos columnas**. El segundo umbral se midió, no se supuso: a 1080 el
+  contenido queda en ~840 px y dos columnas de 400 aprietan los nombres largos
+  — se gana espacio y se pierde legibilidad, que es un mal negocio.
+
+  **Todo cuelga de una sola clase, `body.pc-ancho`, y de la constante
+  `PC_ANCHO`** (§2.2). Apagada, el navegador no aplica ni una de esas reglas y
+  la app vuelve **exactamente** a la barra de siempre — no queda un hueco. Se
+  prueba apagada, y es uno de los 30 casos.
+
+  **Dos cosas que costaron y vale dejar escritas:**
+  1. **El carril naranja tenía que aprender a bajar.** Viajaba con
+     `translateX` y `offsetLeft`; en una columna eso lo dejaba clavado arriba.
+     Ahora mide alto y viaja con `translateY`, y **se remide al cambiar el
+     tamaño de la ventana** — sin eso, cruzar el umbral lo dejaba apuntando en
+     la dirección equivocada.
+  2. ⚠️ **Una comprobación que no comprobaba lo que decía.** El caso *"no hay
+     que deslizar nada"* miraba el rectángulo de cada pestaña — y en el riel las
+     pestañas se estiran al ancho de la columna, así que **la caja nunca se
+     sale; el que se sale es el texto**. Se descubrió estrechando el riel a 96
+     px a propósito: la prueba **siguió en verde** con los nombres cortados.
+     Ahora mira `scrollWidth`. Es la regla de siempre: *una prueba que no puede
+     fallar no es una prueba*, y la única forma de saberlo es romper el código
+     a mano y ver si se pone roja.
+
+  **Y de paso, la marca.** El riel lleva arriba el ícono y el nombre
+  **"Llamita Plus"**, que es lo que Jhon pidió desde el principio: poder
+  distinguirla de un vistazo de la que usa todos los días en el trabajo.
+
+  Prueba: `pruebas/pc-riel.mjs`, **30 casos**, cada uno ancho y angosto.
+  Comparado contra un `git worktree` de `origin/master`: **todo idéntico**,
+  incluida la única roja vieja (`estetica-no-rompio-nada`, 4 casos de la
+  gráfica de metas), que da exactamente lo mismo en las dos corridas.
+
 - **2026-08-28** — **Una meta contaba capuchinos creyendo que eran aguas.** Jhon:
   *"el agua Bosqua de Angamos vendió más de 80 y en la meta me aparecen sólo
   dos"*. Su hipótesis era que cerrar una meta borraba el conteo; no era eso, y

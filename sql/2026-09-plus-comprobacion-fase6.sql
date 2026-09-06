@@ -1,9 +1,15 @@
 --  DÓNDE VA:  Supabase -> SQL Editor -> New query   (en el proyecto NUEVO, llamita-plus)
 --  ES:        1 solo bloque.
 --  TARDA:     instantáneo. NO ESCRIBE NADA: es un select.
---  QUÉ HACE:  comprueba que estén las 33 funciones que la app LLAMA de verdad.
+--  QUÉ HACE:  comprueba que estén las 32 funciones que la app LLAMA de verdad.
 --             Reemplaza al conteo a secas, que no distingue cuál falta.
---  QUÉ VER:   la columna `esta` tiene que decir "sí" en las 33 filas.
+--  QUÉ VER:   la columna `esta` tiene que decir "sí" en las 32 filas.
+--
+--  ✅ CORRIDO EL 2026-09-05: las 32 dijeron "sí". La lista traía una fila de
+--  más, `cuenta_abrir`, que dio FALTA — y era MI error: esa función no existe
+--  ni la llama nadie (la que abre una mesa se llama `mesa_abrir`). La escribí
+--  de memoria en vez de sacarla del código, que es exactamente la §0.1.9.
+--  Se saca para que la próxima corrida no vuelva a asustar por nada.
 --
 --  ⚠️ CORREGIDO EL 2026-09-05. La versión anterior preguntaba por `cron.job` y
 --  fallaba entera: `pg_cron` es una extensión y en este proyecto NO está
@@ -16,7 +22,7 @@ select
   f.nombre,
   case when p.proname is null then 'FALTA' else 'sí' end as esta
 from (values
-   ('cuenta_abrir'),('mesa_abrir'),('cuenta_agregar'),('cuenta_confirmar'),
+   ('mesa_abrir'),('cuenta_agregar'),('cuenta_confirmar'),
    ('cuenta_recalcular'),('cuenta_precuenta'),('cuenta_cerrar'),('cuenta_cobrar'),
    ('cuenta_cobrar_parcial'),('cuenta_pago_parcial_deshacer'),('cuenta_mover'),
    ('items_mover'),('item_anular'),

@@ -62,6 +62,7 @@
        de tarjetas desperdicia espacio, que es lo que pasaba en el panel de la
        mesa. Una raya que se nota es un reborde; esta apenas se intuye. */
     --linea:rgba(31,58,92,.085);
+    --riel:212px;   /* el ancho del riel de la izquierda en PC */
     --r-card:20px; --r-sec:18px;
   }
   *{box-sizing:border-box}
@@ -322,6 +323,56 @@
     .tabs .inner{gap:5px}
     .tab{padding:7px 11px;font-size:12.5px}
     .tab-icon{padding:7px 11px}
+  }
+  /* ══════════════════════════════════════════════════════════════
+     PC · EL RIEL DE LA IZQUIERDA  (Jhon, 2026-09-05)
+     ══════════════════════════════════════════════════════════════
+     En el teléfono la barra de pestañas horizontal es lo correcto: hay una
+     sola dimensión que sobra y es el ancho. En un computador pasa lo
+     contrario — sobra ancho y falta altura—, y esa misma barra obliga a
+     DESLIZARLA para llegar a "Recetas" o "Mermas" teniendo media pantalla
+     vacía al costado. Eso era lo que molestaba.
+
+     Entonces en PC la barra se PARA: se convierte en un riel fijo a la
+     izquierda donde todas las secciones se ven a la vez, y el contenido se
+     queda con el ancho que sobraba.
+
+     ⚠️ TODO cuelga de `body.pc-ancho`, y esa clase la pone el guion (ver
+     `PC_ANCHO`). Apagado, el navegador no aplica ni una de estas reglas y la
+     app queda EXACTAMENTE como estaba — no queda un hueco (§2.2). */
+  .riel-marca{display:none}
+  .solo-riel{display:none}
+  @media (min-width:1080px){
+    body.pc-ancho{padding-left:var(--riel)}
+    /* La línea que separa el riel es una SOMBRA de un píxel, no un borde:
+       la regla de la casa es que lo que separa sea casi imperceptible. */
+    body.pc-ancho .tabs{position:fixed;top:0;left:0;bottom:0;width:var(--riel);
+      padding:16px 12px 18px;overflow-y:auto;box-shadow:1px 0 0 var(--linea)}
+    body.pc-ancho .tabs .inner{flex-direction:column;align-items:stretch;
+      max-width:none;gap:4px;overflow:visible}
+    body.pc-ancho .riel-marca{display:flex;align-items:center;gap:9px;
+      padding:2px 6px 16px;font-size:15px;font-weight:800;letter-spacing:-.01em;
+      color:var(--navy)}
+    body.pc-ancho .riel-marca img{width:26px;height:26px;border-radius:8px;display:block}
+    body.pc-ancho .tab{text-align:left;padding:10px 15px;font-size:14px;
+      box-shadow:none;background:transparent}
+    body.pc-ancho .tab:hover{background:var(--card)}
+    body.pc-ancho .tab.active{background:transparent;color:#fff}
+    body.pc-ancho .tab-icon{justify-content:flex-start;gap:10px;padding:10px 15px}
+    body.pc-ancho .solo-riel{display:inline}
+    /* El carril viaja hacia ABAJO en vez de hacia el costado. El alto se lo
+       pone `moverCarril`, que es quien mide el botón activo. */
+    body.pc-ancho .tab-carril{width:100%}
+    body.pc-ancho .wrap{max-width:1240px;padding-left:26px;padding-right:26px}
+    body.pc-ancho #view-ajustes{padding-left:26px;padding-right:26px}
+  }
+  /* DOS COLUMNAS, y recién a los 1400 px. A 1080 el contenido queda en ~840
+     y dos columnas de 400 aprietan los nombres largos: se gana espacio y se
+     pierde legibilidad, que es un mal negocio. Se mide, no se supone. */
+  @media (min-width:1400px){
+    body.pc-ancho #list,
+    body.pc-ancho #rp-barras{display:grid;grid-template-columns:1fr 1fr;
+      gap:0 20px;align-items:start}
   }
   /* ---------- layout ---------- */
   .wrap{max-width:900px;margin:0 auto;padding:14px 16px 90px}
@@ -2443,6 +2494,7 @@
 
 <div class="tabs">
   <div class="inner">
+    <div class="riel-marca"><img src="icons/icon-192.png" alt=""><span>Llamita Plus</span></div>
     <span class="tab-carril" id="tabCarril" aria-hidden="true"></span>
     <!-- ⌂ EL HOGAR DE LA APP ES MESAS (Jhon, 2026-09-03).
          Hasta hoy esta casita llevaba al inventario, porque el inventario era
@@ -2460,7 +2512,7 @@
          vende— la barra empieza directamente en "Inventario". No queda un
          hueco: queda lo de antes, con el inventario de primero. -->
     <button class="tab tab-icon" data-tab="lama" id="tabLama" aria-label="Mesas" title="Mesas" style="display:none">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5.5 10v9a1 1 0 0 0 1 1H10v-6h4v6h3.5a1 1 0 0 0 1-1v-9"></path></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5.5 10v9a1 1 0 0 0 1 1H10v-6h4v6h3.5a1 1 0 0 0 1-1v-9"></path></svg><span class="solo-riel">Mesas</span>
     </button>
     <!-- El inventario pasa a ser una sección más, como Reparto o Recetas. -->
     <button class="tab active" data-tab="inv" id="tabInv">Inventario</button>
@@ -14071,16 +14123,40 @@ $('aj-rail').addEventListener('click', e=>{
 /* Mueve el carril debajo de la pestaña activa. Se llama después de pintar,
    y en el siguiente cuadro: si se midiera en el mismo, `offsetLeft` daría la
    posición vieja porque el navegador todavía no rehizo el trazado. */
+/* EL INTERRUPTOR DEL RIEL (§2.2). Apagado, la clase nunca se pone, ninguna
+   regla del riel se aplica, y la app vuelve exactamente a la barra horizontal
+   de siempre — en el teléfono y en el computador. */
+const PC_ANCHO = true;
+document.body.classList.toggle('pc-ancho', PC_ANCHO);
+
+/* ¿Estamos con el riel a la vista? Se le pregunta al navegador con la MISMA
+   medida que usa el CSS, en vez de mirar `window.innerWidth` a mano: dos
+   dueños del mismo número es cómo se desincronizan. */
+const rielPuesto = () => PC_ANCHO && window.matchMedia('(min-width:1080px)').matches;
+
 function moverCarril(){
   const c = $('tabCarril'); if(!c) return;
   const b = document.querySelector('.tab.active');
   if(!b || !b.offsetWidth){ c.classList.remove('listo'); return; }
+  const riel = rielPuesto();
   requestAnimationFrame(()=>{
-    c.style.width = b.offsetWidth + 'px';
-    c.style.transform = `translateX(${b.offsetLeft}px)`;
+    if(riel){
+      /* En el riel el carril baja: el ancho lo pone el CSS al 100 %, y el
+         alto se mide del botón porque la casita es más alta que las demás. */
+      c.style.width = '';
+      c.style.height = b.offsetHeight + 'px';
+      c.style.transform = `translateY(${b.offsetTop}px)`;
+    } else {
+      c.style.height = '';
+      c.style.width = b.offsetWidth + 'px';
+      c.style.transform = `translateX(${b.offsetLeft}px)`;
+    }
     c.classList.add('listo');
   });
 }
+/* Al cambiar el tamaño de la ventana se cruza el umbral y el carril queda
+   apuntando en la dirección equivocada. Se remide. */
+window.addEventListener('resize', moverCarril);
 
 function barraPestanas(ver){
   document.querySelector('.tabs').style.display = ver ? '' : 'none';
