@@ -25,7 +25,7 @@
 
 ## Pendientes ahora
 
-### [ ] `sql/2026-09-plus-comprobacion-fase6.sql` — **corregido el 2026-09-05**
+### [x] `sql/2026-09-plus-comprobacion-fase6.sql` — **corregido el 2026-09-05**
 
 > **No escribe nada. Es un `select`.** Se puede correr las veces que sea.
 
@@ -79,6 +79,140 @@ order by esta, f.nombre;
 </details>
 
 ---
+[
+  {
+    "nombre": "cuenta_abrir",
+    "esta": "FALTA"
+  },
+  {
+    "nombre": "crear_producto_enlazado",
+    "esta": "sí"
+  },
+  {
+    "nombre": "cuenta_agregar",
+    "esta": "sí"
+  },
+  {
+    "nombre": "cuenta_cerrar",
+    "esta": "sí"
+  },
+  {
+    "nombre": "cuenta_cobrar",
+    "esta": "sí"
+  },
+  {
+    "nombre": "cuenta_cobrar_parcial",
+    "esta": "sí"
+  },
+  {
+    "nombre": "cuenta_confirmar",
+    "esta": "sí"
+  },
+  {
+    "nombre": "cuenta_mover",
+    "esta": "sí"
+  },
+  {
+    "nombre": "cuenta_pago_parcial_deshacer",
+    "esta": "sí"
+  },
+  {
+    "nombre": "cuenta_precuenta",
+    "esta": "sí"
+  },
+  {
+    "nombre": "cuenta_recalcular",
+    "esta": "sí"
+  },
+  {
+    "nombre": "deshacer_entrada",
+    "esta": "sí"
+  },
+  {
+    "nombre": "deshacer_fusion",
+    "esta": "sí"
+  },
+  {
+    "nombre": "deshacer_merma",
+    "esta": "sí"
+  },
+  {
+    "nombre": "deshacer_restauracion",
+    "esta": "sí"
+  },
+  {
+    "nombre": "fotos_por_dia",
+    "esta": "sí"
+  },
+  {
+    "nombre": "franquicia_linea_lista",
+    "esta": "sí"
+  },
+  {
+    "nombre": "franquicia_linea_no_hay",
+    "esta": "sí"
+  },
+  {
+    "nombre": "fusionar_productos",
+    "esta": "sí"
+  },
+  {
+    "nombre": "historial_dias",
+    "esta": "sí"
+  },
+  {
+    "nombre": "item_anular",
+    "esta": "sí"
+  },
+  {
+    "nombre": "items_mover",
+    "esta": "sí"
+  },
+  {
+    "nombre": "mermar",
+    "esta": "sí"
+  },
+  {
+    "nombre": "mesa_abrir",
+    "esta": "sí"
+  },
+  {
+    "nombre": "meta_avance",
+    "esta": "sí"
+  },
+  {
+    "nombre": "recetas_rotas",
+    "esta": "sí"
+  },
+  {
+    "nombre": "registrar_entrada",
+    "esta": "sí"
+  },
+  {
+    "nombre": "reparto_cerrar",
+    "esta": "sí"
+  },
+  {
+    "nombre": "reparto_descontar_bodega",
+    "esta": "sí"
+  },
+  {
+    "nombre": "reparto_deshacer",
+    "esta": "sí"
+  },
+  {
+    "nombre": "reparto_rechazar",
+    "esta": "sí"
+  },
+  {
+    "nombre": "reparto_recibir",
+    "esta": "sí"
+  },
+  {
+    "nombre": "restaurar_sede",
+    "esta": "sí"
+  }
+]
 
 ### [ ] Y una prueba que NO es SQL — la que de verdad prueba
 
