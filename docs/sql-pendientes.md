@@ -25,7 +25,168 @@
 
 ## Pendientes ahora
 
-### [ ] `sql/2026-09-lama-plano-editable.sql` — el plano de mesas con páginas y secciones
+**Ninguno.** 🎉
+
+Cuando cualquiera de las dos sesiones deje un `.sql` nuevo, aparece acá con el
+texto completo pegado y un `[ ]` para marcar.
+
+---
+
+## Historial reciente
+
+### [x] `sql/2026-09-plus-comprobacion-fase6.sql` — **corrido el 2026-09-05** ✅
+
+> **No escribe nada. Es un `select`.** Se puede correr las veces que sea.
+
+🔴 **Se rompió tres veces por el mismo error, y era mío: preguntaba por
+`cron.job`.** `pg_cron` es una extensión de Postgres, y en este proyecto **no
+está instalada** — el respaldo no la trajo. Postgres analiza la sentencia entera
+antes de ejecutarla, así que una tabla que no existe **mata el bloque completo**,
+aunque el resto esté perfecto. Es la §0.1.9 del archivo madre.
+
+**Y el error ya contestó la pregunta:** sin `pg_cron` no existe ningún cron en
+esta base, así que **ninguno puede estar llamando al proyecto de Café del
+Desierto**. El punto (a) de la Fase 6 queda cerrado. ✅
+
+> ### ✅ Lo que contestó
+>
+> **Las 32 funciones que la app llama están puestas.** La lista traía una fila
+> de más —`cuenta_abrir`— que dio `FALTA`, y **era un error mío**: esa función
+> no existe ni la llama nadie. La que abre una mesa se llama **`mesa_abrir`**, y
+> esa sí está. La escribí de memoria en vez de sacarla del código, que es
+> exactamente la §0.1.9 del archivo madre. Ya está sacada de la lista.
+>
+> **Con esto la estructura queda comprobada** de la única forma que sirve: por
+> nombre, no por conteo.
+
+**Lo que queda por comprobar es mejor que un conteo.** El conteo a secas decía
+*"faltan 31 funciones"* sin decir cuáles, y encima nuestras propias notas no se
+ponían de acuerdo sobre la vara (el plan dice 76, el `README` dice 45 verificadas
+contra el original). **Este `select` pregunta por las 33 funciones que la app
+llama de verdad**, una por una.
+
+**Qué mirar:** la columna `esta` tiene que decir **`sí` en las 32 filas**. Si
+alguna dice `FALTA`, esa es la que hay que rehacer — y sabemos exactamente cuál.
+
+<details><summary>▶ Ver el SQL completo</summary>
+
+```sql
+select
+  f.nombre,
+  case when p.proname is null then 'FALTA' else 'sí' end as esta
+from (values
+   ('mesa_abrir'),('cuenta_agregar'),('cuenta_confirmar'),
+   ('cuenta_recalcular'),('cuenta_precuenta'),('cuenta_cerrar'),('cuenta_cobrar'),
+   ('cuenta_cobrar_parcial'),('cuenta_pago_parcial_deshacer'),('cuenta_mover'),
+   ('items_mover'),('item_anular'),
+   ('mermar'),('deshacer_merma'),('registrar_entrada'),('deshacer_entrada'),
+   ('fusionar_productos'),('deshacer_fusion'),('restaurar_sede'),
+   ('deshacer_restauracion'),('crear_producto_enlazado'),
+   ('reparto_recibir'),('reparto_cerrar'),('reparto_rechazar'),
+   ('reparto_deshacer'),('reparto_descontar_bodega'),
+   ('historial_dias'),('fotos_por_dia'),('meta_avance'),('recetas_rotas'),
+   ('franquicia_linea_lista'),('franquicia_linea_no_hay')
+) as f(nombre)
+left join (
+  select distinct p.proname
+    from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'public'
+) p on p.proname = f.nombre
+order by esta, f.nombre;
+```
+
+</details>
+
+---
+
+> **El resultado tal cual salió** lo pegó Jhon acá el 2026-09-05, y se resume
+> arriba en vez de dejar el volcado entero: 33 filas de JSON en el archivo que
+> se lee para saber *qué falta correr* lo vuelven ilegible. **Queda en la
+> historia de git**, en el commit `4c450ac`, si alguna vez hay que mirarlo
+> literal.
+
+
+### [x] La prueba `ZZZ PRUEBA COPIA` — **cerrada el 2026-09-05** ✅
+
+> ### ✅ EL RESULTADO, y es el que queríamos
+>
+> En la base de Café del Desierto **solo están las dos pruebas viejas** (ids
+> 1279 y 1280, un `zzz ejemplo 1` que quedó de un chat antiguo y viajó en el
+> respaldo). **Los tres productos creados el 2026-09-05 — ids 1468, 1469 y
+> 1470 — no llegaron ahí.**
+>
+> **La copia está separada, comprobado y no prometido.** La Fase 6 se cierra.
+>
+> ⚠️ **Y el susto que hubo en el medio vale escribirlo.** La primera corrida
+> "en el proyecto viejo" devolvió los cinco productos, ids idénticos incluidos,
+> y parecía que la app escribía en las dos bases. **No había cambiado de
+> proyecto**: el editor de Supabase **no dice en la pantalla en cuál estás**.
+> Lo que lo destrabó no fue deducirlo — fue una consulta que le pregunta a la
+> base **quién es** (si tiene `pg_cron` es la vieja, si no es Plus). *Cuando dos
+> explicaciones encajan con la misma evidencia, la salida es una medición que
+> las separe, no un razonamiento más largo.*
+
+**Lo que pasó antes:** creaste el producto en Llamita Plus, **apareció
+en la app**, y **NO apareció en Llamita Stock**. Eso ya era una señal fuerte.
+
+⚠️ **Pero no lo encontraste en el editor de tablas, y eso NO significa que no
+esté: el editor muestra de a 100 filas.** Hay 1.434 productos, así que
+`ZZZ PRUEBA COPIA` está en alguna página que no miraste. **No es una
+coincidencia, es la paginación** — y por eso no se puede concluir nada de no
+haberlo visto ahí.
+
+**Cómo se remata, y son dos consultas de una línea.** La primera va en
+**Llamita Plus**, la segunda en el proyecto **viejo**. Las dos son `select`:
+**no escriben ni una fila**.
+
+```sql
+-- ACÁ, en llamita-plus (iuryhsjucblmebdogewa)
+-- QUÉ VER: la fila. Si no aparece, avisá — algo raro pasa.
+select id, producto, sede, activo from public.productos
+ where producto ilike '%ZZZ%';
+```
+
+```sql
+-- ALLÁ, en el proyecto de Café del Desierto (fqjdecjsbnicvyrxkxcu)
+-- QUÉ VER: CERO FILAS. Si aparece algo, parar todo y avisar.
+select id, producto, sede from public.productos
+ where producto ilike '%ZZZ%';
+```
+
+⚠️ **La segunda es la única vez que se toca la base de ellos, y es de solo
+lectura** — la pide el propio plan de separación, punto (c) de la Fase 6.
+**No corras nada más ahí.**
+
+**Y cuando las dos den lo esperado:** borrá el producto de prueba en Llamita
+Plus, desde la app, como cualquier otro.
+
+---
+
+Cuando cualquiera de las dos sesiones deje un `.sql` nuevo, aparece acá con el
+texto completo pegado y un `[ ]` para marcar.
+
+---
+
+### [x] `sql/2026-09-lama-plano-editable.sql` — **corrido el 2026-09-05** ✅
+
+> ### ✅ Lo que dejó
+>
+> | | |
+> |---|---|
+> | Números repetidos entre salones | **ninguno** — el freno del bloque 1 pasó |
+> | Lo que había | **solo Plaza tiene mesas**: 12, numeradas 1 a 12, todas en "Salón". Angamos y Bodega no tienen ninguna |
+> | Cómo quedó | página **Salón** → sección **Salón** → las 12 mesas. `sin_area` = **0** |
+>
+> ⚠️ **El bloque 3 falló la primera vez, y el error era mío.** `padre_id` es
+> `bigint` y yo escribí un `null` pelado: **dentro de un `insert ... select`,
+> Postgres NO deduce el tipo de la columna de destino** — ahí un `null` nace
+> como TEXTO. Va `null::bigint`. Ya está corregido acá y en `sql/`.
+>
+> **Y contesta sola la pregunta que quedaba pendiente:** Angamos **no tiene
+> mesas cargadas**, así que no hay nada que repartir allá. Se crean desde el
+> modo edición cuando toque.
+
 
 > **Sale de la maqueta que aprobaste** el 2026-09-05:
 > [`docs/propuesta-lama-mesas.html`](propuesta-lama-mesas.html). **Sin esto la
@@ -162,7 +323,7 @@ alter table public.mesas add  constraint mesas_tam_ok
 -- sirve el modo edición.
 -- ================================================================
 insert into public.lama_areas (sede, nombre, padre_id, orden, color)
-select distinct m.sede, 'Salón', null, 0, 'a'
+select distinct m.sede, 'Salón', null::bigint, 0, 'a'
   from public.mesas m
  where not exists (select 1 from public.lama_areas a
                     where a.sede = m.sede and a.padre_id is null);
@@ -223,141 +384,6 @@ select count(*) as sin_area from public.mesas where area_id is null;
 ---
 
 
-### [x] `sql/2026-09-plus-comprobacion-fase6.sql` — **corrido el 2026-09-05** ✅
-
-> **No escribe nada. Es un `select`.** Se puede correr las veces que sea.
-
-🔴 **Se rompió tres veces por el mismo error, y era mío: preguntaba por
-`cron.job`.** `pg_cron` es una extensión de Postgres, y en este proyecto **no
-está instalada** — el respaldo no la trajo. Postgres analiza la sentencia entera
-antes de ejecutarla, así que una tabla que no existe **mata el bloque completo**,
-aunque el resto esté perfecto. Es la §0.1.9 del archivo madre.
-
-**Y el error ya contestó la pregunta:** sin `pg_cron` no existe ningún cron en
-esta base, así que **ninguno puede estar llamando al proyecto de Café del
-Desierto**. El punto (a) de la Fase 6 queda cerrado. ✅
-
-> ### ✅ Lo que contestó
->
-> **Las 32 funciones que la app llama están puestas.** La lista traía una fila
-> de más —`cuenta_abrir`— que dio `FALTA`, y **era un error mío**: esa función
-> no existe ni la llama nadie. La que abre una mesa se llama **`mesa_abrir`**, y
-> esa sí está. La escribí de memoria en vez de sacarla del código, que es
-> exactamente la §0.1.9 del archivo madre. Ya está sacada de la lista.
->
-> **Con esto la estructura queda comprobada** de la única forma que sirve: por
-> nombre, no por conteo.
-
-**Lo que queda por comprobar es mejor que un conteo.** El conteo a secas decía
-*"faltan 31 funciones"* sin decir cuáles, y encima nuestras propias notas no se
-ponían de acuerdo sobre la vara (el plan dice 76, el `README` dice 45 verificadas
-contra el original). **Este `select` pregunta por las 33 funciones que la app
-llama de verdad**, una por una.
-
-**Qué mirar:** la columna `esta` tiene que decir **`sí` en las 32 filas**. Si
-alguna dice `FALTA`, esa es la que hay que rehacer — y sabemos exactamente cuál.
-
-<details><summary>▶ Ver el SQL completo</summary>
-
-```sql
-select
-  f.nombre,
-  case when p.proname is null then 'FALTA' else 'sí' end as esta
-from (values
-   ('mesa_abrir'),('cuenta_agregar'),('cuenta_confirmar'),
-   ('cuenta_recalcular'),('cuenta_precuenta'),('cuenta_cerrar'),('cuenta_cobrar'),
-   ('cuenta_cobrar_parcial'),('cuenta_pago_parcial_deshacer'),('cuenta_mover'),
-   ('items_mover'),('item_anular'),
-   ('mermar'),('deshacer_merma'),('registrar_entrada'),('deshacer_entrada'),
-   ('fusionar_productos'),('deshacer_fusion'),('restaurar_sede'),
-   ('deshacer_restauracion'),('crear_producto_enlazado'),
-   ('reparto_recibir'),('reparto_cerrar'),('reparto_rechazar'),
-   ('reparto_deshacer'),('reparto_descontar_bodega'),
-   ('historial_dias'),('fotos_por_dia'),('meta_avance'),('recetas_rotas'),
-   ('franquicia_linea_lista'),('franquicia_linea_no_hay')
-) as f(nombre)
-left join (
-  select distinct p.proname
-    from pg_proc p
-    join pg_namespace n on n.oid = p.pronamespace
-   where n.nspname = 'public'
-) p on p.proname = f.nombre
-order by esta, f.nombre;
-```
-
-</details>
-
----
-
-> **El resultado tal cual salió** lo pegó Jhon acá el 2026-09-05, y se resume
-> arriba en vez de dejar el volcado entero: 33 filas de JSON en el archivo que
-> se lee para saber *qué falta correr* lo vuelven ilegible. **Queda en la
-> historia de git**, en el commit `4c450ac`, si alguna vez hay que mirarlo
-> literal.
-
-
-### [x] La prueba `ZZZ PRUEBA COPIA` — **cerrada el 2026-09-05** ✅
-
-> ### ✅ EL RESULTADO, y es el que queríamos
->
-> En la base de Café del Desierto **solo están las dos pruebas viejas** (ids
-> 1279 y 1280, un `zzz ejemplo 1` que quedó de un chat antiguo y viajó en el
-> respaldo). **Los tres productos creados el 2026-09-05 — ids 1468, 1469 y
-> 1470 — no llegaron ahí.**
->
-> **La copia está separada, comprobado y no prometido.** La Fase 6 se cierra.
->
-> ⚠️ **Y el susto que hubo en el medio vale escribirlo.** La primera corrida
-> "en el proyecto viejo" devolvió los cinco productos, ids idénticos incluidos,
-> y parecía que la app escribía en las dos bases. **No había cambiado de
-> proyecto**: el editor de Supabase **no dice en la pantalla en cuál estás**.
-> Lo que lo destrabó no fue deducirlo — fue una consulta que le pregunta a la
-> base **quién es** (si tiene `pg_cron` es la vieja, si no es Plus). *Cuando dos
-> explicaciones encajan con la misma evidencia, la salida es una medición que
-> las separe, no un razonamiento más largo.*
-
-**Lo que pasó antes:** creaste el producto en Llamita Plus, **apareció
-en la app**, y **NO apareció en Llamita Stock**. Eso ya era una señal fuerte.
-
-⚠️ **Pero no lo encontraste en el editor de tablas, y eso NO significa que no
-esté: el editor muestra de a 100 filas.** Hay 1.434 productos, así que
-`ZZZ PRUEBA COPIA` está en alguna página que no miraste. **No es una
-coincidencia, es la paginación** — y por eso no se puede concluir nada de no
-haberlo visto ahí.
-
-**Cómo se remata, y son dos consultas de una línea.** La primera va en
-**Llamita Plus**, la segunda en el proyecto **viejo**. Las dos son `select`:
-**no escriben ni una fila**.
-
-```sql
--- ACÁ, en llamita-plus (iuryhsjucblmebdogewa)
--- QUÉ VER: la fila. Si no aparece, avisá — algo raro pasa.
-select id, producto, sede, activo from public.productos
- where producto ilike '%ZZZ%';
-```
-
-```sql
--- ALLÁ, en el proyecto de Café del Desierto (fqjdecjsbnicvyrxkxcu)
--- QUÉ VER: CERO FILAS. Si aparece algo, parar todo y avisar.
-select id, producto, sede from public.productos
- where producto ilike '%ZZZ%';
-```
-
-⚠️ **La segunda es la única vez que se toca la base de ellos, y es de solo
-lectura** — la pide el propio plan de separación, punto (c) de la Fase 6.
-**No corras nada más ahí.**
-
-**Y cuando las dos den lo esperado:** borrá el producto de prueba en Llamita
-Plus, desde la app, como cualquier otro.
-
----
-
-Cuando cualquiera de las dos sesiones deje un `.sql` nuevo, aparece acá con el
-texto completo pegado y un `[ ]` para marcar.
-
----
-
-## Historial reciente
 
 ### [x] `sql/2026-09-plus-encender-tiempo-real.sql` — **corrido el 2026-09-04** ✅
 

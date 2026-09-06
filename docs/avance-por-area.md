@@ -37,7 +37,7 @@ Eso significa dos cosas que conviene tener claras:
 | **Lama · comanda** | **100 %** | 5 de 5 | 🟢 |
 | **Lama · cobro** | **100 %** | 8 de 8 | 🟢 cerrado con la F1 |
 | **Lama · configuración** | **83 %** | 5 de 6 | 🟢 **hecha** · falta el detalle del ticket, que depende de F5 |
-| **Lama · el plano de mesas** | **0 %** | 0 de 5 | 🟡 **maqueta escrita** · espera tu visto bueno |
+| **Lama · el plano de mesas** | **60 %** | 3 de 5 | 🟢 **páginas, secciones y modo edición**, funcionando |
 | **Lama · impresión** | **10 %** | medido, sin construir | ⬜ necesita ir al local |
 | **Lama · arqueo de caja** | **0 %** | 0 de 5 | 🟡 **maqueta escrita** · una caja por local, ya confirmado |
 | **Conexión Lama ↔ Stock** | **0 %** | 0 de 3 | ⬜ va última a propósito |
@@ -89,7 +89,7 @@ pantalla) · ✅ lo anulado del día · ⬜ qué detalle lleva el ticket.
 depende de **F5**: decidir qué lleva el ticket antes de que exista el puente de
 impresión es decidir a ciegas cómo se ve algo que todavía no imprime.
 
-### Lama · el plano de mesas — 0 de 5 🟡
+### Lama · el plano de mesas — 3 de 5 🟢
 
 Páginas · secciones en tarjetas · modo edición · forma y tamaño por mesa · los
 candados de una mesa con cuenta abierta.
@@ -99,8 +99,18 @@ mesa especial, y la objeción técnica no aplicaba: la mesa 12 se cobra al
 instante, así que nunca hay dos para llevar a la vez. **Eso no cuesta ni una
 línea de SQL.**
 
-**Lo que sí hay que construir es el plano editable**, y su maqueta espera visto
-bueno: [`docs/propuesta-lama-mesas.html`](propuesta-lama-mesas.html).
+**Lo que sí había que construir era el plano editable, y está.** Maqueta
+aprobada el 2026-09-05, `.sql` corrido, pantalla publicada:
+
+| Pieza | |
+|---|---|
+| El `.sql` con páginas y secciones | ✅ |
+| El plano agrupado en secciones de color | ✅ |
+| El modo edición (crear, renombrar, mover, quitar) | ✅ |
+| Forma y tamaño por mesa | ✅ **se guardan**; falta que la larga y la redonda se luzcan en el plano grande |
+| Reordenar secciones arrastrando | ⬜ |
+
+Prueba: `pruebas/lama-plano.mjs`, 38 casos.
 
 ### Lama · impresión — medido, sin construir ⬜
 

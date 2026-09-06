@@ -780,6 +780,78 @@
       gap:10px;max-height:none;overflow:visible}
   }
 
+  /* ══════════ LAS SECCIONES DEL PLANO (2026-09-05) ══════════
+     Tarjetas de color SUAVE con las mesas adentro. La regla que las gobierna:
+     el fondo de la sección tiene que ser tan tenue que el rojo de una mesa
+     ocupada siga siendo lo único que grita. Por eso son los tonos `-bg` de la
+     paleta y no colores nuevos.
+
+     Y una nota de disposición: en el teléfono el plano es un riel de 66 px,
+     así que ahí la tarjeta se aprieta y el título se achica. No se esconde —
+     el color y el nombre son justamente lo que dice en qué parte del local
+     está uno mirando. */
+  .lama-mesas.con-secciones{display:block}
+  .lama-sec{border-radius:14px;padding:6px 5px 8px;margin-bottom:8px}
+  .lama-sec-cab{display:flex;align-items:baseline;gap:6px;padding:2px 4px 6px;
+    font-size:10.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase}
+  .lama-sec-cab .t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lama-sec-cab .c{margin-left:auto;font-weight:600;opacity:.72;
+    font-size:10px;letter-spacing:0;text-transform:none;white-space:nowrap}
+  .lama-rej{display:grid;grid-template-columns:1fr;gap:7px}
+  @media (min-width:720px){
+    .lama-sec{padding:10px 11px 12px;margin-bottom:10px}
+    .lama-sec-cab{font-size:12px;padding:0 2px 9px}
+    .lama-sec-cab .c{font-size:11.5px}
+    .lama-rej{grid-template-columns:repeat(auto-fill,minmax(var(--mesa,82px),1fr));gap:10px}
+  }
+  .lama-sec.c-a{background:#E9F1FC;color:#2C5AA0}
+  .lama-sec.c-b{background:#E6F2E8;color:#2E7D32}
+  .lama-sec.c-c{background:#FBF0DC;color:#9C6209}
+  .lama-sec.c-d{background:#F1EAF7;color:#6B4B8F}
+  .lama-sec.c-e{background:#E4E9F0;color:#54677D}
+  /* La forma de la mesa. `larga` conserva el alto de una fila y ocupa dos
+     columnas: una mesa que se estira hacia abajo desordenaría la cuadrícula
+     entera, que es lo que hace legible el plano. */
+  .lama-mesa.f-redonda{border-radius:50%}
+  @media (min-width:720px){
+    .lama-mesa.f-larga{aspect-ratio:2/1;grid-column:span 2}
+  }
+  /* El lápiz del plano, al final de la franja de páginas. */
+  .lama-salones .lapiz{margin-left:auto;background:var(--card);color:var(--muted);
+    padding:6px 11px;display:flex;align-items:center}
+  .lama-salones .lapiz svg{width:16px;height:16px;display:block}
+  .lama-salones .lapiz.on{background:var(--orange);color:#fff}
+  /* El + fantasma que agrega una mesa a una sección. Punteado y sin relleno:
+     se lee como un hueco por llenar, no como una mesa más. */
+  .lama-mesa.nueva{background:transparent;border:1px dashed currentColor;opacity:.55;
+    font-size:26px;font-weight:400;color:inherit;box-shadow:none}
+  .lama-mesa.nueva:active{transform:scale(.95)}
+  .lama-sec-cab.tocable{width:100%;border:none;background:transparent;font:inherit;
+    color:inherit;cursor:pointer;text-align:left;display:flex;align-items:baseline;gap:6px}
+  .lama-sec-cab.tocable .c{text-decoration:underline;opacity:.8}
+  .lama-ed{display:flex;align-items:center;gap:9px;width:100%;border:none;
+    background:var(--card);box-shadow:var(--sombra);border-radius:13px;
+    padding:11px 13px;margin-bottom:8px;font:inherit;font-size:14px;font-weight:700;
+    color:var(--orange);cursor:pointer;text-align:left}
+  .lama-ed:active{transform:scale(.99)}
+  .lama-ed .i{width:26px;height:26px;border-radius:8px;background:var(--bg);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:17px}
+  /* Las opciones de la ficha: píldoras que se tocan, no un menú desplegable.
+     Un desplegable esconde las opciones detrás de un toque más y en el mesón
+     eso se paga en tiempo. */
+  .pf-opc{display:flex;flex-wrap:wrap;gap:6px}
+  .pf-opc button{border:none;background:var(--bg);color:var(--muted);font:inherit;
+    font-size:13.5px;font-weight:700;padding:9px 14px;border-radius:999px;cursor:pointer}
+  .pf-opc button.on{background:var(--navy);color:#fff}
+  .pf-opc.colores button.c-a{background:#E9F1FC;color:#2C5AA0}
+  .pf-opc.colores button.c-b{background:#E6F2E8;color:#2E7D32}
+  .pf-opc.colores button.c-c{background:#FBF0DC;color:#9C6209}
+  .pf-opc.colores button.c-d{background:#F1EAF7;color:#6B4B8F}
+  .pf-opc.colores button.c-e{background:#E4E9F0;color:#54677D}
+  .pf-opc.colores button.on{box-shadow:0 0 0 2px currentColor inset}
+  .pf-borrar{width:100%;border:none;background:var(--red-bg);color:var(--red-fg);
+    font:inherit;font-size:14px;font-weight:700;padding:11px;border-radius:12px;
+    cursor:pointer;margin:4px 0 0}
   /* La regla del plano: la fila de salones a la izquierda y el ⚙ a la
      derecha. Solo aparece en computador — en el teléfono el riel es de una
      columna y no hay nada que ajustar. */
@@ -3143,6 +3215,10 @@
            dispositivo y se sigue guardando igual. -->
       <div id="lama-banda"></div>
       <div class="lama-mesas" id="lama-mesas"><div class="empty">Cargando…</div></div>
+      <!-- La ficha del modo edición. Va acá y no adentro del riel de mesas:
+           ese contenedor hace scroll y recorta todo lo que se salga (la
+           misma pared que se comía el neón de la mesa elegida). -->
+      <div id="lama-plano-ficha"></div>
     </div>
     <div class="lama-panel" id="lama-panel"></div>
   </div>
@@ -5820,7 +5896,17 @@ let BODEGA_PROD = {};
 let LAMA_MESAS   = [];      // el plano de la sede
 let LAMA_CUENTAS = [];      // las cuentas vivas, por mesa_id
 let LAMA_ITEMS   = [];      // los items de la cuenta abierta
-let LAMA_SALON   = null;    // el salón elegido
+let LAMA_SALON   = null;    // el salón elegido (el modelo viejo, sin páginas)
+/* EL PLANO CON PÁGINAS Y SECCIONES (maqueta aprobada el 2026-09-05).
+   `lama_areas` guarda los dos niveles con una sola forma: sin padre es una
+   PÁGINA, con padre es una SECCIÓN adentro de ella.
+   ⚠️ Nace VACÍO a propósito. Si el .sql todavía no se corrió —o la tabla no
+   existe— el plano sigue funcionando exactamente como antes, agrupando por
+   `salon`. Publicar una pantalla que se queda en blanco esperando un .sql es
+   justo la falla silenciosa que este proyecto ya pagó dos veces. */
+let LAMA_AREAS   = [];      // páginas y secciones de esta sede
+let LAMA_PAGINA  = null;    // la página elegida (id)
+let LAMA_EDITA   = false;   // ¿está puesto el modo edición del plano?
 let LAMA_SEL     = null;    // id de la mesa abierta en el panel
 let LAMA_PAPEL   = null;    // el texto de la última comanda o precuenta
 let LAMA_CARTA   = [];      // el catálogo vendible de esta sede
@@ -5872,6 +5958,17 @@ const ICONO_LAPIZ =
 
 const lamaCuentaDe = mesaId => LAMA_CUENTAS.find(c => c.mesa_id === mesaId) || null;
 const lamaMesaDe   = id     => LAMA_MESAS.find(m => m.id === id) || null;
+/* PÁGINAS Y SECCIONES. Un solo criterio: sin padre es página, con padre es
+   sección. `ordenar` los deja como los dejó el modo edición, y el nombre
+   desempata para que dos con el mismo orden no bailen entre recargas. */
+const lamaOrdenar  = (a,b) => (a.orden - b.orden) || a.nombre.localeCompare(b.nombre);
+const lamaPaginas  = ()    => LAMA_AREAS.filter(a => !a.padre_id).sort(lamaOrdenar);
+const lamaSecciones= pag   => LAMA_AREAS.filter(a => a.padre_id === pag).sort(lamaOrdenar);
+const lamaAreaDe   = id    => LAMA_AREAS.find(a => a.id === id) || null;
+/* ¿Hay plano nuevo? Solo si el .sql se corrió Y esta sede tiene páginas. Es
+   la pregunta que decide entre las dos formas de pintar, y se hace UNA vez
+   para que no queden dos dueños de la misma decisión. */
+const lamaHayAreas = ()    => lamaPaginas().length > 0;
 const plata = n => '$' + Math.round(+n || 0).toLocaleString('es-CL');
 
 /* La carta sale de `fudo_productos`, el espejo del catálogo de Fudo que se
@@ -5919,20 +6016,31 @@ async function lamaCargar(forzar){
       sb.from('mesas').select('*').eq('sede', SEDE).eq('activa', true)
         .order('salon').order('orden').limit(500),
       sb.from('cuentas').select('*').eq('sede', SEDE).neq('estado', 'cerrada').limit(500),
+      /* Las áreas van en el mismo viaje. Si la tabla no existe todavía,
+         Supabase devuelve un error y `data` viene nulo: eso NO rompe nada,
+         se sigue con el modelo viejo. */
+      sb.from('lama_areas').select('*').eq('sede', SEDE).eq('activa', true)
+        .order('orden').order('nombre').limit(300),
     ];
     const cartaVieja = LAMA_CARTA_SEDE === SEDE && LAMA_CARTA.length;
     if(!cartaVieja) pide.push(
       sb.from('fudo_productos').select('fudo_product_id,nombre,precio')
         .eq('sede', SEDE).eq('activo', true).order('nombre').limit(1000));
 
-    const [mm, cc, pp] = await Promise.all(pide);
+    const [mm, cc, aa, pp] = await Promise.all(pide);
     LAMA_MESAS   = mm.data || [];
     LAMA_CUENTAS = cc.data || [];
+    LAMA_AREAS   = aa.data || [];
     if(pp){
       LAMA_CARTA = (pp.data || []).filter(p => p.nombre && +p.precio > 0);
       LAMA_CARTA_SEDE = SEDE;
     }
     if(!LAMA_SALON) LAMA_SALON = (LAMA_MESAS[0] || {}).salon || 'Salón';
+    /* La página elegida se recuerda mientras siga existiendo: si alguien la
+       borra desde otro teléfono, se cae a la primera en vez de dejar el plano
+       vacío sin decir por qué. */
+    const pags = lamaPaginas();
+    if(pags.length && !pags.some(p => p.id === LAMA_PAGINA)) LAMA_PAGINA = pags[0].id;
     /* Los motivos de descuento los necesita AHORA el panel, no solo la ventana
        de cobro (C5). `lamaCargarMedios` se pide una vez por sesión y en
        silencio, así que llamarla acá no cuesta nada. */
@@ -6081,10 +6189,24 @@ function lamaPintarPlano(){
   /* La franja de salones solo aparece si hay más de uno. Hoy solo existe
      "Salón" — Terraza y POPUP están en Fudo pero no se usan — y un selector
      de una sola opción es ruido. */
-  $('lama-salones').innerHTML = salones.length > 1
-    ? salones.map(s => `<button type="button" data-lamasalon="${esc(s)}"${
-        s === LAMA_SALON ? ' class="on"' : ''}>${esc(s)}</button>`).join('')
-    : '';
+  const pags = lamaPaginas();
+  $('lama-salones').innerHTML = pags.length
+    /* Con páginas la franja se muestra SIEMPRE, aunque haya una sola: es
+       desde donde se agregan las que faltan, así que esconderla dejaría el
+       camino sin puerta. */
+    ? pags.map(p => `<button type="button" data-lamapagina="${p.id}"${
+        p.id === LAMA_PAGINA ? ' class="on"' : ''}>${esc(p.nombre)}</button>`).join('')
+      /* El lápiz vive al final de la franja y NO durante un movimiento: dos
+         modos encendidos a la vez es cómo alguien mueve una mesa creyendo que
+         la está reordenando. */
+      + (LAMA_MODO ? '' :
+         `<button type="button" class="lapiz${LAMA_EDITA ? ' on' : ''}"
+            data-lamaacc="plano-editar" title="Editar el plano"
+            aria-label="Editar el plano">${ICONO_LAPIZ}</button>`)
+    : (salones.length > 1
+        ? salones.map(s => `<button type="button" data-lamasalon="${esc(s)}"${
+            s === LAMA_SALON ? ' class="on"' : ''}>${esc(s)}</button>`).join('')
+        : '');
 
   /* Con una mesa elegida, el plano se encoge a un riel en el teléfono y la
      cuenta ocupa el resto. Sin eso habría que salir de la cuenta para mirar
@@ -6092,9 +6214,15 @@ function lamaPintarPlano(){
   const caja = cont.closest('.lama');
   if(caja) caja.classList.toggle('con-panel', !!LAMA_SEL);
 
-  const mesas = LAMA_MESAS.filter(m => m.salon === LAMA_SALON);
+  const conAreas = lamaHayAreas();
+  const mesas = conAreas
+    ? LAMA_MESAS.filter(m => lamaSecciones(LAMA_PAGINA).some(x => x.id === m.area_id))
+    : LAMA_MESAS.filter(m => m.salon === LAMA_SALON);
+  cont.classList.toggle('con-secciones', conAreas);
   if(!mesas.length){
-    cont.innerHTML = '<div class="empty">Esta sede todavía no tiene mesas.</div>';
+    cont.innerHTML = conAreas
+      ? '<div class="empty">Esta página todavía no tiene mesas.</div>'
+      : '<div class="empty">Esta sede todavía no tiene mesas.</div>';
     lamaPintarBanda();
     return;
   }
@@ -6103,7 +6231,7 @@ function lamaPintarPlano(){
      de quien abrió la mesa y era ruido: no ayuda a decidir y tapa lo único
      que se lee de un vistazo, que es el color. */
   const moviendo = LAMA_MODO === 'mesa' || LAMA_MODO === 'items';
-  cont.innerHTML = mesas.map(m => {
+  const dibujar = m => {
     const c = lamaCuentaDe(m.id);
     const est = !c ? 'libre' : c.estado === 'precuenta' ? 'cobrando' : 'ocupada';
     let extra = LAMA_SEL === m.id ? ' sel' : '';
@@ -6118,20 +6246,62 @@ function lamaPintarPlano(){
       else if(LAMA_MODO === 'items' && est !== 'libre'){ extra = ' viva'; }
       else { extra = ' apagada'; tocable = false; }
     }
-    return `<button type="button" class="lama-mesa ${est}${extra}" data-lamamesa="${m.id}"${
+    const forma = m.forma && m.forma !== 'cuadrada' ? ' f-' + m.forma : '';
+    return `<button type="button" class="lama-mesa ${est}${extra}${forma}" data-lamamesa="${m.id}"${
       tocable ? '' : ' disabled'} aria-label="Mesa ${m.numero}, ${est}">
       <span class="n">${m.numero}</span>
     </button>`;
-  }).join('');
+  };
+
+  if(conAreas){
+    /* Cada sección es una tarjeta de color suave con sus mesas adentro. Los
+       colores son de la paleta de la casa y NO compiten con los de estado:
+       el fondo es tenue y la mesa es sólida, así el rojo de "ocupada" sigue
+       siendo lo único que grita. */
+    const secs = lamaSecciones(LAMA_PAGINA);
+    cont.innerHTML = secs.map(sec => {
+      const dentro = mesas.filter(m => m.area_id === sec.id);
+      if(!dentro.length && !LAMA_EDITA) return '';
+      const ocup = dentro.filter(m => lamaCuentaDe(m.id)).length;
+      const cab = LAMA_EDITA
+        ? `<button type="button" class="lama-sec-cab tocable" data-lamaseced="${sec.id}">
+             <span class="t">${esc(sec.nombre)}</span><span class="c">editar</span></button>`
+        : `<header class="lama-sec-cab"><span class="t">${esc(sec.nombre)}</span>
+             ${ocup ? `<span class="c">${ocup} de ${dentro.length}</span>` : ''}</header>`;
+      return `<section class="lama-sec c-${esc(sec.color || 'a')}" data-lamasec="${sec.id}">
+        ${cab}
+        <div class="lama-rej">${dentro.map(dibujar).join('')}${
+          LAMA_EDITA ? `<button type="button" class="lama-mesa nueva"
+            data-lamanuevamesa="${sec.id}" aria-label="Agregar una mesa acá">+</button>` : ''}</div>
+      </section>`;
+    }).join('') || '<div class="empty">Esta página todavía no tiene secciones.</div>';
+    if(LAMA_EDITA) cont.innerHTML +=
+      `<button type="button" class="lama-ed" data-lamaacc="plano-nueva-seccion">
+         <span class="i">+</span> Agregar una sección a esta página</button>
+       <button type="button" class="lama-ed" data-lamaacc="plano-nueva-pagina">
+         <span class="i">+</span> Agregar una página</button>`;
+  } else {
+    cont.innerHTML = mesas.map(dibujar).join('');
+  }
 
   lamaPintarBanda();
+  lamaPintarPF();
 }
 
 /* La banda del modo mover. Dice de dónde sale y qué falta hacer, y lleva la
    salida al lado — un modo del que no se ve cómo salir es una trampa. */
 function lamaPintarBanda(){
   const caja = $('lama-banda'); if(!caja) return;
-  if(LAMA_MODO !== 'mesa' && LAMA_MODO !== 'items'){ caja.innerHTML = ''; return; }
+  if(LAMA_MODO !== 'mesa' && LAMA_MODO !== 'items'){
+    /* Editando el plano la cinta dice DÓNDE estás y cómo salir. Un modo del
+       que no se ve la salida es una trampa — la misma razón por la que el
+       modo mover lleva su ✕ al lado. */
+    caja.innerHTML = LAMA_EDITA
+      ? `<div class="lama-banda"><span class="t">Editando el plano</span>
+           <button type="button" data-lamaacc="plano-listo">✕ Listo</button></div>`
+      : '';
+    return;
+  }
   const m = lamaMesaDe(LAMA_SEL);
   const txt = LAMA_MODO === 'mesa'
     ? `Mesa ${m ? m.numero : ''} → toca la mesa destino`
@@ -8231,6 +8401,195 @@ function lamaCfgFicha(){
 }
 
 /* ==================================================================
+   EL MODO EDICIÓN DEL PLANO  (2026-09-05, maqueta aprobada por Jhon)
+   ==================================================================
+   Agregar y quitar mesas, moverlas de sección, crear secciones y páginas,
+   y cambiarles el nombre, el color, la forma y el tamaño. Todo desde la
+   pantalla: nadie tiene que volver a pedir un `.sql` para mover una mesa.
+
+   ⚠️ DÓNDE ME APARTÉ DE LA MAQUETA, Y POR QUÉ. Ahí decía "arrastrarla la
+   mueve a otra sección". No se hizo con arrastre: **en el teléfono el plano
+   es un riel de 66 px**, y arrastrar dentro de una columna que además hace
+   scroll es la receta de mover una mesa sin querer — y una mesa movida por
+   accidente manda el pedido al lugar equivocado. Se toca la mesa y se elige
+   la sección en su ficha: un gesto que no se dispara solo. El arrastre puede
+   volver el día que exista una pantalla de plano grande.
+
+   LOS CANDADOS, y son de los que protegen datos (§0.8):
+     · una mesa con la cuenta abierta no se quita ni se mueve
+     · una sección con mesas no se borra
+     · una página con secciones no se borra
+   Los tres avisan con el motivo. Ninguno hace algo raro en silencio.        */
+let LAMA_PF = null;   // la ficha abierta del plano: {tipo, ...}
+
+function lamaPintarPF(){ const c = $('lama-plano-ficha'); if(c) c.innerHTML = lamaPFHTML(); }
+
+const LAMA_COLORES = [['a','Azul'],['b','Verde'],['c','Ámbar'],['d','Lila'],['e','Gris']];
+const LAMA_FORMAS  = [['cuadrada','Cuadrada'],['redonda','Redonda'],['larga','Larga']];
+const LAMA_TAMANOS = [['chica','Chica'],['normal','Normal'],['grande','Grande']];
+
+const lamaPFOpc = (campo, opciones, valor) => `<div class="pf-opc">` + opciones.map(([v,t]) =>
+  `<button type="button" data-lamapf="${campo}" data-v="${v}"
+     class="${valor === v ? 'on' : ''}">${esc(t)}</button>`).join('') + `</div>`;
+
+function lamaPFHTML(){
+  const f = LAMA_PF; if(!f) return '';
+  let cuerpo = '', titulo = '', borrar = '';
+
+  if(f.tipo === 'mesa'){
+    titulo = f.nueva ? 'Mesa nueva' : 'Mesa ' + f.numero;
+    const secs = lamaSecciones(LAMA_PAGINA);
+    cuerpo = `
+      <div class="cfg-campo">
+        <label for="pf-num">Número</label>
+        <input id="pf-num" inputmode="numeric" value="${esc(String(f.numero ?? ''))}">
+      </div>
+      <div class="cfg-campo"><label>Sección</label>
+        <div class="pf-opc">${secs.map(x =>
+          `<button type="button" data-lamapf="area_id" data-v="${x.id}"
+             class="${+f.area_id === x.id ? 'on' : ''}">${esc(x.nombre)}</button>`).join('')}</div>
+      </div>
+      <div class="cfg-campo"><label>Forma</label>${lamaPFOpc('forma', LAMA_FORMAS, f.forma)}</div>
+      <div class="cfg-campo"><label>Tamaño</label>${lamaPFOpc('tam', LAMA_TAMANOS, f.tam)}</div>`;
+    if(!f.nueva) borrar = 'Quitar del plano';
+  }
+
+  if(f.tipo === 'seccion' || f.tipo === 'pagina'){
+    const esSec = f.tipo === 'seccion';
+    titulo = f.nueva ? (esSec ? 'Sección nueva' : 'Página nueva')
+                     : (esSec ? 'Sección' : 'Página');
+    cuerpo = `
+      <div class="cfg-campo">
+        <label for="pf-nom">Cómo se llama</label>
+        <input id="pf-nom" value="${esc(f.nombre || '')}"
+               placeholder="${esSec ? 'Ala izquierda, Barra…' : 'Salón, Mostrador…'}">
+      </div>` +
+      (esSec ? `<div class="cfg-campo"><label>Color</label>
+        <div class="pf-opc colores">${LAMA_COLORES.map(([v,t]) =>
+          `<button type="button" data-lamapf="color" data-v="${v}"
+             class="c-${v}${f.color === v ? ' on' : ''}">${esc(t)}</button>`).join('')}</div>
+      </div>` : '');
+    if(!f.nueva) borrar = esSec ? 'Borrar la sección' : 'Borrar la página';
+  }
+
+  return `<div class="cfg-ficha" id="lama-pf">
+    <div class="caja" role="dialog" aria-modal="true">
+      <h3>${esc(titulo)}</h3>
+      ${cuerpo}
+      ${borrar ? `<button type="button" class="pf-borrar" data-lamaacc="plano-borrar">${esc(borrar)}</button>` : ''}
+      <div class="mbtns">
+        <button type="button" class="btn btn-gris"   data-lamaacc="plano-cancelar">Cancelar</button>
+        <button type="button" class="btn btn-orange" data-lamaacc="plano-guardar">Guardar</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* Abrir la ficha de una mesa. El número que se propone para una mesa nueva es
+   el siguiente libre DE LA SEDE, no de la sección: desde el 2026-09-05 el
+   número es único por sede, y proponer uno repetido sería ofrecer un camino
+   que la base va a rechazar. */
+function lamaPFMesa(m, areaId){
+  if(m) LAMA_PF = {tipo:'mesa', id:m.id, numero:m.numero, area_id:m.area_id,
+                   forma:m.forma || 'cuadrada', tam:m.tam || 'normal'};
+  else {
+    const usados = LAMA_MESAS.map(x => +x.numero);
+    let n = 1; while(usados.includes(n)) n++;
+    LAMA_PF = {tipo:'mesa', nueva:true, numero:n, area_id:+areaId,
+               forma:'cuadrada', tam:'normal'};
+  }
+  lamaPintarPF();
+}
+
+async function lamaPFGuardar(){
+  const f = LAMA_PF; if(!f) return;
+  const $v = id => { const e = $(id); return e ? e.value.trim() : ''; };
+
+  if(f.tipo === 'mesa'){
+    const n = parseInt($v('pf-num'), 10);
+    if(!(n > 0)){ avisar('El número de la mesa tiene que ser mayor que cero.'); return; }
+    if(!f.area_id){ avisar('Elegí en qué sección va.'); return; }
+    /* El número repetido lo rechaza la base (es único por sede), pero se
+       comprueba acá también para poder decirlo en castellano en vez de
+       mostrar el error crudo de Postgres. */
+    const choque = LAMA_MESAS.find(x => +x.numero === n && x.id !== f.id);
+    if(choque){ avisar('Ya existe la mesa ' + n + ' en esta sede.'); return; }
+    const fila = {numero:n, area_id:+f.area_id, forma:f.forma, tam:f.tam};
+    const r = f.nueva
+      ? await sb.from('mesas').insert({...fila, sede:SEDE, activa:true,
+          salon:(lamaAreaDe(+f.area_id) || {}).nombre || 'Salón', orden:n})
+      : await sb.from('mesas').update(fila).eq('id', f.id);
+    if(r.error){ avisar('No se pudo guardar la mesa.\n\n' + r.error.message); return; }
+  }
+
+  if(f.tipo === 'seccion' || f.tipo === 'pagina'){
+    const nom = $v('pf-nom');
+    if(!nom){ avisar('Ponele un nombre.'); return; }
+    const fila = {nombre:nom};
+    if(f.tipo === 'seccion') fila.color = f.color || 'a';
+    const r = f.nueva
+      ? await sb.from('lama_areas').insert({...fila, sede:SEDE, activa:true,
+          padre_id: f.tipo === 'seccion' ? LAMA_PAGINA : null,
+          orden: (f.tipo === 'seccion' ? lamaSecciones(LAMA_PAGINA) : lamaPaginas()).length})
+      : await sb.from('lama_areas').update(fila).eq('id', f.id);
+    if(r.error){ avisar('No se pudo guardar.\n\n' + r.error.message); return; }
+  }
+
+  LAMA_PF = null;
+  await lamaCargar();
+  lamaPintarPF();
+}
+
+/* Borrar, con los tres candados dichos con su motivo. La mesa NO se borra:
+   se desactiva, porque tiene cuentas, comandas y ventas colgando — lo mismo
+   que pasa con los productos en Stock (§0.6.3). */
+async function lamaPFBorrar(){
+  const f = LAMA_PF; if(!f || f.nueva) return;
+
+  if(f.tipo === 'mesa'){
+    if(lamaCuentaDe(f.id)){
+      avisar('La mesa ' + f.numero + ' tiene una cuenta abierta.\n\nCobrala o cerrala primero.');
+      return;
+    }
+    /* `preguntar` y NO el `confirm` del navegador: la app tiene su propia
+       ventana —con el desenfoque de fondo y el estilo de la casa— y mezclar
+       las dos formas de preguntar se nota al instante. */
+    if(!await preguntar('¿Quitar la mesa ' + f.numero + ' del plano?',
+                        'Su historial se conserva.', 'Quitar')) return;
+    const r = await sb.from('mesas').update({activa:false}).eq('id', f.id);
+    if(r.error){ avisar('No se pudo quitar.\n\n' + r.error.message); return; }
+  }
+
+  if(f.tipo === 'seccion'){
+    const cuantas = LAMA_MESAS.filter(m => m.area_id === f.id).length;
+    if(cuantas){
+      avisar('Esta sección tiene ' + cuantas + ' mesa' + (cuantas === 1 ? '' : 's') +
+             '.\n\nMovelas a otra sección antes de borrarla.');
+      return;
+    }
+    const r = await sb.from('lama_areas').delete().eq('id', f.id);
+    if(r.error){ avisar('No se pudo borrar.\n\n' + r.error.message); return; }
+  }
+
+  if(f.tipo === 'pagina'){
+    const cuantas = lamaSecciones(f.id).length;
+    if(cuantas){
+      avisar('Esta página tiene ' + cuantas + ' sección' + (cuantas === 1 ? '' : 'es') +
+             '.\n\nBorralas o movelas antes.');
+      return;
+    }
+    if(lamaPaginas().length < 2){ avisar('Es la única página que hay. Creá otra antes de borrar esta.'); return; }
+    const r = await sb.from('lama_areas').delete().eq('id', f.id);
+    if(r.error){ avisar('No se pudo borrar.\n\n' + r.error.message); return; }
+    LAMA_PAGINA = null;
+  }
+
+  LAMA_PF = null;
+  await lamaCargar();
+  lamaPintarPF();
+}
+
+/* ==================================================================
    MOVER — la mesa entera, o algunos productos
    ==================================================================
    Existe porque el garzón se equivoca: anota en la 3 lo que era de la 7, o
@@ -8410,6 +8769,44 @@ $('view-lama').addEventListener('click', async e => {
 
   const sa = e.target.closest('[data-lamasalon]');
   if(sa){ LAMA_SALON = sa.dataset.lamasalon; LAMA_SEL = null; LAMA_PAPEL = null; lamaPintar(); return; }
+  /* Las píldoras de la ficha escriben en la copia y repintan. Se edita una
+     copia y recién al Guardar se toca la base: así Cancelar deja todo como
+     estaba, igual que el descuento del panel (C5). */
+  const op = e.target.closest('[data-lamapf]');
+  if(op && LAMA_PF){
+    const c = op.dataset.lamapf;
+    LAMA_PF[c] = c === 'area_id' ? +op.dataset.v : op.dataset.v;
+    /* Lo tipeado no se pierde al tocar una píldora: se rescata antes de
+       repintar. Sin esto, elegir el color borraba el nombre a medio escribir. */
+    const n = $('pf-nom'), u = $('pf-num');
+    if(n) LAMA_PF.nombre = n.value;
+    if(u) LAMA_PF.numero = u.value;
+    lamaPintarPF();
+    return;
+  }
+  const se = e.target.closest('[data-lamaseced]');
+  if(se){
+    const x = lamaAreaDe(+se.dataset.lamaseced);
+    if(x){ LAMA_PF = {tipo:'seccion', id:x.id, nombre:x.nombre, color:x.color || 'a'};
+           lamaPintarPF(); }
+    return;
+  }
+  const nm = e.target.closest('[data-lamanuevamesa]');
+  if(nm){ lamaPFMesa(null, nm.dataset.lamanuevamesa); return; }
+
+  const pg = e.target.closest('[data-lamapagina]');
+  if(pg){
+    const id = +pg.dataset.lamapagina;
+    /* Editando, tocar la página en la que YA estás la abre para renombrarla o
+       borrarla. Tocar otra sigue siendo cambiar de página, que es lo que uno
+       espera de una franja de pestañas. */
+    if(LAMA_EDITA && id === LAMA_PAGINA){
+      const x = lamaAreaDe(id);
+      if(x){ LAMA_PF = {tipo:'pagina', id:x.id, nombre:x.nombre}; lamaPintarPF(); }
+      return;
+    }
+    LAMA_PAGINA = id; LAMA_SEL = null; LAMA_PAPEL = null; lamaPintar(); return;
+  }
 
   const me = e.target.closest('[data-lamamesa]');
   if(me){
@@ -8418,6 +8815,11 @@ $('view-lama').addEventListener('click', async e => {
        la elige: abrir es el + de abajo a la derecha. */
     if(LAMA_MODO === 'mesa')       { await lamaMoverMesa(id);  return; }
     if(LAMA_MODO === 'items')      { await lamaMoverItems(id); return; }
+    /* Editando, tocar una mesa la abre para cambiarla — no para atenderla.
+       Es la misma tecla con dos sentidos, y por eso el modo se anuncia con
+       una cinta naranja arriba: sin ella, tocar una mesa haría algo distinto
+       de lo que uno espera y no habría cómo saberlo. */
+    if(LAMA_EDITA){ const m = lamaMesaDe(id); if(m) lamaPFMesa(m); return; }
     await lamaSeleccionar(id);
     return;
   }
@@ -8479,6 +8881,20 @@ $('view-lama').addEventListener('click', async e => {
   const ac = e.target.closest('[data-lamaacc]');
   if(ac){
     const a = ac.dataset.lamaacc;
+    /* EL MODO EDICIÓN DEL PLANO. Al salir se limpia la ficha: dejarla
+       abierta detrás de un modo apagado es cómo se guarda algo sin querer. */
+    if(a === 'plano-editar'){ LAMA_EDITA = !LAMA_EDITA; LAMA_PF = null;
+                              LAMA_SEL = null; lamaPintar(); return; }
+    else if(a === 'plano-listo'){ LAMA_EDITA = false; LAMA_PF = null; lamaPintar(); return; }
+    else if(a === 'plano-cancelar'){ LAMA_PF = null; lamaPintarPF(); return; }
+    else if(a === 'plano-guardar'){ await lamaPFGuardar(); return; }
+    else if(a === 'plano-borrar'){ await lamaPFBorrar(); return; }
+    else if(a === 'plano-nueva-seccion'){
+      LAMA_PF = {tipo:'seccion', nueva:true, nombre:'', color:'a'}; lamaPintarPF(); return;
+    }
+    else if(a === 'plano-nueva-pagina'){
+      LAMA_PF = {tipo:'pagina', nueva:true, nombre:''}; lamaPintarPF(); return;
+    }
     if(a === 'confirmar')          await lamaConfirmar();
     else if(a === 'cancelar')      await lamaCancelar();
     else if(a === 'precuenta')     await lamaPrecuenta();

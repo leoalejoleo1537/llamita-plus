@@ -1201,6 +1201,50 @@ desactiva (tiene cuentas y ventas colgando, igual que los productos en Stock); y
 **una mesa con la cuenta abierta no se puede quitar ni mover de página** —
 mover el piso mientras alguien está sentado es cómo se pierde una cuenta.
 
+##### ✅ CONSTRUIDO — 2026-09-05 · pasos 1, 2 y 3
+
+**El `.sql` está corrido** (`sql/2026-09-lama-plano-editable.sql`) y la pantalla
+publicada. Lo que dejó la migración: **solo Plaza tenía mesas** —12, numeradas 1
+a 12, todas en "Salón"— y quedaron en página *Salón* → sección *Salón*, con
+`sin_area` en 0. **Angamos y Bodega no tienen ninguna**, así que la pregunta que
+quedaba abierta se contestó sola: no hay nada que repartir allá.
+
+⚠️ **El bloque 3 falló la primera vez y el error era mío:** `padre_id` es
+`bigint` y escribí un `null` pelado. **Dentro de un `insert ... select`,
+Postgres NO deduce el tipo de la columna de destino** — ahí un `null` nace como
+texto. Va `null::bigint`. Es la familia de §0.1.9: escribir de memoria en vez de
+decirlo explícito.
+
+**Lo que quedó en la pantalla:**
+
+| | |
+|---|---|
+| El plano | páginas en la franja de arriba, secciones en tarjetas de color suave, las mesas adentro |
+| El modo edición | el ✎ al final de la franja · cinta naranja mientras dura · agregar y quitar mesas, moverlas de sección, crear y renombrar secciones y páginas, forma y tamaño por mesa |
+| **Sin el `.sql`** | el plano sigue **exactamente como antes**, agrupando por `salon`, y el ✎ ni aparece. Publicar una pantalla que se queda en blanco esperando un `.sql` es la falla silenciosa que este proyecto ya pagó dos veces |
+
+⚠️ **DÓNDE ME APARTÉ DE LA MAQUETA APROBADA, y hay que decirlo.** Ahí decía
+*"arrastrarla la mueve a otra sección"*. **No se hizo con arrastre.** En el
+teléfono el plano es un riel de 66 px que además hace scroll, y arrastrar ahí
+es la receta de mover una mesa sin querer — y una mesa movida por accidente
+manda el pedido al lugar equivocado. Se toca la mesa y se elige la sección en su
+ficha: **un gesto que no se dispara solo**. El arrastre puede volver el día que
+exista una pantalla de plano grande.
+
+**Los tres candados, y son de los que protegen datos (§0.8):** una mesa con la
+cuenta abierta no se quita ni se mueve; una sección con mesas no se borra; una
+página con secciones tampoco. Los tres **avisan con el motivo** — ninguno hace
+algo raro en silencio. Y **quitar una mesa no la borra: la desactiva**, porque
+tiene cuentas, comandas y ventas colgando.
+
+**Prueba: `pruebas/lama-plano.mjs`, 38 casos**, con el `.sql` corrido y sin
+correr. ⚠️ **Y uno de ellos pasaba por la razón equivocada:** el caso del
+candado de la mesa con cuenta abierta seguía en verde con el candado sacado,
+porque sin él aparece una confirmación que la prueba nunca contestaba — y no
+contestarla también impedía la escritura. Ahora la prueba **acepta lo que
+aparezca**, así que sin candado la mesa se borra y el caso se pone rojo. Se
+comprobó rompiendo el código a propósito.
+
 ##### Sus tres respuestas, y lo que cambió cada una
 
 | Pregunta | Respuesta |

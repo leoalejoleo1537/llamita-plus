@@ -95,9 +95,16 @@ alter table public.mesas add  constraint mesas_tam_ok
 -- Cada sede estrena una página "Salón", y adentro una sección por cada salón
 -- que ya existía. Después las movés vos desde la app, que es para lo que
 -- sirve el modo edición.
+--
+-- ⚠️ CORREGIDO EL 2026-09-05: el `null` de `padre_id` va con `::bigint`.
+-- Uno supone que Postgres deduce el tipo de la columna de destino, y NO lo
+-- hace dentro de un `insert ... select`: ahí un `null` pelado nace como
+-- TEXTO, y la columna es bigint. Falla con "column padre_id is of type
+-- bigint but expression is of type text". Es la misma familia de error que
+-- §0.1.9: escribir de memoria en vez de decirlo explícito.
 -- ================================================================
 insert into public.lama_areas (sede, nombre, padre_id, orden, color)
-select distinct m.sede, 'Salón', null, 0, 'a'
+select distinct m.sede, 'Salón', null::bigint, 0, 'a'
   from public.mesas m
  where not exists (select 1 from public.lama_areas a
                     where a.sede = m.sede and a.padre_id is null);
