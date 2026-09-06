@@ -6,16 +6,15 @@
 
 ---
 
-## La copia está separada — y falta la comprobación que lo prueba
+## ✅ La copia está separada, y está comprobado
 
 Al 2026-09-02, esta copia **apunta a su propia base de datos** y no tiene
 ninguna conexión con el sistema de Café del Desierto.
 
-⚠️ **Dicho con precisión:** todo lo comprobado apunta a que sí — el código no
-nombra su proyecto por ninguna parte, y la app corre contra la base nueva. Pero
-**la prueba de punta a punta de la Fase 6 todavía no se corrió**, y hasta que se
-corra lo honesto es decir *"todo indica que quedó separado"*. Está lista para
-pegar en [`docs/sql-pendientes.md`](docs/sql-pendientes.md).
+**Y no es una impresión: es una medición.** El 2026-09-05 se creó un producto de
+prueba acá y se lo buscó en la base de ellos: **no llegó**. Además, el código no
+nombra su proyecto por ninguna parte y la app crea **un solo** cliente de
+Supabase, apuntando acá.
 
 | | |
 |---|---|
@@ -41,7 +40,7 @@ El plan completo está en **[`docs/plan-separacion.md`](docs/plan-separacion.md)
 | 3 | Cortar el cordón: credenciales nuevas, `.sql` marcados | ✅ |
 | 4 | Desplegar las 11 Edge Functions en el proyecto nuevo | ⬜ **lo único que falta de verdad** · lo pega Jhon |
 | 5 | Vercel nuevo apuntando acá | ✅ **2026-09-02** · Jhon abre la app desde el teléfono |
-| 6 | Las comprobaciones finales | 🟡 **a medias** — ver abajo |
+| 6 | Las comprobaciones finales | ✅ **2026-09-05** — ver abajo |
 | 7 | Reescribir §0.9, la política de divergencia, "limpiar antes de vender" | ✅ **2026-09-04** · están en `CLAUDE.md` |
 
 > ⚠️ **Corregido el 2026-09-05.** Las fases 5 y 7 decían ⬜ **estando hechas**,
@@ -49,7 +48,7 @@ El plan completo está en **[`docs/plan-separacion.md`](docs/plan-separacion.md)
 > rehacer trabajo terminado es el error más caro de este proyecto, así que se
 > arregla apenas se ve.
 
-### Qué falta de la Fase 6, exactamente
+### La Fase 6, comprobación por comprobación
 
 | Comprobación | Estado |
 |---|---|
@@ -57,11 +56,17 @@ El plan completo está en **[`docs/plan-separacion.md`](docs/plan-separacion.md)
 | **La app corre contra la base nueva** | ✅ Jhon entra, ve sus datos, y el `.sql` del tiempo real hizo efecto |
 | **(a) Ningún cron apunta al proyecto viejo** | ✅ **2026-09-05** · `pg_cron` **no está instalada** en este proyecto, así que no existe ni un cron. Nada puede llamar a la casa de ellos |
 | **(b) Los números de la estructura** | 🟡 **medido**: 44 tablas · **45** funciones · 60 políticas · 1.434 productos. Tres de cuatro clavados; el de funciones **no tiene una vara confiable** — ver abajo |
-| **(c) El producto `ZZZ PRUEBA COPIA`** — que aparezca acá y **no** allá | ⬜ **es la prueba que de verdad prueba**, y no está hecha |
+| **(c) El producto `ZZZ PRUEBA COPIA`** — que aparezca acá y **no** allá | ✅ **2026-09-05** · en la base de ellos solo están las dos pruebas viejas del respaldo. Los tres de hoy no llegaron |
 
-⚠️ **La (c) es la que importa** y las otras dos no la reemplazan. Mientras no
-esté, lo honesto es decir *"todo indica que quedó separado"*, no *"está
-comprobado"*.
+✅ **La (c) es la que importa, y está hecha.** Ya no hay que decir *"todo indica
+que quedó separado"*: **está comprobado**, con la prueba que pidió Jhon el
+primer día.
+
+⚠️ **Con un susto en el medio que vale recordar.** La primera corrida "en el
+proyecto viejo" devolvió los cinco productos y parecía que la app escribía en
+las dos bases. **La pestaña nunca había cambiado de proyecto** — el editor de
+Supabase no dice en pantalla en cuál estás. Lo destrabó una consulta que le
+pregunta a la base **quién es**, no un razonamiento más largo.
 
 #### El número de funciones: dos documentos nuestros no coinciden
 
