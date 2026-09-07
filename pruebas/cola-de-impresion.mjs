@@ -67,6 +67,7 @@ async function montar({conMigracion = true} = {}){
       /* Sin la migración corrida esta tabla NO existe: es el estado real de
          la base hasta que Jhon pegue el .sql. */
       lama_motivos_anulacion: conMigracion ? MOTIVOS_ANU : null,
+      lama_impresiones: [],
       app_permisos:[{correo:'jhon@cafe.cl', nombre:'Jhon', puede_ajustes:true,
                      puede_editar:true, puede_fudo:true, puede_lama:true, fudo_bloqueos:[]}],
       producto_enlace:[], fudo_stock_push:[], fudo_sync:[], secciones:[], movimientos:[],
@@ -87,7 +88,14 @@ async function montar({conMigracion = true} = {}){
         is(){return api;}, not(){return api;}, or(){return api;}, ilike(){return api;},
         maybeSingle(){return Promise.resolve({data:filas[0]||null,error:err});},
         single(){return Promise.resolve({data:filas[0]||null,error:err});},
-        insert(v){ window.__esc.push({tabla:n, op:'insert', datos:v}); const rows=(Array.isArray(v)?v:[v]).map(r=>({id:++seq, ...r}));
+        insert(v){ window.__esc.push({tabla:n, op:'insert', datos:v});
+          /* La cola guarda de verdad: la pantalla de Ajustes tiene que poder
+             listar lo que se acaba de encolar, o probaríamos media cosa. */
+          if(n === 'lama_impresiones'){
+            (Array.isArray(v)?v:[v]).forEach(r =>
+              T.lama_impresiones.unshift({id:++seq, estado:'pendiente',
+                creada_at:new Date().toISOString(), ...r}));
+          } const rows=(Array.isArray(v)?v:[v]).map(r=>({id:++seq, ...r}));
           const e={select:()=>e, single:()=>Promise.resolve({data:rows[0],error:null}),
                    then:f=>Promise.resolve({data:rows,error:null}).then(f)}; return e; },
         update(){const e={eq:()=>e,in:()=>e,select:()=>e,
@@ -251,6 +259,45 @@ await caso('marcada como precuenta y NO como comanda', async () =>
   (await cola())[0].tipo === 'precuenta' || (await cola())[0].tipo);
 await caso('se distingue de la comanda al leerla', async () =>
   (await cola())[0].contenido.toLowerCase().includes('precuenta') || (await cola())[0].contenido.slice(0,80));
+
+
+console.log('\nLA PANTALLA · Ajustes → Impresión, que es como se prueba sin impresora:');
+await page.click('#btnMenu'); await page.waitForTimeout(300);
+await page.click('[data-accion="ajustes"]'); await page.waitForTimeout(600);
+await page.click('[data-aj="impresion"]'); await page.waitForTimeout(700);
+await caso('la sección existe y se abre', async () =>
+  await page.isVisible('#aj-imp') || 'no aparece');
+await caso('lista los papeles que se mandaron', async () =>
+  (await page.locator('[data-lamaimp]').count()) > 0 ||
+  'no lista ninguno de los que se encolaron');
+await caso('cada uno dice si salió o está esperando', async () =>
+  ((await page.textContent('#aj-imp')) || '').includes('esperando') || 'no dice el estado');
+await caso('tocar uno muestra el papel ENTERO, como sale', async () => {
+  await page.click('[data-lamaimp]'); await page.waitForTimeout(400);
+  const t = await page.textContent('.imp-papel').catch(()=>null);
+  return (t && t.includes('MESA')) || 'no se ve el papel';
+});
+await caso('y ofrece reimprimirlo', async () =>
+  await page.isVisible('[data-lamaacc="imp-reimprimir"]') || 'no se puede reimprimir');
+await caso('reimprimir manda una COPIA, no revive la vieja', async () => {
+  await limpiar();
+  await page.click('[data-lamaacc="imp-reimprimir"]'); await page.waitForTimeout(700);
+  const c = await cola();
+  const u = await page.evaluate(() =>
+    window.__esc.filter(x => x.tabla === 'lama_impresiones' && x.op === 'update').length);
+  if(u) return 'revivió la fila vieja en vez de copiarla';
+  return c.length === 1 || 'encoló ' + c.length;
+});
+await caso('el papel de prueba se puede mandar sin tocar ninguna mesa', async () => {
+  await limpiar();
+  await page.click('[data-lamaacc="imp-prueba"]'); await page.waitForTimeout(700);
+  const c = await cola();
+  return (c.length === 1 && c[0].tipo === 'prueba') || JSON.stringify(c.map(x=>x.tipo));
+});
+await caso('y lleva acentos y ñ, que es lo que se viene a comprobar', async () => {
+  const c = await cola();
+  return /[áéíóúñ]/.test(c[0].contenido) || 'sin acentos no prueba nada';
+});
 
 console.log('\nY NINGÚN ERROR DE JAVASCRIPT:');
 await caso('la consola quedó limpia', async () => errores.length === 0 || errores[0]);

@@ -1267,12 +1267,13 @@ la visita.
 
 | Pieza | |
 |---|---|
-| `lama_impresiones` · el buzón | ⬜ **el `.sql` espera a Jhon** |
+| `lama_impresiones` · el buzón | ✅ corrida el 2026-09-06 |
 | La app encola comanda, precuenta y anulación | ✅ |
 | **La tercera comanda**, que no existía | ✅ `lamaAnulacionTxt` |
 | El puente (`puente/puente.mjs` + `imprimir.mjs`) | ✅ escrito, **sin probar contra la impresora** |
-| Instalarlo en el local | ⬜ hace falta ir |
-| Reimprimir un ticket | ⬜ |
+| **Ajustes → Impresión** · la cola a la vista | ✅ **es la forma de probar comandar SIN impresora** |
+| Reimprimir un ticket | ✅ manda una copia |
+| Instalarlo en el local | ⬜ hace falta ir → [`docs/plan-visita-al-local.html`](plan-visita-al-local.html) |
 
 **Cómo le habla a Windows, y es lo contrario de lo primero que uno intenta:**
 no le quita la impresora — **se la pide**. Le manda un trabajo *RAW* al spooler
@@ -1302,8 +1303,19 @@ que manda a pedir motivo sólo lo que ya salió a la cocina—, y el caso de pru
 se queda como la red que atrapa a quien mañana agregue un `lamaEncolar` en el
 camino del borrado.
 
-Prueba: `pruebas/cola-de-impresion.mjs`, **17 casos**, con los dos lados —que
-anular lo comandado imprima, y que anular lo que nunca salió **no** imprima—.
+##### Y el bug de siempre, en su versión nueva
+
+Los manejadores de la cola nacieron colgados de `view-lama` —donde vive todo lo
+demás de Lama— **y la pantalla está dentro de Ajustes**. Resultado: la lista se
+dibujaba y **no respondía ni un toque**. Es el mismo par separado que dejó los
+− + de la ventana del producto sin hacer nada: **lo que se DIBUJA y lo que se
+ESCUCHA tienen que estar en el mismo contenedor.** Lo encontró la prueba.
+
+Prueba: `pruebas/cola-de-impresion.mjs`, **25 casos** — que anular lo comandado
+imprima, que anular lo que nunca salió **no** imprima, y que la pantalla de
+Ajustes liste, muestre el papel entero y reimprima **mandando una copia** en vez
+de revivir la fila vieja (revivirla borraría que ya había salido una vez, y
+nadie podría explicar los dos papeles iguales).
 
 ##### Las TRES comandas — dicho por Jhon el 2026-09-05
 

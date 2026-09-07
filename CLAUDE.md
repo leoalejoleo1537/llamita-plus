@@ -212,6 +212,27 @@ sólo aparece a veces es una señal que se aprende a no buscar.
 
 Es la corrección de un sesgo medido, no una cortesía.
 
+### 🔵 Y AL CERRAR UNA ETAPA: el mapa de dónde vamos
+
+*(Pedido por Jhon el 2026-09-06: "me puedas mostrar mientras desarrollamos una
+sección en qué parte del plan vamos, qué falta construir".)*
+
+> **Cuando se cierra una etapa o se está por empezar otra, el mensaje termina
+> con un cuadro de DÓNDE VAMOS.** Al final, no en el medio.
+
+Qué lleva, y nada más:
+
+| | |
+|---|---|
+| **Dónde estamos** | la fase, en una línea |
+| **Lo que quedó cerrado** | lo de esta tanda |
+| **Lo que sigue**, y de quién depende | de Claude o de Jhon |
+| **Lo que está trabado en él** | con qué lo desbloquea |
+
+⚠️ **Sale de `docs/avance-por-area.md`, que es la fuente** — no se inventa cada
+vez. Es la misma regla del informe nocturno: dos copias del mismo estado se
+desincronizan.
+
 **CABECERA OBLIGATORIA EN TODO ARCHIVO QUE SE LE ENTREGUE** *(pedido por Jhon el
 2026-08-01, después de perder varias vueltas preguntando dónde se pega cada
 cosa).* Él dijo textual: *"asume que ni sé utilizar bien aún Supabase"*. Cada

@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La visita al local &middot; conectar la impresora</title>
+<style>
+  :root{
+    --navy:#0F1E31; --navy2:#16283F;
+    --orange:#DC4405; --orange-dark:#B93A04;
+    --bg:#E9EEF5; --card:#FDFEFF; --border:#D6DFEB;
+    --text:#121E2C; --muted:#61707F;
+    --red-bg:#FCE9E6; --red-fg:#C0392B;
+    --green-bg:#E4F1E5; --green-fg:#2E7D32;
+    --amber-bg:#FDF0DE; --amber-fg:#9C6209;
+    --gray-bg:#E1E8F1; --gray-fg:#54677D;
+    --azul-bg:#E8F0FB; --azul-fg:#2C5AA0;
+    --sec-bg:#D0DDEC; --sec-tx:#1F3A5C; --sec-line:rgba(31,58,92,.22);
+    --sec-filo:#41628C;
+    --sombra:0 2px 4px rgba(20,40,70,.04), 0 12px 26px -18px rgba(20,40,70,.34);
+    --r-card:20px; --r-sec:18px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+       background:var(--bg);color:var(--text);line-height:1.5}
+  .doc{max-width:1080px;margin:0 auto;padding:22px 16px 80px}
+
+  h1{font-size:26px;margin:0 0 4px;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 26px}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:.06em;
+     color:var(--sec-tx);background:var(--sec-bg);border-left:4px solid var(--sec-filo);
+     padding:9px 14px;border-radius:0 var(--r-sec) var(--r-sec) 0;margin:38px 0 16px}
+  h3{font-size:16px;margin:26px 0 8px}
+  p{margin:0 0 12px}
+  .nota{background:var(--card);border:1px solid var(--border);border-radius:14px;
+        padding:14px 16px;margin:0 0 18px;box-shadow:var(--sombra)}
+  .nota.ojo{background:var(--amber-bg);border-color:rgba(156,98,9,.28)}
+  .nota.si{background:var(--green-bg);border-color:rgba(46,125,50,.28)}
+  .nota.no{background:var(--red-bg);border-color:rgba(192,57,43,.28)}
+  .nota b{color:var(--text)}
+  code{background:var(--gray-bg);border-radius:5px;padding:1px 5px;font-size:.9em}
+
+  .marco{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);
+         box-shadow:var(--sombra);overflow:hidden;margin:0 0 10px}
+  .marco-tit{background:var(--navy);color:#fff;font-size:12px;letter-spacing:.05em;
+             text-transform:uppercase;padding:8px 14px;display:flex;
+             justify-content:space-between;align-items:center}
+  .marco-tit span{opacity:.62;text-transform:none;letter-spacing:0;font-size:11px}
+  .lienzo{padding:16px;background:var(--bg)}
+  .pie-marco{font-size:13px;color:var(--muted);margin:0 0 26px;padding:0 4px}
+
+  /* la franja Salón | Mostrador, igual que la de salones de la app */
+  .salones{display:flex;gap:6px;margin:0 0 14px}
+  .salones button{background:var(--card);border:1px solid var(--border);color:var(--muted);
+    border-radius:999px;padding:8px 18px;font-size:14px;font-weight:700;cursor:default}
+  .salones button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+
+  /* el plano, con los mismos cuadrados de la app */
+  .plano{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:7px;
+         padding:6px 8px 16px}
+  .mesa{aspect-ratio:1;border-radius:var(--r-sec);display:flex;flex-direction:column;
+        align-items:center;justify-content:center;gap:3px;font-weight:800;font-size:22px}
+  .mesa .r{font-size:11px;font-weight:700;opacity:.85;letter-spacing:.03em}
+  .mesa.libre{background:var(--green-bg);color:var(--green-fg)}
+  .mesa.ocupada{background:var(--red-fg);color:#fff}
+  .mesa.cobrando{background:var(--azul-fg);color:#fff}
+  .mesa.nueva{background:var(--card);border:1px dashed var(--border);color:var(--orange);font-size:30px}
+  .mesa.sel{box-shadow:0 0 0 5px rgba(220,68,5,.16), 0 8px 24px -6px rgba(220,68,5,.7)}
+
+  table{width:100%;table-layout:fixed;border-collapse:collapse;background:var(--card);
+        border:1px solid var(--border);border-radius:14px;overflow:hidden;
+        box-shadow:var(--sombra);margin:0 0 18px;font-size:14px}
+  th{background:var(--sec-bg);color:var(--sec-tx);text-align:left;padding:10px 13px;
+     font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+  td{padding:10px 13px;border-top:1px solid var(--border);vertical-align:top}
+  td code,.op code{overflow-wrap:anywhere}
+  th:first-child{width:38%}
+  table.pasos th:nth-child(1){width:15%}
+  table.pasos th:nth-child(3){width:26%}
+  td.si{color:var(--green-fg);font-weight:700}
+  td.no{color:var(--red-fg);font-weight:700}
+
+  .pregunta{background:var(--azul-bg);border:1px solid rgba(44,90,160,.28);
+            border-radius:14px;padding:16px 18px;margin:0 0 16px}
+  .pregunta h4{margin:0 0 8px;font-size:16px;color:var(--azul-fg)}
+  .op{background:#fff;border:1px solid var(--border);border-radius:11px;
+      padding:11px 13px;margin:8px 0 0;font-size:14px}
+  .op b{color:var(--azul-fg)}
+  .op.gana{border-color:rgba(46,125,50,.45);background:var(--green-bg)}
+  .marca{background:var(--azul-bg);color:var(--azul-fg);border-radius:999px;
+         padding:3px 10px;font-size:12px;font-weight:700;display:inline-block}
+  .marca.ok{background:var(--green-bg);color:var(--green-fg)}
+  .marca.mal{background:var(--red-bg);color:var(--red-fg)}
+</style>
+<style>
+  .paso{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);
+    box-shadow:var(--sombra);padding:15px 17px;margin:0 0 12px;display:flex;gap:14px}
+  .paso .n{flex:0 0 34px;height:34px;border-radius:50%;background:var(--navy);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px}
+  .paso .c{flex:1;min-width:0}
+  .paso h4{margin:4px 0 6px;font-size:16px}
+  .paso p{margin:0 0 8px;font-size:14.5px}
+  .paso p:last-child{margin-bottom:0}
+  .paso code{font-size:.88em}
+  .paso.antes .n{background:var(--green-fg)}
+  .paso.ojo{background:var(--amber-bg);border-color:rgba(156,98,9,.28)}
+  .paso.ojo .n{background:var(--amber-fg)}
+  .lleva{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
+  .lleva span{background:var(--card);border:1px solid var(--border);border-radius:999px;
+    padding:7px 14px;font-size:13.5px;font-weight:700;box-shadow:var(--sombra)}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>Conectar la impresora</h1>
+<p class="sub">El paso a paso de la visita al local &middot; <b>F5</b> &middot; 2026-09-06</p>
+
+<div class="nota si">
+  <p style="margin:0 0 8px"><b>Todo lo que se pod&iacute;a hacer desde ac&aacute;
+  ya est&aacute; hecho.</b> La cola de impresi&oacute;n existe y funciona, la app
+  ya deja los papeles ah&iacute;, y el programa del puente est&aacute; escrito.
+  <b>Lo &uacute;nico que falta es enchufarlo</b>, y eso hay que hacerlo en el
+  computador del local.</p>
+  <p style="margin:0">Es <b>la misma visita que Fudo ya te cobr&oacute;</b> con su
+  extensi&oacute;n de Chrome y su aplicaci&oacute;n de Windows. No hay una
+  versi&oacute;n de esto sin programa instalado &mdash; eso es justo lo que se
+  midi&oacute; el 1 de septiembre.</p>
+</div>
+
+<h2>Qu&eacute; llev&aacute;s</h2>
+<div class="lleva">
+  <span>El tel&eacute;fono</span>
+  <span>Un pendrive <i>(o Google Drive)</i></span>
+  <span>15 minutos sin gente esperando</span>
+</div>
+
+<h2>Antes de ir &middot; desde tu casa, 5 minutos</h2>
+
+<div class="paso antes">
+  <div class="n">A</div>
+  <div class="c">
+    <h4>Comprob&aacute; que la cola anda</h4>
+    <p>En la app: abr&iacute; una mesa, agreg&aacute; algo y toc&aacute;
+    <b>Confirmar</b>. Despu&eacute;s and&aacute; a
+    <b>Ajustes &rarr; Impresi&oacute;n</b>.</p>
+    <p><b>Tiene que aparecer un rengl&oacute;n</b> que diga <i>Comanda</i> y
+    <i>esperando</i>. Toc&aacute;lo: se ve el papel entero, tal como va a salir.</p>
+    <p><b>Si aparece, lo &uacute;nico que falta es el puente.</b> Si no aparece,
+    avisame antes de ir &mdash; no tiene sentido viajar a conectar algo que
+    todav&iacute;a no tiene qu&eacute; imprimir.</p>
+  </div>
+</div>
+
+<div class="paso antes">
+  <div class="n">B</div>
+  <div class="c">
+    <h4>Llev&aacute;te la carpeta del puente</h4>
+    <p>Est&aacute; en el repositorio, en <code>puente/</code>. Baj&aacute;la a un
+    pendrive o dejala en Drive para abrirla desde el computador del local.</p>
+    <p>Son siete archivos chicos. <b>No hay nada que configurar todav&iacute;a</b>:
+    eso se hace all&aacute;, porque hace falta el nombre exacto de la impresora.</p>
+  </div>
+</div>
+
+<h2>En el local &middot; el paso a paso</h2>
+
+<div class="paso">
+  <div class="n">1</div>
+  <div class="c">
+    <h4>Anot&aacute; el nombre EXACTO de la impresora</h4>
+    <p>Men&uacute; Inicio &rarr; escrib&iacute; <b>Impresoras</b> &rarr;
+    <i>Impresoras y esc&aacute;neres</i>. Ah&iacute; est&aacute; la lista.</p>
+    <p><b>Copiala tal cual</b>, con may&uacute;sculas, espacios y guiones. Si
+    dice <code>Printer-80</code> no sirve escribir <code>printer 80</code>: el
+    puente la busca por su nombre y no adivina.</p>
+  </div>
+</div>
+
+<div class="paso">
+  <div class="n">2</div>
+  <div class="c">
+    <h4>Instal&aacute; Node.js</h4>
+    <p>En Chrome: <b>nodejs.org</b> &rarr; el bot&oacute;n grande que dice
+    <b>LTS</b> &rarr; siguiente, siguiente, terminar.</p>
+    <p>Es lo que hace que el programa pueda correr. Se instala una vez y no se
+    toca nunca m&aacute;s.</p>
+  </div>
+</div>
+
+<div class="paso">
+  <div class="n">3</div>
+  <div class="c">
+    <h4>Copi&aacute; la carpeta al computador</h4>
+    <p>Peg&aacute; <code>puente</code> en <code>C:\llamita-puente</code>. En el
+    escritorio tambi&eacute;n sirve, pero ah&iacute; es m&aacute;s f&aacute;cil
+    que alguien la borre sin querer.</p>
+  </div>
+</div>
+
+<div class="paso">
+  <div class="n">4</div>
+  <div class="c">
+    <h4>Doble clic en <code>instalar.bat</code></h4>
+    <p>Se abre una ventana negra que baja lo que hace falta. Cuando termina, se
+    abre el <b>Bloc de notas</b> con un archivo de configuraci&oacute;n.</p>
+    <p>Complet&aacute; <b>dos cosas</b> y nada m&aacute;s:</p>
+    <p><code>"impresora"</code> &rarr; el nombre del paso 1<br>
+       <code>"sede"</code> &rarr; <code>plaza</code> o <code>angamos</code></p>
+    <p>Guard&aacute; (Ctrl+S) y cerr&aacute; el Bloc de notas.</p>
+  </div>
+</div>
+
+<div class="paso">
+  <div class="n">5</div>
+  <div class="c">
+    <h4>Doble clic en <code>probar.bat</code></h4>
+    <p><b>Ac&aacute; se sabe si funciona.</b> Tiene que salir un papel que diga
+    <i>Papel de prueba</i> y una l&iacute;nea con acentos y &ntilde;.</p>
+    <p><b>Mir&aacute; los acentos.</b> Si salen bien, todo el resto va a salir
+    bien. Si salen como s&iacute;mbolos raros, sacale una foto y mandamela: es
+    la tabla de caracteres de la impresora y se arregla en una l&iacute;nea.</p>
+  </div>
+</div>
+
+<div class="paso">
+  <div class="n">6</div>
+  <div class="c">
+    <h4>Doble clic en <code>arrancar.bat</code> y dejalo abierto</h4>
+    <p>Esa ventana negra es el puente trabajando. Va a decir <i>conexi&oacute;n:
+    SUBSCRIBED</i>.</p>
+    <p><b>Ahora la prueba de verdad:</b> desde tu tel&eacute;fono, comand&aacute;
+    algo en una mesa. El papel tiene que salir solo.</p>
+  </div>
+</div>
+
+<div class="paso">
+  <div class="n">7</div>
+  <div class="c">
+    <h4>Que arranque solo con Windows</h4>
+    <p>Tecla Windows + R &rarr; escrib&iacute; <code>shell:startup</code> &rarr;
+    Enter. Se abre una carpeta.</p>
+    <p>Arrastr&aacute; ah&iacute; un <b>acceso directo</b> de
+    <code>arrancar.bat</code> (bot&oacute;n derecho sobre el archivo &rarr;
+    <i>Enviar a</i> &rarr; <i>Escritorio</i>, y de ah&iacute; lo mov&eacute;s).</p>
+    <p>Con eso, cada vez que prendan el computador el puente se levanta solo.</p>
+  </div>
+</div>
+
+<h2>Las tres cosas que pueden salir mal</h2>
+
+<table>
+  <tr><th>Lo que ves</th><th>Qu&eacute; es</th></tr>
+  <tr><td><i>"No encuentro la impresora"</i></td>
+      <td>El nombre no coincide. Volv&eacute; al paso 1 y copialo tal cual</td></tr>
+  <tr><td>Dice <b>SUBSCRIBED</b> y no sale nada</td>
+      <td>La cola no est&aacute; en vivo. Se arregla con un <code>.sql</code>, no en el local &mdash; avisame</td></tr>
+  <tr><td>Sale el papel con s&iacute;mbolos raros</td>
+      <td>La tabla de caracteres. Foto y me la mand&aacute;s</td></tr>
+</table>
+
+<div class="paso ojo">
+  <div class="n">!</div>
+  <div class="c">
+    <h4>Lo que NO hay que hacer, pase lo que pase</h4>
+    <p>Si algo no funciona, en internet vas a encontrar que se arregla
+    <b>cambi&aacute;ndole el driver a la impresora</b> (Zadig, WinUSB). <b>No lo
+    hagas.</b></p>
+    <p>Eso dejar&iacute;a que el navegador la tome, <b>y con eso Fudo deja de
+    imprimir</b>. Es romper el servicio del caf&eacute; para ganar una comodidad
+    nuestra. Si llegamos a ese punto, se vuelve y se piensa de nuevo.</p>
+  </div>
+</div>
+
+<div class="nota">
+  <p style="margin:0"><b>Y si no sale nada de nada, no se pierde nada.</b> El
+  puente no toca el inventario ni las ventas: est&aacute; aislado a
+  prop&oacute;sito. Si falla, lo &uacute;nico que no ocurre es que salga un
+  papel &mdash; la comanda ya qued&oacute; guardada y se puede volver a mandar a
+  imprimir desde <b>Ajustes &rarr; Impresi&oacute;n</b>.</p>
+</div>
+
+<div class="nota ojo">
+  <p style="margin:0"><b>Lo que traigo yo de esta visita:</b> si sale el papel,
+  mandame una <b>foto del ticket</b>. Con eso ajusto el dise&ntilde;o &mdash;
+  hoy est&aacute; copiado del que ya exist&iacute;a, no de los de ustedes&mdash;
+  y de paso se destraba <i>el detalle del ticket</i>, que es lo &uacute;nico que
+  deja la configuraci&oacute;n en 5 de 6.</p>
+</div>
+
+</div>
+</body>
+</html>

@@ -830,6 +830,30 @@
        cuatro celdas que se comía la sección entera. */
     .lama-mesa.t-grande.f-larga{grid-row:span 1;aspect-ratio:3/1}
   }
+  /* La cola de impresión. Una fila por papel, con lo único que importa
+     mirando: si salió o no. */
+  .imp-fila{display:flex;align-items:center;gap:11px;width:100%;border:none;
+    background:transparent;font:inherit;color:inherit;text-align:left;
+    padding:11px 13px;cursor:pointer}
+  .imp-fila + .imp-fila{border-top:1px solid var(--linea)}
+  .imp-fila:active{background:var(--bg)}
+  .imp-fila .e{flex-shrink:0;border-radius:999px;padding:3px 11px;
+    font-size:11.5px;font-weight:800;letter-spacing:.01em}
+  .imp-fila .e.ok{background:var(--green-bg);color:var(--green-fg)}
+  .imp-fila .e.mal{background:var(--red-bg);color:var(--red-fg)}
+  .imp-fila .e.esp{background:var(--amber-bg);color:var(--amber-fg)}
+  .imp-fila .n{flex:1;min-width:0;font-size:14.5px;font-weight:700}
+  .imp-fila .n .s{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+  /* EL PAPEL, en letra de máquina de escribir y respetando los espacios: si
+     acá se ve torcido, en el rollo también. Es la única parte de la app donde
+     una tipografía de ancho fijo es lo correcto — porque lo que se está
+     mirando ES un papel de ancho fijo. */
+  .imp-papel{background:var(--bg);border-radius:12px;padding:14px;margin:0 0 4px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:12.5px;line-height:1.45;white-space:pre-wrap;overflow-x:auto;
+    color:var(--text)}
+  .imp-error{background:var(--red-bg);color:var(--red-fg);border-radius:11px;
+    padding:10px 12px;margin:0 0 12px;font-size:13px;font-weight:600}
   /* El lápiz del plano, al final de la franja de páginas. */
   .lama-salones .lapiz{margin-left:auto;background:var(--card);color:var(--muted);
     padding:6px 11px;display:flex;align-items:center}
@@ -11905,6 +11929,8 @@ const ICO = {
   relaciones:'<path d="M9.5 14.5 14.5 9.5"></path><path d="M8 12H6a3.5 3.5 0 0 1 0-7h2"></path><path d="M16 12h2a3.5 3.5 0 0 1 0 7h-2"></path>',
   metas:'<circle cx="12" cy="12" r="8.5"></circle><circle cx="12" cy="12" r="4.5"></circle><circle cx="12" cy="12" r="1"></circle>',
   personas:'<path d="M16 20v-1.6a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20"></path><circle cx="9.5" cy="7" r="3.2"></circle><path d="M21 20v-1.6a4 4 0 0 0-3-3.87"></path>',
+  /* La impresora: la tapa arriba, el cuerpo, y el papel saliendo abajo. */
+  impresion:'<path d="M7 8V4h10v4"></path><rect x="3.5" y="8" width="17" height="7" rx="1.6"></rect><path d="M7 13h10v7H7z"></path>',
   fudo:'<path d="M12 3v13"></path><polyline points="7 8 12 3 17 8"></polyline><path d="M4 21h16"></path>',
   respaldos:'<path d="M3 6v12a9 3 0 0 0 18 0V6"></path><ellipse cx="12" cy="6" rx="9" ry="3"></ellipse><path d="M3 12a9 3 0 0 0 18 0"></path>',
   actividad:'<path d="M3 12h4l2.5 7 5-14L17 12h4"></path>',
@@ -12043,6 +12069,20 @@ const AJUSTES = [
     ver:()=>!!(PERMISOS.puede_lama && SEDE && SEDE !== 'central'),
     render:()=>ajMesasHTML(),
     montar:()=>ajMesasMontar() },
+
+  /* LA COLA DE IMPRESIÓN. Va en Ajustes y no adentro del área de ventas por la
+     misma razón que la configuración: el mesón es para vender. Acá se viene a
+     comprobar, no a trabajar. */
+  { id:'impresion', ico:'impresion', tit:'Impresión',
+    sub:'Los papeles que se mandaron a imprimir, y si salieron.',
+    ver:()=>!!(PERMISOS.puede_lama && SEDE && SEDE !== 'central'),
+    render:()=>`<div class="aj-caja">
+        <h3>La cola de impresión</h3>
+        <p class="aj-nota">Cada comanda, precuenta y anulación deja acá su papel.
+          Tocá uno para verlo entero, tal como sale.</p>
+        <div id="aj-imp"></div>
+      </div>`,
+    montar:()=>{ LAMA_IMP_DAT = null; LAMA_IMP_VER = null; lamaPintarImp(); lamaImpCargar(); } },
 ];
 
 /* Las secciones que esta cuenta puede ver. Una sección sin `ver()` la ve
@@ -12063,6 +12103,108 @@ const ajVisibles = () => AJUSTES.filter(a => !a.ver || a.ver());
    Lo que se reusa TAL CUAL, y por eso la mudanza costó poco: `lamaPintarCfg`
    y todas sus acciones, y el trío `lamaTamLeer/Guardar/Aplicar`. Lo único
    nuevo es el envoltorio. */
+/* ==================================================================
+   AJUSTES → IMPRESIÓN · la cola a la vista  (F5, 2026-09-06)
+   ==================================================================
+   Para qué existe, y no es una pantalla de diagnóstico: **es la forma de
+   probar que comandar funciona SIN tener la impresora conectada.** Se abre
+   una mesa, se comanda, y acá tiene que aparecer el papel — con el texto
+   exacto que va a salir. Si aparece, lo único que falta es el puente.
+
+   Y sirve después igual: cuando el puente esté puesto, esta pantalla es
+   donde se ve qué salió, qué está esperando y qué falló y por qué. Un papel
+   que no sale y no deja rastro es la falla silenciosa de §0.5. */
+let LAMA_IMP_DAT  = null;   // las últimas filas de la cola
+let LAMA_IMP_VER  = null;   // la fila abierta, para mirar el papel entero
+let LAMA_IMP_ERR  = null;
+
+async function lamaImpCargar(){
+  const r = await sb.from('lama_impresiones').select('*')
+    .eq('sede', SEDE).order('creada_at', {ascending:false}).limit(30);
+  LAMA_IMP_ERR = r.error ? r.error.message : null;
+  LAMA_IMP_DAT = r.error ? [] : (r.data || []);
+  lamaPintarImp();
+}
+
+const LAMA_IMP_NOM = {comanda:'Comanda', precuenta:'Precuenta',
+                      anulacion:'Anulación', prueba:'Prueba'};
+
+function lamaPintarImp(){
+  const caja = $('aj-imp'); if(!caja) return;
+
+  if(LAMA_IMP_ERR){
+    /* El error se muestra con lo que hay que hacer, no solo con su texto.
+       Es el caso más probable: la tabla todavía no existe. */
+    caja.innerHTML = `<div class="cfg-lista"><div class="cfg-vacio">
+      Todavía no hay cola de impresión.<br>
+      <span style="font-size:12.5px">Falta correr
+      <b>sql/2026-09-lama-cola-de-impresion.sql</b> en Supabase.</span></div></div>`;
+    return;
+  }
+  if(!LAMA_IMP_DAT){ caja.innerHTML = '<div class="cfg-lista"><div class="cfg-vacio">Cargando…</div></div>'; return; }
+
+  const filas = LAMA_IMP_DAT.length ? LAMA_IMP_DAT.map(f => {
+    const h = new Date(f.creada_at).toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'});
+    const est = f.estado === 'impresa' ? 'ok' : f.estado === 'error' ? 'mal' : 'esp';
+    const dice = f.estado === 'impresa' ? 'salió'
+               : f.estado === 'error'   ? 'no salió' : 'esperando';
+    return `<button type="button" class="imp-fila" data-lamaimp="${f.id}">
+      <span class="e ${est}">${dice}</span>
+      <span class="n">${esc(LAMA_IMP_NOM[f.tipo] || f.tipo)}
+        <span class="s">${h}${f.quien ? ' · ' + esc(f.quien) : ''}</span></span>
+    </button>`;
+  }).join('') : `<div class="cfg-vacio">Todavía no se mandó ningún papel.<br>
+      <span style="font-size:12.5px">Comandá una mesa y va a aparecer acá.</span></div>`;
+
+  caja.innerHTML = `<div class="cfg-lista">${filas}</div>
+    <button type="button" class="btn btn-gris" style="width:100%;margin-top:10px"
+            data-lamaacc="imp-prueba">Mandar un papel de prueba</button>` +
+    lamaImpPapel();
+}
+
+/* El papel completo, tal como va a salir. En letra de máquina de escribir y
+   respetando los espacios: si acá se ve torcido, en el rollo también. */
+function lamaImpPapel(){
+  const f = LAMA_IMP_VER; if(!f) return '';
+  return `<div class="cfg-ficha" id="lama-imp-papel">
+    <div class="caja" role="dialog" aria-modal="true">
+      <h3>${esc(LAMA_IMP_NOM[f.tipo] || f.tipo)}</h3>
+      ${f.error ? `<div class="imp-error">${esc(f.error)}</div>` : ''}
+      <pre class="imp-papel">${esc(f.contenido)}</pre>
+      <div class="mbtns">
+        <button type="button" class="btn btn-gris"   data-lamaacc="imp-cerrar">Cerrar</button>
+        <button type="button" class="btn btn-orange" data-lamaacc="imp-reimprimir">Reimprimir</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* REIMPRIMIR no reusa la fila vieja: manda una COPIA nueva a la cola.
+   Volver a poner la vieja en "pendiente" borraría que ya había salido una vez,
+   y entonces nadie podría explicar por qué hay dos papeles iguales dando
+   vueltas. Una copia deja las dos historias escritas. */
+async function lamaImpReimprimir(){
+  const f = LAMA_IMP_VER; if(!f) return;
+  await lamaEncolar(f.tipo, f.contenido, f.cuenta_id);
+  LAMA_IMP_VER = null;
+  await lamaImpCargar();
+  aviso('Mandado a imprimir de nuevo');
+}
+
+async function lamaImpPrueba(){
+  await lamaEncolar('prueba', [
+    '      ' + (SEDES[SEDE] || {}).label,
+    '   ─────────────────────',
+    '   Papel de prueba',
+    '   ' + new Date().toLocaleString('es-CL'),
+    '   ─────────────────────',
+    '   Acentos: á é í ó ú ñ Ñ',
+    '   Si esto se lee bien,',
+    '   la impresora está lista.',
+  ].join('\n'), null);
+  await lamaImpCargar();
+}
+
 function ajMesasHTML(){
   return `<div class="aj-caja">
       <h3>Tamaño de las mesas</h3>
@@ -14532,6 +14674,18 @@ $('aj-pane').addEventListener('click', async e=>{
   if(cw){ await lamaCfgApagar(cw.dataset.lamacfgsw); return; }
   const ce = e.target.closest('[data-lamacfged]');
   if(ce){ lamaCfgAbrirFicha(ce.dataset.lamacfged); return; }
+  /* ⚠️ LA COLA DE IMPRESIÓN VA ACÁ Y NO EN `view-lama`. Nació allá —donde
+     vive todo lo demás de Lama— y no respondía ni un toque: la pantalla está
+     dentro de Ajustes, y un manejador colgado de otra pantalla nunca se
+     entera. Es el mismo par separado que dejó los − + de la ventana del
+     producto sin hacer nada: lo que se DIBUJA y lo que se ESCUCHA tienen que
+     estar en el mismo lugar. Lo encontró la prueba, no el ojo. */
+  const im = e.target.closest('[data-lamaimp]');
+  if(im){
+    LAMA_IMP_VER = (LAMA_IMP_DAT || []).find(x => x.id === +im.dataset.lamaimp) || null;
+    lamaPintarImp();
+    return;
+  }
   const cn = e.target.closest('[data-lamacfgnuevo]');
   if(cn){ lamaCfgAbrirFicha(null); return; }
   const ca = e.target.closest('[data-lamaacc]');
@@ -14539,6 +14693,9 @@ $('aj-pane').addEventListener('click', async e=>{
     const a = ca.dataset.lamaacc;
     if(a === 'cfg-cancelar'){ LAMA_CFG_EDIT = null; lamaPintarCfg(); return; }
     if(a === 'cfg-guardar'){ await lamaCfgGuardar(); return; }
+    if(a === 'imp-prueba'){ await lamaImpPrueba(); return; }
+    if(a === 'imp-cerrar'){ LAMA_IMP_VER = null; lamaPintarImp(); return; }
+    if(a === 'imp-reimprimir'){ await lamaImpReimprimir(); return; }
   }
 
   const sw = e.target.closest('[data-persona]');

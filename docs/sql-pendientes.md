@@ -25,7 +25,21 @@
 
 ## Pendientes ahora
 
-### [ ] `sql/2026-09-lama-cola-de-impresion.sql` — el buzón del puente
+**Ninguno.** 🎉
+
+---
+
+Cuando cualquiera de las dos sesiones deje un `.sql` nuevo, aparece acá con el
+texto completo pegado y un `[ ]` para marcar.
+
+---
+
+## Historial reciente
+
+### [x] `sql/2026-09-lama-cola-de-impresion.sql` — **corrido el 2026-09-06** ✅
+
+> **`lama_impresiones` quedó en vivo.** Con eso la app ya deja los papeles en el
+> buzón y se pueden mirar en **Ajustes → Impresión**, con o sin impresora.
 
 > **No urgente, y sin riesgo.** Crea una tabla nueva y no toca ninguna
 > existente. **Sin el puente instalado, esta tabla junta papeles y no molesta
@@ -135,12 +149,6 @@ select 'lama_impresiones' as tabla,
 
 ---
 
-Cuando cualquiera de las dos sesiones deje un `.sql` nuevo, aparece acá con el
-texto completo pegado y un `[ ]` para marcar.
-
----
-
-## Historial reciente
 
 ### [x] `sql/2026-09-plus-comprobacion-fase6.sql` — **corrido el 2026-09-05** ✅
 
