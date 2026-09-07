@@ -76,6 +76,7 @@ partió. Lo que quedó acá son **las reglas duras**, que sí se leen siempre.
 | **entender por qué algo se publicó sin que nadie lo escribiera en el chat** | **[`docs/tareas-automaticas.md`](docs/tareas-automaticas.md)** — cinco rutinas construyen solas durante los turnos de Jhon, y una escribe el informe de las 01:00 | — |
 | **tocar cualquier cosa de Llamita Lama** | **[`docs/LAMA.md`](docs/LAMA.md)** | 427 |
 | **decidir si Llamita Plus habla con la API de Fudo** | **[`docs/fudo-api-cuanto-sirve.md`](docs/fudo-api-cuanto-sirve.md)** — leer es barato; **escribir tocaría el POS real del café**, y por eso los secretos no viajaron en la copia | — |
+| **tocar el puente de impresión, o vender el sistema a otro café** | **[`docs/la-impresora.md`](docs/la-impresora.md)** — todo lo medido sobre la impresora, y la regla de que el cliente no instala nada | — |
 | **replicar una pantalla de Fudo** | **[`docs/atlas-fudo.md`](docs/atlas-fudo.md)** — cómo se comporta lo que estamos copiando. Lo que siga en `⬜ PENDIENTE` **se pregunta, no se inventa** | — |
 | **dejar un `.sql` nuevo listo para Jhon** | agregarlo a **[`docs/sql-pendientes.md`](docs/sql-pendientes.md)** — es el único lugar donde se sabe qué falta correr | — |
 | **entender por qué aparece un `docs/salud-del-codigo*.md` nuevo** | son revisiones automáticas, programadas el 2026-09-02: lunes 08:00 para Stock, lunes/miércoles/viernes ~06:00 para Lama. Cada una abre una sesión NUEVA sin memoria de las anteriores —lee el repo, no toca nada, solo reporta— para no acumular contexto para siempre en un mismo chat | — |
@@ -1493,10 +1494,34 @@ más**:
 3. **Funciona desde cualquier teléfono del local**, y desde fuera del local
    también, sin averiguar ninguna IP.
 
-**Lo que cuesta, dicho sin adornos:** hay que instalarlo en ese computador y
+**Lo que cuesta, dicho sin adornos:** hay que ponerlo en ese computador y
 dejarlo arrancando con Windows. Es una visita al local, y **es la misma visita
 que Fudo ya te cobró** con su extensión y su aplicación. No hay una versión de
-esto sin programa instalado: eso es justo lo que se acaba de medir.
+esto sin programa en el computador: eso es justo lo que se acaba de medir.
+
+### 🔴 REGLA DURA — lo difícil va de nuestro lado; lo del cliente es un doble clic
+
+*(Jhon, 2026-09-07, frenando un error mío: el plan de la visita pedía instalar
+Node.js en el computador del café.)*
+
+> *"si quiero vender este proyecto a cafeterías debe ser fácil de instalar. No
+> me interesa si es difícil de construir la infraestructura, pero que sea fácil
+> para el cliente."*
+
+**Si una decisión de arquitectura le agrega un paso a quien compra el sistema,
+hay que buscar otra — aunque de este lado cueste más.** El error de fondo no
+fue elegir Node: fue elegir lo cómodo de escribir y cargarlo en la cuenta del
+cliente.
+
+Cómo quedó el puente: **PowerShell, que Windows trae de fábrica.** Tres
+archivos de 15 KB, un doble clic, la impresora se elige de una lista y el
+arranque automático se pregunta. **Cero instalaciones.**
+
+Se descartó un `.exe` empaquetado (se probó: `bun build --compile` lo produce)
+porque pesa 115 MB y, sobre todo, porque **sin firmar dispara SmartScreen y los
+antivirus** — para entregarle a un cliente eso es peor que un archivo de texto.
+
+El detalle completo está en **[`docs/la-impresora.md`](docs/la-impresora.md)**.
 
 **Y va aislado**, sin tocar la app ni la base, como pide el orden de trabajo de
 más abajo: si falla, que falle solo.

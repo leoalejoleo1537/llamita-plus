@@ -132,7 +132,17 @@
 <div class="lleva">
   <span>El tel&eacute;fono</span>
   <span>Un pendrive <i>(o Google Drive)</i></span>
-  <span>15 minutos sin gente esperando</span>
+  <span>10 minutos sin gente esperando</span>
+</div>
+
+<div class="nota si">
+  <p style="margin:0 0 8px">🟢 <b>No hay que instalar nada.</b> Windows ya trae
+  todo lo que el puente necesita &mdash; viene de f&aacute;brica desde Windows 7.
+  <b>No hay Node, ni programas que bajar, ni terminal.</b></p>
+  <p style="margin:0">Son <b>tres archivos que pesan menos que una foto</b>, y
+  se abre con doble clic. <i>(La primera versi&oacute;n de este plan ped&iacute;a
+  instalar Node.js. Estaba mal y Jhon lo fren&oacute;: un caf&eacute; no puede
+  depender de que alguien instale herramientas de programador.)</i></p>
 </div>
 
 <h2>Antes de ir &middot; desde tu casa, 5 minutos</h2>
@@ -171,79 +181,65 @@
     <h4>Anot&aacute; el nombre EXACTO de la impresora</h4>
     <p>Men&uacute; Inicio &rarr; escrib&iacute; <b>Impresoras</b> &rarr;
     <i>Impresoras y esc&aacute;neres</i>. Ah&iacute; est&aacute; la lista.</p>
-    <p><b>Copiala tal cual</b>, con may&uacute;sculas, espacios y guiones. Si
-    dice <code>Printer-80</code> no sirve escribir <code>printer 80</code>: el
-    puente la busca por su nombre y no adivina.</p>
+    <p><b>No hace falta anotarlo</b> &mdash; el programa te la va a mostrar. Es
+    solo para saber de antemano c&oacute;mo se llama y no dudar en el paso 3.</p>
   </div>
 </div>
 
 <div class="paso">
   <div class="n">2</div>
   <div class="c">
-    <h4>Instal&aacute; Node.js</h4>
-    <p>En Chrome: <b>nodejs.org</b> &rarr; el bot&oacute;n grande que dice
-    <b>LTS</b> &rarr; siguiente, siguiente, terminar.</p>
-    <p>Es lo que hace que el programa pueda correr. Se instala una vez y no se
-    toca nunca m&aacute;s.</p>
+    <h4>Copi&aacute; la carpeta al computador</h4>
+    <p>Peg&aacute; <code>puente</code> en <code>C:\Llamita</code>. En el
+    escritorio tambi&eacute;n sirve, pero ah&iacute; es m&aacute;s f&aacute;cil
+    que alguien la borre sin querer.</p>
+    <p>Son <b>tres archivos</b> y pesan menos que una foto.</p>
   </div>
 </div>
 
 <div class="paso">
   <div class="n">3</div>
   <div class="c">
-    <h4>Copi&aacute; la carpeta al computador</h4>
-    <p>Peg&aacute; <code>puente</code> en <code>C:\llamita-puente</code>. En el
-    escritorio tambi&eacute;n sirve, pero ah&iacute; es m&aacute;s f&aacute;cil
-    que alguien la borre sin querer.</p>
+    <h4>Doble clic en <code>Llamita Impresora.bat</code></h4>
+    <p>Se abre una ventana y te muestra <b>la lista de impresoras</b> del
+    computador, numeradas. Escrib&iacute;s el n&uacute;mero de la de comandas y
+    Enter.</p>
+    <p>Despu&eacute;s te muestra <b>la lista de locales</b> y eleg&iacute;s
+    cu&aacute;l es.</p>
+    <p><b>No hay que escribir ning&uacute;n nombre a mano.</b> Ese era el paso
+    donde se equivoca todo el mundo.</p>
   </div>
 </div>
 
 <div class="paso">
   <div class="n">4</div>
   <div class="c">
-    <h4>Doble clic en <code>instalar.bat</code></h4>
-    <p>Se abre una ventana negra que baja lo que hace falta. Cuando termina, se
-    abre el <b>Bloc de notas</b> con un archivo de configuraci&oacute;n.</p>
-    <p>Complet&aacute; <b>dos cosas</b> y nada m&aacute;s:</p>
-    <p><code>"impresora"</code> &rarr; el nombre del paso 1<br>
-       <code>"sede"</code> &rarr; <code>plaza</code> o <code>angamos</code></p>
-    <p>Guard&aacute; (Ctrl+S) y cerr&aacute; el Bloc de notas.</p>
+    <h4>Dec&iacute; que s&iacute; al papel de prueba</h4>
+    <p><b>Ac&aacute; se sabe si funciona.</b> Tiene que salir un papel que diga
+    <i>Papel de prueba</i> y una l&iacute;nea con acentos y &ntilde;.</p>
+    <p><b>Mir&aacute; los acentos.</b> Si salen bien, todo el resto va a salir
+    bien. Si salen como s&iacute;mbolos raros, sacale una foto y mandamela: es
+    la tabla de caracteres de la impresora y se cambia con un n&uacute;mero.</p>
   </div>
 </div>
 
 <div class="paso">
   <div class="n">5</div>
   <div class="c">
-    <h4>Doble clic en <code>probar.bat</code></h4>
-    <p><b>Ac&aacute; se sabe si funciona.</b> Tiene que salir un papel que diga
-    <i>Papel de prueba</i> y una l&iacute;nea con acentos y &ntilde;.</p>
-    <p><b>Mir&aacute; los acentos.</b> Si salen bien, todo el resto va a salir
-    bien. Si salen como s&iacute;mbolos raros, sacale una foto y mandamela: es
-    la tabla de caracteres de la impresora y se arregla en una l&iacute;nea.</p>
+    <h4>Dec&iacute; que s&iacute; a que arranque solo</h4>
+    <p>Te lo pregunta &eacute;l mismo. Con eso, cada vez que prendan el
+    computador el puente se levanta y nadie tiene que acordarse de nada.</p>
+    <p>La ventana se puede minimizar. Queda trabajando.</p>
   </div>
 </div>
 
 <div class="paso">
   <div class="n">6</div>
   <div class="c">
-    <h4>Doble clic en <code>arrancar.bat</code> y dejalo abierto</h4>
-    <p>Esa ventana negra es el puente trabajando. Va a decir <i>conexi&oacute;n:
-    SUBSCRIBED</i>.</p>
-    <p><b>Ahora la prueba de verdad:</b> desde tu tel&eacute;fono, comand&aacute;
-    algo en una mesa. El papel tiene que salir solo.</p>
-  </div>
-</div>
-
-<div class="paso">
-  <div class="n">7</div>
-  <div class="c">
-    <h4>Que arranque solo con Windows</h4>
-    <p>Tecla Windows + R &rarr; escrib&iacute; <code>shell:startup</code> &rarr;
-    Enter. Se abre una carpeta.</p>
-    <p>Arrastr&aacute; ah&iacute; un <b>acceso directo</b> de
-    <code>arrancar.bat</code> (bot&oacute;n derecho sobre el archivo &rarr;
-    <i>Enviar a</i> &rarr; <i>Escritorio</i>, y de ah&iacute; lo mov&eacute;s).</p>
-    <p>Con eso, cada vez que prendan el computador el puente se levanta solo.</p>
+    <h4>La prueba de verdad</h4>
+    <p>Desde <b>tu tel&eacute;fono</b>, comand&aacute; algo en una mesa.</p>
+    <p><b>El papel tiene que salir solo</b>, sin tocar el computador. Eso es lo
+    que ninguna otra prueba puede decir.</p>
   </div>
 </div>
 
@@ -252,9 +248,11 @@
 <table>
   <tr><th>Lo que ves</th><th>Qu&eacute; es</th></tr>
   <tr><td><i>"No encuentro la impresora"</i></td>
-      <td>El nombre no coincide. Volv&eacute; al paso 1 y copialo tal cual</td></tr>
-  <tr><td>Dice <b>SUBSCRIBED</b> y no sale nada</td>
-      <td>La cola no est&aacute; en vivo. Se arregla con un <code>.sql</code>, no en el local &mdash; avisame</td></tr>
+      <td>Se cambi&oacute; o se reinstal&oacute;. Doble clic en <b>Configurar impresora.bat</b></td></tr>
+  <tr><td>Dice <i>escuchando</i> y no sale nada</td>
+      <td>Mir&aacute; <b>Ajustes &rarr; Impresi&oacute;n</b> en la app: si el papel dice <i>no sali&oacute;</i>, el motivo est&aacute; escrito ah&iacute;</td></tr>
+  <tr><td>Windows dice que bloque&oacute; el archivo</td>
+      <td>Bot&oacute;n derecho sobre el <code>.bat</code> &rarr; Propiedades &rarr; <b>Desbloquear</b></td></tr>
   <tr><td>Sale el papel con s&iacute;mbolos raros</td>
       <td>La tabla de caracteres. Foto y me la mand&aacute;s</td></tr>
 </table>

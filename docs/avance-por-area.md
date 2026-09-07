@@ -133,9 +133,13 @@ inventario ni de ventas, así que si falla, falla solo.
 **Fuera de la cuenta y esperando a Jhon:** el detalle del ticket (lo que deja
 Configuración en 5 de 6) necesita sus fotos de las comandas de verdad.
 
-⚠️ **El puente nunca habló con la impresora de verdad.** Lo probado son los
-bytes —tildes, ñ, el avance antes del corte—, no el encaje con Windows. Las dos
-cosas no son lo mismo (§0.5).
+⚠️ **El puente nunca habló con la impresora de verdad.** Lo probado es el texto
+del programa —el BOM, el avance antes del corte, que no borre filas—, no el
+encaje con Windows. Las dos cosas no son lo mismo (§0.5).
+
+🟢 **Y el 2026-09-07 dejó de necesitar Node.** El cliente no instala nada:
+Windows ya trae PowerShell. Tres archivos, un doble clic, la impresora se elige
+de una lista. Ver [`docs/la-impresora.md`](la-impresora.md).
 
 ### Lama · arqueo de caja — 0 de 5 🟡 *desbloqueado el 2026-09-04*
 

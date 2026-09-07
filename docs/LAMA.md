@@ -1270,10 +1270,27 @@ la visita.
 | `lama_impresiones` · el buzón | ✅ corrida el 2026-09-06 |
 | La app encola comanda, precuenta y anulación | ✅ |
 | **La tercera comanda**, que no existía | ✅ `lamaAnulacionTxt` |
-| El puente (`puente/puente.mjs` + `imprimir.mjs`) | ✅ escrito, **sin probar contra la impresora** |
+| El puente (`puente/Llamita-Impresora.ps1`) | ✅ escrito, **sin probar contra la impresora** |
 | **Ajustes → Impresión** · la cola a la vista | ✅ **es la forma de probar comandar SIN impresora** |
 | Reimprimir un ticket | ✅ manda una copia |
 | Instalarlo en el local | ⬜ hace falta ir → [`docs/plan-visita-al-local.html`](plan-visita-al-local.html) |
+
+##### 🔴 REESCRITO EL 2026-09-07 · el cliente no instala nada
+
+**La primera versión pedía instalar Node.js en el computador del café, y Jhon
+la frenó:** *"si quiero vender este proyecto a cafeterías debe ser fácil de
+instalar… no me interesa si es difícil de construir la infraestructura, pero
+que sea fácil para el cliente"*. Tenía razón, y el error era de método: elegí
+lo cómodo de escribir y se lo cargué a quien compra.
+
+**Ahora está en PowerShell, que Windows trae de fábrica.** Tres archivos de
+15 KB, un doble clic, la impresora **se elige de una lista** y el arranque
+automático **se pregunta**. Cero instalaciones, nada que actualizar.
+
+Se descartó un `.exe` empaquetado —se probó, `bun build --compile` lo produce
+desde acá— porque pesa 115 MB y **sin firmar dispara SmartScreen y los
+antivirus**: para entregarle a un cliente, eso es peor que un archivo de texto.
+Todo el razonamiento está en [`docs/la-impresora.md`](la-impresora.md).
 
 **Cómo le habla a Windows, y es lo contrario de lo primero que uno intenta:**
 no le quita la impresora — **se la pide**. Le manda un trabajo *RAW* al spooler
@@ -1282,11 +1299,14 @@ lo mismo que hace Fudo, y por eso su programa convive con el driver en vez de
 pelearlo.
 
 ⚠️ **Lo que NO está probado, dicho antes de que alguien lo dé por bueno:** el
-puente **nunca habló con la impresora de verdad**. `pruebas/puente-de-impresion.mjs`
-(14 casos) prueba **los bytes** —que la ñ y las tildes se traduzcan a la tabla
-de la impresora, que el papel avance antes de que la cuchilla corte—, que es lo
-que se puede romper desde acá. **El encaje con el spooler sólo se comprueba en
-el local**, y confundir las dos cosas es exactamente §0.5.
+puente **nunca habló con la impresora de verdad**, y acá no hay Windows para
+ejecutarlo. `pruebas/puente-de-impresion.mjs` (**23 casos**) **lee el archivo**
+y comprueba lo que, si se rompe, se rompe en silencio: que lleve BOM (sin él
+PowerShell 5.1 convierte las tildes en basura), que el avance del papel vaya
+**antes** del corte, que no haya quedado ni una mención a Zadig o WinUSB, y que
+el puente nunca borre filas de la cola. **Es una lectura, no una ejecución** —
+vale menos que correrlo y mucho más que no mirar nada. **El encaje con el
+spooler sólo se comprueba en el local**, y confundir las dos cosas es §0.5.
 
 **Si el puente falla, no se rompe nada:** la comanda ya quedó guardada y la
 venta sigue. Pero **se avisa en pantalla** —*"el papel quedó sin salir"*—
