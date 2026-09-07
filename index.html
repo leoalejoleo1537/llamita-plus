@@ -813,8 +813,22 @@
      columnas: una mesa que se estira hacia abajo desordenaría la cuadrícula
      entera, que es lo que hace legible el plano. */
   .lama-mesa.f-redonda{border-radius:50%}
+  /* EL TAMAÑO DE UNA MESA. Es cuánta gente sienta, no una decoración: en el
+     plano de un salón una mesa de seis tiene que verse más grande que una de
+     dos, o el plano deja de parecerse al local.
+
+     ⚠️ Solo en computador. En el teléfono el plano es un riel de una columna
+     angosta: ahí "grande" no tiene a dónde crecer, y una mesa que se estira
+     hacia abajo empujaría a todas las demás fuera de la vista. En el riel
+     mandan el número y el color, que es lo único que se lee de un vistazo. */
   @media (min-width:720px){
     .lama-mesa.f-larga{aspect-ratio:2/1;grid-column:span 2}
+    .lama-mesa.t-chica{width:78%;justify-self:center}
+    .lama-mesa.t-grande{grid-column:span 2;grid-row:span 2}
+    /* Larga Y grande a la vez no se apilan: la larga ya ocupa dos columnas,
+       así que grande solo le agrega alto. Sin esta línea quedaba una mesa de
+       cuatro celdas que se comía la sección entera. */
+    .lama-mesa.t-grande.f-larga{grid-row:span 1;aspect-ratio:3/1}
   }
   /* El lápiz del plano, al final de la franja de páginas. */
   .lama-salones .lapiz{margin-left:auto;background:var(--card);color:var(--muted);
@@ -6247,7 +6261,8 @@ function lamaPintarPlano(){
       else { extra = ' apagada'; tocable = false; }
     }
     const forma = m.forma && m.forma !== 'cuadrada' ? ' f-' + m.forma : '';
-    return `<button type="button" class="lama-mesa ${est}${extra}${forma}" data-lamamesa="${m.id}"${
+    const tam   = m.tam   && m.tam   !== 'normal'   ? ' t-' + m.tam   : '';
+    return `<button type="button" class="lama-mesa ${est}${extra}${forma}${tam}" data-lamamesa="${m.id}"${
       tocable ? '' : ' disabled'} aria-label="Mesa ${m.numero}, ${est}">
       <span class="n">${m.numero}</span>
     </button>`;

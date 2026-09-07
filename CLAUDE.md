@@ -75,6 +75,7 @@ partió. Lo que quedó acá son **las reglas duras**, que sí se leen siempre.
 |---|---|---|
 | **entender por qué algo se publicó sin que nadie lo escribiera en el chat** | **[`docs/tareas-automaticas.md`](docs/tareas-automaticas.md)** — cinco rutinas construyen solas durante los turnos de Jhon, y una escribe el informe de las 01:00 | — |
 | **tocar cualquier cosa de Llamita Lama** | **[`docs/LAMA.md`](docs/LAMA.md)** | 427 |
+| **decidir si Llamita Plus habla con la API de Fudo** | **[`docs/fudo-api-cuanto-sirve.md`](docs/fudo-api-cuanto-sirve.md)** — leer es barato; **escribir tocaría el POS real del café**, y por eso los secretos no viajaron en la copia | — |
 | **replicar una pantalla de Fudo** | **[`docs/atlas-fudo.md`](docs/atlas-fudo.md)** — cómo se comporta lo que estamos copiando. Lo que siga en `⬜ PENDIENTE` **se pregunta, no se inventa** | — |
 | **dejar un `.sql` nuevo listo para Jhon** | agregarlo a **[`docs/sql-pendientes.md`](docs/sql-pendientes.md)** — es el único lugar donde se sabe qué falta correr | — |
 | **entender por qué aparece un `docs/salud-del-codigo*.md` nuevo** | son revisiones automáticas, programadas el 2026-09-02: lunes 08:00 para Stock, lunes/miércoles/viernes ~06:00 para Lama. Cada una abre una sesión NUEVA sin memoria de las anteriores —lee el repo, no toca nada, solo reporta— para no acumular contexto para siempre en un mismo chat | — |

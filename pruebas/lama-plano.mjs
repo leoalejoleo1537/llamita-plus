@@ -30,7 +30,11 @@ const AREAS = [
 ];
 const MESAS = Array.from({length:12}, (_,i)=>({
   id:100+i, sede:'plaza', salon:'Salón', numero:i+1, orden:i+1, activa:true,
-  area_id: i < 5 ? 11 : 12, forma:'cuadrada', tam:'normal' }));
+  area_id: i < 5 ? 11 : 12,
+  /* Una de cada forma y una de cada tamaño, para que el plano se pruebe con
+     la variedad que va a tener de verdad y no con doce cuadrados iguales. */
+  forma: i===1?'redonda' : i===6?'larga' : 'cuadrada',
+  tam:   i===2?'chica'   : i===3?'grande': 'normal' }));
 
 /* La mesa 2 nace ocupada y la 3 cobrando: así los tres colores se ven sin
    tener que abrir nada, y se prueba que el estado manda sobre el color. */
@@ -181,6 +185,41 @@ await caso('tocar una mesa la elige, como siempre', async () => {
   await page.click('[data-lamamesa="103"]'); await page.waitForTimeout(400);
   return (await page.getAttribute('[data-lamamesa="103"]','class')).includes('sel') || 'no se eligió';
 });
+
+console.log('\nLA FORMA Y EL TAMAÑO SALEN DE LA BASE, no del código:');
+await caso('la redonda se dibuja redonda', async () =>
+  (await page.getAttribute('[data-lamamesa="101"]','class')).includes('f-redonda') || 'no tomó la forma');
+await caso('la larga se dibuja larga', async () =>
+  (await page.getAttribute('[data-lamamesa="106"]','class')).includes('f-larga') || 'no tomó la forma');
+await caso('la chica y la grande llevan su marca', async () =>
+  ((await page.getAttribute('[data-lamamesa="102"]','class')).includes('t-chica') &&
+   (await page.getAttribute('[data-lamamesa="103"]','class')).includes('t-grande')) || 'falta alguna');
+await caso('una mesa normal NO lleva marca de más', async () => {
+  const c = await page.getAttribute('[data-lamamesa="100"]','class');
+  return (!c.includes('t-') && !c.includes('f-')) || 'le sobra: ' + c;
+});
+await caso('y en el computador la grande de verdad ocupa más', async () => {
+  const g = await page.locator('[data-lamamesa="103"]').boundingBox();
+  const n = await page.locator('[data-lamamesa="100"]').boundingBox();
+  return (g.width > n.width * 1.5 && g.height > n.height * 1.5)
+    || `grande ${Math.round(g.width)}x${Math.round(g.height)}, normal ${Math.round(n.width)}x${Math.round(n.height)}`;
+});
+await caso('y la chica, menos', async () => {
+  const c = await page.locator('[data-lamamesa="102"]').boundingBox();
+  const n = await page.locator('[data-lamamesa="100"]').boundingBox();
+  return c.width < n.width || `chica ${Math.round(c.width)}, normal ${Math.round(n.width)}`;
+});
+
+console.log('\nEN EL TELÉFONO el tamaño NO se aplica, y es a propósito:');
+await page.setViewportSize({width:390, height:844}); await page.waitForTimeout(350);
+await caso('la grande mide lo mismo que una normal en el riel', async () => {
+  const g = await page.locator('[data-lamamesa="103"]').boundingBox();
+  const n = await page.locator('[data-lamamesa="100"]').boundingBox();
+  /* Una mesa que se estira en una columna de 66 px empujaría a todas las
+     demás fuera de la vista. Ahí mandan el número y el color. */
+  return Math.abs(g.width - n.width) < 2 || `grande ${Math.round(g.width)}, normal ${Math.round(n.width)}`;
+});
+await page.setViewportSize({width:1280, height:900}); await page.waitForTimeout(350);
 
 console.log('\nSIN EL .SQL · todo sigue como antes (lo que evita publicar una pantalla rota):');
 await montar({conAreas:false});
