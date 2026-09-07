@@ -250,14 +250,100 @@ await caso('a 1500 se parte en dos', async () =>
   cols.split(' ').length === 2 || `da ${cols}`);
 
 console.log('\nEL INTERRUPTOR APAGADO · vuelve exactamente a lo de antes (§2.2):');
-await page.evaluate(() => document.body.classList.remove('pc-ancho'));
+/* ⚠️ EL ORDEN IMPORTA, y este caso lo aprendió a la mala. `PC_ANCHO` es una
+   constante y no se puede apagar desde acá, así que se simula sacándole la
+   clase al cuerpo. Pero desde el 2026-09-07 hay un manejador de `resize` que
+   la vuelve a poner: quitarla ANTES de cambiar el tamaño no servía de nada.
+   Primero se acomoda la ventana, y recién después se apaga. */
 await ir(1440, 900);
+await page.evaluate(() => document.body.classList.remove('pc-ancho'));
+await page.waitForTimeout(200);
 m = await medir();
 await caso('la barra vuelve a ser horizontal', async () => m.pos === 'sticky' || `pos=${m.pos}`);
 await caso('el contenido vuelve a su ancho de siempre', async () =>
   m.invW === 900 || `mide ${m.invW}`);
 await caso('no queda un hueco a la izquierda', async () => m.padL === 0 || `padL=${m.padL}`);
 await caso('la marca del riel desaparece', async () => !m.marca || 'quedó colgada');
+
+
+console.log('\n🔴 LA CHINCHETA · fijar y soltar el panel:');
+await ir(1440, 900);
+await page.evaluate(() => { try{ localStorage.removeItem('llamita_menu_fijo'); }catch{} });
+await page.reload(); await page.waitForTimeout(600);
+await page.click('.gate-btn[data-sede="plaza"]').catch(()=>{});
+await page.waitForTimeout(700);
+
+await caso('de fábrica el panel viene fijo', async () =>
+  await page.evaluate(() => document.body.classList.contains('menu-fijo')) || 'nace suelto');
+await caso('el menú entero se mudó adentro del panel', async () =>
+  await page.evaluate(() =>
+    document.getElementById('drawer').closest('.tabs') !== null)
+  || 'el cajón sigue colgando del cuerpo de la página');
+await caso('y es el MISMO cajón, no una copia', async () =>
+  await page.evaluate(() => document.querySelectorAll('#drawer, .drawer').length) === 1
+  || 'hay dos menús: se van a desincronizar');
+await caso('con el panel fijo, las tres rayas desaparecen', async () =>
+  !(await page.isVisible('#btnMenu')) || 'ofrece abrir algo que ya está abierto');
+await caso('Actualizar, Historial y Cambiar sede están a la vista', async () => {
+  const faltan = [];
+  for(const a of ['actualizar','historial','cambiar-sede'])
+    if(!(await page.isVisible(`[data-accion="${a}"]`))) faltan.push(a);
+  return faltan.length === 0 || 'no se ven: ' + faltan.join(', ');
+});
+await caso('el nombre de la sede se lee (no quedó en "—")', async () =>
+  ((await page.textContent('#drawerSede')) || '').includes('Plaza')
+  || 'dice: ' + (await page.textContent('#drawerSede')));
+await caso('la chincheta está, chiquita y a la vista', async () =>
+  await page.isVisible('#fijarRiel') || 'no hay cómo soltarlo');
+
+console.log('\nAL SOLTARLO · el panel se va ENTERO, no se queda a medias:');
+await page.click('#fijarRiel'); await page.waitForTimeout(500);
+await caso('el riel desaparece', async () =>
+  await page.evaluate(() => getComputedStyle(document.querySelector('.tabs')).position) === 'sticky'
+  || 'el panel sigue puesto');
+await caso('las pestañas vuelven arriba, horizontales', async () =>
+  await page.isVisible('#tabInv') || 'se perdieron las pestañas');
+await caso('el contenido recupera todo el ancho', async () =>
+  await page.evaluate(() => parseFloat(getComputedStyle(document.body).paddingLeft)) === 0
+  || 'quedó un hueco a la izquierda');
+await caso('vuelven las tres rayas', async () =>
+  await page.isVisible('#btnMenu') || 'no hay forma de abrir el menú');
+await caso('el cajón vuelve a ser cajón', async () =>
+  await page.evaluate(() =>
+    document.getElementById('drawer').parentElement === document.body)
+  || 'quedó colgando adentro del riel apagado');
+
+console.log('\n🔴 Y SE PUEDE VOLVER · un camino de ida sería una trampa:');
+await page.click('#btnMenu'); await page.waitForTimeout(400);
+await caso('el "Fijar el panel" está adentro del menú', async () =>
+  await page.isVisible('#fijarMenu') || 'no hay cómo volver a fijarlo');
+await page.click('#fijarMenu'); await page.waitForTimeout(600);
+await caso('y el panel vuelve', async () =>
+  await page.evaluate(() => document.body.classList.contains('menu-fijo')) || 'no volvió');
+await caso('se cierra el cajón al fijarlo, sin dejarlo abierto encima', async () =>
+  !(await page.evaluate(() => document.getElementById('scrim').classList.contains('open')))
+  || 'quedó el fondo oscuro puesto');
+
+console.log('\nSE ACUERDA · es una preferencia de ESTE aparato:');
+await caso('lo elegido queda guardado', async () =>
+  await page.evaluate(() => { try{ return localStorage.getItem('llamita_menu_fijo'); }catch{ return null; } }) === 'si'
+  || 'no se guardó');
+await page.click('#fijarRiel'); await page.waitForTimeout(400);
+await page.reload(); await page.waitForTimeout(700);
+await page.click('.gate-btn[data-sede="plaza"]').catch(()=>{});
+await page.waitForTimeout(700);
+await caso('al recargar sigue suelto, no vuelve solo', async () =>
+  !(await page.evaluate(() => document.body.classList.contains('menu-fijo')))
+  || 'se volvió a fijar solo y perdió lo que el local eligió');
+
+console.log('\nEN EL TELÉFONO la chincheta NO existe:');
+await ir(390, 844);
+await caso('no se ofrece fijar nada', async () =>
+  !(await page.isVisible('#fijarMenu')) || 'ofrece algo que no se puede hacer en un teléfono');
+await caso('y el menú sigue siendo el cajón de siempre', async () =>
+  await page.isVisible('#btnMenu') || 'se quedó sin menú');
+await ir(1440, 900);
+await page.evaluate(() => { try{ localStorage.removeItem('llamita_menu_fijo'); }catch{} });
 
 console.log('\nY NINGÚN ERROR DE JAVASCRIPT EN TODA LA SESIÓN:');
 await caso('la consola quedó limpia', async () =>

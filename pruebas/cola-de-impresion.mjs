@@ -13,7 +13,7 @@
    no aparece nunca fallan igual de feo.                                   */
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { abrirNavegador } from './navegador.mjs';
+import { abrirNavegador, abrirMenu } from './navegador.mjs';
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
 const browser = await abrirNavegador();
@@ -262,7 +262,7 @@ await caso('se distingue de la comanda al leerla', async () =>
 
 
 console.log('\nLA PANTALLA · Ajustes → Impresión, que es como se prueba sin impresora:');
-await page.click('#btnMenu'); await page.waitForTimeout(300);
+await abrirMenu(page);
 await page.click('[data-accion="ajustes"]'); await page.waitForTimeout(600);
 await page.click('[data-aj="impresion"]'); await page.waitForTimeout(700);
 await caso('la sección existe y se abre', async () =>

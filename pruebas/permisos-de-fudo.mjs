@@ -15,7 +15,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
-import { abrirNavegador } from './navegador.mjs';
+import { abrirNavegador, abrirMenu } from './navegador.mjs';
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
 const html = readFileSync(join(raiz,'index.html'),'utf8');
@@ -131,7 +131,7 @@ await page.click('.gate-btn[data-sede="plaza"]');
 await page.waitForTimeout(400);
 
 console.log('\nAjustes → Fudo → Permisos de actualización:');
-await page.click('#btnMenu'); await page.waitForTimeout(200);
+await abrirMenu(page);
 await page.click('[data-accion="ajustes"]'); await page.waitForTimeout(400);
 await page.click('#aj-rail [data-aj="fudo"]'); await page.waitForTimeout(700);
 

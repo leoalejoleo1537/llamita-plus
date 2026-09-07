@@ -20,7 +20,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
-import { abrirNavegador } from './navegador.mjs';
+import { abrirNavegador, abrirMenu } from './navegador.mjs';
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
 const browser = await abrirNavegador();
@@ -123,15 +123,18 @@ await page.click('.gate-btn[data-sede="plaza"]');
 await page.waitForTimeout(300);
 
 console.log('\nSe entra a Ajustes:');
-await page.click('#btnMenu');
-await page.waitForTimeout(250);
+await abrirMenu(page);
 await caso('la puerta de Administración aparece con permiso', async () =>
   await page.isVisible('#bloqueAdmin') || 'no se ve el bloque de administración');
 await page.click('[data-accion="ajustes"]');
 await page.waitForTimeout(400);
 await caso('se abre la pantalla', async () => await page.isVisible('#view-ajustes') || 'no se abrió');
+/* Se mira UNA PESTAÑA y no `.tabs`, y la diferencia importa desde el
+   2026-09-07: con el panel fijo el menú vive adentro de `.tabs`, así que ese
+   contenedor tiene que seguir visible aunque las pestañas no. Preguntar por
+   el contenedor confundía "no hay pestañas" con "no hay panel". */
 await caso('las pestañas de arriba se esconden', async () =>
-  !(await page.isVisible('.tabs')) || 'las pestañas siguen ahí');
+  !(await page.isVisible('#tabInv')) || 'las pestañas siguen ahí');
 
 /* ---------- EL BUCLE ---------- */
 console.log('\nNINGUNA sección se pide dos veces (el bucle de Salud):');
@@ -301,7 +304,7 @@ await caso('el botón de volver dice a dónde', async () =>
 await page.click('#aj-volver');
 await page.waitForTimeout(300);
 await caso('vuelve al inventario', async () => await page.isVisible('#view-inv') || 'no volvió');
-await caso('y las pestañas reaparecen', async () => await page.isVisible('.tabs') || 'siguen escondidas');
+await caso('y las pestañas reaparecen', async () => await page.isVisible('#tabInv') || 'siguen escondidas');
 
 /* LA PUERTA DE ATRÁS. Ajustes esconde la barra de pestañas, y hasta el
    2026-08-20 solo la devolvía al salir POR EL BOTÓN DE VOLVER. Cambiando de
@@ -309,15 +312,22 @@ await caso('y las pestañas reaparecen', async () => await page.isVisible('.tabs
    inventario sin forma de ir a Reparto salvo recargar la página.
    Jhon lo encontró usándolo, no las pruebas. */
 console.log('\nY también se sale por la puerta de atrás (cambiar de sede):');
-await page.click('#btnMenu'); await page.waitForTimeout(200);
+await abrirMenu(page);
 await page.click('[data-accion="ajustes"]'); await page.waitForTimeout(400);
 await caso('estando en Ajustes, la barra está escondida', async () =>
-  !(await page.isVisible('.tabs')) || 'no se escondió');
-await page.click('#btnMenu'); await page.waitForTimeout(200);
+  !(await page.isVisible('#tabInv')) || 'no se escondió');
+await caso('🔴 pero el panel de la izquierda NO desaparece con ella', async () => {
+  /* Con el panel fijo, el menú vive adentro de la barra. Apagar la barra
+     entera dejaba Ajustes sin menú, sin usuario y sin salida. */
+  if(!(await page.evaluate(() => document.body.classList.contains('menu-fijo')))) return true;
+  return await page.isVisible('[data-accion="cambiar-sede"]')
+    || 'el panel se fue con las pestañas: quedaste en Ajustes sin salida';
+});
+await abrirMenu(page);
 await page.click('[data-accion="cambiar-sede"]'); await page.waitForTimeout(300);
 await page.click('.gate-btn[data-sede="angamos"]'); await page.waitForTimeout(500);
 await caso('al cambiar de sede desde Ajustes, la barra VUELVE', async () =>
-  await page.isVisible('.tabs') || 'quedó escondida: hay que recargar la página para navegar');
+  await page.isVisible('#tabInv') || 'quedó escondida: hay que recargar la página para navegar');
 
 await caso('ningún error de JavaScript en todo el recorrido', () =>
   errores.length === 0 || errores.join(' | ').slice(0,300));

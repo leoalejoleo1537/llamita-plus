@@ -42,3 +42,19 @@ export async function abrirNavegador(){
   if (!exe) return null;
   return chromium.launch({ executablePath: exe, args: ['--no-sandbox'] });
 }
+
+/* ABRIR EL MENÚ, desde donde esté.
+   ---------------------------------------------------------------------------
+   Desde el 2026-09-07 el menú puede estar en dos lugares: adentro del riel de
+   la izquierda —y entonces ya está a la vista, sin botón que apretar— o
+   detrás de las tres rayas, como siempre.
+
+   Las pruebas hacían `click('#btnMenu')` a secas y se quedaban esperando un
+   botón que, con el panel fijo, no existe. Esto hace lo que hace una persona:
+   si hay botón, lo aprieta; si no, ya está abierto.                        */
+export async function abrirMenu(page){
+  if (await page.isVisible('#btnMenu').catch(() => false)) {
+    await page.click('#btnMenu');
+  }
+  await page.waitForTimeout(250);
+}

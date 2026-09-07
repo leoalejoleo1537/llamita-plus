@@ -235,6 +235,51 @@
   .drawer-salir{width:40px;height:40px;border:none;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
   .drawer-salir svg{width:21px;height:21px}
   .drawer .live{display:inline-flex;background:var(--gray-bg);border-radius:999px;color:var(--gray-fg);padding:5px 11px;font-size:12.5px}
+  /* ══════════ EL PANEL FIJO SE COME AL CAJÓN (2026-09-07) ══════════
+     En el computador había DOS paneles a la izquierda: el riel de secciones,
+     siempre puesto, y el cajón del menú, que se abría con el botón de las tres
+     rayas. Dos paneles para el mismo costado de la pantalla es espacio tirado.
+
+     Ahora el cajón **se muda adentro del riel**. Y se muda de verdad: es el
+     MISMO elemento, movido de lugar en la página, no una copia. Copiar el
+     menú habría dejado dos dueños del mismo botón — el error que este archivo
+     ya pagó varias veces.
+
+     Con el panel fijo, el botón de las tres rayas desaparece: no queda nada
+     que abrir, porque ya está todo a la vista. */
+  .drawer.en-riel{position:static;width:auto;max-width:none;transform:none;
+    box-shadow:none;background:transparent;z-index:auto;overflow:visible;
+    padding:14px 0 0;margin-top:12px;border-top:1px solid var(--linea)}
+  .drawer.en-riel .drawer-top{padding:0 6px 10px;border-bottom:none;margin-bottom:0}
+  .drawer.en-riel .drawer-sede{font-size:14px;margin-bottom:5px}
+  .drawer.en-riel .drawer-sec{padding:12px 6px 4px;font-size:11px;
+    text-transform:uppercase;letter-spacing:.05em}
+  .drawer.en-riel .drawer-item{padding:9px 10px;font-size:14px;gap:10px;
+    border-radius:10px}
+  .drawer.en-riel .drawer-item:hover{background:var(--card)}
+  .drawer.en-riel .drawer-item svg{width:18px;height:18px}
+  .drawer.en-riel .drawer-online{padding:2px 8px 4px;font-size:12.5px}
+  .drawer.en-riel .drawer-foot{padding:12px 8px 0;border-top:1px solid var(--linea);
+    margin-top:14px}
+  .drawer.en-riel .drawer-user{font-size:13px}
+  .drawer.en-riel .drawer-salir{width:32px;height:32px}
+  .drawer.en-riel .drawer-salir svg{width:18px;height:18px}
+  /* Suelto, el "Fijar el panel" del cajón. Fijo, no tiene sentido: la
+     chincheta del riel hace lo mismo y está más cerca. */
+  .drawer.en-riel #fijarMenu{display:none}
+  /* El "Fijar el panel" del cajón: sólo en computador, y colgado de `es-pc`
+     —que mira el ancho de la pantalla— y NO de `pc-ancho`, que mira si el
+     riel está puesto. Si colgara de la segunda, soltar el panel escondería el
+     botón para volver a fijarlo. */
+  .solo-pc{display:none}
+  body.es-pc .solo-pc{display:flex}
+  /* LA CHINCHETA. Chica y apagada: es un ajuste que se toca una vez, no una
+     acción del día a día. Se enciende al pasarle el dedo por encima. */
+  .chincheta{margin-left:auto;width:26px;height:26px;border:none;background:none;
+    color:var(--muted);opacity:.45;cursor:pointer;padding:0;border-radius:7px;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .chincheta:hover{opacity:1;background:var(--card)}
+  .chincheta svg{width:15px;height:15px;display:block}
   /* ---------- aviso transitorio ---------- */
   .toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);background:var(--navy);color:#fff;
          padding:11px 18px;border-radius:999px;font-size:13.5px;font-weight:600;z-index:70;max-width:88%;
@@ -365,6 +410,8 @@
     body.pc-ancho .tab-carril{width:100%}
     body.pc-ancho .wrap{max-width:1240px;padding-left:26px;padding-right:26px}
     body.pc-ancho #view-ajustes{padding-left:26px;padding-right:26px}
+    /* Con el panel fijo no hay nada que abrir: todo está a la vista. */
+    body.pc-ancho.menu-fijo #btnMenu{display:none}
   }
   /* DOS COLUMNAS, y recién a los 1400 px. A 1080 el contenido queda en ~840
      y dos columnas de 400 aprietan los nombres largos: se gana espacio y se
@@ -2604,7 +2651,9 @@
 
 <div class="tabs">
   <div class="inner">
-    <div class="riel-marca"><img src="icons/icon-192.png" alt=""><span>Llamita Plus</span></div>
+    <div class="riel-marca"><img src="icons/icon-192.png" alt=""><span>Llamita Plus</span>
+      <button type="button" class="chincheta" id="fijarRiel" title="Soltar el panel"
+              aria-label="Soltar el panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6l-1 6 4 3v2H6v-2l4-3z"></path><path d="M12 15v5"></path></svg></button></div>
     <span class="tab-carril" id="tabCarril" aria-hidden="true"></span>
     <!-- ⌂ EL HOGAR DE LA APP ES MESAS (Jhon, 2026-09-03).
          Hasta hoy esta casita llevaba al inventario, porque el inventario era
@@ -2669,6 +2718,14 @@
     <div class="drawer-sede" id="drawerSede">—</div>
     <span class="live" id="live"><span class="dot"></span><span id="liveText">—</span></span>
   </div>
+
+  <!-- La chincheta viaja CON el menú: cuando el panel está suelto, el menú es
+       este cajón y el botón para volver a fijarlo tiene que estar acá adentro.
+       Una sola idea en un solo lugar, en vez de dos botones en dos sitios. -->
+  <button type="button" class="drawer-item solo-pc" id="fijarMenu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6l-1 6 4 3v2H6v-2l4-3z"></path><path d="M12 15v5"></path></svg>
+    Fijar el panel
+  </button>
 
   <div class="drawer-sec">Atajos</div>
   <button type="button" class="drawer-item" id="drActualizar" data-accion="actualizar">
@@ -4049,9 +4106,17 @@ function pedirTexto(titulo, valor){
 }
 
 /* ---------------- menú lateral ---------------- */
+/* Los dos rótulos que el cajón muestra arriba. Se sacaron de `abrirMenu`
+   porque con el panel FIJO el cajón nunca se abre — y sin esto se quedaba
+   diciendo "—" para siempre. Es la clase de detalle que no rompe nada y hace
+   que la pantalla se vea a medio terminar. */
+function refrescarMenu(){
+  const a = $('drawerSede'), b = $('drawerUser');
+  if(a) a.textContent = SEDE ? SEDES[SEDE].label : '—';
+  if(b) b.textContent = saludo();
+}
 function abrirMenu(){
-  $('drawerSede').textContent = SEDE ? SEDES[SEDE].label : '—';
-  $('drawerUser').textContent = saludo();
+  refrescarMenu();
   $('drawer').classList.add('open'); $('scrim').classList.add('open');
 }
 function cerrarMenu(){ $('drawer').classList.remove('open'); $('scrim').classList.remove('open'); }
@@ -4184,6 +4249,9 @@ let vistaActual = 'inv';
 /* ---------------- selección de sede ---------------- */
 function pickSede(s){
   SEDE = s;
+  /* Con el panel fijo el cajón nunca se abre, así que su nombre de sede hay
+     que refrescarlo acá: es el momento en que deja de ser "—". */
+  setTimeout(refrescarMenu, 0);
   $('topTitle').textContent = SEDES[s].label;
   $('topSede').textContent = TITULOS.inv;
   $('footText').textContent = SEDES[s].label + ' · sincronizado en tiempo real';
@@ -14791,12 +14859,73 @@ $('aj-rail').addEventListener('click', e=>{
    regla del riel se aplica, y la app vuelve exactamente a la barra horizontal
    de siempre — en el teléfono y en el computador. */
 const PC_ANCHO = true;
-document.body.classList.toggle('pc-ancho', PC_ANCHO);
 
-/* ¿Estamos con el riel a la vista? Se le pregunta al navegador con la MISMA
-   medida que usa el CSS, en vez de mirar `window.innerWidth` a mano: dos
-   dueños del mismo número es cómo se desincronizan. */
-const rielPuesto = () => PC_ANCHO && window.matchMedia('(min-width:1080px)').matches;
+/* ══════════ LA CHINCHETA · fijar o soltar el panel ══════════
+   Pedido por Jhon el 2026-09-07, y con una razón que no es de gusto: cada
+   local tiene su pantalla. Donde el computador es chico, el riel se lleva
+   200 px que le hacen falta al inventario; donde es grande, tenerlo siempre
+   puesto ahorra un toque por cada cosa.
+
+   Se guarda POR DISPOSITIVO y no en la base, igual que el tamaño de las
+   mesas: es comodidad de quien mira, no un dato del negocio. La caja del
+   navegador puede estar cerrada —modo incógnito, permisos— así que todo va
+   entre `try`, y si falla, queda fijo, que es lo que la mayoría quiere. */
+const MENU_FIJO_LLAVE = 'llamita_menu_fijo';
+function menuFijoLeer(){
+  try { return localStorage.getItem(MENU_FIJO_LLAVE) !== 'no'; } catch { return true; }
+}
+function menuFijoGuardar(v){
+  try { localStorage.setItem(MENU_FIJO_LLAVE, v ? 'si' : 'no'); } catch { }
+}
+let MENU_FIJO = menuFijoLeer();
+
+/* ⚠️ EL CAJÓN SE MUEVE, NO SE COPIA. Es el mismo elemento cambiado de sitio:
+   así los manejadores que cuelgan de `#drawer` siguen funcionando y no hay
+   dos versiones del mismo botón que puedan desincronizarse. */
+function aplicarMenuFijo(){
+  const dr = $('drawer'), tabs = document.querySelector('.tabs');
+  if(!dr || !tabs) return;
+  const fijo = rielPuesto();
+  refrescarMenu();
+  /* `es-pc` dice SOLO que la pantalla es grande, y no depende de la
+     chincheta. Hace falta separado: es lo que deja ver el "Fijar el panel"
+     dentro del cajón cuando el riel está suelto. Sin eso, soltarlo sería un
+     camino de ida — el botón para volver estaría escondido detrás de la
+     misma regla que lo apagó. */
+  document.body.classList.toggle('es-pc', pantallaGrande());
+  /* SOLTAR EL PANEL LO SACA ENTERO, no solo su contenido: eso es lo que Jhon
+     pidió — "que esté o no". Al quitar `pc-ancho` la barra vuelve a ser
+     horizontal arriba, el cajón vuelve a ser cajón y las tres rayas vuelven. */
+  document.body.classList.toggle('pc-ancho', fijo);
+  document.body.classList.toggle('menu-fijo', fijo);
+  if(fijo){
+    if(dr.parentElement !== tabs) tabs.appendChild(dr);
+    dr.classList.add('en-riel');
+    dr.classList.remove('open');
+    $('scrim').classList.remove('open');
+  } else {
+    if(dr.parentElement !== document.body) document.body.appendChild(dr);
+    dr.classList.remove('en-riel');
+  }
+  const ch = $('fijarRiel');
+  if(ch){
+    ch.title = 'Soltar el panel';
+    ch.setAttribute('aria-label', 'Soltar el panel');
+  }
+}
+function menuFijoAlternar(v){
+  MENU_FIJO = v;
+  menuFijoGuardar(v);
+  aplicarMenuFijo();
+  moverCarril();
+}
+
+/* ¿La pantalla da para riel? Se le pregunta al navegador con la MISMA medida
+   que usa el CSS, en vez de mirar `window.innerWidth` a mano: dos dueños del
+   mismo número es cómo se desincronizan. */
+const pantallaGrande = () => window.matchMedia('(min-width:1080px)').matches;
+/* Y ¿está puesto? Eso ya depende también de la chincheta. */
+const rielPuesto = () => PC_ANCHO && MENU_FIJO && pantallaGrande();
 
 function moverCarril(){
   const c = $('tabCarril'); if(!c) return;
@@ -14819,11 +14948,28 @@ function moverCarril(){
   });
 }
 /* Al cambiar el tamaño de la ventana se cruza el umbral y el carril queda
-   apuntando en la dirección equivocada. Se remide. */
-window.addEventListener('resize', moverCarril);
+   apuntando en la dirección equivocada. Se remide, y de paso el cajón vuelve
+   a su lugar: al angostar la ventana tiene que volver a ser un cajón. */
+window.addEventListener('resize', () => { aplicarMenuFijo(); moverCarril(); });
+aplicarMenuFijo();
+
+$('fijarRiel').addEventListener('click', () => menuFijoAlternar(false));
+$('fijarMenu').addEventListener('click', () => { cerrarMenu(); menuFijoAlternar(true); });
 
 function barraPestanas(ver){
-  document.querySelector('.tabs').style.display = ver ? '' : 'none';
+  /* ⚠️ CON EL PANEL FIJO SE ESCONDEN LAS PESTAÑAS, NO EL RIEL ENTERO.
+     Desde que el menú vive adentro de `.tabs`, apagar `.tabs` para entrar a
+     Ajustes hacía desaparecer **el panel completo** — el menú, el usuario y
+     la salida incluidos. Quedabas en Ajustes sin nada a la izquierda.
+
+     Es el precio de haber metido una cosa dentro de otra, y se paga acá:
+     apagar lo que hay que apagar y nada más. Lo encontró la prueba de
+     navegación, que ya vigilaba esta misma esquina desde el 2026-08-20. */
+  const tabs = document.querySelector('.tabs');
+  const fijo = document.body.classList.contains('menu-fijo');
+  tabs.style.display = (ver || fijo) ? '' : 'none';
+  const lista = tabs.querySelector('.inner');
+  if(lista) lista.style.display = ver ? '' : 'none';
   /* Al volver de Ajustes la barra estaba escondida, así que las pestañas
      medían 0 y el carril no se podía colocar. Se remide al reaparecer. */
   if(ver) moverCarril();

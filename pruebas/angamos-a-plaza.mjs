@@ -13,7 +13,7 @@
    local; acá se prueba que la app le mande lo que necesita.                 */
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { abrirNavegador } from './navegador.mjs';
+import { abrirNavegador, abrirMenu } from './navegador.mjs';
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
 const browser = await abrirNavegador();
@@ -89,7 +89,7 @@ console.log('\nLa pestaña vive SOLO en Angamos:');
 await page.click('.gate-btn[data-sede="plaza"]'); await page.waitForTimeout(500);
 await caso('en Mall Plaza no aparece', async () =>
   !(await page.isVisible('#tabAPlaza')) || 'aparece donde no corresponde');
-await page.click('#btnMenu'); await page.waitForTimeout(200);
+await abrirMenu(page);
 await page.click('[data-accion="cambiar-sede"]'); await page.waitForTimeout(300);
 await page.click('.gate-btn[data-sede="angamos"]'); await page.waitForTimeout(600);
 await caso('en Parque Angamos sí', async () =>

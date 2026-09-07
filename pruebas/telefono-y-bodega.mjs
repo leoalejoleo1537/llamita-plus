@@ -23,7 +23,7 @@
 import { pathToFileURL } from 'node:url';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { abrirNavegador } from './navegador.mjs';
+import { abrirNavegador, abrirMenu } from './navegador.mjs';
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
 const browser = await abrirNavegador();
@@ -103,7 +103,7 @@ await page.click('.gate-btn[data-sede="plaza"]');
 await page.waitForTimeout(350);
 
 console.log('\nAjustes cabe en un teléfono de 390 px:');
-await page.click('#btnMenu'); await page.waitForTimeout(200);
+await abrirMenu(page);
 await page.click('[data-accion="ajustes"]'); await page.waitForTimeout(400);
 
 for (const sec of ['productos','actividad','secciones','salud','respaldos','personas']) {
@@ -130,7 +130,7 @@ console.log('\nEl botón Actualizar:');
 await page.click('#aj-volver'); await page.waitForTimeout(400);
 await caso('en Mall Plaza se ve el de la barra', async () =>
   await page.isVisible('#btnActualizar') || 'no se ve');
-await page.click('#btnMenu'); await page.waitForTimeout(250);
+await abrirMenu(page);
 await caso('en Mall Plaza se ve el atajo del menú', async () =>
   await page.isVisible('#drActualizar') || 'no se ve');
 
@@ -138,7 +138,7 @@ await page.click('[data-accion="cambiar-sede"]'); await page.waitForTimeout(300)
 await page.click('.gate-btn[data-sede="central"]'); await page.waitForTimeout(500);
 await caso('en Bodega el de la barra está escondido', async () =>
   !(await page.isVisible('#btnActualizar')) || 'sigue visible: promete una sincronización que no existe');
-await page.click('#btnMenu'); await page.waitForTimeout(250);
+await abrirMenu(page);
 await caso('en Bodega el atajo del menú está escondido', async () =>
   !(await page.isVisible('#drActualizar')) || 'sigue visible');
 await caso('y Ajustes sigue en su lugar (no se tocó nada de ahí)', async () =>

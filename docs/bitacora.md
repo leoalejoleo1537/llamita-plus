@@ -8,6 +8,43 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-09-07** — **Los dos paneles de la izquierda se hicieron uno.** Jhon:
+  *"actualmente para la versión de pc hay 2 paneles en la parte izquierda, uno
+  que se despliega con un botón y otro que está fijo, esto que es a todas luces
+  un desperdicio"*. Tenía razón: dos paneles peleando por el mismo costado.
+
+  **El menú se MUDA adentro del riel, y se muda de verdad:** es el mismo
+  elemento cambiado de lugar en la página, no una copia. Copiarlo habría dejado
+  **dos dueños del mismo botón**, que es el error que este archivo ya pagó
+  varias veces. Con el panel puesto, las tres rayas desaparecen: no queda nada
+  que abrir.
+
+  **La chincheta** —chiquita, arriba a la derecha del nombre— **saca el panel
+  entero**, no sólo su contenido: *"para que esté o no"*. Soltarlo devuelve la
+  barra horizontal, el cajón y las tres rayas, exactamente como estaban. Y el
+  botón para volver a fijarlo **viaja con el menú**: vive adentro del cajón, así
+  que soltar el panel nunca es un camino de ida. Se guarda **por dispositivo**,
+  como el tamaño de las mesas: cada local tiene su pantalla.
+
+  ⚠️ **Y destapó un bug de verdad, que la prueba de navegación atrapó antes de
+  publicar.** Ajustes esconde la barra de pestañas — y desde que el menú vive
+  adentro de esa barra, entrar a Ajustes **hacía desaparecer el panel completo**:
+  el menú, el usuario y la salida. Quedabas en Ajustes sin nada a la izquierda.
+  Es el precio de meter una cosa dentro de otra, y se paga apagando lo que hay
+  que apagar y nada más. **La prueba que lo cazó vigilaba esa misma esquina
+  desde el 2026-08-20**, cuando Jhon encontró usándola que cambiar de sede desde
+  Ajustes dejaba la barra escondida.
+
+  **Y un caso de prueba que dejó de probar lo que decía:** el del interruptor
+  apagado simulaba el apagado sacándole una clase al cuerpo *antes* de cambiar
+  el tamaño de la ventana — y ahora hay un manejador de `resize` que la vuelve a
+  poner. Quedaba en verde por el orden de dos líneas. Se invirtió el orden.
+
+  `pruebas/pc-riel.mjs` pasa de 30 a **49 casos**, y las diez llamadas a
+  `#btnMenu` de las otras pruebas pasaron a un ayudante compartido que **hace lo
+  que hace una persona**: si hay botón lo aprieta, y si el menú ya está a la
+  vista, no.
+
 - **2026-09-05** — **En el computador, la barra de pestañas se PARÓ.** Jhon:
   *"ampliame la pantalla para el pc de todo Llamita Plus… manten siempre
   desplegado el panel de la izquierda, mete ahi recetas y mermas"*.

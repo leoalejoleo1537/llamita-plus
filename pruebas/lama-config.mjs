@@ -19,7 +19,7 @@
      que el cobro siga funcionando igual                                     */
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { abrirNavegador } from './navegador.mjs';
+import { abrirNavegador, abrirMenu } from './navegador.mjs';
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
 const browser = await abrirNavegador();
@@ -137,7 +137,7 @@ async function montar({puedeLama = true, archivo = 'index.html'} = {}){
 
 /* A Ajustes se entra por el menú lateral, no por un botón de la barra. */
 const abrirAjustes = async () => {
-  await page.click('#btnMenu');                 await page.waitForTimeout(350);
+  await abrirMenu(page);
   await page.click('[data-accion="ajustes"]');  await page.waitForTimeout(650);
 };
 /* En Ajustes la barra de pestañas se esconde —se entró a otra zona—, así que
