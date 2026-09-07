@@ -1,0 +1,9 @@
+{
+  "_1": "Copiá este archivo como config.json y completá las dos primeras líneas.",
+  "impresora": "Printer-80",
+  "sede": "plaza",
+
+  "_2": "Estas dos NO se tocan: son las de Llamita Plus.",
+  "supabase_url": "https://iuryhsjucblmebdogewa.supabase.co",
+  "supabase_key": "sb_publishable_NxrNACdDllRjfRYeMmsGJw_sqWO0DrC"
+}

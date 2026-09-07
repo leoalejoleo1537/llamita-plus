@@ -38,7 +38,7 @@ Eso significa dos cosas que conviene tener claras:
 | **Lama · cobro** | **100 %** | 8 de 8 | 🟢 cerrado con la F1 |
 | **Lama · configuración** | **83 %** | 5 de 6 | 🟢 **hecha** · falta el detalle del ticket, que depende de F5 |
 | **Lama · el plano de mesas** | **80 %** | 4 de 5 | 🟢 falta reordenar secciones arrastrando |
-| **Lama · impresión** | **10 %** | medido, sin construir | ⬜ necesita ir al local |
+| **Lama · impresión** | **50 %** | 3 de 6 | 🟡 el puente está escrito · falta el `.sql` y la visita |
 | **Lama · arqueo de caja** | **0 %** | 0 de 5 | 🟡 **maqueta escrita** · una caja por local, ya confirmado |
 | **Conexión Lama ↔ Stock** | **0 %** | 0 de 3 | ⬜ va última a propósito |
 | **Producto multi-cliente** | **0 %** | 0 de 4 | ⬜ no empezado |
@@ -112,15 +112,27 @@ aprobada el 2026-09-05, `.sql` corrido, pantalla publicada:
 
 Prueba: `pruebas/lama-plano.mjs`, 38 casos.
 
-### Lama · impresión — medido, sin construir ⬜
+### Lama · impresión — 3 de 6 🟡
 
 **Lo medido ya vale**: la impresora habla ESC/POS, está instalada, y se
 comprobó **en el local** que el navegador no puede tomarla — las dos puertas
 (USB y serie) están cerradas por Windows, no por Fudo.
 
-**Falta el puente**: un programa chico en el computador del local que se
-suscriba a Supabase y le pida a Windows que imprima. Va **aislado**: si falla,
-que falle solo.
+**El puente ya está escrito** (`puente/`), y va **aislado**: no sabe nada de
+inventario ni de ventas, así que si falla, falla solo.
+
+| Pieza | |
+|---|---|
+| La cola `lama_impresiones` | ⬜ el `.sql` espera a Jhon |
+| La app encola los tres papeles | ✅ |
+| El programa del puente | ✅ escrito |
+| **Probarlo contra la impresora** | ⬜ **hace falta ir al local** |
+| Reimprimir un ticket | ⬜ |
+| El detalle del ticket (lo que dejó a Configuración en 5 de 6) | ⬜ espera los ejemplos de Jhon |
+
+⚠️ **El puente nunca habló con la impresora de verdad.** Lo probado son los
+bytes —tildes, ñ, el avance antes del corte—, no el encaje con Windows. Las dos
+cosas no son lo mismo (§0.5).
 
 ### Lama · arqueo de caja — 0 de 5 🟡 *desbloqueado el 2026-09-04*
 

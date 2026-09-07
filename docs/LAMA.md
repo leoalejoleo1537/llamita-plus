@@ -1260,6 +1260,51 @@ base: si falla, que falle solo. El texto ya está armado —`lamaComandaTxt` y
 `lamaPrecuentaTxt`—, así que el puente no tiene que saber nada de mesas.
 **Reimprimir un ticket** entra acá, porque sin puente no sirve de nada.
 
+##### ✅ CONSTRUIDO — 2026-09-06 · la mitad que no necesita ir al local
+
+**El puente está escrito** (`puente/`) y **la cola también** — falta el `.sql` y
+la visita.
+
+| Pieza | |
+|---|---|
+| `lama_impresiones` · el buzón | ⬜ **el `.sql` espera a Jhon** |
+| La app encola comanda, precuenta y anulación | ✅ |
+| **La tercera comanda**, que no existía | ✅ `lamaAnulacionTxt` |
+| El puente (`puente/puente.mjs` + `imprimir.mjs`) | ✅ escrito, **sin probar contra la impresora** |
+| Instalarlo en el local | ⬜ hace falta ir |
+| Reimprimir un ticket | ⬜ |
+
+**Cómo le habla a Windows, y es lo contrario de lo primero que uno intenta:**
+no le quita la impresora — **se la pide**. Le manda un trabajo *RAW* al spooler
+con el driver que ya está puesto, así que **Fudo sigue imprimiendo igual**. Es
+lo mismo que hace Fudo, y por eso su programa convive con el driver en vez de
+pelearlo.
+
+⚠️ **Lo que NO está probado, dicho antes de que alguien lo dé por bueno:** el
+puente **nunca habló con la impresora de verdad**. `pruebas/puente-de-impresion.mjs`
+(14 casos) prueba **los bytes** —que la ñ y las tildes se traduzcan a la tabla
+de la impresora, que el papel avance antes de que la cuchilla corte—, que es lo
+que se puede romper desde acá. **El encaje con el spooler sólo se comprueba en
+el local**, y confundir las dos cosas es exactamente §0.5.
+
+**Si el puente falla, no se rompe nada:** la comanda ya quedó guardada y la
+venta sigue. Pero **se avisa en pantalla** —*"el papel quedó sin salir"*—
+porque sin ese aviso la cocina se quedaría esperando un papel que nadie mandó.
+Y cada papel que no sale deja escrito **por qué** en su propia fila.
+
+##### Una condición que resultó ser código muerto
+
+El papel de la anulación nacía con un `if (estado === 'confirmado')`. **Al
+invertirlo a propósito para ver si la prueba se ponía roja, siguió en verde**:
+a esa función sólo se llega por lo confirmado, así que ese `if` no protegía
+nada. Se sacó. **La regla sigue viva y vive donde se decide** —en `lamaQuitar`,
+que manda a pedir motivo sólo lo que ya salió a la cocina—, y el caso de prueba
+se queda como la red que atrapa a quien mañana agregue un `lamaEncolar` en el
+camino del borrado.
+
+Prueba: `pruebas/cola-de-impresion.mjs`, **17 casos**, con los dos lados —que
+anular lo comandado imprima, y que anular lo que nunca salió **no** imprima—.
+
 ##### Las TRES comandas — dicho por Jhon el 2026-09-05
 
 **Una sola impresora y un solo sitio**: de ahí sale la comida y la bebida. No

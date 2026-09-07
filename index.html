@@ -7109,6 +7109,63 @@ async function lamaQuitar(itemId){
    este mismo texto es lo que se le manda a la impresora. Por eso se arma acá
    y no en el momento de imprimir: el formato se afina ahora, sin depender
    del computador del local. */
+/* ==================================================================
+   LA COLA DE IMPRESIÓN  (F5, 2026-09-06)
+   ==================================================================
+   La app NO imprime: escribe el papel en `lama_impresiones` y sigue con lo
+   suyo. El programita del computador del local está suscrito a esa tabla y
+   saca lo que aparezca.
+
+   POR QUÉ ASÍ, y está medido en el local (§2.3): el navegador **no puede
+   tomar la impresora** —Windows se queda con ella y no la suelta— y una
+   página en `https` tampoco puede llamar a una dirección de la red local. La
+   salida es que el puente **no reciba nada**: que se suscriba y saque. Sin
+   conexión entrante no hay contenido mixto, ni firewall, ni IP que averiguar,
+   y funciona desde cualquier teléfono del local.
+
+   ⚠️ SI FALLA, NO ROMPE NADA Y TAMPOCO SE CALLA. Encolar es lo último que
+   pasa después de comandar: si la tabla no existe todavía, la comanda ya se
+   guardó igual y la venta sigue su curso. Pero **se avisa en pantalla**, que
+   es la §0.5 —un sistema que falla en silencio es peor que uno que se cae—:
+   sin este aviso, la cocina se quedaría esperando un papel que nadie mandó. */
+const LAMA_IMPRIMIR = true;   // el interruptor (§2.2): apagado, nada se encola
+
+async function lamaEncolar(tipo, texto, cuentaId){
+  if(!LAMA_IMPRIMIR || !texto) return;
+  const r = await sb.from('lama_impresiones').insert({
+    sede: SEDE, tipo, contenido: texto, quien: NOMBRE || null,
+    cuenta_id: cuentaId || null});
+  if(r.error){
+    /* El mensaje dice QUÉ hacer, no solo que algo falló. Y no usa `avisar`
+       —que traba la pantalla con un botón— porque el garzón está en medio de
+       una venta: el papel se puede reimprimir después. */
+    aviso('No se pudo mandar a imprimir · el papel quedó sin salir', 6000);
+    console.error('cola de impresión:', r.error.message);
+  }
+}
+
+/* LA TERCERA COMANDA, que Jhon nombró el 2026-09-05 y no existía: cuando se
+   anula algo YA COMANDADO, sale un papel que muestra SOLO lo anulado.
+
+   No es un lujo: sin ese papel **la cocina sigue preparando lo que ya no va**.
+   La primera comanda dijo "hacé esto" y nada la contradijo nunca. */
+function lamaAnulacionTxt(mesa, item, motivo, comentario){
+  const hora = new Date().toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'});
+  return [
+    '      ' + SEDES[SEDE].label,
+    '   ─────────────────────',
+    '   *** ANULADO ***',
+    `   MESA ${mesa ? mesa.numero : '—'}          ${hora}`,
+    '   ─────────────────────',
+    `   ${fmt(item.cantidad)} x ${item.nombre}`,
+    `   Motivo: ${motivo}`,
+    ...(comentario ? [`   → ${comentario}`] : []),
+    '   ─────────────────────',
+    '   NO PREPARAR',
+    '   ' + (NOMBRE || ''),
+  ].join('\n');
+}
+
 function lamaComandaTxt(mesa, comanda){
   const hora = new Date(comanda.created_at || Date.now())
     .toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'});
@@ -7131,6 +7188,7 @@ async function lamaConfirmar(){
   const cm = await lamaLlamar('cuenta_confirmar', {p_cuenta_id: c.id, p_quien: NOMBRE});
   if(!cm) return;
   LAMA_PAPEL = lamaComandaTxt(lamaMesaDe(LAMA_SEL), cm);
+  await lamaEncolar('comanda', LAMA_PAPEL, c.id);
   await lamaCargarItems(true);
   lamaPintar();
   aviso('✓ Comanda #' + cm.numero);
@@ -7196,6 +7254,7 @@ async function lamaPrecuenta(){
   if(!r) return;
   LAMA_CUENTAS = LAMA_CUENTAS.map(x => x.id === r.id ? r : x);
   LAMA_PAPEL = lamaPrecuentaTxt(lamaMesaDe(LAMA_SEL), r.total);
+  await lamaEncolar('precuenta', LAMA_PAPEL, c.id);
   lamaPintar();
 }
 
@@ -7337,6 +7396,23 @@ async function lamaAnularConfirmar(){
     p_item_id: it.id, p_motivo: a.motivo,
     p_comentario: a.comentario.trim() || null, p_quien: NOMBRE});
   if(!r) return;
+
+  /* El papel de la anulación. Acá NO hace falta preguntar si el producto
+     estaba comandado, y la diferencia importa: **a esta función sólo se llega
+     por lo confirmado**. Los dos caminos que abren la ventana del motivo
+     —el ✕ y el − de una línea ya salida— comprueban `estado === 'confirmado'`
+     antes de abrirla; lo que nunca salió a la cocina se quita y punto, sin
+     motivo y sin papel.
+
+     ⚠️ ACÁ HABÍA UN `if` QUE SIEMPRE ERA VERDADERO. Se sacó al comprobar que
+     la prueba seguía en verde con la condición invertida: no la protegía
+     ninguna condición, la protegía el camino. Un `if` muerto al lado de uno
+     vivo es el par huérfano que ya produjo el bug de los − + de la ventana
+     del producto. La regla que sigue en pie es la de arriba y vive donde se
+     decide, en `lamaQuitar`. */
+  await lamaEncolar('anulacion',
+    lamaAnulacionTxt(lamaMesaDe(LAMA_SEL), it, lamaMotivoAnuNom(a.motivo),
+                     a.comentario.trim()), it.cuenta_id);
 
   LAMA_ANU = null;
   await lamaCargarItems(true);
