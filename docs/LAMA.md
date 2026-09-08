@@ -1742,7 +1742,7 @@ poder crearlas ella:
 2. **Medios de pago** — crear y editar. Lo necesita el cierre, y ya está previsto como tabla `lama_medios_pago`
 3. **Motivos de anulación** — crear y editar. Lo necesita C9
 4. **Qué detalle lleva el ticket** — editable, con su propia pantalla. Sale de A2
-5. **El tamaño y la POSICIÓN de las mesas.** El tamaño ya se ajusta con el ⚙ del plano (2026-08-31, por dispositivo). Falta la posición, y primero hay que decidir qué significa: ¿reordenar las mesas en la grilla, o un plano de verdad con coordenadas, donde la mesa 7 esté junto a la ventana?
+5. ~~**El tamaño y la POSICIÓN de las mesas.**~~ — **resuelto el 2026-09-05/08**: el tamaño se ajusta con el ⚙ del plano (por dispositivo), y la posición quedó resuelta como *páginas → secciones → mesas*, no como coordenadas libres — la mesa 7 se ubica agrupándola en su sección ("junto a la ventana" es un nombre de sección, no una coordenada en un mapa). Reordenar las secciones es con flechas, no arrastrando (F4, `docs/propuesta-lama-mesas.html`).
 6. ~~**Dónde queda registrada la anulación**~~ — **resuelto el 2026-09-01**: en las columnas `anulado_at`, `anulado_por`, `anulado_motivo` y `anulado_comentario` de `cuenta_items`, y los motivos en `lama_motivos_anulacion`. **Lo que falta es la pantalla** para que Adriana cree motivos nuevos, y un listado de lo anulado del día para el arqueo.
 
 ---
