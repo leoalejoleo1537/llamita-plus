@@ -183,10 +183,8 @@ cliente.
 
 ## Lo que hoy espera a Jhon, y no a Claude
 
-| Qué | Desbloquea |
-|---|---|
-| ~~Las 3 preguntas del bloque H~~ | ✅ **hecho el 2026-09-04** |
-| **Decidir el arqueo ciego** — Fudo lo hace con roles y Llamita no tiene | que F6 arranque sin frenarse a mitad |
-| Desplegar las **11 Edge Functions** | los crons: la foto diaria y la limpieza |
-| Una **visita al local** con el puente instalado | la impresión |
-| Aprobar la maqueta del **plano de mesas** ([ya está escrita](propuesta-lama-mesas.html)) | el plano editable |
+> ⚠️ **Esta tabla se sacó el 2026-09-08.** Vivía duplicada acá y en la bandeja
+> **🔴 PREGUNTAS QUE ESPERAN A JHON** de `docs/LAMA.md`, y las dos se
+> desincronizaron — esta seguía pidiendo el arqueo ciego (ya contestado en
+> parte y no bloqueante) y el plano de mesas (aprobado y construido). **La
+> bandeja de `LAMA.md` es la única fuente** — se lee ahí, no se copia acá.
