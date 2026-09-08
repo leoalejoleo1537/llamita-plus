@@ -818,7 +818,7 @@ sirve, no se copia — y se dice por qué. Esta tabla es el corazón de la ruta.
 | Descuento con el ícono `%` | D3 | ✅ F1 · `lama-descuento`, 21 casos |
 | **La precuenta bloquea agregar** | E1 | ✅ F2 · `lama-precuenta`, 13 casos |
 | Las palabras exactas de los botones | F1 | ✅ F2 · el paso de vocabulario, más abajo |
-| Mostrador — vender sin mesa | A1 | ⬜ **F4** · maqueta escrita, espera aprobación |
+| Mostrador — vender sin mesa | A1 | ✅ F4 · resuelto por regla del negocio, sin SQL (ver más abajo) |
 | Reimprimir un ticket | B3 | ⬜ **F5** · necesita el puente |
 
 > ⚠️ **Las cuatro primeras decían ⬜ hasta el 2026-09-05**, con F1 y F2 cerradas
@@ -1463,11 +1463,16 @@ en `/caja` — se hacen el día que Lama se muestre, no antes.
 
 #### Lo que hace falta de Jhon, y cuándo
 
+> ⚠️ **Reescrito el 2026-09-08**: la versión anterior seguía pidiendo el
+> descuento de los 5 consumos (se disolvió solo — F3 le dio una pantalla para
+> escribirlo él mismo), el bloque H del atlas (contestado, F6 desbloqueado
+> desde el 4 de septiembre) y aprobar el plano de mesas (aprobado y construido
+> desde el 5). Tres pendientes fantasma. Lo que de verdad falta está en la
+> bandeja **🔴 PREGUNTAS QUE ESPERAN A JHON**, al final de este archivo — ahí
+> y no acá, para que no vuelva a haber dos listas del mismo estado.
+
 | Cuándo | Qué |
 |---|---|
-| antes de **F3** | **El descuento de cada uno de los 5 consumos** (administrativo, garzones, eventos, redes, cumpleaños). Hoy son todos 0 |
-| antes de **F4** | Aprobar **[la maqueta del plano de mesas](propuesta-lama-mesas.html)**, y decir cómo se reparten las mesas de **Angamos** |
-| antes de **F6** | Las **tres respuestas del bloque H** del atlas, por NotebookLM |
 | cuando pueda | Una visita al local para instalar el puente (**F5**) |
 
 ---
