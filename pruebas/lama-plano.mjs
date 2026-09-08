@@ -355,6 +355,38 @@ await caso('y no escribió nada', async () =>
   (await esc()).filter(x => x.tabla === 'lama_areas').length === 0 || 'guardó una sin nombre');
 await cerrarAviso();
 
+console.log('\n🔴 REORDENAR CON FLECHAS, NO ARRASTRANDO:');
+await montar({conAreas:true}); await editar();
+await caso('la primera sección no tiene flecha para subir', async () =>
+  !(await page.isVisible('[data-lamasecsube="11"]')) || 'ofrece subir la que ya está primera');
+await caso('pero sí tiene para bajar', async () =>
+  await page.isVisible('[data-lamasecbaja="11"]') || 'no puede bajar');
+await caso('la última no tiene flecha para bajar', async () =>
+  !(await page.isVisible('[data-lamasecbaja="12"]')) || 'ofrece bajar la que ya está última');
+await caso('y sí para subir', async () =>
+  await page.isVisible('[data-lamasecsube="12"]') || 'no puede subir');
+await caso('"Ala izquierda" empieza arriba', async () => {
+  const t = await page.evaluate(() =>
+    [...document.querySelectorAll('.lama-sec .t')].map(x => x.textContent));
+  return t[0] === 'Ala izquierda' || 'orden inicial: ' + t.join(', ');
+});
+await page.click('[data-lamasecbaja="11"]'); await page.waitForTimeout(500);
+await caso('bajarla la manda al final, en pantalla', async () => {
+  const t = await page.evaluate(() =>
+    [...document.querySelectorAll('.lama-sec .t')].map(x => x.textContent));
+  return t[0] === 'Ala derecha' || 'sigue en: ' + t.join(', ');
+});
+await caso('y se lo pide a la base — las dos filas con su orden nuevo', async () => {
+  const u = (await esc()).filter(x => x.tabla === 'lama_areas' && x.op === 'update');
+  return u.length === 2 || 'mandó ' + u.length + ' actualizaciones';
+});
+await caso('las mesas se quedan en su sección — reordenar no las mueve', async () => {
+  /* Sin `:not(.nueva)`: en modo edición cada sección lleva el + fantasma, que
+     también es un `.lama-mesa` y se contaría de más. */
+  const izq = await page.locator('.lama-sec:has-text("Ala izquierda") .lama-mesa:not(.nueva)').count();
+  return izq === 5 || 'la sección quedó con ' + izq + ' mesas';
+});
+
 console.log('\nSALIR DEL MODO EDICIÓN:');
 await montar({conAreas:true}); await editar();
 await page.click('[data-lamaacc="plano-listo"]'); await page.waitForTimeout(300);

@@ -1245,6 +1245,23 @@ contestarla también impedía la escritura. Ahora la prueba **acepta lo que
 aparezca**, así que sin candado la mesa se borra y el caso se pone rojo. Se
 comprobó rompiendo el código a propósito.
 
+##### ✅ CERRADO — 2026-09-08 · reordenar secciones
+
+Lo único que quedaba del plano. **Con flechas, no arrastrando** — la misma
+decisión que ya se había tomado para Configuración (medios de pago, motivos):
+en un teléfono arrastrar para reordenar falla más de lo que acierta, y dos
+flechas se entienden igual sin equivocarse nunca. La primera sección no
+ofrece subir, ni la última bajar — no hay nada raro que puedan hacer, así que
+no se ofrece.
+
+Se mueve en pantalla primero y se guarda después, la misma receta de
+`lamaCfgMover`: el toque se siente al instante, no atado a la vuelta de la
+red. Prueba: 8 casos nuevos en `pruebas/lama-plano.mjs` (45 → 53), incluido
+que reordenar **no mueve las mesas** de sección — mueve el orden, no el
+contenido.
+
+**El plano de mesas queda en 5 de 5.**
+
 ##### Sus tres respuestas, y lo que cambió cada una
 
 | Pregunta | Respuesta |
@@ -1735,7 +1752,6 @@ poder crearlas ella:
 
 | Qué | Dónde está planteada | Qué desbloquea |
 |---|---|---|
-| **Aprobar la maqueta del plano de mesas** — páginas, secciones y modo edición. Y decirme **cómo se reparten las mesas de Angamos**, si es que allá también hay secciones | [`docs/propuesta-lama-mesas.html`](propuesta-lama-mesas.html) · resumida en la **F4** de arriba | **F4 entero.** Nada se escribe hasta que la apruebes (§0.7) |
 | **Aprobar la maqueta del Arqueo de caja**. ✅ La urgente ya está contestada (una caja por local); quedan dos que **no bloquean**: el arqueo ciego y quién abre y cierra | [`docs/propuesta-lama-arqueo.html`](propuesta-lama-arqueo.html) · resumidas en la **F6** de arriba | **F6 entero** |
 | **Una visita al local** para instalar el puente de impresión | §2.3 de `CLAUDE.md` | **F5**, y con ella el detalle del ticket que dejó a F3 en 5 de 6 |
 | **Decidir sobre la API de Fudo** — vos preguntaste cuánto ayudaría. La respuesta está escrita, con un corte: **leer es barato y seguro; escribir tocaría el POS real del café** | [`docs/fudo-api-cuanto-sirve.md`](fudo-api-cuanto-sirve.md) | la **Fase 4** (11 Edge Functions ya escritas y apagadas) y el descuadre del conteo nocturno |

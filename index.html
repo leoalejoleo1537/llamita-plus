@@ -992,9 +992,17 @@
   .lama-mesa.nueva{background:transparent;border:1px dashed currentColor;opacity:.55;
     font-size:26px;font-weight:400;color:inherit;box-shadow:none}
   .lama-mesa.nueva:active{transform:scale(.95)}
-  .lama-sec-cab.tocable{width:100%;border:none;background:transparent;font:inherit;
-    color:inherit;cursor:pointer;text-align:left;display:flex;align-items:baseline;gap:6px}
-  .lama-sec-cab.tocable .c{text-decoration:underline;opacity:.8}
+  .lama-sec-cab.tocable-cab{display:flex;align-items:center;gap:6px}
+  .lama-sec-cab .tocable{flex:1;min-width:0;border:none;background:transparent;font:inherit;
+    color:inherit;cursor:pointer;text-align:left;display:flex;align-items:baseline;gap:6px;padding:0}
+  .lama-sec-cab .tocable .c{text-decoration:underline;opacity:.8}
+  /* Las flechas de reordenar. Chiquitas y apagadas — es un ajuste que se usa
+     una vez cada tanto, no un botón del día a día. */
+  .lama-sec-flechas{display:flex;gap:2px;flex-shrink:0}
+  .lama-sec-flechas button{width:22px;height:22px;border:none;background:rgba(255,255,255,.55);
+    border-radius:6px;font-size:10px;color:inherit;opacity:.75;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;padding:0}
+  .lama-sec-flechas button:active{opacity:1;background:rgba(255,255,255,.85)}
   .lama-ed{display:flex;align-items:center;gap:9px;width:100%;border:none;
     background:var(--card);box-shadow:var(--sombra);border-radius:13px;
     padding:11px 13px;margin-bottom:8px;font:inherit;font-size:14px;font-weight:700;
@@ -6528,9 +6536,20 @@ function lamaPintarPlano(){
       const dentro = mesas.filter(m => m.area_id === sec.id);
       if(!dentro.length && !LAMA_EDITA) return '';
       const ocup = dentro.filter(m => lamaCuentaDe(m.id)).length;
+      /* REORDENAR CON FLECHAS, NO ARRASTRANDO — la misma decisión que ya se
+         tomó para las listas de Configuración (medios de pago, motivos): en
+         un teléfono arrastrar para reordenar falla más de lo que acierta.
+         Dos flechas se entienden igual y no se equivocan nunca. La primera
+         sección no tiene flecha para subir, ni la última para bajar — no
+         hay nada raro que puedan hacer, así que no se ofrecen. */
+      const iSec = secs.indexOf(sec);
+      const flechas = LAMA_EDITA ? `<span class="lama-sec-flechas">
+          ${iSec > 0 ? `<button type="button" data-lamasecsube="${sec.id}" aria-label="Subir esta sección">▲</button>` : ''}
+          ${iSec < secs.length - 1 ? `<button type="button" data-lamasecbaja="${sec.id}" aria-label="Bajar esta sección">▼</button>` : ''}
+        </span>` : '';
       const cab = LAMA_EDITA
-        ? `<button type="button" class="lama-sec-cab tocable" data-lamaseced="${sec.id}">
-             <span class="t">${esc(sec.nombre)}</span><span class="c">editar</span></button>`
+        ? `<div class="lama-sec-cab tocable-cab">${flechas}<button type="button" class="tocable" data-lamaseced="${sec.id}">
+             <span class="t">${esc(sec.nombre)}</span><span class="c">editar</span></button></div>`
         : `<header class="lama-sec-cab"><span class="t">${esc(sec.nombre)}</span>
              ${ocup ? `<span class="c">${ocup} de ${dentro.length}</span>` : ''}</header>`;
       return `<section class="lama-sec c-${esc(sec.color || 'a')}" data-lamasec="${sec.id}">
@@ -8842,6 +8861,22 @@ function lamaPFMesa(m, areaId){
   lamaPintarPF();
 }
 
+/* SUBIR / BAJAR una sección. Se mueve en pantalla primero y se guarda
+   después — la misma receta de `lamaCfgMover`, para que el toque se sienta
+   al instante y no atado a la vuelta de la red. */
+async function lamaSecMover(id, delta){
+  const secs = lamaSecciones(LAMA_PAGINA);
+  const i = secs.findIndex(x => x.id === id);
+  const j = i + delta;
+  if(i < 0 || j < 0 || j >= secs.length) return;
+  secs.splice(j, 0, secs.splice(i, 1)[0]);
+  secs.forEach((x, n) => { x.orden = n; });
+  lamaPintarPlano();
+  try {
+    await Promise.all(secs.map((x, n) => sb.from('lama_areas').update({orden: n}).eq('id', x.id)));
+  } catch(e) { avisar('No se pudo guardar el orden.\n\n' + (e.message || '')); await lamaCargar(); }
+}
+
 async function lamaPFGuardar(){
   const f = LAMA_PF; if(!f) return;
   const $v = id => { const e = $(id); return e ? e.value.trim() : ''; };
@@ -9125,6 +9160,10 @@ $('view-lama').addEventListener('click', async e => {
     lamaPintarPF();
     return;
   }
+  const ssub = e.target.closest('[data-lamasecsube]');
+  if(ssub){ await lamaSecMover(+ssub.dataset.lamasecsube, -1); return; }
+  const sbaj = e.target.closest('[data-lamasecbaja]');
+  if(sbaj){ await lamaSecMover(+sbaj.dataset.lamasecbaja, +1); return; }
   const se = e.target.closest('[data-lamaseced]');
   if(se){
     const x = lamaAreaDe(+se.dataset.lamaseced);

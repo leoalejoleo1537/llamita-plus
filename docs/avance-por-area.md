@@ -37,7 +37,7 @@ Eso significa dos cosas que conviene tener claras:
 | **Lama · comanda** | **100 %** | 5 de 5 | 🟢 |
 | **Lama · cobro** | **100 %** | 8 de 8 | 🟢 cerrado con la F1 |
 | **Lama · configuración** | **83 %** | 5 de 6 | 🟢 **hecha** · falta el detalle del ticket, que depende de F5 |
-| **Lama · el plano de mesas** | **80 %** | 4 de 5 | 🟢 falta reordenar secciones arrastrando |
+| **Lama · el plano de mesas** | **100 %** | 5 de 5 | 🟢 **terminado** |
 | **Lama · impresión** | **83 %** | 5 de 6 | 🟡 **falta ir al local** · todo lo demás está |
 | **Lama · arqueo de caja** | **0 %** | 0 de 5 | 🟡 **maqueta escrita** · una caja por local, ya confirmado |
 | **Conexión Lama ↔ Stock** | **0 %** | 0 de 3 | ⬜ va última a propósito |
@@ -89,7 +89,7 @@ pantalla) · ✅ lo anulado del día · ⬜ qué detalle lleva el ticket.
 depende de **F5**: decidir qué lleva el ticket antes de que exista el puente de
 impresión es decidir a ciegas cómo se ve algo que todavía no imprime.
 
-### Lama · el plano de mesas — 4 de 5 🟢
+### Lama · el plano de mesas — 5 de 5 🟢
 
 Páginas · secciones en tarjetas · modo edición · forma y tamaño por mesa · los
 candados de una mesa con cuenta abierta.
@@ -108,7 +108,7 @@ aprobada el 2026-09-05, `.sql` corrido, pantalla publicada:
 | El plano agrupado en secciones de color | ✅ |
 | El modo edición (crear, renombrar, mover, quitar) | ✅ |
 | Forma y tamaño por mesa | ✅ redonda, larga, chica y grande se dibujan en el plano de computador. **En el teléfono el tamaño no se aplica a propósito**: en un riel de 66 px una mesa grande empujaría a las demás fuera de la vista |
-| Reordenar secciones arrastrando | ⬜ |
+| Reordenar secciones — **con flechas, no arrastrando** | ✅ misma decisión que Configuración: en un teléfono arrastrar falla más de lo que acierta |
 
 Prueba: `pruebas/lama-plano.mjs`, 38 casos.
 
