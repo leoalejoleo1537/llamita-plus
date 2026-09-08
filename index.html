@@ -77,7 +77,14 @@
   /* El logo es el archivo que entrega Jhon, redimensionado. Nunca se
      redibuja por código (regla 2.1). */
   .gate-marca{display:block;margin:0 auto 12px;border-radius:22px}
-  .gate-logo{font-size:34px;font-weight:800;color:var(--orange);letter-spacing:.5px;margin-bottom:4px}
+  /* EL NOMBRE, MÁS FINO. Era sans-serif a peso 800 — grueso a propósito para
+     leerse en una pantalla chica. Jhon pidió "algo más elegante y fino, no
+     grueso": una serif del sistema a peso normal cumple sin sumar una
+     dependencia externa — esta app no le pide nada a una red que puede no
+     estar, ni en el mesón ni acá. Georgia está en todos lados; el resto de
+     la lista es el mismo respaldo de siempre. */
+  .gate-logo{font-family:Georgia,'Iowan Old Style','Palatino Linotype',Palatino,serif;
+    font-size:36px;font-weight:400;color:var(--orange);letter-spacing:.2px;margin-bottom:4px}
   .gate-sub{font-size:14.5px;color:var(--muted);margin:0 0 26px}
   .gate-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:17px 20px;margin-bottom:12px;border-radius:10px;border:1.5px solid var(--border);background:#fff;font-size:16.5px;font-weight:700;color:var(--text);cursor:pointer;transition:.15s;text-align:left}
   .gate-btn:hover,.gate-btn:active{border-color:var(--orange);background:#FFF7F3}
@@ -92,6 +99,80 @@
   .gate-err{display:none;background:var(--red-bg);color:var(--red-fg);border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;margin:0 0 10px;text-align:left}
   .gate-link{background:none;border:none;color:var(--muted);font-size:12.5px;cursor:pointer;text-decoration:underline;margin-top:16px;padding:0}
   .gate-link:hover{color:var(--orange)}
+  /* ══════════════════════════════════════════════════════════════
+     LA PANTALLA DE INICIO DE SESIÓN — REHECHA 2026-09-08
+     ══════════════════════════════════════════════════════════════
+     Sale de la maqueta que trajo Jhon ("1b · propuesta nueva · escritorio").
+     En el teléfono se queda la tarjeta simple de siempre — el panel
+     decorativo no cabe en un ancho de 66px y no aporta nada ahí. De 900px
+     para arriba aparece el panel de la izquierda, que es lo que la maqueta
+     pedía para el computador. */
+  .login-card{background:#fff;border-radius:22px;box-shadow:0 20px 60px -20px rgba(15,30,49,.28);
+    overflow:hidden;max-width:400px;width:100%}
+  .login-visual{display:none}
+  .login-form{box-shadow:none;border-radius:0;max-width:none;padding:38px 30px 30px}
+  .login-h1{display:none}
+  .login-sub{display:none}
+  .login-marca-tel{display:block}
+  .login-logo-tel{display:block}
+
+  /* Los campos con ícono. Un solo contenedor por campo, y el ícono adentro
+     en vez de superpuesto a mano — así el foco y el error del borde se
+     dibujan en el contenedor entero, no solo en el input. */
+  .login-campo{display:flex;align-items:center;gap:10px;border:1.5px solid var(--border);
+    border-radius:10px;padding:0 14px;margin-bottom:10px;background:#fff;transition:border-color .15s}
+  .login-campo:focus-within{border-color:var(--orange)}
+  .login-campo svg{width:19px;height:19px;flex-shrink:0;color:var(--muted)}
+  .login-campo input{flex:1;min-width:0;height:46px;border:none;outline:none;
+    font-size:15.5px;color:var(--text);background:transparent;font-family:inherit}
+  .login-ver{border:none;background:none;color:var(--muted);cursor:pointer;
+    padding:6px;flex-shrink:0;display:flex}
+  .login-ver svg{width:19px;height:19px}
+  .login-ver.on{color:var(--orange)}
+
+  .login-cta{width:100%;padding:15px;border:none;border-radius:10px;background:var(--orange);
+    color:#fff;font-size:16.5px;font-weight:800;cursor:pointer;margin-top:4px;
+    display:flex;align-items:center;justify-content:center;gap:8px}
+  .login-cta:disabled{opacity:.6}
+  .login-cta svg{width:18px;height:18px}
+
+  .login-fila{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    margin-top:14px;flex-wrap:wrap}
+  .login-check{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);
+    cursor:pointer;user-select:none}
+  .login-check input{width:15px;height:15px;accent-color:var(--orange);margin:0}
+  .login-olvide{background:none;border:none;color:var(--muted);font-size:12.5px;
+    text-decoration:underline;cursor:pointer;padding:0;font-family:inherit}
+  .login-olvide:hover{color:var(--orange)}
+
+  @media (min-width:900px){
+    /* EL PANEL SE ABRE EN DOS. Contenido a la izquierda (el logo, las formas),
+       el formulario a la derecha — como en la maqueta. */
+    .login-card{max-width:860px;display:flex;border-radius:26px}
+    .login-visual{display:flex;flex-direction:column;align-items:center;justify-content:center;
+      position:relative;overflow:hidden;flex:0 0 380px;background:var(--bg)}
+    /* Las formas son puro adorno — círculos suaves de la propia paleta,
+       nunca un color nuevo. Se recortan con el propio panel: `overflow:hidden`
+       arriba hace de marco. */
+    .login-blob{position:absolute;border-radius:50%}
+    .login-blob.b1{width:210px;height:210px;top:-60px;left:-50px;background:rgba(15,30,49,.10)}
+    .login-blob.b2{width:150px;height:150px;top:20px;right:-40px;background:rgba(220,68,5,.14)}
+    .login-blob.b3{width:170px;height:170px;top:150px;left:-60px;background:rgba(15,30,49,.16)}
+    .login-blob.b4{width:130px;height:130px;bottom:70px;left:20px;background:rgba(15,30,49,.10)}
+    .login-blob.b5{width:190px;height:190px;bottom:-70px;right:-40px;background:rgba(15,30,49,.10)}
+    .login-visual-logo{position:relative;width:128px;height:128px;border-radius:28px;
+      box-shadow:0 14px 34px -12px rgba(15,30,49,.35)}
+    .login-visual-marca{position:relative;margin-top:16px;font-family:Georgia,'Iowan Old Style',
+      'Palatino Linotype',Palatino,serif;font-weight:400;font-size:32px;color:var(--orange);
+      letter-spacing:.2px}
+    .login-marca-tel,.login-logo-tel{display:none}
+
+    .login-form{flex:1;padding:52px 48px;display:flex;flex-direction:column;justify-content:center}
+    .login-h1{display:block;font-size:27px;font-weight:800;color:var(--text);margin:0 0 6px;
+      letter-spacing:-.01em}
+    .login-sub{display:block;font-size:14.5px;color:var(--muted);margin:0 0 26px}
+  }
+
   /* ---------- quién está en línea (presencia) ---------- */
   .online{display:none;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:7px 12px;font-size:12.5px;font-weight:600;color:#fff;max-width:190px;min-width:0}
   .online .odot{width:8px;height:8px;border-radius:50%;background:#4CAF50;flex-shrink:0}
@@ -2582,17 +2663,50 @@
 </head>
 <body>
 
-<!-- ================= INICIO DE SESIÓN (obligatorio al abrir) ================= -->
-<div class="gate top" id="login-gate">
-  <div class="gate-box">
-    <img class="gate-marca" src="icons/icon-192.png" alt="" width="88" height="88">
-    <div class="gate-logo">Llamita</div>
-    <p class="gate-sub">Inicia sesión para comenzar</p>
-    <div class="gate-err" id="login-err"></div>
-    <input type="email" class="gate-input" id="login-email" placeholder="Correo" autocomplete="username">
-    <input type="password" class="gate-input" id="login-pass" placeholder="Contraseña" autocomplete="current-password">
-    <button class="gate-cta" id="login-btn">Entrar</button>
-    <div class="gate-foot">¿Sin cuenta? Pídesela al administrador</div>
+<!-- ================= INICIO DE SESIÓN (obligatorio al abrir) =================
+     REHECHA el 2026-09-08 sobre la maqueta que trajo Jhon ("1b · propuesta
+     nueva · escritorio"). En el teléfono queda la tarjeta simple de siempre
+     —.login-visual se esconde y no hay nada que perder—; de 900px para
+     arriba aparece el panel izquierdo con las formas y el logo grande, que
+     es lo que la maqueta pedía para el computador. -->
+<div class="gate top login-gate" id="login-gate">
+  <div class="login-card">
+    <div class="login-visual" aria-hidden="true">
+      <span class="login-blob b1"></span><span class="login-blob b2"></span>
+      <span class="login-blob b3"></span><span class="login-blob b4"></span>
+      <span class="login-blob b5"></span>
+      <img class="login-visual-logo" src="icons/icon-192.png" alt="" width="128" height="128">
+      <div class="login-visual-marca">Llamita</div>
+    </div>
+    <div class="gate-box login-form">
+      <img class="gate-marca login-marca-tel" src="icons/icon-192.png" alt="" width="80" height="80">
+      <div class="gate-logo login-logo-tel">Llamita</div>
+      <h1 class="login-h1">Bienvenido</h1>
+      <p class="login-sub">Ingresá a tu cuenta para continuar</p>
+      <div class="gate-err" id="login-err"></div>
+      <div class="login-campo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20v-1.6a4 4 0 0 0-4-4h-2a4 4 0 0 0-4 4V20"></path><circle cx="11" cy="7" r="3.4"></circle></svg>
+        <input type="email" id="login-email" placeholder="Usuario o correo" autocomplete="username">
+      </div>
+      <div class="login-campo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="14" height="9.5" rx="2.2"></rect><path d="M7.5 10.5V7a4 4 0 0 1 8 0v3.5"></path></svg>
+        <input type="password" id="login-pass" placeholder="Contraseña" autocomplete="current-password">
+        <button type="button" class="login-ver" id="login-ver" aria-label="Mostrar la contraseña" title="Mostrar la contraseña">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        </button>
+      </div>
+      <button class="login-cta" id="login-btn"><span>Ingresar</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg>
+      </button>
+      <div class="login-fila">
+        <label class="login-check">
+          <input type="checkbox" id="login-recordar" checked>
+          <span>Mantener sesión iniciada</span>
+        </label>
+        <button type="button" class="login-olvide" id="login-olvide">¿Olvidaste tu contraseña?</button>
+      </div>
+      <div class="gate-foot">¿Sin cuenta? Pídesela al administrador</div>
+    </div>
   </div>
 </div>
 
@@ -4369,6 +4483,50 @@ function onLogin(user){
 $('login-btn').addEventListener('click',doLogin);
 $('login-pass').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
 $('login-email').addEventListener('keydown',e=>{ if(e.key==='Enter') $('login-pass').focus(); });
+
+/* MOSTRAR LA CONTRASEÑA. Un ojo que alterna `type`, nada más — el mismo
+   patrón que cualquier formulario, sin guardar ni recordar nada. */
+$('login-ver').addEventListener('click', () => {
+  const c = $('login-pass'), b = $('login-ver');
+  const verla = c.type === 'password';
+  c.type = verla ? 'text' : 'password';
+  b.classList.toggle('on', verla);
+  b.title = verla ? 'Ocultar la contraseña' : 'Mostrar la contraseña';
+});
+
+/* "MANTENER SESIÓN INICIADA". Supabase ya guarda la sesión en este aparato
+   apenas alguien entra — es lo correcto para el mesón, donde nadie quiere
+   loguearse cada rato. Desmarcar la casilla es para el caso contrario: un
+   computador que no es solo de una persona. No hace falta tocar cómo guarda
+   la sesión Supabase para lograrlo — alcanza con cerrarla sola al cerrar la
+   pestaña, que es exactamente lo que "no la mantengas" significa. */
+window.addEventListener('beforeunload', () => {
+  const cb = $('login-recordar');
+  if(cb && !cb.checked && USER) { try{ sb.auth.signOut(); }catch{} }
+});
+
+/* "¿OLVIDASTE TU CONTRASEÑA?" — de verdad, con lo que Supabase ya trae.
+   No inventa una pantalla nueva: le pide a Supabase que mande el correo de
+   recuperación. El mensaje es el MISMO exista o no esa cuenta — decir
+   "ese correo no existe" es un regalo para quien está probando contraseñas
+   ajenas, y acá ni siquiera hay margen: es la puerta de un sistema que
+   maneja el inventario de un café. */
+$('login-olvide').addEventListener('click', async () => {
+  const email = $('login-email').value.trim();
+  const err = $('login-err');
+  if(!email){
+    err.textContent = 'Escribí tu correo arriba primero.';
+    err.style.display = 'block';
+    $('login-email').focus();
+    return;
+  }
+  err.style.display = 'none';
+  const b = $('login-olvide'); b.disabled = true;
+  try { await sb.auth.resetPasswordForEmail(email); }
+  catch(e){ console.error(e); }
+  finally { b.disabled = false; }
+  aviso('Si ese correo tiene cuenta, le va a llegar un enlace para cambiar la contraseña.', 6000);
+});
 
 async function cerrarSesion(){
   cerrarMenu();

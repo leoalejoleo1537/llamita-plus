@@ -8,6 +8,68 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-09-08** — **Vuelve el logo original, y el login se rehace sobre la
+  maqueta de Jhon.** Dos pedidos separados que llegaron juntos.
+
+  **El logo.** El mosaico azul y rojo —el que Llamita Stock usa hace meses—
+  volvió a reemplazar al círculo de hojas verdes que esta copia había estrenado
+  para distinguirse en el teléfono. Es una decisión de Jhon, y vale decir la
+  tensión en voz alta: el cambio a verde se hizo **por esa misma razón**
+  —poder diferenciar Llamita Plus de Llamita Stock de un vistazo—, y este
+  commit la deshace a propósito. **No se generó de nuevo: se restauró el
+  archivo tal cual estaba** en el commit `26b46c9`, de antes de que existiera
+  el verde — así no hay una segunda versión del mismo logo dando vueltas.
+
+  **El nombre "Llamita", más fino.** Pedido explícito: *"algo más elegante y
+  fino, no grueso"*. Pasó de un sans-serif a peso 800 a una **serif del
+  sistema a peso 400** (Georgia y su respaldo de siempre) — sin sumar una
+  dependencia externa, porque esta app no le pide nada a una red que puede no
+  estar, ni en el mesón ni en ningún lado.
+
+  **La pantalla de login, rehecha sobre la maqueta que trajo Jhon**
+  ("1b · propuesta nueva · escritorio"). De 900px para arriba aparece el panel
+  partido: a la izquierda el logo grande sobre formas suaves de la propia
+  paleta (nunca un color nuevo — la maqueta traía un azul que no es de la
+  casa, y se tradujo a navy/naranja); a la derecha "Bienvenido" y el
+  formulario, con íconos dentro de cada campo. **En el teléfono se quedó la
+  tarjeta simple de siempre**, apenas enriquecida con los mismos íconos — el
+  panel decorativo no cabe en un riel de 66px y no aporta nada ahí.
+
+  **Tres piezas de la maqueta que no se dejaron como dibujo:**
+  1. **Mostrar la contraseña** — el ojo de siempre, alterna `type` y nada más.
+  2. **"¿Olvidaste tu contraseña?"** llama de verdad a
+     `sb.auth.resetPasswordForEmail()`. Sin correo escrito, pide que se
+     escriba antes de llamar a nadie. Y el mensaje **es el mismo exista o no
+     esa cuenta** — decir "ese correo no existe" es un regalo para quien está
+     probando contraseñas ajenas, en la puerta de un sistema que maneja el
+     inventario de un café.
+  3. **"Mantener sesión iniciada"** — Supabase ya guarda la sesión en el
+     aparato apenas alguien entra, que es lo correcto para el mesón. Destildar
+     la casilla no reconfigura cómo Supabase guarda nada: alcanza con cerrar
+     la sesión sola al cerrar la pestaña, que es lo que la frase significa
+     para un computador que no es solo de una persona.
+
+  ⚠️ **Un detalle de método al escribir la prueba:** el primer intento de
+  comprobar "es el logo viejo y no el verde" leía el color de un píxel
+  dibujándolo en un `<canvas>` del navegador — y bajo `file://` Chromium marca
+  cualquier imagen como *tainted* y no deja leer el canvas, sin importar que
+  sea el mismo origen. Se resolvió preguntándole al archivo directo con
+  Python/PIL, afuera del navegador, en vez de pelear con esa restricción.
+
+  Y un segundo: la prueba de "mantener sesión" primero fingía una sesión
+  activa escribiendo `window.USER` desde afuera — y no servía de nada, porque
+  `USER` es una variable de módulo del propio guion (`let USER` a nivel de
+  script), no una propiedad de `window`; asignarla desde otro contexto no
+  toca la que lee el manejador de `beforeunload`. Se cambió a un login de
+  verdad contra el simulacro, que es la única forma honesta de dejar esa
+  variable en el estado real.
+
+  Prueba nueva: `pruebas/login-screen.mjs`, **22 casos**, comprobados en las
+  dos direcciones (el ojo y el cierre por destildar se rompieron a propósito
+  y las pruebas se pusieron rojas). Comparado contra un `git worktree` de
+  `origin/master`: las cuatro pruebas que no tocaba esta tanda dieron
+  exactamente lo mismo en las dos corridas.
+
 - **2026-09-07** — **Los dos paneles de la izquierda se hicieron uno.** Jhon:
   *"actualmente para la versión de pc hay 2 paneles en la parte izquierda, uno
   que se despliega con un botón y otro que está fijo, esto que es a todas luces
