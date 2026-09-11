@@ -69,6 +69,69 @@ Lama estén en verde, y **comparar la batería contra una línea base** sacada d
 `origin/master` con `git worktree`. Decir "no toqué Stock" es una intención;
 comparar dos corridas es un dato.
 
+### LA DIRECCIÓN "TERRACOTA CÁLIDA" — 2026-09-11
+
+> Jhon trajo una maqueta armada con Claude Diseño ("Llamita Stock UI") y pidió
+> textual: *"arreglar el tema visual en lotes grandes de mejora... prefiero
+> que implementemos este cambio y luego vayamos corrigiendo"*. Este es el
+> primer lote.
+
+**Qué se hizo.** Se retiñó Mesas + cobro entero —plano, panel, carta, ventana
+de cobro— a la paleta terracota/crema de la maqueta, con Manrope como
+tipografía. **Cero líneas tocadas fuera de `#view-lama`**: casi todo el CSS de
+Lama ya vivía de las mismas variables que usa Inventario (`--orange`,
+`--card`, `--bg`...), así que redefinirlas dentro de `#view-lama` retiñó todo
+sin reescribir una regla por botón, y como esas variables solo cascaden a los
+descendientes de ese div, Stock sigue con el naranja Fudo de siempre — nada
+tocó el `:root` global (§2 de `CLAUDE.md`).
+
+**Lo que cambió de verdad, no solo de color:**
+- **Las mesas ocupada/cobrando dejaron de ser un relleno sólido y pasan a
+  tinte**, como "libre" ya era — reversa a propósito la regla vieja de
+  `pruebas/lama-mesas.mjs` ("las mesas son sólidas"). La prueba se actualizó
+  en el mismo commit, con el porqué escrito ahí mismo: no es un descuido, es
+  la maqueta pidiendo lo contrario de lo que se había decidido en julio.
+- **La mesa seleccionada pasa a color pleno** (antes: halo nada más) — es la
+  única que lo lleva, así que mientras se mira su panel el color dice "estás
+  viendo esta", no el estado.
+- **La cabecera del panel dejó de ser un banner sólido** (rojo/verde/azul con
+  letras blancas) y pasa a la misma superficie tenue de las mesas. Es la
+  crítica más repetida de la maqueta: *"cuatro fondos apilados... todo
+  compite"*.
+- **La mesa dice tiempo y monto, no solo el número.** Nuevo:
+  `lamaCargarTotales()` trae de una sola vez cuánto lleva cada cuenta viva
+  (sumando `cuenta_items`, sin lo anulado) para que el plano pueda decir
+  "42 MIN · $12.090" sin tener que abrir la mesa. Antes `LAMA_ITEMS` solo
+  traía los de la cuenta seleccionada — no alcanzaba para esto. Se refresca
+  con el mismo aviso en vivo de `cuenta_items` que ya existía.
+- **Las píldoras de "más pedidos" y la calculadora de vuelto ya existían** —
+  la maqueta las mostraba como si fueran nuevas, pero es solo el reskin.
+
+**Lo que la maqueta pedía y NO se hizo, y por qué:**
+- **La franja de métricas del turno** (ventas, ticket promedio, en cocina,
+  stock bajo) — pide agregaciones nuevas que no existían, y la propia
+  dirección "1b" de la maqueta ya la sacaba. Queda para cuando alguien la
+  pida.
+- **El cobro por toque largo en la mesa** (hoja que sube sin abrir el panel) y
+  **la pantalla de efectivo a pantalla completa con numpad** — son caminos
+  NUEVOS, no un reskin de los que existen. El cobro actual (multi-pago,
+  descuento, parcial por producto) se re-pintó con la paleta nueva tal como
+  está, sin recortarle nada.
+- **"Dividir la cuenta en partes iguales entre N personas"** — **esto es una
+  pregunta para Jhon, no una decisión tomada.** El atlas (arriba, bloque D2)
+  ya había decidido *"solo por producto... un abono en plata sin decir qué
+  cubre no se puede desarmar en el arqueo"*, y por eso se construyó el pago
+  parcial por producto (F1). La maqueta muestra lo contrario. Puede que Jhon
+  haya cambiado de opinión al armarla, o puede que sea una idea de la sesión
+  de diseño que nunca se contrastó con esa regla — no se sabe cuál de las dos
+  sin preguntar, así que no se construyó ninguna versión. Queda en la bandeja
+  de abajo.
+
+**Cómo se comprobó que no se rompió nada:** la batería completa de Lama en
+verde antes y después (misma cantidad de casos + los que se sumaron), y tres
+assertions de color en `pruebas/lama-mesas.mjs` que sí cambiaron de valor a
+propósito, con el porqué escrito en el propio archivo de prueba.
+
 ### ✅ C8 · LOS TRES SÍMBOLOS DEL TELÉFONO — 2026-09-02 · **la F1 queda cerrada**
 
 En el teléfono, `%` · impresora · lápiz bajan **debajo del TOTAL**, donde llega
@@ -1760,3 +1823,4 @@ poder crearlas ella:
 | **Aprobar la maqueta del Arqueo de caja**. ✅ La urgente ya está contestada (una caja por local); quedan dos que **no bloquean**: el arqueo ciego y quién abre y cierra | [`docs/propuesta-lama-arqueo.html`](propuesta-lama-arqueo.html) · resumidas en la **F6** de arriba | **F6 entero** |
 | **Una visita al local** para instalar el puente de impresión | §2.3 de `CLAUDE.md` | **F5**, y con ella el detalle del ticket que dejó a F3 en 5 de 6 |
 | **Decidir sobre la API de Fudo** — vos preguntaste cuánto ayudaría. La respuesta está escrita, con un corte: **leer es barato y seguro; escribir tocaría el POS real del café** | [`docs/fudo-api-cuanto-sirve.md`](fudo-api-cuanto-sirve.md) | la **Fase 4** (11 Edge Functions ya escritas y apagadas) y el descuadre del conteo nocturno |
+| **¿Dividir la cuenta en partes iguales entre N personas, además del pago parcial por producto que ya existe?** La maqueta de terracota (2026-09-11) muestra "Entre 4 personas · $3.325 cada uno", pero el atlas ya había decidido lo contrario en su momento: *"solo por producto... un abono en plata sin decir qué cubre no se puede desarmar en el arqueo"* — y por eso existe F1 (pago parcial por producto). No se sabe si cambiaste de opinión al armar la maqueta o si es una idea de esa sesión que nunca se contrastó con la regla vieja, así que no se construyó ninguna versión | sección "LA DIRECCIÓN TERRACOTA CÁLIDA" de arriba | una función nueva de cobro, si decís que sí |

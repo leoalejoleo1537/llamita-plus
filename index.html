@@ -8,6 +8,13 @@
 <meta name="theme-color" content="#0F1E31">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
+<!-- Manrope: SOLO la usa Llamita Lama (§view-lama), para la dirección "terracota
+     cálida" que trajo Jhon. El resto de la app se queda con la tipografía del
+     sistema — cargar una fuente ajena a un sitio que casi no la usa no se
+     justifica; que Lama sí la use, sí. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Llamita">
@@ -821,7 +828,51 @@
      porque son listas que se leen; acá el plano y la cuenta compiten por el
      espacio, y apilarlas al centro deja media pantalla en blanco con el panel
      apretado. Es lo único que `view-lama` le cambia a `.wrap`. */
-  #view-lama{max-width:none;padding-left:18px;padding-right:18px}
+  /* ══════════════════════════════════════════════════════════════
+     DIRECCIÓN "TERRACOTA CÁLIDA" — 2026-09-11
+     ══════════════════════════════════════════════════════════════
+     Sale de la maqueta que trajo Jhon (Claude Diseño, "Llamita Stock UI").
+     Pedido textual: "arreglar el tema visual en lotes grandes de mejora...
+     implementemos este cambio y luego vayamos corrigiendo".
+
+     CÓMO SE HIZO SIN TOCAR STOCK: casi todo el CSS de acá abajo ya vivía de
+     `var(--orange)`, `var(--card)`, `var(--bg)`, etc. — las mismas variables
+     que usa Inventario. Redefinirlas ACÁ, adentro de `#view-lama`, retiñe
+     Mesas/cobro entero sin escribir una regla nueva por cada botón, y como
+     las variables solo cascaden a los descendientes de este div, Inventario,
+     Recetas y Ajustes siguen exactamente con el naranja Fudo de siempre —
+     ninguna toca el `:root` global (§2 de CLAUDE.md).
+
+     LO QUE SÍ SE REESCRIBIÓ A MANO, y por qué:
+     - `.lama-mesa.ocupada` dejó de ser un relleno SÓLIDO y pasa a tinte, como
+       "libre" ya era — es la crítica de la maqueta: "la mesa solo dice libre
+       u ocupada... cuatro fondos apilados... todo compite". Reversa a
+       propósito la regla de `pruebas/lama-mesas.mjs` de julio ("las mesas son
+       sólidas"): la prueba se actualizó en este mismo commit, no se dejó en
+       rojo (§0.5 de CLAUDE.md).
+     - El tinte de "ocupada" NO usa `--red-fg`/`--red-bg`: esas variables
+       siguen significando "peligro/borrar" en TRES lugares más de esta misma
+       pantalla (el basurero de la carta, "Falta" del vuelto, anular un ítem).
+       Repintarlas habría vuelto ámbar-terracota el botón de anular, que tiene
+       que seguir gritando rojo. Por eso hay un par nuevo, `--mesa-ocu-*`,
+       solo para el tinte de la mesa ocupada y su cabecera.
+     - `--azul-*` (el color de "cobrando") sí se reutiliza tal cual: dentro de
+       Lama solo lo usan la mesa cobrando, su cabecera y el botón de impresora
+       encendida — las tres son la MISMA idea. Deja de ser azul y pasa a
+       ámbar cálido; el nombre de la variable no cambió porque renombrarla
+       tocaba tres reglas más sin ganar nada. */
+  #view-lama{max-width:none;padding-left:18px;padding-right:18px;
+    font-family:'Manrope',-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+    --bg:#F6F3EE;
+    --text:#524A44; --muted:#948A82;
+    --border:#E7DFD5;
+    --linea:rgba(82,74,68,.10);
+    --orange:#B0542C; --orange-dark:#8F4425;
+    --navy:#524A44;
+    --azul-bg:#FAF1DD; --azul-fg:#9C6209;
+    --mesa-ocu-bg:#FBEEE6; --mesa-ocu-fg:#8F4425;
+    --sombra:0 2px 5px rgba(82,74,68,.06), 0 14px 30px -20px rgba(82,74,68,.3);
+  }
 
   /* EL PLANO Y EL PANEL.
      · Sin mesa elegida: el plano solo, a todo lo ancho.
@@ -1053,34 +1104,47 @@
   .lama-tam .pie button{border:none;background:transparent;color:var(--orange);
     font:inherit;font-size:12.5px;font-weight:800;cursor:pointer;padding:0}
 
-  /* LOS TRES COLORES. Medidos de las capturas de Fudo el 31 de agosto:
-     libre #D2F1C0 con el numero en #3D741C, ocupada #EF4444 solida con el
-     numero en blanco. La LOGICA es lo que se copia, no los valores: lo libre
-     NO grita —es el estado normal— y lo ocupado si, porque es lo que pide
-     atencion. Los valores salen de la paleta de Stock, sin inventar ninguno.
-     El primer intento pinto tambien el verde solido y quedo pesado y ajeno.
-     El borde es lo que faltaba: sin el, un relleno palido sobre el fondo gris
-     de la app no se lee como un cuadro. */
+  /* LOS TRES COLORES — REESCRITO 2026-09-11, misma lógica, otro tratamiento.
+     Hasta hoy "ocupada" y "cobrando" eran un relleno SÓLIDO con el número en
+     blanco, y "libre" el único tinte pálido — la lógica de Fudo, medida el 31
+     de julio. La maqueta de Jhon pide lo mismo que ya regía para "libre" pero
+     para los TRES: "las mesas mantienen fondo lleno, pero en versión tinte:
+     misma lectura de un vistazo, sin grito". El borde sigue sin hacer falta
+     por la misma razón de siempre: el tinte se lee como cuadro por la sombra,
+     no por un filo. */
   .lama-mesa{aspect-ratio:auto;padding:12px 0;border:none;border-radius:14px;
-    cursor:pointer;font:inherit;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font:inherit;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:2px;min-width:0;
     box-shadow:var(--sombra);
     transition:transform .12s ease, box-shadow .22s ease, opacity .18s ease}
   .lama-mesa:active{transform:scale(.95)}
   .lama-mesa .n{font-size:17px;font-weight:800;line-height:1}
+  /* EL DETALLE — "número, tiempo y monto. Tres datos, nada más" (la maqueta).
+     Solo aparece en mesas no-libres: una mesa libre no tiene tiempo ni monto
+     que mostrar, y escribir "—" ahí sería ruido de vuelta. */
+  .lama-mesa .d{font-size:10px;font-weight:700;opacity:.82;line-height:1.2;
+    font-variant-numeric:tabular-nums;white-space:nowrap;max-width:100%;
+    overflow:hidden;text-overflow:ellipsis}
   @media (min-width:720px){
     .lama-mesa{aspect-ratio:1;padding:0;border-radius:var(--r-sec)}
     .lama-mesa .n{font-size:22px}
+    .lama-mesa .d{font-size:11.5px}
   }
   .lama-mesa.libre{background:var(--green-bg);color:var(--green-fg)}
-  .lama-mesa.ocupada{background:var(--red-fg);color:#fff}
-  .lama-mesa.cobrando{background:var(--azul-fg);color:#fff}
-  /* La mesa elegida se ENCIENDE, no se enmarca. Un halo naranja difuso que la
+  .lama-mesa.ocupada{background:var(--mesa-ocu-bg);color:var(--mesa-ocu-fg)}
+  .lama-mesa.cobrando{background:var(--azul-bg);color:var(--azul-fg)}
+  /* La mesa elegida se ENCIENDE, no se enmarca. Un halo terracota difuso que la
      levanta del plano, sin contorno duro — el anillo grueso anterior se leia
-     como un ovalo con reborde, que es justo lo que la casa no usa. */
-  .lama-mesa.sel{box-shadow:0 0 0 5px rgba(220,68,5,.16), 0 8px 24px -6px rgba(220,68,5,.7)}
+     como un ovalo con reborde, que es justo lo que la casa no usa. Y ahora,
+     además del halo, se llena entera de color pleno: es la ÚNICA mesa que lo
+     lleva ("D · color pleno... la reservo para la mesa seleccionada", dice la
+     maqueta) — mientras se mira su panel al lado, el color deja de avisar
+     estado y pasa a avisar "estás mirando esta". */
+  .lama-mesa.sel{background:var(--orange);color:#fff;
+    box-shadow:0 0 0 5px rgba(176,84,44,.16), 0 8px 24px -6px rgba(176,84,44,.7)}
   /* MODO MOVER: lo que la base va a rechazar igual se apaga y no se puede tocar. */
   .lama-mesa.apagada{opacity:.3}
-  .lama-mesa.viva{box-shadow:0 0 0 5px rgba(220,68,5,.16), 0 8px 24px -6px rgba(220,68,5,.7)}
+  .lama-mesa.viva{box-shadow:0 0 0 5px rgba(176,84,44,.16), 0 8px 24px -6px rgba(176,84,44,.7)}
   .lama-mesa.origen{opacity:.55;box-shadow:var(--sombra)}
 
   /* ==========  F3 · LA CONFIGURACIÓN DE LAMA  ==========
@@ -1191,20 +1255,28 @@
      son tarjetas sueltas sobre el fondo, acá van dentro de un contenedor. */
   .lama-caja{background:var(--card);border:none;border-radius:var(--r-card);
     box-shadow:var(--sombra);overflow:visible;position:relative}
-  .lama-cab{background:var(--red-fg);color:#fff;padding:13px 15px;display:flex;align-items:center;
-    gap:8px;border-radius:var(--r-card) var(--r-card) 0 0;position:relative}
-  .lama-cab.libre{background:var(--green-fg)}
-  .lama-cab.cobrando{background:var(--azul-fg)}
+  /* LA CABECERA DEL PANEL — REESCRITA 2026-09-11: era un banner SÓLIDO
+     (rojo/verde/azul con letras blancas). La crítica de la maqueta lo nombra
+     de punta a punta: "cuatro fondos apilados en el panel: rojo, blanco,
+     crema, gris". Pasa a la misma superficie tenue que ya llevan las mesas
+     —mismo par de variables—, y "Mesa N" queda en tinta neutra siempre: lo
+     único que cambia de color con el estado es la palabra de abajo. */
+  .lama-cab{background:var(--mesa-ocu-bg);color:var(--mesa-ocu-fg);padding:13px 15px;
+    display:flex;align-items:center;gap:8px;
+    border-radius:var(--r-card) var(--r-card) 0 0;position:relative}
+  .lama-cab.libre{background:var(--green-bg);color:var(--green-fg)}
+  .lama-cab.cobrando{background:var(--azul-bg);color:var(--azul-fg)}
   .lama-cab .tit{flex:1;min-width:0}
-  .lama-cab .tit b{display:block;font-size:17px;line-height:1.15}
-  .lama-cab .tit span{display:block;font-size:11.5px;font-weight:700;opacity:.82;margin-top:1px}
-  .lama-cab button{border:none;background:rgba(255,255,255,.18);color:#fff;font:inherit;
+  .lama-cab .tit b{display:block;font-size:17px;line-height:1.15;color:var(--text)}
+  .lama-cab .tit span{display:block;font-size:11.5px;font-weight:700;opacity:.9;margin-top:1px}
+  .lama-cab button{border:none;background:rgba(0,0,0,.055);color:var(--text);font:inherit;
     font-size:14px;font-weight:700;padding:7px 11px;border-radius:9px;cursor:pointer;flex:0 0 auto}
   .lama-cab button:active{transform:scale(.94)}
   .lama-cab button[disabled]{opacity:.45;cursor:default}
-  /* La impresora encendida: la mesa está azul y este botón la devuelve. Que se
-     vea apretado es lo que dice que hay algo que deshacer. */
-  .lama-cab button.on{background:#fff;color:var(--azul-fg)}
+  /* La impresora encendida: la mesa está en cobrando y este botón la devuelve.
+     Que se vea apretado, en el mismo ámbar de "cobrando", es lo que dice que
+     hay algo que deshacer. */
+  .lama-cab button.on{background:var(--azul-fg);color:#fff}
   /* ==========  EL BUSCADOR DENTRO DEL PANEL  ==========
      Antes había que abrir una pantalla entera para agregar un producto. El
      garzón y quien está en caja toman la orden mientras el cliente habla, y
@@ -1322,7 +1394,7 @@
      con "Cerrar mesa", que es lo que de verdad se aprieta. */
   .lama-trio{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;
     position:relative}
-  .lama-trio button{border:none;background:#FFF1EC;color:var(--orange);font:inherit;
+  .lama-trio button{border:none;background:var(--mesa-ocu-bg);color:var(--orange);font:inherit;
     font-size:17px;font-weight:800;padding:12px 0;border-radius:13px;cursor:pointer;
     display:flex;align-items:center;justify-content:center;transition:transform .12s ease}
   .lama-trio button:active{transform:scale(.94)}
@@ -1353,7 +1425,7 @@
   .lama-cand:active{transform:scale(.985)}
   .lama-cand .tk{width:24px;height:24px;border-radius:50%;background:var(--bg);flex:0 0 auto;
     display:flex;align-items:center;justify-content:center;font-weight:800;color:transparent;font-size:13px}
-  .lama-cand.on{background:#FFF7F3;box-shadow:var(--sombra),0 0 0 4px rgba(220,68,5,.14)}
+  .lama-cand.on{background:var(--mesa-ocu-bg);box-shadow:var(--sombra),0 0 0 4px rgba(176,84,44,.14)}
   .lama-cand.on .tk{background:var(--orange);color:#fff}
   .lama-cand .tx{flex:1;min-width:0}
   .lama-cand .p1{font-weight:700;font-size:14.5px;display:block;white-space:nowrap;
@@ -1373,7 +1445,7 @@
   .lama-fab{position:fixed;right:18px;bottom:20px;z-index:40;width:58px;height:58px;
     border:none;border-radius:50%;background:var(--orange);color:#fff;font-size:32px;
     font-weight:400;line-height:1;cursor:pointer;display:flex;align-items:center;
-    justify-content:center;box-shadow:0 6px 20px rgba(220,68,5,.45);
+    justify-content:center;box-shadow:0 6px 20px rgba(176,84,44,.45);
     transition:transform .14s ease}
   .lama-fab:active{transform:scale(.9)}
   .lama-fab:focus-visible{outline:3px solid var(--navy);outline-offset:3px}
@@ -1415,7 +1487,7 @@
     color:var(--orange);font-size:21px;font-weight:600;line-height:1;
     display:flex;align-items:center;justify-content:center}
   /* Ya agregado: la fila lleva cuántos van, para no tener que salir a contar. */
-  .lama-prod.puesto{background:#FFF7F3;box-shadow:var(--sombra),0 0 0 4px rgba(220,68,5,.14)}
+  .lama-prod.puesto{background:var(--mesa-ocu-bg);box-shadow:var(--sombra),0 0 0 4px rgba(176,84,44,.14)}
   .lama-prod.puesto .mas{background:var(--orange);color:#fff;font-size:14px;font-weight:800}
   .lama-carta-pie{flex:0 0 auto;padding:12px 14px calc(12px + env(safe-area-inset-bottom));
     background:var(--card);box-shadow:0 -6px 20px -8px rgba(20,40,70,.28);
@@ -1470,7 +1542,7 @@
      que tocar el mismo producto otra vez y confiar. Ahora la fila muestra
      − n + como en Fudo, y se puede subir y bajar sin salir de la lista. */
   .lama-prod .paso{flex:0 0 auto;display:flex;align-items:center;gap:2px;
-    border-radius:999px;padding:2px;background:var(--bg);box-shadow:0 0 0 3px rgba(220,68,5,.13)}
+    border-radius:999px;padding:2px;background:var(--bg);box-shadow:0 0 0 3px rgba(176,84,44,.13)}
   .lama-prod .paso span{width:28px;height:28px;border-radius:50%;display:flex;
     align-items:center;justify-content:center;font-size:17px;font-weight:800;color:var(--orange)}
   /* EN 1, EL MENOS ES UN BASURERO: lo que sigue no es restar, es sacarlo del
@@ -6168,6 +6240,14 @@ let BODEGA_PROD = {};
 let LAMA_MESAS   = [];      // el plano de la sede
 let LAMA_CUENTAS = [];      // las cuentas vivas, por mesa_id
 let LAMA_ITEMS   = [];      // los items de la cuenta abierta
+/* EL MONTO EN EL PLANO — 2026-09-11. La maqueta pide que la mesa diga tiempo
+   Y monto sin abrirla ("tres datos, nada más"), y `LAMA_ITEMS` solo trae los
+   de la cuenta SELECCIONADA — nunca alcanzó para pintar las demás. Este mapa
+   guarda cuenta_id → {monto, items} de TODAS las cuentas vivas, con una
+   consulta liviana aparte (ver `lamaCargarTotales`). No reemplaza a
+   LAMA_ITEMS: el panel de la mesa abierta sigue leyendo de ahí, línea por
+   línea, para el − n + y el resto. */
+let LAMA_TOTALES = new Map();
 let LAMA_SALON   = null;    // el salón elegido (el modelo viejo, sin páginas)
 /* EL PLANO CON PÁGINAS Y SECCIONES (maqueta aprobada el 2026-09-05).
    `lama_areas` guarda los dos niveles con una sola forma: sin padre es una
@@ -6323,10 +6403,43 @@ async function lamaCargar(forzar){
       await lamaTop();
     }
     await lamaCargarItems(true);
+    await lamaCargarTotales();
     lamaPintar();
   })();
   try { await LAMA_CARGANDO; } finally { LAMA_CARGANDO = null; }
 }
+
+/* EL MONTO DE CADA MESA, SIN ABRIRLAS. Una consulta aparte y liviana —solo
+   cuenta_id, cantidad, precio— de TODOS los items vivos de la sede, para que
+   el plano pueda decir "3 ítems · $12.090" en una mesa que nadie tocó. Lo
+   anulado no suma, igual que en el panel (`lamaPintarPanel`): si los dos
+   números no coincidieran, la pantalla mentiría en una de las dos partes. */
+async function lamaCargarTotales(){
+  const vivas = LAMA_CUENTAS.map(c => c.id);
+  if(!vivas.length){ LAMA_TOTALES = new Map(); return; }
+  const r = await sb.from('cuenta_items').select('cuenta_id,cantidad,precio,anulado_at')
+    .in('cuenta_id', vivas).is('anulado_at', null).limit(3000);
+  const mapa = new Map();
+  for(const it of (r.data || [])){
+    const e = mapa.get(it.cuenta_id) || {monto:0, items:0};
+    e.monto += (+it.cantidad || 0) * (+it.precio || 0);
+    e.items += 1;
+    mapa.set(it.cuenta_id, e);
+  }
+  LAMA_TOTALES = mapa;
+}
+
+/* CUÁNTO LLEVA ABIERTA, en minutos enteros. Mismo cálculo que `haceCuanto`,
+   pero sin la palabra "hace": acá va al lado de un monto, en una píldora
+   chica, y "hace 42 min" no cabe — "42 MIN" sí. */
+const lamaMinAbierta = c => {
+  /* Defensivo a propósito: en la base `created_at` siempre existe (lo pone
+     Postgres solo), pero una cuenta armada a mano —como las de las pruebas,
+     de antes de que este dato importara— puede no traerlo. Mostrar "0 MIN"
+     es preferible a que la pantalla completa reviente por un NaN. */
+  const t = new Date(c.created_at).getTime();
+  return Number.isFinite(t) ? Math.max(0, Math.round((Date.now() - t) / 60000)) : 0;
+};
 
 /* El ⟳ de la barra sí tiene que volver a traer la carta: es el momento en que
    alguien dice "cambió el catálogo en Fudo". */
@@ -6499,9 +6612,16 @@ function lamaPintarPlano(){
     return;
   }
 
-  /* El cuadrito dice el NÚMERO y nada más. Llegó a mostrar debajo el correo
-     de quien abrió la mesa y era ruido: no ayuda a decidir y tapa lo único
-     que se lee de un vistazo, que es el color. */
+  /* EL CUADRITO — REESCRITO 2026-09-11. Decía el NÚMERO y nada más: llegó a
+     mostrar debajo el correo de quien abrió la mesa y era ruido, porque no
+     ayudaba a decidir y tapaba lo único que se leía de un vistazo, el color.
+     La maqueta de Jhon agrega DOS datos más, y la razón por la que no es el
+     mismo error: "la mesa solo dice libre u ocupada; el mesero necesita
+     tiempo y monto" — ahí el color solo decía SI hay que mirar la mesa, no
+     CUÁNTO apura mirarla. Sigue el límite de siempre, nada de nombres ni
+     correos: "número, tiempo y monto, tres datos y nada más". Por eso solo
+     aparece en las no-libres — una mesa libre no tiene tiempo ni monto que
+     decir. */
   const moviendo = LAMA_MODO === 'mesa' || LAMA_MODO === 'items';
   const dibujar = m => {
     const c = lamaCuentaDe(m.id);
@@ -6520,17 +6640,26 @@ function lamaPintarPlano(){
     }
     const forma = m.forma && m.forma !== 'cuadrada' ? ' f-' + m.forma : '';
     const tam   = m.tam   && m.tam   !== 'normal'   ? ' t-' + m.tam   : '';
+    /* Mientras se está moviendo algo no se muestra: es un dato que confunde
+       más de lo que ayuda cuando lo que importa es a dónde puede ir. */
+    let detalle = '';
+    if(c && !moviendo){
+      const min = lamaMinAbierta(c) + ' MIN';
+      const t = LAMA_TOTALES.get(c.id);
+      detalle = `<span class="d">${t && t.items ? min + ' · ' + plata(t.monto) : min}</span>`;
+    }
     return `<button type="button" class="lama-mesa ${est}${extra}${forma}${tam}" data-lamamesa="${m.id}"${
       tocable ? '' : ' disabled'} aria-label="Mesa ${m.numero}, ${est}">
-      <span class="n">${m.numero}</span>
+      <span class="n">${m.numero}</span>${detalle}
     </button>`;
   };
 
   if(conAreas){
     /* Cada sección es una tarjeta de color suave con sus mesas adentro. Los
        colores son de la paleta de la casa y NO compiten con los de estado:
-       el fondo es tenue y la mesa es sólida, así el rojo de "ocupada" sigue
-       siendo lo único que grita. */
+       el fondo de la sección es tenue y el de la mesa es su propio tinte —
+       más fuerte, y con la mesa seleccionada en color pleno—, así una mesa
+       que hay que mirar sigue destacando sobre el color de su sección. */
     const secs = lamaSecciones(LAMA_PAGINA);
     cont.innerHTML = secs.map(sec => {
       const dentro = mesas.filter(m => m.area_id === sec.id);
@@ -6707,7 +6836,11 @@ function lamaPintarPanel(){
     .reduce((s,i) => s + (+i.cantidad||0) * (+i.precio||0), 0);
   const cobrando = c.estado === 'precuenta';
   const clase  = cobrando ? 'cobrando' : '';
-  const estado = cobrando ? 'Cobrando' : 'Ocupada';
+  /* El tiempo va acá también, no solo en el plano — es el mismo dato que
+     pidió la maqueta ("tiempo y monto"), y quien ya abrió el panel lo sigue
+     necesitando: decide si vale la pena ofrecer descuento por demora, por
+     ejemplo. */
+  const estado = (cobrando ? 'Cobrando' : 'Ocupada') + ' · ' + lamaMinAbierta(c) + ' min';
 
   /* ELEGIR QUÉ SE MUEVE. Reemplaza el cuerpo del panel y no la pantalla
      entera, y la cabecera se queda para no perder de vista en qué mesa se está. */
@@ -16392,7 +16525,15 @@ function subscribeRealtime(){
     .on('postgres_changes',{event:'*',schema:'public',table:'cuentas'},()=>{
       if(vistaActual==='lama') lamaCargar(); })
     .on('postgres_changes',{event:'*',schema:'public',table:'cuenta_items'},()=>{
-      if(vistaActual==='lama') lamaCargarItems().then(lamaPintarPanel); })
+      if(vistaActual==='lama'){
+        lamaCargarItems().then(lamaPintarPanel);
+        /* El monto de CADA mesa vive aparte de LAMA_ITEMS (ver
+           `lamaCargarTotales`), así que un item que cambia en cualquier mesa
+           —no solo la abierta— tiene que volver a sumarse para que el plano
+           no muestre un número viejo. */
+        lamaCargarTotales().then(lamaPintarPlano);
+      }
+    })
     .subscribe(status=>{
       if(status==='SUBSCRIBED'){
         $('liveText').textContent='en vivo'; $('live').classList.remove('off');

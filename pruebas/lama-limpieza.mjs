@@ -369,7 +369,10 @@ await caso('y el halo sigue estando — no se arregló apagándolo', async () =>
   const s = await page.evaluate(()=>{
     const sel=document.querySelector('.lama-mesa.sel');
     return sel ? getComputedStyle(sel).boxShadow : 'NO HAY';});
-  return s.includes('220, 68, 5') || 'el resplandor naranja desapareció: ' + s;
+  /* El color del halo pasó de naranja Fudo a terracota (2026-09-11, la
+     maqueta de Jhon) — sigue siendo `var(--orange)` retinado, así que el
+     halo en sí no se tocó, solo su valor dentro de #view-lama. */
+  return s.includes('176, 84, 44') || 'el resplandor terracota desapareció: ' + s;
 });
 
 /* ================================================================

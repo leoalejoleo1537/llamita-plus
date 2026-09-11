@@ -8,6 +8,41 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-09-11** — **Lama se retiñe a la dirección "terracota cálida"** que
+  trajo Jhon armada con Claude Diseño ("Llamita Stock UI"). Pedido textual:
+  *"arreglar el tema visual en lotes grandes de mejora... implementemos este
+  cambio y luego vayamos corrigiendo"*.
+
+  Casi todo el CSS de Mesas/cobro ya vivía de las mismas variables que usa
+  Inventario (`--orange`, `--card`, `--bg`, `--navy`...). Redefinirlas dentro
+  de `#view-lama` retiñó el plano, el panel, la carta y la ventana de cobro
+  enteros sin reescribir una regla por botón — y como esas variables solo
+  cascaden a los descendientes de ese div, Stock sigue con el naranja Fudo de
+  siempre. Cero líneas tocadas fuera de `#view-lama`/`lama*`/`pruebas/lama-*`
+  (§0.9).
+
+  Dos decisiones viejas se revirtieron a propósito, porque la maqueta pedía
+  lo contrario y quien puede pedirlo es Jhon: las mesas ocupada/cobrando
+  dejaron de ser un relleno sólido y pasan a tinte (como "libre" ya era), y la
+  cabecera del panel dejó de ser un banner de color sólido. Las dos
+  `pruebas/lama-mesas.mjs` que fijaban el comportamiento viejo se actualizaron
+  en el mismo commit, con el porqué escrito ahí.
+
+  Se sumó un dato nuevo: la mesa dice tiempo y monto sin abrirla
+  (`lamaCargarTotales()`, una consulta aparte de `LAMA_ITEMS` que solo traía
+  la cuenta seleccionada).
+
+  Lo que la maqueta mostraba y no se construyó: la franja de métricas del
+  turno (pide agregaciones nuevas), el cobro por toque largo y la pantalla de
+  efectivo a pantalla completa (son caminos nuevos, no un reskin), y dividir
+  la cuenta en partes iguales por persona — esto último **contradice una
+  decisión ya tomada** (el atlas: "solo por producto, un abono en plata sin
+  decir qué cubre no se puede desarmar en el arqueo"), así que quedó anotado
+  en la bandeja de preguntas de `docs/LAMA.md` en vez de construirse a ciegas.
+
+  Detalle completo, con la lista de qué cambió y qué no: `docs/LAMA.md`,
+  sección "LA DIRECCIÓN TERRACOTA CÁLIDA".
+
 - **2026-09-08** — **Vuelve el logo original, y el login se rehace sobre la
   maqueta de Jhon.** Dos pedidos separados que llegaron juntos.
 

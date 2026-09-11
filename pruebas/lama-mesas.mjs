@@ -171,16 +171,23 @@ await caso('el cuadrito NO muestra quién abrió la mesa', async () =>
   !(await page.textContent('[data-lamamesa="101"]')).includes('adriana')
   || 'pinta el correo de quien la abrió, y eso es ruido');
 
-/* Los tres colores son SÓLIDOS y el número va en blanco, como en Fudo. Con
-   los tonos pálidos de la paleta el azul de "cobrando" no se despegaba del
-   fondo de la app: había que adivinar cuál mesa se estaba cobrando. */
-await caso('las mesas son sólidas, no un tono pálido del fondo', async () => {
+/* ⚠️ REVERSA A PROPÓSITO 2026-09-11. Hasta hoy los tres colores eran SÓLIDOS
+   con el número en blanco, como en Fudo — la prueba se llamaba "las mesas son
+   sólidas, no un tono pálido del fondo" y este mismo comentario decía que el
+   azul de "cobrando" no se despegaba del fondo si era pálido.
+
+   La maqueta que trajo Jhon (Claude Diseño, 2026-09-11) pide lo contrario:
+   "las mesas mantienen fondo lleno, pero en versión tinte... sin grito", con
+   el color pleno reservado a la mesa SELECCIONADA (ver el caso del halo, más
+   abajo). No es un olvido de esta prueba: es la decisión vieja, cambiada por
+   la persona que puede cambiarla. */
+await caso('las mesas son un tinte, no un relleno sólido', async () => {
   const c = await page.evaluate(()=>{
     const e = document.querySelector('[data-lamamesa="102"]');   // la que está cobrando
     const s = getComputedStyle(e);
     return {fondo:s.backgroundColor, texto:s.color};
   });
-  return (c.fondo === 'rgb(44, 90, 160)' && c.texto === 'rgb(255, 255, 255)')
+  return (c.fondo === 'rgb(250, 241, 221)' && c.texto === 'rgb(156, 98, 9)')
     || 'quedó '+JSON.stringify(c);
 });
 /* El glosario de colores se sacó: tres cuadritos de colores no necesitan pie
@@ -193,13 +200,12 @@ await caso('la pantalla ocupa todo el ancho', async () => {
   const w = await page.evaluate(()=>getComputedStyle(document.getElementById('view-lama')).maxWidth);
   return w === 'none' || 'sigue acotada a '+w;
 });
-console.log('\nLos colores, con la lógica de Fudo y la paleta de Stock:');
-/* Medido de las capturas de Fudo el 31-08: libre #D2F1C0 con el número en
-   #3D741C, ocupada #EF4444 sólida con blanco. Lo que se copia es la LÓGICA:
-   lo libre no grita —es el estado normal— y lo ocupado sí. Los valores salen
-   de la paleta de Stock. El primer intento pintó el verde también sólido y
-   quedó pesado; el borde es lo que hace que un relleno pálido se lea como un
-   cuadro sobre el fondo gris de la app. */
+console.log('\nLos colores, con la lógica de Fudo y la paleta de la maqueta:');
+/* "Libre" no cambió con la maqueta del 2026-09-11: ya era el único tinte
+   pálido de los tres, que es justo lo que la maqueta pide para los otros dos
+   también (ver el caso de arriba). Sigue siendo lo que se copió de Fudo el
+   31-08 (#D2F1C0/#3D741C de referencia): lo libre no grita —es el estado
+   normal—, y ahora lo ocupado tampoco, pero de un tinte más fuerte. */
 await caso('la mesa LIBRE es pálida, con el número oscuro', async () => {
   const c = await page.evaluate(()=>{
     const s = getComputedStyle(document.querySelector('[data-lamamesa="103"]'));
@@ -225,19 +231,22 @@ await caso('ninguna mesa tiene reborde, y todas tienen sombra', async () => {
   return (!r.malas.length && !r.sinSombra.length)
     || 'con reborde: '+r.malas.join(',')+' · sin sombra: '+r.sinSombra.join(',');
 });
-/* La elegida se ENCIENDE, no se enmarca: un halo difuso, no un anillo duro. */
+/* La elegida se ENCIENDE, no se enmarca: un halo difuso, no un anillo duro.
+   El color del halo es el terracota de la maqueta (2026-09-11), no el
+   naranja Fudo de antes — es `var(--orange)` retinado dentro de #view-lama. */
 await caso('la mesa elegida se marca con un halo, no con un anillo', async () => {
   await page.click('[data-lamamesa="103"]'); await page.waitForTimeout(300);
   const s = await page.evaluate(()=>getComputedStyle(document.querySelector('.lama-mesa.sel')).boxShadow);
-  return (/rgba\(220, 68, 5/.test(s) && /px/.test(s) && !/0px 0px 0px 3px rgb/.test(s))
+  return (/rgba\(176, 84, 44/.test(s) && /px/.test(s) && !/0px 0px 0px 3px rgb/.test(s))
     || 'la marca no es un halo: '+s;
 });
-await caso('la OCUPADA es sólida, con el número en blanco', async () => {
+/* La OCUPADA pasó de sólida a tinte (mismo cambio que "cobrando", arriba). */
+await caso('la OCUPADA es un tinte, con el número en su color', async () => {
   const c = await page.evaluate(()=>{
     const s = getComputedStyle(document.querySelector('[data-lamamesa="101"]'));
     return {f:s.backgroundColor, t:s.color};
   });
-  return (c.f === 'rgb(192, 57, 43)' && c.t === 'rgb(255, 255, 255)') || 'quedó '+JSON.stringify(c);
+  return (c.f === 'rgb(251, 238, 230)' && c.t === 'rgb(143, 68, 37)') || 'quedó '+JSON.stringify(c);
 });
 /* Jhon: "en el teléfono quiero que siempre las mesas estén apiladas a la
    izquierda y a la derecha la información". Sostenerlo siempre evita que la
