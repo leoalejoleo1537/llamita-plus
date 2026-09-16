@@ -1112,7 +1112,7 @@
      misma lectura de un vistazo, sin grito". El borde sigue sin hacer falta
      por la misma razón de siempre: el tinte se lee como cuadro por la sombra,
      no por un filo. */
-  .lama-mesa{aspect-ratio:auto;padding:12px 0;border:none;border-radius:14px;
+  .lama-mesa{position:relative;aspect-ratio:auto;padding:12px 0;border:none;border-radius:14px;
     cursor:pointer;font:inherit;display:flex;flex-direction:column;
     align-items:center;justify-content:center;gap:2px;min-width:0;
     box-shadow:var(--sombra);
@@ -1120,15 +1120,25 @@
   .lama-mesa:active{transform:scale(.95)}
   .lama-mesa .n{font-size:17px;font-weight:800;line-height:1}
   /* EL DETALLE — "número, tiempo y monto. Tres datos, nada más" (la maqueta).
-     Solo aparece en mesas no-libres: una mesa libre no tiene tiempo ni monto
-     que mostrar, y escribir "—" ahí sería ruido de vuelta. */
-  .lama-mesa .d{font-size:10px;font-weight:700;opacity:.82;line-height:1.2;
-    font-variant-numeric:tabular-nums;white-space:nowrap;max-width:100%;
-    overflow:hidden;text-overflow:ellipsis}
+     El texto solo aparece en mesas no-libres —una libre no tiene tiempo ni
+     monto que decir, y un "—" ahí sería ruido de vuelta—, pero el RENGLÓN se
+     reserva siempre (`min-height`), esté vacío o no: es lo que mantiene fija
+     la altura de la mesa sin importar su estado. Ver el porqué en `dibujar()`. */
+  .lama-mesa .d{display:block;min-height:1.2em;font-size:10px;font-weight:700;
+    opacity:.82;line-height:1.2;font-variant-numeric:tabular-nums;
+    white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  /* LA PÍLDORA DEL TIEMPO, en la esquina — más fiel a la maqueta que un simple
+     texto en la línea de abajo. Va `position:absolute`, así que NO cuenta
+     para el alto de la mesa (a diferencia de `.d`): puede aparecer y
+     desaparecer sin mover nada, la garantía que pidió Jhon. */
+  .lama-mesa .t{position:absolute;top:5px;right:6px;font-size:8.5px;font-weight:800;
+    padding:2px 5px;border-radius:999px;background:rgba(0,0,0,.09);
+    line-height:1.3;font-variant-numeric:tabular-nums}
   @media (min-width:720px){
     .lama-mesa{aspect-ratio:1;padding:0;border-radius:var(--r-sec)}
     .lama-mesa .n{font-size:22px}
     .lama-mesa .d{font-size:11.5px}
+    .lama-mesa .t{top:8px;right:8px;font-size:10px;padding:2px 7px}
   }
   .lama-mesa.libre{background:var(--green-bg);color:var(--green-fg)}
   .lama-mesa.ocupada{background:var(--mesa-ocu-bg);color:var(--mesa-ocu-fg)}
@@ -1268,7 +1278,13 @@
   .lama-cab.cobrando{background:var(--azul-bg);color:var(--azul-fg)}
   .lama-cab .tit{flex:1;min-width:0}
   .lama-cab .tit b{display:block;font-size:17px;line-height:1.15;color:var(--text)}
-  .lama-cab .tit span{display:block;font-size:11.5px;font-weight:700;opacity:.9;margin-top:1px}
+  .lama-cab .tit span{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;
+    opacity:.9;margin-top:1px}
+  /* El punto de color — así lo pide la maqueta ("● Ocupada"): la cabecera ya
+     no es un banner sólido (arriba), así que el color del estado necesita
+     algo más que el fondo tenue para seguir leyéndose de un vistazo. */
+  .lama-cab .tit span::before{content:"";width:6px;height:6px;border-radius:50%;
+    background:currentColor;flex:0 0 auto}
   .lama-cab button{border:none;background:rgba(0,0,0,.055);color:var(--text);font:inherit;
     font-size:14px;font-weight:700;padding:7px 11px;border-radius:9px;cursor:pointer;flex:0 0 auto}
   .lama-cab button:active{transform:scale(.94)}
@@ -6640,17 +6656,39 @@ function lamaPintarPlano(){
     }
     const forma = m.forma && m.forma !== 'cuadrada' ? ' f-' + m.forma : '';
     const tam   = m.tam   && m.tam   !== 'normal'   ? ' t-' + m.tam   : '';
-    /* Mientras se está moviendo algo no se muestra: es un dato que confunde
-       más de lo que ayuda cuando lo que importa es a dónde puede ir. */
-    let detalle = '';
+    /* ⚠️ EL ESPACIO DEL DETALLE SE RESERVA SIEMPRE, aunque no diga nada —
+       libre, o mientras se mueve algo. La primera versión solo agregaba el
+       `<span class="d">` cuando había algo que decir, y eso hacía que las
+       mesas de UNA línea (libres) quedaran más BAJAS que las de DOS (ocupada/
+       cobrando): en el teléfono se notaba como una cuadrícula despareja, y al
+       tocar entre mesas de distinto estado la fila entera saltaba de alto.
+       Jhon: "las mesas queden fijas... cuando paso de una mesa a otra estas
+       se mueven cambian de tamaño". Con el `<span>` siempre presente —vacío
+       cuando no hay nada que decir— las DOS líneas de alto están reservadas
+       siempre, así que ninguna mesa es más baja que otra. */
+    let detalle = '', tiempo = '';
     if(c && !moviendo){
       const min = lamaMinAbierta(c) + ' MIN';
       const t = LAMA_TOTALES.get(c.id);
-      detalle = `<span class="d">${t && t.items ? min + ' · ' + plata(t.monto) : min}</span>`;
+      const monto = t && t.items ? plata(t.monto) : '';
+      /* ⚠️ EL RIEL DEL TELÉFONO ES DE 66px: LA PÍLDORA FLOTANTE NO CABE.
+         En computador el tiempo va en una píldora de esquina (`.t`,
+         position:absolute — no cuenta para el alto de la mesa) y el detalle
+         de abajo dice ítems y monto, como en la maqueta ("3 ítems $12.090").
+         Probado con captura: en el riel de 50px de ancho esa píldora quedaba
+         ENCIMA del número — no hay dónde ponerla sin taparlo. Ahí el tiempo
+         vuelve a la línea de abajo, como en la primera versión de este mismo
+         cambio, que ya se había probado sin ese problema. */
+      if(lamaEsTelefono()){
+        detalle = monto ? min + ' · ' + monto : min;
+      } else {
+        tiempo = `<span class="t">${min}</span>`;
+        if(t && t.items) detalle = t.items + ' ítem' + (t.items === 1 ? '' : 's') + ' · ' + monto;
+      }
     }
     return `<button type="button" class="lama-mesa ${est}${extra}${forma}${tam}" data-lamamesa="${m.id}"${
       tocable ? '' : ' disabled'} aria-label="Mesa ${m.numero}, ${est}">
-      <span class="n">${m.numero}</span>${detalle}
+      ${tiempo}<span class="n">${m.numero}</span><span class="d">${detalle}</span>
     </button>`;
   };
 

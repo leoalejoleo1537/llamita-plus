@@ -248,6 +248,38 @@ await caso('la OCUPADA es un tinte, con el número en su color', async () => {
   });
   return (c.f === 'rgb(251, 238, 230)' && c.t === 'rgb(143, 68, 37)') || 'quedó '+JSON.stringify(c);
 });
+/* ⚠️ REGRESIÓN REAL — 2026-09-16. Jhon, mirando la app: "necesito que las
+   mesas queden fijas!!! porque cuando paso de una mesa a otra estas se
+   mueven cambian de tamaño". La causa: el detalle de tiempo/monto (2026-09-11)
+   solo se agregaba en mesas no-libres, así que una libre (una línea) quedaba
+   más BAJA que una ocupada (dos líneas) — la cuadrícula se veía dispareja, y
+   tocar entre mesas de distinto estado hacía "saltar" el alto de la fila.
+   La 101 es ocupada, la 102 cobrando, la 103 libre: las tres tienen que medir
+   exactamente lo mismo, sea cual sea su estado o cuál esté seleccionada. */
+await caso('TODAS las mesas miden lo mismo, sin importar su estado', async () => {
+  await page.click('[data-lamamesa="103"]'); await page.waitForTimeout(300);
+  const r1 = await page.evaluate(()=>{
+    const out = {};
+    document.querySelectorAll('.lama-mesa:not(.nueva)').forEach(e=>{
+      const b = e.getBoundingClientRect();
+      out[e.dataset.lamamesa] = b.width + 'x' + Math.round(b.height);
+    });
+    return out;
+  });
+  await page.click('[data-lamamesa="101"]'); await page.waitForTimeout(300);
+  const r2 = await page.evaluate(()=>{
+    const out = {};
+    document.querySelectorAll('.lama-mesa:not(.nueva)').forEach(e=>{
+      const b = e.getBoundingClientRect();
+      out[e.dataset.lamamesa] = b.width + 'x' + Math.round(b.height);
+    });
+    return out;
+  });
+  const medidas = new Set(Object.values(r1));
+  const cambio = Object.keys(r1).find(id => r1[id] !== r2[id]);
+  return (medidas.size === 1 && !cambio)
+    || 'no miden igual: ' + JSON.stringify(r1) + (cambio ? ' · cambió al elegir otra: ' + cambio : '');
+});
 /* Jhon: "en el teléfono quiero que siempre las mesas estén apiladas a la
    izquierda y a la derecha la información". Sostenerlo siempre evita que la
    pantalla cambie de forma cada vez que se toca una mesa. */

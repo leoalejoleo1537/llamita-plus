@@ -69,12 +69,48 @@ Lama estén en verde, y **comparar la batería contra una línea base** sacada d
 `origin/master` con `git worktree`. Decir "no toqué Stock" es una intención;
 comparar dos corridas es un dato.
 
-### LA DIRECCIÓN "TERRACOTA CÁLIDA" — 2026-09-11
+### LA DIRECCIÓN "TERRACOTA CÁLIDA" — 2026-09-11, segundo lote el 2026-09-16
 
 > Jhon trajo una maqueta armada con Claude Diseño ("Llamita Stock UI") y pidió
 > textual: *"arreglar el tema visual en lotes grandes de mejora... prefiero
 > que implementemos este cambio y luego vayamos corrigiendo"*. Este es el
 > primer lote.
+
+#### ⚠️ SEGUNDO LOTE — 2026-09-16: un bug real, y más fidelidad con la maqueta
+
+Jhon, mirando la app: *"necesito que las mesas queden fijas!!! porque cuando
+paso de una mesa a otra estas se mueven cambian de tamaño"*.
+
+**La causa.** El detalle de tiempo/monto del primer lote solo se agregaba en
+mesas NO-libres. Una libre (una línea: el número) quedaba más BAJA que una
+ocupada (dos líneas: número + detalle) — en el teléfono la cuadrícula se veía
+dispareja, y tocar entre mesas de distinto estado hacía "saltar" el alto de
+toda la fila. No era la selección la que movía nada: era que dos estados
+distintos ya medían distinto, y saltar de uno a otro se sentía como que la
+mesa "se movía".
+
+**El arreglo.** El renglón del detalle (`.lama-mesa .d`) se reserva SIEMPRE
+—con `min-height`—, esté vacío o no. Probado con una prueba nueva
+(`pruebas/lama-mesas.mjs`, "TODAS las mesas miden lo mismo") que **se
+confirmó en rojo** revirtiendo el fix a mano antes de dejarla en verde — la
+única forma de saber que de verdad prueba algo.
+
+**Y una segunda vuelta de fidelidad contra la maqueta**, en el mismo lote:
+- El tiempo pasa a una píldora en la esquina de la mesa (`.lama-mesa .t`,
+  `position:absolute` — no cuenta para el alto, así que puede aparecer y
+  desaparecer sin repetir el problema de arriba) **solo en computador**. En
+  el teléfono el riel mide 50px de ancho y la píldora flotante quedaba
+  ENCIMA del número — comprobado con una captura, no a ojo — así que ahí el
+  tiempo vuelve a la línea de abajo, como en la primera versión.
+- El detalle de abajo pasa a decir "N ítems · $monto" (antes decía el
+  tiempo dos veces, una en la píldora y otra ahí).
+- La cabecera del panel suma el punto de color antes de "Ocupada"/"Cobrando"
+  (`::before` con `background:currentColor`), como en "● Ocupada" de la
+  maqueta — sin agregar HTML nuevo, solo CSS sobre lo que ya estaba.
+- **Se probó y se descartó** un ícono de lupa en el buscador: TODA la app
+  —Stock incluido— usa buscadores sin ícono, solo placeholder. Agregarlo
+  solo en Lama habría creado la inconsistencia que se supone que esto
+  arregla, no al revés.
 
 **Qué se hizo.** Se retiñó Mesas + cobro entero —plano, panel, carta, ventana
 de cobro— a la paleta terracota/crema de la maqueta, con Manrope como
