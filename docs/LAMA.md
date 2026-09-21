@@ -69,7 +69,28 @@ Lama estén en verde, y **comparar la batería contra una línea base** sacada d
 `origin/master` con `git worktree`. Decir "no toqué Stock" es una intención;
 comparar dos corridas es un dato.
 
-### LA DIRECCIÓN "TERRACOTA CÁLIDA" — 2026-09-11, segundo lote el 2026-09-16
+### LA DIRECCIÓN "TERRACOTA CÁLIDA" — 2026-09-11, segundo lote el 2026-09-16, revertido en parte el 2026-09-21
+
+> **2026-09-21 — Jhon pidió parar de iterar el detalle de la mesa.** Dijo
+> textual: *"no tiene mucho sentido poner tanto contexto en el cuadrado de la
+> mesa... me gustaría que solo apareciera el número"*, en una conversación más
+> grande sobre sentirse estancado con el ritmo del proyecto (ver el informe
+> de diagnóstico que se armó ese mismo día, enlazado en la bandeja de abajo).
+>
+> Se sacó el detalle de tiempo/monto y la píldora de esquina del segundo lote
+> (2026-09-16) **enteros** — el cuadrito vuelve a decir solo el número, como
+> antes del 2026-09-11. **El color por estado (terracota/tinte) se queda**:
+> eso nunca fue lo que se cuestionó. `lamaMinAbierta()` sigue viva porque la
+> usa la cabecera del panel ("Ocupada · 42 min"); `LAMA_TOTALES` y
+> `lamaCargarTotales()` se borraron enteros porque ya no los leía nadie —
+> dejarlos habría sido una consulta a la base en cada cambio de item,
+> gastando cuota por un mapa que nadie mira.
+>
+> **La lección, para no repetirla:** un dato correcto no es lo mismo que un
+> dato que vale la pena. "Tiempo y monto en la mesa" salía de la maqueta y
+> parecía una mejora obvia; en la práctica, la persona que tiene que mirar el
+> plano de un vistazo prefirió el silencio. Esto es la misma regla del texto
+> mínimo (§2.1 de CLAUDE.md) aplicada a datos, no solo a palabras.
 
 > Jhon trajo una maqueta armada con Claude Diseño ("Llamita Stock UI") y pidió
 > textual: *"arreglar el tema visual en lotes grandes de mejora... prefiero

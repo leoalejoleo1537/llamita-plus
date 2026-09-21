@@ -1112,33 +1112,20 @@
      misma lectura de un vistazo, sin grito". El borde sigue sin hacer falta
      por la misma razón de siempre: el tinte se lee como cuadro por la sombra,
      no por un filo. */
-  .lama-mesa{position:relative;aspect-ratio:auto;padding:12px 0;border:none;border-radius:14px;
-    cursor:pointer;font:inherit;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;gap:2px;min-width:0;
+  /* EL CUADRITO DICE EL NÚMERO Y NADA MÁS. Se probó un detalle de tiempo/monto
+     (2026-09-11) y se sacó (2026-09-21, pedido de Jhon): agregaba información
+     real, pero a costa de que la mesa dejara de leerse de un vistazo — que es
+     justo lo que el cuadrito tiene que hacer mejor que cualquier otra pantalla.
+     Si ese dato hace falta, el panel de al lado ya lo dice (§F1). */
+  .lama-mesa{aspect-ratio:auto;padding:12px 0;border:none;border-radius:14px;
+    cursor:pointer;font:inherit;display:flex;align-items:center;justify-content:center;
     box-shadow:var(--sombra);
     transition:transform .12s ease, box-shadow .22s ease, opacity .18s ease}
   .lama-mesa:active{transform:scale(.95)}
   .lama-mesa .n{font-size:17px;font-weight:800;line-height:1}
-  /* EL DETALLE — "número, tiempo y monto. Tres datos, nada más" (la maqueta).
-     El texto solo aparece en mesas no-libres —una libre no tiene tiempo ni
-     monto que decir, y un "—" ahí sería ruido de vuelta—, pero el RENGLÓN se
-     reserva siempre (`min-height`), esté vacío o no: es lo que mantiene fija
-     la altura de la mesa sin importar su estado. Ver el porqué en `dibujar()`. */
-  .lama-mesa .d{display:block;min-height:1.2em;font-size:10px;font-weight:700;
-    opacity:.82;line-height:1.2;font-variant-numeric:tabular-nums;
-    white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
-  /* LA PÍLDORA DEL TIEMPO, en la esquina — más fiel a la maqueta que un simple
-     texto en la línea de abajo. Va `position:absolute`, así que NO cuenta
-     para el alto de la mesa (a diferencia de `.d`): puede aparecer y
-     desaparecer sin mover nada, la garantía que pidió Jhon. */
-  .lama-mesa .t{position:absolute;top:5px;right:6px;font-size:8.5px;font-weight:800;
-    padding:2px 5px;border-radius:999px;background:rgba(0,0,0,.09);
-    line-height:1.3;font-variant-numeric:tabular-nums}
   @media (min-width:720px){
     .lama-mesa{aspect-ratio:1;padding:0;border-radius:var(--r-sec)}
     .lama-mesa .n{font-size:22px}
-    .lama-mesa .d{font-size:11.5px}
-    .lama-mesa .t{top:8px;right:8px;font-size:10px;padding:2px 7px}
   }
   .lama-mesa.libre{background:var(--green-bg);color:var(--green-fg)}
   .lama-mesa.ocupada{background:var(--mesa-ocu-bg);color:var(--mesa-ocu-fg)}
@@ -6256,14 +6243,6 @@ let BODEGA_PROD = {};
 let LAMA_MESAS   = [];      // el plano de la sede
 let LAMA_CUENTAS = [];      // las cuentas vivas, por mesa_id
 let LAMA_ITEMS   = [];      // los items de la cuenta abierta
-/* EL MONTO EN EL PLANO — 2026-09-11. La maqueta pide que la mesa diga tiempo
-   Y monto sin abrirla ("tres datos, nada más"), y `LAMA_ITEMS` solo trae los
-   de la cuenta SELECCIONADA — nunca alcanzó para pintar las demás. Este mapa
-   guarda cuenta_id → {monto, items} de TODAS las cuentas vivas, con una
-   consulta liviana aparte (ver `lamaCargarTotales`). No reemplaza a
-   LAMA_ITEMS: el panel de la mesa abierta sigue leyendo de ahí, línea por
-   línea, para el − n + y el resto. */
-let LAMA_TOTALES = new Map();
 let LAMA_SALON   = null;    // el salón elegido (el modelo viejo, sin páginas)
 /* EL PLANO CON PÁGINAS Y SECCIONES (maqueta aprobada el 2026-09-05).
    `lama_areas` guarda los dos niveles con una sola forma: sin padre es una
@@ -6419,30 +6398,9 @@ async function lamaCargar(forzar){
       await lamaTop();
     }
     await lamaCargarItems(true);
-    await lamaCargarTotales();
     lamaPintar();
   })();
   try { await LAMA_CARGANDO; } finally { LAMA_CARGANDO = null; }
-}
-
-/* EL MONTO DE CADA MESA, SIN ABRIRLAS. Una consulta aparte y liviana —solo
-   cuenta_id, cantidad, precio— de TODOS los items vivos de la sede, para que
-   el plano pueda decir "3 ítems · $12.090" en una mesa que nadie tocó. Lo
-   anulado no suma, igual que en el panel (`lamaPintarPanel`): si los dos
-   números no coincidieran, la pantalla mentiría en una de las dos partes. */
-async function lamaCargarTotales(){
-  const vivas = LAMA_CUENTAS.map(c => c.id);
-  if(!vivas.length){ LAMA_TOTALES = new Map(); return; }
-  const r = await sb.from('cuenta_items').select('cuenta_id,cantidad,precio,anulado_at')
-    .in('cuenta_id', vivas).is('anulado_at', null).limit(3000);
-  const mapa = new Map();
-  for(const it of (r.data || [])){
-    const e = mapa.get(it.cuenta_id) || {monto:0, items:0};
-    e.monto += (+it.cantidad || 0) * (+it.precio || 0);
-    e.items += 1;
-    mapa.set(it.cuenta_id, e);
-  }
-  LAMA_TOTALES = mapa;
 }
 
 /* CUÁNTO LLEVA ABIERTA, en minutos enteros. Mismo cálculo que `haceCuanto`,
@@ -6656,39 +6614,17 @@ function lamaPintarPlano(){
     }
     const forma = m.forma && m.forma !== 'cuadrada' ? ' f-' + m.forma : '';
     const tam   = m.tam   && m.tam   !== 'normal'   ? ' t-' + m.tam   : '';
-    /* ⚠️ EL ESPACIO DEL DETALLE SE RESERVA SIEMPRE, aunque no diga nada —
-       libre, o mientras se mueve algo. La primera versión solo agregaba el
-       `<span class="d">` cuando había algo que decir, y eso hacía que las
-       mesas de UNA línea (libres) quedaran más BAJAS que las de DOS (ocupada/
-       cobrando): en el teléfono se notaba como una cuadrícula despareja, y al
-       tocar entre mesas de distinto estado la fila entera saltaba de alto.
-       Jhon: "las mesas queden fijas... cuando paso de una mesa a otra estas
-       se mueven cambian de tamaño". Con el `<span>` siempre presente —vacío
-       cuando no hay nada que decir— las DOS líneas de alto están reservadas
-       siempre, así que ninguna mesa es más baja que otra. */
-    let detalle = '', tiempo = '';
-    if(c && !moviendo){
-      const min = lamaMinAbierta(c) + ' MIN';
-      const t = LAMA_TOTALES.get(c.id);
-      const monto = t && t.items ? plata(t.monto) : '';
-      /* ⚠️ EL RIEL DEL TELÉFONO ES DE 66px: LA PÍLDORA FLOTANTE NO CABE.
-         En computador el tiempo va en una píldora de esquina (`.t`,
-         position:absolute — no cuenta para el alto de la mesa) y el detalle
-         de abajo dice ítems y monto, como en la maqueta ("3 ítems $12.090").
-         Probado con captura: en el riel de 50px de ancho esa píldora quedaba
-         ENCIMA del número — no hay dónde ponerla sin taparlo. Ahí el tiempo
-         vuelve a la línea de abajo, como en la primera versión de este mismo
-         cambio, que ya se había probado sin ese problema. */
-      if(lamaEsTelefono()){
-        detalle = monto ? min + ' · ' + monto : min;
-      } else {
-        tiempo = `<span class="t">${min}</span>`;
-        if(t && t.items) detalle = t.items + ' ítem' + (t.items === 1 ? '' : 's') + ' · ' + monto;
-      }
-    }
+    /* EL CUADRITO DICE EL NÚMERO Y NADA MÁS — vuelto a pedir por Jhon el
+       2026-09-21: "me gustaría que solo apareciera el número". El detalle de
+       tiempo/monto agregado el 2026-09-11 se sacó entero (el texto y la
+       píldora de esquina); lo único que queda de ese lote es el color por
+       estado, que es aparte y no se tocó. `lamaMinAbierta`/`LAMA_TOTALES`
+       siguen existiendo — los usa la cabecera del panel — así que si el día
+       de mañana se quiere el dato de vuelta, es una línea acá, no rehacer
+       nada. */
     return `<button type="button" class="lama-mesa ${est}${extra}${forma}${tam}" data-lamamesa="${m.id}"${
       tocable ? '' : ' disabled'} aria-label="Mesa ${m.numero}, ${est}">
-      ${tiempo}<span class="n">${m.numero}</span><span class="d">${detalle}</span>
+      <span class="n">${m.numero}</span>
     </button>`;
   };
 
@@ -16563,15 +16499,7 @@ function subscribeRealtime(){
     .on('postgres_changes',{event:'*',schema:'public',table:'cuentas'},()=>{
       if(vistaActual==='lama') lamaCargar(); })
     .on('postgres_changes',{event:'*',schema:'public',table:'cuenta_items'},()=>{
-      if(vistaActual==='lama'){
-        lamaCargarItems().then(lamaPintarPanel);
-        /* El monto de CADA mesa vive aparte de LAMA_ITEMS (ver
-           `lamaCargarTotales`), así que un item que cambia en cualquier mesa
-           —no solo la abierta— tiene que volver a sumarse para que el plano
-           no muestre un número viejo. */
-        lamaCargarTotales().then(lamaPintarPlano);
-      }
-    })
+      if(vistaActual==='lama') lamaCargarItems().then(lamaPintarPanel); })
     .subscribe(status=>{
       if(status==='SUBSCRIBED'){
         $('liveText').textContent='en vivo'; $('live').classList.remove('off');
