@@ -1402,6 +1402,12 @@
     font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;border:none;
     width:100%;text-align:left;font-family:inherit}
   .lama-arq-pill b{color:var(--text)}
+  /* El enlace al historial — siempre presente, en las dos posiciones del
+     aviso, para que "el historial de arqueos" (paso 5 de la maqueta) no
+     necesite un botón propio pisando el aviso principal. */
+  .lama-arq-hist{display:block;background:none;border:none;color:var(--muted);
+    font:inherit;font-size:12.5px;font-weight:700;text-decoration:underline;
+    padding:0 2px 12px;margin-top:-6px;cursor:pointer}
   .lama-arq-pill:active{transform:scale(.99)}
 
   /* LA VENTANA — mismo patrón que `.cfg-ficha`: un recuadro centrado sobre
@@ -1440,6 +1446,8 @@
   .arq-mov .v{font-weight:700;font-variant-numeric:tabular-nums;flex:0 0 auto}
   .arq-mov .v.ingreso{color:var(--green-fg)}
   .arq-mov .v.egreso{color:var(--red-fg)}
+  .arq-mov .v.gris{color:var(--muted);font-weight:600}
+  .arq-mov + .arq-mov{border-top:1px solid var(--linea)}
 
   .lama-desc{margin-top:10px}
   .lama-desc-abrir{margin-top:10px}
@@ -6618,17 +6626,39 @@ async function lamaArqPorMedio(){
 function lamaArqPintarBanner(){
   const cont = $('lama-arq-banner'); if(!cont) return;
   if(!LAMA_ARQ_SQL){ cont.innerHTML = ''; return; }   // el .sql todavía no se corrió
+  const hist = `<button type="button" class="lama-arq-hist" data-lamaarq="historial">Ver arqueos anteriores</button>`;
   if(!LAMA_ARQ){
     cont.innerHTML = `<div class="lama-arq-av">
       <span>La caja del turno no está abierta</span>
       <button type="button" data-lamaarq="abrir">Abrir</button>
-    </div>`;
+    </div>` + hist;
     return;
   }
   const hora = new Date(LAMA_ARQ.abierto_at).toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'});
   cont.innerHTML = `<button type="button" class="lama-arq-pill" data-lamaarq="turno">
       <span>Caja abierta desde las <b>${hora}</b></span>
-    </button>`;
+    </button>` + hist;
+}
+
+/* PASO 5 DE LA MAQUETA · el historial de arqueos, que no se puede tocar
+   (docs/propuesta-lama-arqueo.html, §6). Solo lee `lama_arqueos` cerrados
+   de esta sede — ni un botón de editar ni de reabrir, porque un arqueo
+   cerrado no se reabre jamás (la maqueta, §4). */
+async function lamaArqCargarHistorial(){
+  const r = await sb.from('lama_arqueos').select('*')
+    .eq('sede', SEDE).eq('estado', 'cerrada')
+    .order('cerrado_at', {ascending:false}).limit(20);
+  return r.data || [];
+}
+
+function lamaArqAbrirHistorial(){
+  LAMA_ARQ_MODAL = {modo:'historial', lista:[]};
+  lamaArqPintarModal();
+  lamaArqCargarHistorial().then(lista=>{
+    if(!LAMA_ARQ_MODAL || LAMA_ARQ_MODAL.modo !== 'historial') return;   // se cerró mientras cargaba
+    LAMA_ARQ_MODAL.lista = lista;
+    lamaArqPintarModal();
+  });
 }
 
 function lamaArqCerrarModal(){ LAMA_ARQ_MODAL = null; lamaArqPintarModal(); }
@@ -6789,6 +6819,31 @@ function lamaArqPintarModal(){
     return;
   }
 
+  if(m.modo === 'historial'){
+    const filas = m.lista || [];
+    cont.innerHTML = `<div class="arq-ficha" data-arqfondo="1" role="dialog" aria-modal="true" aria-label="Arqueos anteriores">
+      <div class="arq-tarj">
+        <h4>Arqueos anteriores</h4>
+        <p class="cab">${esc(sedeLabel)} · los últimos ${filas.length}</p>
+        ${filas.length ? `<div class="arq-lista">${filas.map(a=>{
+            const dia  = new Date(a.abierto_at).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit'});
+            const hIni = new Date(a.abierto_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+            const hFin = a.cerrado_at ? new Date(a.cerrado_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}) : '—';
+            const dif  = +a.diferencia || 0;
+            const clase    = dif === 0 ? 'gris' : (dif > 0 ? 'ingreso' : 'egreso');
+            const etiqueta = dif === 0 ? 'cuadrada' : (dif > 0 ? 'sobra' : 'falta');
+            return `<div class="arq-mov">
+              <span class="n"><b>${dia} · ${hIni}→${hFin}</b>${a.cerrado_por ? ' · '+esc(a.cerrado_por) : ''}</span>
+              <span class="v ${clase}">${etiqueta}${dif !== 0 ? ' '+plata(Math.abs(dif)) : ''}</span>
+            </div>`;
+          }).join('')}</div>`
+          : `<p class="cab" style="margin:4px 0 0">Todavía no hay ninguno cerrado.</p>`}
+        <div class="arq-btns"><button type="button" class="btn btn-gris" style="flex:1" data-lamaarq="cancelar">Cerrar</button></div>
+      </div>
+    </div>`;
+    return;
+  }
+
   cont.innerHTML = '';
 }
 
@@ -6848,6 +6903,7 @@ function lamaArqEngancharUnaVez(){
       const acc = b.dataset.lamaarq;
       if(acc === 'abrir') lamaArqAbrirModal();
       else if(acc === 'turno') lamaArqAbrirTurno();
+      else if(acc === 'historial') lamaArqAbrirHistorial();
     });
   }
   const modal = $('lama-arqueo');

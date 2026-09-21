@@ -1877,7 +1877,6 @@ poder crearlas ella:
 
 | Qué | Dónde está planteada | Qué desbloquea |
 |---|---|---|
-| **Aprobar la maqueta del Arqueo de caja**. ✅ La urgente ya está contestada (una caja por local); quedan dos que **no bloquean**: el arqueo ciego y quién abre y cierra | [`docs/propuesta-lama-arqueo.html`](propuesta-lama-arqueo.html) · resumidas en la **F6** de arriba | **F6 entero** |
 | **Una visita al local** para instalar el puente de impresión | §2.3 de `CLAUDE.md` | **F5**, y con ella el detalle del ticket que dejó a F3 en 5 de 6 |
 | **Decidir sobre la API de Fudo** — vos preguntaste cuánto ayudaría. La respuesta está escrita, con un corte: **leer es barato y seguro; escribir tocaría el POS real del café** | [`docs/fudo-api-cuanto-sirve.md`](fudo-api-cuanto-sirve.md) | la **Fase 4** (11 Edge Functions ya escritas y apagadas) y el descuadre del conteo nocturno |
 | **¿Dividir la cuenta en partes iguales entre N personas, además del pago parcial por producto que ya existe?** La maqueta de terracota (2026-09-11) muestra "Entre 4 personas · $3.325 cada uno", pero el atlas ya había decidido lo contrario en su momento: *"solo por producto... un abono en plata sin decir qué cubre no se puede desarmar en el arqueo"* — y por eso existe F1 (pago parcial por producto). No se sabe si cambiaste de opinión al armar la maqueta o si es una idea de esa sesión que nunca se contrastó con la regla vieja, así que no se construyó ninguna versión | sección "LA DIRECCIÓN TERRACOTA CÁLIDA" de arriba | una función nueva de cobro, si decís que sí |
