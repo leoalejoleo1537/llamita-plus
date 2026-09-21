@@ -39,7 +39,7 @@ Eso significa dos cosas que conviene tener claras:
 | **Lama · configuración** | **83 %** | 5 de 6 | 🟢 **hecha** · falta el detalle del ticket, que depende de F5 |
 | **Lama · el plano de mesas** | **100 %** | 5 de 5 | 🟢 **terminado** |
 | **Lama · impresión** | **83 %** | 5 de 6 | 🟡 **falta ir al local** · todo lo demás está |
-| **Lama · arqueo de caja** | **0 %** | 0 de 5 | 🟡 **maqueta escrita** · una caja por local, ya confirmado |
+| **Lama · arqueo de caja** | **80 %** | 4 de 5 | 🟡 **construida y publicada** · falta que Jhon pegue el `.sql` |
 | **Conexión Lama ↔ Stock** | **0 %** | 0 de 3 | ⬜ va última a propósito |
 | **Producto multi-cliente** | **0 %** | 0 de 4 | ⬜ no empezado |
 
@@ -141,25 +141,31 @@ encaje con Windows. Las dos cosas no son lo mismo (§0.5).
 Windows ya trae PowerShell. Tres archivos, un doble clic, la impresora se elige
 de una lista. Ver [`docs/la-impresora.md`](la-impresora.md).
 
-### Lama · arqueo de caja — 0 de 5 🟡 *desbloqueado el 2026-09-04*
+### Lama · arqueo de caja — 4 de 5 🟡 *construida el 2026-09-21*
 
-Abrir y cerrar turno · efectivo contado vs. calculado · sobrantes y faltantes ·
-arqueo ciego · el informe del turno.
+Abrir y cerrar turno ✅ · efectivo contado vs. calculado ✅ · sobrantes y
+faltantes ✅ · arqueo ciego ✅ (interruptor en Ajustes) · el historial de
+arqueos ⬜.
 
-✅ **El atlas ya contestó las tres preguntas del bloque H.** Se sabe el ciclo
-completo, la fórmula del efectivo esperado, que el cierre es **irreversible**,
-que puede haber varios arqueos abiertos a la vez, y que si se olvidaron de
-abrirlo se puede abrir con hora hacia atrás.
+Las tres preguntas de la maqueta ya las contestó Jhon el 2026-09-21: el
+arqueo ciego es un interruptor por sede en Ajustes → Interruptores (apagado
+de fábrica), una sola caja por sede sin selector, y cualquiera que entre a
+Mesas puede abrir y cerrar con su nombre escrito.
 
-**La maqueta ya está escrita** y espera tu visto bueno:
-[`docs/propuesta-lama-arqueo.html`](propuesta-lama-arqueo.html). Sigue en 0 de 5
-a propósito — una maqueta no es una pieza construida.
+**Lo que hay:** el aviso arriba del plano cuando la caja no está abierta ·
+abrir con el monto inicial · la tarjeta del turno con lo cobrado por medio y
+el total esperado · movimientos de mano (ingreso/egreso, con nota) · cerrar
+contando el efectivo, con o sin el arqueo ciego · el candado que impide
+anular una venta de un arqueo ya cerrado.
 
-⚠️ **Trae tres preguntas para Jhon**, y una es urgente: **cuántas cajas físicas
-hay en cada local**, porque cambia la forma de la tabla y después se paga
-migrando datos. Las otras dos son el *arqueo ciego* —que en Fudo es un permiso
-por rol y Llamita no tiene roles a propósito (§6.1)— y quién puede abrir y
-cerrar.
+⚠️ **Publicado en `index.html`, pero apagado hasta que Jhon pegue
+`sql/2026-09-lama-arqueo.sql`** (está en `docs/sql-pendientes.md`). Sin las
+tablas, el aviso de caja simplemente no aparece y Mesas sigue funcionando
+igual que hoy — es la misma regla de siempre: publicar antes del `.sql` no
+puede romper nada.
+
+**Lo único que queda pendiente para el 5 de 5:** el historial de arqueos
+cerrados, para mirar turnos pasados. No bloquea usar el arqueo de hoy.
 
 ### Conexión Lama ↔ Stock — 0 de 3 ⬜
 

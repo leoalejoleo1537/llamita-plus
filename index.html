@@ -1385,6 +1385,62 @@
   .lama-trabada svg{width:15px;height:15px;flex:0 0 auto}
   .lama-fab.trabada{background:var(--gray-fg);opacity:.55}
 
+  /* ══════════ F6 · EL ARQUEO DE CAJA — 2026-09-21 ══════════
+     El aviso arriba del plano ("no está abierta" / "abierta desde…") copia
+     la misma pinta de `.lama-trabada`: ámbar cuando falta algo, y una
+     pastilla tranquila cuando ya está resuelto — nunca un candado, porque
+     la maqueta es explícita: "se puede vender igual". */
+  .lama-arq-av{display:flex;align-items:center;gap:10px;background:var(--amber-bg);
+    color:var(--amber-fg);border-radius:13px;padding:11px 14px;margin-bottom:12px;
+    font-size:13.5px;font-weight:700}
+  .lama-arq-av span{flex:1}
+  .lama-arq-av button{border:none;background:var(--amber-fg);color:#fff;font:inherit;
+    font-size:12.5px;font-weight:800;padding:7px 14px;border-radius:999px;cursor:pointer;
+    flex:0 0 auto}
+  .lama-arq-pill{display:flex;align-items:center;gap:10px;background:var(--card);
+    box-shadow:var(--sombra);border-radius:13px;padding:10px 14px;margin-bottom:12px;
+    font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;border:none;
+    width:100%;text-align:left;font-family:inherit}
+  .lama-arq-pill b{color:var(--text)}
+  .lama-arq-pill:active{transform:scale(.99)}
+
+  /* LA VENTANA — mismo patrón que `.cfg-ficha`: un recuadro centrado sobre
+     el fondo desenfocado, y no una hoja que sube desde abajo (esto no es
+     el cobro, es un trámite corto de una sola pantalla a la vez). */
+  .arq-ficha{position:fixed;inset:0;z-index:46;background:rgba(15,30,49,.42);
+    backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px}
+  .arq-tarj{background:var(--card);border-radius:var(--r-card);box-shadow:var(--sombra);
+    padding:20px;width:100%;max-width:400px;max-height:88vh;overflow-y:auto}
+  .arq-tarj h4{margin:0 0 3px;font-size:18px}
+  .arq-tarj .cab{color:var(--muted);font-size:13px;margin:0 0 16px}
+  .arq-ren{display:flex;align-items:center;gap:10px;padding:9px 1px;font-size:14.5px}
+  .arq-ren + .arq-ren{border-top:1px solid var(--linea)}
+  .arq-ren .n{flex:1;min-width:0}
+  .arq-ren .v{font-weight:700;font-variant-numeric:tabular-nums;flex:0 0 auto}
+  .arq-ren .v.gris{color:var(--muted);font-weight:600}
+  .arq-tot{margin-top:10px;padding:12px 14px;border-radius:14px;background:var(--bg);
+    display:flex;gap:10px;align-items:center;font-weight:800;font-size:16.5px}
+  .arq-tot .n{flex:1}
+  .arq-tot.verde{background:var(--green-bg);color:var(--green-fg)}
+  .arq-tot.rojo{background:var(--red-bg);color:var(--red-fg)}
+  .arq-tot.oculto{background:var(--azul-bg);color:var(--azul-fg);font-weight:700;font-size:13.5px}
+  .arq-campo{margin:0 0 13px}
+  .arq-campo label{display:block;font-size:11.5px;color:var(--muted);margin:0 0 5px;
+    text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+  .arq-campo input{width:100%;border:none;background:var(--bg);border-radius:11px;
+    padding:11px 13px;font:inherit;font-size:16px;color:var(--text);
+    font-variant-numeric:tabular-nums}
+  .arq-campo select{width:100%;border:none;background:var(--bg);border-radius:11px;
+    padding:11px 13px;font:inherit;font-size:15px;color:var(--text)}
+  .arq-btns{display:flex;gap:10px;margin-top:16px}
+  .arq-btns .btn{flex:1}
+  .arq-lista{display:flex;flex-direction:column;gap:2px;margin:4px 0 0}
+  .arq-mov{display:flex;align-items:center;gap:9px;padding:8px 1px;font-size:13.5px}
+  .arq-mov .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .arq-mov .v{font-weight:700;font-variant-numeric:tabular-nums;flex:0 0 auto}
+  .arq-mov .v.ingreso{color:var(--green-fg)}
+  .arq-mov .v.egreso{color:var(--red-fg)}
+
   .lama-desc{margin-top:10px}
   .lama-desc-abrir{margin-top:10px}
   /* La línea de la suma: "Descuento 20 % · −$2.140". Ámbar, como todo lo que
@@ -3499,6 +3555,11 @@
 <div class="wrap" id="view-lama" style="display:none">
   <div class="lama">
     <div class="lama-plano">
+      <!-- F6 · el aviso de la caja del turno (§0.7, la maqueta aprobada el
+           2026-09-21). Va ANTES de los salones: es lo primero que hay que
+           saber al entrar a Mesas, en las dos direcciones — "no está
+           abierta" y "está abierta, tocá para ver el turno". -->
+      <div id="lama-arq-banner"></div>
       <div class="lama-salones" id="lama-salones"></div>
       <!-- ACÁ ESTABA LA TUERCA DEL TAMAÑO DE LAS MESAS, y se mudó el
            2026-09-04 a Ajustes -> Mesas. El área de ventas es para vender:
@@ -3522,6 +3583,7 @@
   <div id="lama-pp"></div>
   <div id="lama-cob"></div>
   <div id="lama-anu"></div>
+  <div id="lama-arqueo"></div>
 </div>
 
 <!-- ================= RECETAS ================= -->
@@ -6253,6 +6315,15 @@ let LAMA_SALON   = null;    // el salón elegido (el modelo viejo, sin páginas)
    justo la falla silenciosa que este proyecto ya pagó dos veces. */
 let LAMA_AREAS   = [];      // páginas y secciones de esta sede
 let LAMA_PAGINA  = null;    // la página elegida (id)
+/* F6 · EL ARQUEO DE CAJA — aprobado el 2026-09-21 sobre
+   docs/propuesta-lama-arqueo.html. LAMA_ARQ es el arqueo ABIERTO de esta
+   sede (o null si no hay ninguno); nace null a propósito, igual que
+   LAMA_AREAS: si el .sql todavía no se corrió, el aviso de caja
+   simplemente no aparece, y el resto de Mesas sigue funcionando como
+   siempre — publicar antes de que Jhon pegue el .sql no puede romper nada. */
+let LAMA_ARQ      = null;   // el arqueo abierto de esta sede, o null
+let LAMA_ARQ_MOVS = [];     // sus ingresos y egresos de mano
+let LAMA_ARQ_MODAL = null;  // {modo:'abrir'|'turno'|'movimiento'|'cerrar'|'cerrada', ...}
 let LAMA_EDITA   = false;   // ¿está puesto el modo edición del plano?
 let LAMA_SEL     = null;    // id de la mesa abierta en el panel
 let LAMA_PAPEL   = null;    // el texto de la última comanda o precuenta
@@ -6398,6 +6469,7 @@ async function lamaCargar(forzar){
       await lamaTop();
     }
     await lamaCargarItems(true);
+    await lamaArqCargar();
     lamaPintar();
   })();
   try { await LAMA_CARGANDO; } finally { LAMA_CARGANDO = null; }
@@ -6502,11 +6574,322 @@ function lamaAnularEngancharUnaVez(){
   });
 }
 
+/* ================================================================
+   F6 · EL ARQUEO DE CAJA — aprobado el 2026-09-21 sobre
+   docs/propuesta-lama-arqueo.html. Un aviso, nunca un candado (la maqueta,
+   §2a): se puede vender con la caja sin abrir — lo único que hace el aviso
+   es avisar, porque una venta cobrada sin arqueo abierto queda fuera del
+   cuadre del turno.
+   ================================================================ */
+let LAMA_ARQ_SQL = true;   // se pone en false solo si sql/2026-09-lama-arqueo.sql todavía no se corrió
+
+async function lamaArqCargar(){
+  if(!SEDE) return;
+  const r = await sb.from('lama_arqueos').select('*')
+    .eq('sede', SEDE).eq('estado', 'abierta').limit(1).maybeSingle();
+  if(r.error){ LAMA_ARQ_SQL = false; LAMA_ARQ = null; LAMA_ARQ_MOVS = []; return; }
+  LAMA_ARQ_SQL = true;
+  LAMA_ARQ = r.data || null;
+  if(!LAMA_ARQ){ LAMA_ARQ_MOVS = []; return; }
+  const rm = await sb.from('lama_caja_movimientos').select('*')
+    .eq('arqueo_id', LAMA_ARQ.id).order('id');
+  LAMA_ARQ_MOVS = rm.data || [];
+}
+
+/* Lo cobrado desde que se abrió, agrupado por medio. Relee siempre de
+   `cuenta_pagos` — nunca confía en un número guardado, la misma regla de
+   `cuenta_cobrar` (§0.1.2): el efectivo esperado no se puede firmar con un
+   número que la pantalla trae de memoria. */
+async function lamaArqPorMedio(){
+  if(!LAMA_ARQ) return {};
+  const r = await sb.from('cuenta_pagos')
+    .select('medio,monto,cuentas!inner(sede)')
+    .eq('cuentas.sede', SEDE)
+    .gte('created_at', LAMA_ARQ.abierto_at);
+  const porMedio = {};
+  for(const p of (r.data || [])){
+    if(!porMedio[p.medio]) porMedio[p.medio] = {monto:0, n:0};
+    porMedio[p.medio].monto += (+p.monto || 0);
+    porMedio[p.medio].n++;
+  }
+  return porMedio;
+}
+
+function lamaArqPintarBanner(){
+  const cont = $('lama-arq-banner'); if(!cont) return;
+  if(!LAMA_ARQ_SQL){ cont.innerHTML = ''; return; }   // el .sql todavía no se corrió
+  if(!LAMA_ARQ){
+    cont.innerHTML = `<div class="lama-arq-av">
+      <span>La caja del turno no está abierta</span>
+      <button type="button" data-lamaarq="abrir">Abrir</button>
+    </div>`;
+    return;
+  }
+  const hora = new Date(LAMA_ARQ.abierto_at).toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'});
+  cont.innerHTML = `<button type="button" class="lama-arq-pill" data-lamaarq="turno">
+      <span>Caja abierta desde las <b>${hora}</b></span>
+    </button>`;
+}
+
+function lamaArqCerrarModal(){ LAMA_ARQ_MODAL = null; lamaArqPintarModal(); }
+
+function lamaArqAbrirModal(){
+  LAMA_ARQ_MODAL = {modo:'abrir', monto_inicial:''};
+  lamaArqPintarModal();
+}
+
+async function lamaArqAbrirTurno(){
+  if(!LAMA_ARQ) return;
+  LAMA_ARQ_MODAL = {modo:'turno', porMedio:{}};
+  lamaArqPintarModal();
+  const porMedio = await lamaArqPorMedio();
+  if(!LAMA_ARQ_MODAL || LAMA_ARQ_MODAL.modo !== 'turno') return;   // se cerró mientras cargaba
+  LAMA_ARQ_MODAL.porMedio = porMedio;
+  lamaArqPintarModal();
+}
+
+function lamaArqAbrirMovimiento(){
+  LAMA_ARQ_MODAL = {modo:'movimiento', tipo:'egreso', monto:'', nota:''};
+  lamaArqPintarModal();
+}
+
+async function lamaArqAbrirCerrar(){
+  if(!LAMA_ARQ) return;
+  const ciego = ajVal('arqueo_ciego', SEDE, false);
+  LAMA_ARQ_MODAL = {modo:'cerrar', ciego, efectivo_contado:'', comentario:'', porMedio:{}};
+  lamaArqPintarModal();
+  const porMedio = await lamaArqPorMedio();
+  if(!LAMA_ARQ_MODAL || LAMA_ARQ_MODAL.modo !== 'cerrar') return;
+  LAMA_ARQ_MODAL.porMedio = porMedio;
+  lamaArqPintarModal();
+}
+
+function lamaArqPintarModal(){
+  const cont = $('lama-arqueo'); if(!cont) return;
+  const m = LAMA_ARQ_MODAL;
+  if(!m){ cont.innerHTML = ''; return; }
+  const sedeLabel = (SEDES[SEDE] && SEDES[SEDE].corto) || SEDE || '';
+
+  if(m.modo === 'abrir'){
+    cont.innerHTML = `<div class="arq-ficha" data-arqfondo="1" role="dialog" aria-modal="true" aria-label="Abrir la caja">
+      <div class="arq-tarj">
+        <h4>Abrir la caja</h4>
+        <p class="cab">${esc(new Date().toLocaleString('es-CL',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}))} · ${esc(sedeLabel)}</p>
+        <div class="arq-campo">
+          <label>Monto inicial — el fondo de cambio</label>
+          <input type="number" inputmode="decimal" id="arq-in-monto" placeholder="$ 0" value="${esc(m.monto_inicial)}">
+        </div>
+        <div class="arq-btns">
+          <button type="button" class="btn btn-gris" data-lamaarq="cancelar">Cancelar</button>
+          <button type="button" class="btn btn-orange" data-lamaarq="confirmar-abrir">Abrir</button>
+        </div>
+      </div>
+    </div>`;
+    return;
+  }
+
+  if(m.modo === 'turno'){
+    if(!LAMA_ARQ){ cont.innerHTML = ''; return; }
+    const hora = new Date(LAMA_ARQ.abierto_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+    const efv = m.porMedio.efectivo || {monto:0, n:0};
+    const ingresos = LAMA_ARQ_MOVS.filter(x=>x.tipo==='ingreso').reduce((s,x)=>s+(+x.monto||0),0);
+    const egresos  = LAMA_ARQ_MOVS.filter(x=>x.tipo==='egreso').reduce((s,x)=>s+(+x.monto||0),0);
+    const neto = ingresos - egresos;
+    const esperado = (+LAMA_ARQ.monto_inicial||0) + efv.monto + neto;
+    const otros = Object.keys(m.porMedio).filter(k=>k!=='efectivo');
+    cont.innerHTML = `<div class="arq-ficha" data-arqfondo="1" role="dialog" aria-modal="true" aria-label="Caja abierta">
+      <div class="arq-tarj">
+        <h4>Caja abierta</h4>
+        <p class="cab">Desde las ${hora}${LAMA_ARQ.abierto_por ? ' · la abrió '+esc(LAMA_ARQ.abierto_por) : ''}</p>
+        <div class="arq-ren"><span class="n">Monto inicial</span><span class="v">${plata(LAMA_ARQ.monto_inicial)}</span></div>
+        <div class="arq-ren"><span class="n">Efectivo cobrado · ${efv.n} venta${efv.n===1?'':'s'}</span><span class="v">${plata(efv.monto)}</span></div>
+        ${LAMA_ARQ_MOVS.length ? `<div class="arq-ren"><span class="n">Ingresos y egresos · ${LAMA_ARQ_MOVS.length}</span><span class="v">${neto>=0?'+ ':'− '}${plata(Math.abs(neto))}</span></div>` : ''}
+        <div class="arq-tot verde"><span class="n">Debería haber</span><span>${plata(esperado)}</span></div>
+        ${otros.map(k=>`<div class="arq-ren"><span class="n">${esc(lamaMedioNom(k))}</span><span class="v gris">${plata(m.porMedio[k].monto)}</span></div>`).join('')}
+        ${LAMA_ARQ_MOVS.length ? `<div class="arq-lista">${LAMA_ARQ_MOVS.slice().reverse().map(x=>`<div class="arq-mov"><span class="n">${esc(x.nota)}</span><span class="v ${x.tipo}">${x.tipo==='ingreso'?'+ ':'− '}${plata(x.monto)}</span></div>`).join('')}</div>` : ''}
+        <div class="arq-btns">
+          <button type="button" class="btn btn-gris" data-lamaarq="movimiento">Movimiento</button>
+          <button type="button" class="btn btn-orange" data-lamaarq="ir-cerrar">Cerrar caja</button>
+        </div>
+      </div>
+    </div>`;
+    return;
+  }
+
+  if(m.modo === 'movimiento'){
+    cont.innerHTML = `<div class="arq-ficha" data-arqfondo="1" role="dialog" aria-modal="true" aria-label="Movimiento de caja">
+      <div class="arq-tarj">
+        <h4>Movimiento</h4>
+        <p class="cab">Plata que entra o sale del cajón sin ser una venta</p>
+        <div class="arq-campo">
+          <label>Tipo</label>
+          <select id="arq-in-tipo">
+            <option value="egreso"${m.tipo==='egreso'?' selected':''}>Egreso — sale plata</option>
+            <option value="ingreso"${m.tipo==='ingreso'?' selected':''}>Ingreso — entra plata</option>
+          </select>
+        </div>
+        <div class="arq-campo"><label>Monto</label>
+          <input type="number" inputmode="decimal" id="arq-in-mmonto" placeholder="$ 0" value="${esc(m.monto)}"></div>
+        <div class="arq-campo"><label>Nota</label>
+          <input type="text" id="arq-in-nota" placeholder="Para qué es" value="${esc(m.nota)}"></div>
+        <div class="arq-btns">
+          <button type="button" class="btn btn-gris" data-lamaarq="volver-turno">Cancelar</button>
+          <button type="button" class="btn btn-orange" data-lamaarq="confirmar-movimiento">Guardar</button>
+        </div>
+      </div>
+    </div>`;
+    return;
+  }
+
+  if(m.modo === 'cerrar'){
+    if(!LAMA_ARQ){ cont.innerHTML = ''; return; }
+    const efv = m.porMedio.efectivo || {monto:0, n:0};
+    const ingresos = LAMA_ARQ_MOVS.filter(x=>x.tipo==='ingreso').reduce((s,x)=>s+(+x.monto||0),0);
+    const egresos  = LAMA_ARQ_MOVS.filter(x=>x.tipo==='egreso').reduce((s,x)=>s+(+x.monto||0),0);
+    const esperado = (+LAMA_ARQ.monto_inicial||0) + efv.monto + ingresos - egresos;
+    const otros = Object.keys(m.porMedio).filter(k=>k!=='efectivo');
+    cont.innerHTML = `<div class="arq-ficha" data-arqfondo="1" role="dialog" aria-modal="true" aria-label="Cerrar la caja">
+      <div class="arq-tarj">
+        <h4>Contá el cajón</h4>
+        <p class="cab">Escribí lo que hay de verdad</p>
+        <div class="arq-campo"><label>Efectivo contado</label>
+          <input type="number" inputmode="decimal" id="arq-in-contado" placeholder="$" value="${esc(m.efectivo_contado)}"></div>
+        ${otros.map(k=>`<div class="arq-ren"><span class="n">${esc(lamaMedioNom(k))}</span><span class="v gris">${plata(m.porMedio[k].monto)}</span></div>`).join('')}
+        <div class="arq-campo"><label>Comentario (opcional)</label>
+          <input type="text" id="arq-in-coment" placeholder="Si pasó algo raro, acá" value="${esc(m.comentario)}"></div>
+        ${m.ciego
+          ? `<div class="arq-tot oculto">La diferencia se ve recién al cerrar</div>`
+          : `<div class="arq-tot"><span class="n">Debería haber</span><span>${plata(esperado)}</span></div>`}
+        <div class="arq-btns">
+          <button type="button" class="btn btn-gris" data-lamaarq="volver-turno">Volver</button>
+          <button type="button" class="btn btn-orange" data-lamaarq="confirmar-cerrar">Cerrar caja</button>
+        </div>
+      </div>
+    </div>`;
+    return;
+  }
+
+  if(m.modo === 'cerrada'){
+    const a = m.arqueo;
+    const hIni = new Date(a.abierto_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+    const hFin = new Date(a.cerrado_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+    const dif = +a.diferencia || 0;
+    const claseTot = dif === 0 ? 'verde' : (dif > 0 ? 'verde' : 'rojo');
+    const etiqueta  = dif === 0 ? 'Cuadrada' : (dif > 0 ? 'Sobra' : 'Falta');
+    cont.innerHTML = `<div class="arq-ficha" data-arqfondo="1" role="dialog" aria-modal="true" aria-label="Caja cerrada">
+      <div class="arq-tarj">
+        <h4>Caja cerrada</h4>
+        <p class="cab">${hIni} → ${hFin}${a.cerrado_por ? ' · la cerró '+esc(a.cerrado_por) : ''}</p>
+        <div class="arq-ren"><span class="n">Según el sistema</span><span class="v">${plata(a.efectivo_esperado)}</span></div>
+        <div class="arq-ren"><span class="n">Contado</span><span class="v">${plata(a.efectivo_contado)}</span></div>
+        <div class="arq-tot ${claseTot}"><span class="n">${etiqueta}</span><span>${plata(Math.abs(dif))}</span></div>
+        <div class="arq-btns"><button type="button" class="btn btn-orange" style="flex:1" data-lamaarq="cancelar">Listo</button></div>
+      </div>
+    </div>`;
+    return;
+  }
+
+  cont.innerHTML = '';
+}
+
+async function lamaArqConfirmarAbrir(){
+  const m = LAMA_ARQ_MODAL; if(!m) return;
+  const monto = +String(m.monto_inicial).replace(/[^\d.-]/g,'');
+  if(m.monto_inicial === '' || isNaN(monto) || monto < 0){
+    avisar('Escribí el monto inicial de la caja.'); return;
+  }
+  const r = await lamaLlamar('arqueo_abrir', {p_sede: SEDE, p_monto_inicial: monto, p_quien: NOMBRE});
+  if(!r) return;
+  LAMA_ARQ = r; LAMA_ARQ_MOVS = [];
+  LAMA_ARQ_MODAL = null;
+  lamaArqPintarBanner(); lamaArqPintarModal();
+  aviso('✓ Caja abierta');
+}
+
+async function lamaArqConfirmarMovimiento(){
+  const m = LAMA_ARQ_MODAL; if(!m || !LAMA_ARQ) return;
+  const monto = +String(m.monto).replace(/[^\d.-]/g,'');
+  if(!monto || monto <= 0){ avisar('El monto tiene que ser mayor que cero.'); return; }
+  if(!String(m.nota||'').trim()){ avisar('Escribí para qué es este movimiento.'); return; }
+  const r = await lamaLlamar('arqueo_movimiento', {
+    p_arqueo_id: LAMA_ARQ.id, p_tipo: m.tipo, p_monto: monto,
+    p_nota: m.nota.trim(), p_quien: NOMBRE});
+  if(!r) return;
+  LAMA_ARQ_MOVS.push(r);
+  aviso('✓ Anotado');
+  await lamaArqAbrirTurno();   // vuelve a la tarjeta del turno, ya actualizada
+}
+
+async function lamaArqConfirmarCerrar(){
+  const m = LAMA_ARQ_MODAL; if(!m || !LAMA_ARQ) return;
+  const contado = +String(m.efectivo_contado).replace(/[^\d.-]/g,'');
+  if(m.efectivo_contado === '' || isNaN(contado) || contado < 0){
+    avisar('Contá el cajón y escribí cuánto hay.'); return;
+  }
+  const ok = await preguntar('¿Cerrar la caja?',
+    'Una vez cerrada no se puede reabrir, y las ventas de este turno dejan de poder anularse.',
+    'Cerrar caja');
+  if(!ok) return;
+  const r = await lamaLlamar('arqueo_cerrar', {
+    p_arqueo_id: LAMA_ARQ.id, p_efectivo_contado: contado,
+    p_comentario: String(m.comentario||'').trim() || null, p_quien: NOMBRE});
+  if(!r) return;
+  LAMA_ARQ = null; LAMA_ARQ_MOVS = [];
+  LAMA_ARQ_MODAL = {modo:'cerrada', arqueo:r};
+  lamaArqPintarBanner(); lamaArqPintarModal();
+}
+
+function lamaArqEngancharUnaVez(){
+  const banner = $('lama-arq-banner');
+  if(banner && !banner.dataset.enganchado){
+    banner.dataset.enganchado = '1';
+    banner.addEventListener('click', e => {
+      const b = e.target.closest('[data-lamaarq]'); if(!b) return;
+      const acc = b.dataset.lamaarq;
+      if(acc === 'abrir') lamaArqAbrirModal();
+      else if(acc === 'turno') lamaArqAbrirTurno();
+    });
+  }
+  const modal = $('lama-arqueo');
+  if(modal && !modal.dataset.enganchado){
+    modal.dataset.enganchado = '1';
+    modal.addEventListener('click', async e => {
+      if(!LAMA_ARQ_MODAL) return;
+      if(e.target.dataset && e.target.dataset.arqfondo){ lamaArqCerrarModal(); return; }
+      const b = e.target.closest('[data-lamaarq]'); if(!b) return;
+      const acc = b.dataset.lamaarq;
+      if(acc === 'cancelar')             { lamaArqCerrarModal(); return; }
+      if(acc === 'volver-turno')         { await lamaArqAbrirTurno(); return; }
+      if(acc === 'movimiento')           { lamaArqAbrirMovimiento(); return; }
+      if(acc === 'ir-cerrar')            { await lamaArqAbrirCerrar(); return; }
+      if(acc === 'confirmar-abrir')      { await lamaArqConfirmarAbrir(); return; }
+      if(acc === 'confirmar-movimiento') { await lamaArqConfirmarMovimiento(); return; }
+      if(acc === 'confirmar-cerrar')     { await lamaArqConfirmarCerrar(); return; }
+    });
+    /* Como en `lamaAnularEngancharUnaVez`: guardar en el estado sin repintar,
+       para no perder el foco en la primera letra. */
+    modal.addEventListener('input', e => {
+      if(!LAMA_ARQ_MODAL) return;
+      const id = e.target.id;
+      if(id === 'arq-in-monto')   LAMA_ARQ_MODAL.monto_inicial = e.target.value;
+      if(id === 'arq-in-mmonto')  LAMA_ARQ_MODAL.monto = e.target.value;
+      if(id === 'arq-in-nota')    LAMA_ARQ_MODAL.nota = e.target.value;
+      if(id === 'arq-in-contado') LAMA_ARQ_MODAL.efectivo_contado = e.target.value;
+      if(id === 'arq-in-coment') LAMA_ARQ_MODAL.comentario = e.target.value;
+    });
+    modal.addEventListener('change', e => {
+      if(LAMA_ARQ_MODAL && e.target.id === 'arq-in-tipo') LAMA_ARQ_MODAL.tipo = e.target.value;
+    });
+  }
+}
+
 function lamaPintar(){
   lamaCobrarEngancharUnaVez();
   lamaAnularEngancharUnaVez();
+  lamaArqEngancharUnaVez();
   lamaPintarPlano(); lamaPintarPanel(); lamaPintarFab();
   lamaPintarCarta(); lamaPintarPP();
+  lamaArqPintarBanner();
 }
 
 /* EL TAMAÑO DE LAS MESAS — lo elige quien mira, no el código.
@@ -14392,6 +14775,16 @@ const INTERRUPTORES = [
   { clave:'aviso_motor', porSede:[''], defecto:true,
     tit:'Aviso de sincronización',
     sub:'La franja bajo las pestañas cuando el reloj lleva rato sin correr. Solo la ve administración.' },
+  /* F6 · EL ARQUEO CIEGO — "una de las joyas de la corona" (Jhon,
+     2026-09-21). Fudo lo hace quitándole un permiso al rol Cajero; acá no
+     hay roles (§6.1), así que es un interruptor por sede en vez de un
+     permiso por persona — la misma salida que ya se usó para no construir
+     un sistema de roles por una sola casilla. Apagado (de fábrica) es
+     exactamente lo de hoy: el cajero ve cuánto debería haber antes de
+     contar. Encendido, cuenta a ciegas — el control anti-fraude real. */
+  { clave:'arqueo_ciego', porSede:['plaza','angamos'], defecto:false,
+    tit:'Arqueo ciego',
+    sub:'Al cerrar la caja, el cajero cuenta sin ver cuánto debería haber. Apagado, ve el total esperado antes de contar.' },
 ];
 
 async function ajCargarAjustes(){
