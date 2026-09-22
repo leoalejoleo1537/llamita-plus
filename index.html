@@ -258,6 +258,15 @@
      empujar el nombre de la sede fuera de la barra */
   @media (max-width:370px){ .sync-btn .cuerpo .tx{display:none} .sync-btn .cuerpo{padding:0 11px} }
   @media (prefers-reduced-motion: reduce){ .sync-btn .onda{animation:none !important} }
+  /* CON EL PANEL FIJADO (computador), "Actualizar" ya vive en el riel de la
+     izquierda (Atajos → Actualizar) — el mismo botón, la misma función,
+     dos lugares. Jhon lo pidió sacar de arriba por redundante (2026-09-22).
+     En el teléfono el riel es un cajón que hay que abrir con las tres
+     rayas, así que ahí el botón de arriba SIGUE siendo el único camino
+     rápido y se queda. `body.pc-ancho` es la clase real de "el panel está
+     fijado", no el ancho de pantalla: una pantalla ancha con el panel
+     suelto vuelve a necesitar este botón. */
+  body.pc-ancho #btnActualizar{display:none}
   .icon-btn:disabled{opacity:.55;cursor:default}
   .icon-btn.on{background:rgba(255,255,255,.18)}
   .icon-btn{position:relative}
@@ -1448,6 +1457,56 @@
   .arq-mov .v.egreso{color:var(--red-fg)}
   .arq-mov .v.gris{color:var(--muted);font-weight:600}
   .arq-mov + .arq-mov{border-top:1px solid var(--linea)}
+
+  /* ══════════ LA PÁGINA DE ARQUEO — 2026-09-22 ══════════
+     Una tarjeta por turno, igual que `.hist-card`, con una píldora de
+     estado y el color de la diferencia — la misma idea que Fudo resuelve
+     con una tabla ancha, adaptada a una columna porque acá el aparato que
+     manda es el teléfono. */
+  .arqpag-fila{background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:13px 15px;margin-bottom:9px;cursor:pointer;display:flex;
+    align-items:center;gap:12px}
+  .arqpag-fila:active{transform:scale(.99)}
+  .arqpag-fila .cent{flex:1;min-width:0}
+  .arqpag-fila .f{font-size:14.5px;font-weight:700;color:var(--text)}
+  .arqpag-fila .m{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .arqpag-fila .der{text-align:right;flex:0 0 auto}
+  .arqpag-fila .sist{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+  .arqpag-chip{display:inline-block;border-radius:999px;padding:3px 10px;font-size:11.5px;
+    font-weight:800;margin-top:4px}
+  .arqpag-chip.abierta{background:var(--azul-bg);color:var(--azul-fg)}
+  .arqpag-chip.cuadrada{background:var(--green-bg);color:var(--green-fg)}
+  .arqpag-chip.sobra{background:var(--green-bg);color:var(--green-fg)}
+  .arqpag-chip.falta{background:var(--red-bg);color:var(--red-fg)}
+  /* El desglose por medio, indentado — Efectivo/Débito arriba, sus Ventas y
+     Propinas debajo, más chico y gris. Sin interactividad de abrir/cerrar
+     a propósito: con dos o tres medios por turno, mostrarlo entero de una
+     vez es más simple que un acordeón que hay que tocar para cada uno. */
+  .arqpag-medio{font-weight:700;font-size:14.5px;margin-top:2px}
+  .arqpag-medio:first-child{margin-top:0}
+  .arqpag-sub{display:flex;justify-content:space-between;padding:2px 0 2px 16px;
+    font-size:12.5px;color:var(--muted)}
+  .arqpag-cab{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .arqpag-cab h2{margin:0;font-size:17px}
+  .arqpag-vacio{text-align:center;color:var(--muted);padding:30px 10px;font-size:14px}
+
+  /* ══════════ MOVIMIENTOS DE CAJA — su propia página ══════════ */
+  .movcaja-fila{display:flex;align-items:center;gap:11px;background:var(--card);
+    border:1px solid var(--border);border-radius:13px;padding:11px 14px;margin-bottom:7px}
+  .movcaja-fila .n{flex:1;min-width:0}
+  .movcaja-fila .n b{display:block;font-size:14px}
+  .movcaja-fila .n span{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+  .movcaja-fila .v{font-weight:800;font-size:15px;font-variant-numeric:tabular-nums;flex:0 0 auto}
+  .movcaja-fila .v.ingreso{color:var(--green-fg)}
+  .movcaja-fila .v.egreso{color:var(--red-fg)}
+  .movcaja-form{background:var(--card);border-radius:14px;box-shadow:var(--sombra);
+    padding:14px 16px;margin-bottom:16px}
+  .movcaja-form h3{margin:0 0 10px;font-size:15px}
+  .movcaja-form .fila2{display:flex;gap:10px}
+  .movcaja-form .fila2 .arq-campo{flex:1}
+  .movcaja-cerrada{display:flex;align-items:center;gap:10px;background:var(--amber-bg);
+    color:var(--amber-fg);border-radius:13px;padding:12px 14px;font-size:13.5px;
+    font-weight:700;margin-bottom:16px}
 
   .lama-desc{margin-top:10px}
   .lama-desc-abrir{margin-top:10px}
@@ -2934,6 +2993,17 @@
     <button class="tab tab-icon" data-tab="lama" id="tabLama" aria-label="Mesas" title="Mesas" style="display:none">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5.5 10v9a1 1 0 0 0 1 1H10v-6h4v6h3.5a1 1 0 0 0 1-1v-9"></path></svg><span class="solo-riel">Mesas</span>
     </button>
+    <!-- ARQUEO Y MOVIMIENTOS DE CAJA — pestañas propias, pedidas por Jhon el
+         2026-09-22 mirando la pantalla real de Fudo: allá el arqueo tiene su
+         propia página (historial + el turno en vivo), separada de Ventas y
+         de Movimientos de caja. Van junto a Mesas y no dentro del menú
+         porque son del mismo trabajo — cobrar y cuadrar la caja —, la misma
+         razón por la que Recibir/Enviar son pestañas propias en Bodega en
+         vez de dos modos escondidos adentro de Reparto. Nacen ocultas con
+         la misma condición que Mesas: sin `puede_lama` no hay nada que
+         cuadrar. -->
+    <button class="tab" data-tab="arqueo" id="tabArqueo" style="display:none">Arqueo</button>
+    <button class="tab" data-tab="movcaja" id="tabMovCaja" style="display:none">Movimientos</button>
     <!-- El inventario pasa a ser una sección más, como Reparto o Recetas. -->
     <button class="tab active" data-tab="inv" id="tabInv">Inventario</button>
     <button class="tab" data-tab="reparto">Reparto <span class="tab-badge" id="repBadge" style="display:none"></span></button>
@@ -3594,6 +3664,28 @@
   <div id="lama-arqueo"></div>
 </div>
 
+<!-- ================= ARQUEO DE CAJA — su propia página =================
+     Pedida por Jhon el 2026-09-22 mirando la pantalla real de Fudo: el
+     arqueo tiene ahí su propio lugar, con el historial completo y el turno
+     en vivo, no solo un aviso arriba del plano. La página vive de los
+     mismos datos que ya carga Mesas (`LAMA_ARQ`, `lamaArqCargar`,
+     `lamaArqPorMedio`) — dos pantallas, un solo dueño de la verdad. -->
+<div class="wrap" id="view-arqueo" style="display:none">
+  <div id="arqpag-cuerpo"><div class="empty">Cargando…</div></div>
+  <div id="arqpag-detalle"></div>
+</div>
+
+<!-- ================= MOVIMIENTOS DE CAJA — su propia página =============
+     El ingreso/egreso de mano, en un libro aparte del arqueo — igual que en
+     Fudo, donde "Movimientos de caja" es su propia pestaña. Anotar uno acá
+     es la MISMA función (`arqueo_movimiento`) que "Movimiento" dentro de la
+     tarjeta del turno; esta página es otra puerta a la misma escritura, no
+     una segunda. -->
+<div class="wrap" id="view-movcaja" style="display:none">
+  <div id="movcaja-form"></div>
+  <div id="movcaja-lista"><div class="empty">Cargando…</div></div>
+</div>
+
 <!-- ================= RECETAS ================= -->
 <div class="wrap" id="view-recetas" style="display:none">
 
@@ -3795,7 +3887,7 @@ const SEDES = {
   central: { label:'Bodega',           corto:'Bodega',     excel:'bodega'  },
 };
 /* el título de la barra dice en qué estás, como en Fudo */
-const TITULOS = {inv:'Inventario', reparto:'Reparto', recepcion:'Lo que llega a bodega', envios:'Enviar a los locales', aplaza:'Enviar a Mall Plaza', hist:'Historial', recetas:'Recetas', mermas:'Mermas', enlaces:'Enlaces', lama:'Mesas', ajustes:'Ajustes'};
+const TITULOS = {inv:'Inventario', reparto:'Reparto', recepcion:'Lo que llega a bodega', envios:'Enviar a los locales', aplaza:'Enviar a Mall Plaza', hist:'Historial', recetas:'Recetas', mermas:'Mermas', enlaces:'Enlaces', lama:'Mesas', arqueo:'Arqueo de caja', movcaja:'Movimientos de caja', ajustes:'Ajustes'};
 let SEDE = null;
 let channel = null;
 /* Lo pide pickSede() y lo cumple aplicarPermisos(): "abrí en el hogar, que
@@ -4128,6 +4220,14 @@ function aplicarPermisos(){
   const hayLama = !!(PERMISOS.puede_lama && SEDE && SEDE !== 'central');
   if(tl) tl.style.display = hayLama ? '' : 'none';
   if(!PERMISOS.puede_lama && vistaActual === 'lama') pickTab('inv');
+  /* Arqueo y Movimientos de caja son del mismo permiso que Mesas — cuadrar
+     la caja no es un trabajo aparte de vender, así que no se inventa un
+     candado nuevo (§0.8: un permiso se justifica por lo que decide, y acá
+     no hay una decisión distinta que proteger). */
+  const taq = $('tabArqueo'), tmc = $('tabMovCaja');
+  if(taq) taq.style.display = hayLama ? '' : 'none';
+  if(tmc) tmc.style.display = hayLama ? '' : 'none';
+  if(!hayLama && (vistaActual === 'arqueo' || vistaActual === 'movcaja')) pickTab('inv');
 
   /* EL ATERRIZAJE EN EL HOGAR. pickSede pidió abrir en el hogar, pero allá
      todavía no se sabía si esta cuenta tiene Mesas; acá sí. Se cumple una
@@ -6939,6 +7039,288 @@ function lamaArqEngancharUnaVez(){
   }
 }
 
+/* ================================================================
+   LA PÁGINA DE ARQUEO — pedida por Jhon el 2026-09-22 mirando la pantalla
+   real de Fudo (Arqueos de Caja: historial a la izquierda, detalle a la
+   derecha). Acá el detalle es una ficha superpuesta, no una columna — el
+   aparato que manda es el teléfono. Reusa el mismo estado y las mismas
+   consultas que el aviso de Mesas (`LAMA_ARQ`, `lamaArqCargar`), así que
+   las dos pantallas nunca pueden decir cosas distintas sobre el mismo
+   turno: una verdad, dos vitrinas.
+
+   Abrir y cerrar la caja SIGUEN viviendo solo en Mesas — acá no hay botón
+   para eso. No es una limitación de esta pantalla: es que un turno se abre
+   parado frente al mesón, no revisando el historial. */
+let ARQPAG_LISTA = [];   // arqueos de esta sede, abiertos y cerrados, recientes primero
+let ARQPAG_SEL   = null; // el id del que está mostrando el detalle, o null
+
+async function arqPagCargar(){
+  const cuerpo = $('arqpag-cuerpo'); if(!cuerpo) return;
+  arqPagEngancharUnaVez();
+  cuerpo.innerHTML = '<div class="empty">Cargando…</div>';
+  await lamaArqCargar();
+  if(!LAMA_ARQ_SQL){
+    cuerpo.innerHTML = '<div class="arqpag-vacio">Todavía no está corrido<br><code>sql/2026-09-lama-arqueo.sql</code>.</div>';
+    return;
+  }
+  const r = await sb.from('lama_arqueos').select('*')
+    .eq('sede', SEDE).order('abierto_at', {ascending:false}).limit(30);
+  ARQPAG_LISTA = r.data || [];
+  arqPagPintar();
+}
+
+function arqPagFilaHTML(a){
+  const abierta = a.estado === 'abierta';
+  const dIni = new Date(a.abierto_at).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit'});
+  const hIni = new Date(a.abierto_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+  const hFin = a.cerrado_at ? new Date(a.cerrado_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}) : null;
+  let chip, sistTxt;
+  if(abierta){
+    chip = '<span class="arqpag-chip abierta">Abierta</span>';
+    sistTxt = '—';
+  } else {
+    const dif = +a.diferencia || 0;
+    const clase    = dif === 0 ? 'cuadrada' : (dif > 0 ? 'sobra' : 'falta');
+    const etiqueta = dif === 0 ? 'Cuadrada' : (dif > 0 ? 'Sobra ' : 'Falta ') + plata(Math.abs(dif));
+    chip = `<span class="arqpag-chip ${clase}">${etiqueta}</span>`;
+    sistTxt = plata(a.efectivo_esperado);
+  }
+  return `<div class="arqpag-fila" data-arqpagver="${a.id}">
+    <div class="cent">
+      <div class="f">${dIni} · ${hIni}${hFin ? ' → ' + hFin : ''}</div>
+      <div class="m">${a.abierto_por ? 'Abrió ' + esc(a.abierto_por) : ''}${a.cerrado_por ? ' · Cerró ' + esc(a.cerrado_por) : ''}</div>
+      ${chip}
+    </div>
+    <div class="der"><div class="sist">${sistTxt}</div></div>
+  </div>`;
+}
+
+function arqPagPintar(){
+  const cuerpo = $('arqpag-cuerpo'); if(!cuerpo) return;
+  const cab = '<div class="arqpag-cab"><h2>Arqueo de caja</h2></div>';
+  cuerpo.innerHTML = cab + (ARQPAG_LISTA.length
+    ? ARQPAG_LISTA.map(arqPagFilaHTML).join('')
+    : '<div class="arqpag-vacio">Todavía no hay ningún arqueo en esta sede.</div>');
+}
+
+/* Lo cobrado entre dos fechas, por medio, separando venta de propina — la
+   misma pareja que Fudo despliega en su detalle. `hasta` en null es "hasta
+   ahora", para un turno todavía abierto. */
+async function arqDesglose(desde, hasta){
+  let qp = sb.from('cuenta_pagos').select('medio,monto,cuentas!inner(sede)').eq('cuentas.sede', SEDE).gte('created_at', desde);
+  let qt = sb.from('cuenta_propinas').select('medio,monto,cuentas!inner(sede)').eq('cuentas.sede', SEDE).gte('created_at', desde);
+  if(hasta){ qp = qp.lte('created_at', hasta); qt = qt.lte('created_at', hasta); }
+  const [rp, rt] = await Promise.all([qp, qt]);
+  const out = {};
+  for(const p of (rp.data || [])){
+    if(!out[p.medio]) out[p.medio] = {ventas:0, propinas:0};
+    out[p.medio].ventas += (+p.monto || 0);
+  }
+  for(const p of (rt.data || [])){
+    if(!out[p.medio]) out[p.medio] = {ventas:0, propinas:0};
+    out[p.medio].propinas += (+p.monto || 0);
+  }
+  return out;
+}
+
+async function arqPagAbrirDetalle(id){
+  const a = ARQPAG_LISTA.find(x => x.id === id); if(!a) return;
+  ARQPAG_SEL = id;
+  arqPagPintarDetalle(a, null, []);
+  const [desglose, movsR] = await Promise.all([
+    arqDesglose(a.abierto_at, a.cerrado_at),
+    sb.from('lama_caja_movimientos').select('*').eq('arqueo_id', a.id).order('id')
+  ]);
+  if(ARQPAG_SEL !== id) return;   // se cerró la ficha, o se abrió otra, mientras cargaba
+  arqPagPintarDetalle(a, desglose, movsR.data || []);
+}
+
+function arqPagCerrarDetalle(){ ARQPAG_SEL = null; const d = $('arqpag-detalle'); if(d) d.innerHTML = ''; }
+
+function arqPagPintarDetalle(a, desglose, movs){
+  const cont = $('arqpag-detalle'); if(!cont) return;
+  const abierta = a.estado === 'abierta';
+  const hIni = new Date(a.abierto_at).toLocaleString('es-CL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  const hFin = a.cerrado_at ? new Date(a.cerrado_at).toLocaleString('es-CL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : null;
+
+  let ingresosHTML = '<p class="cab" style="margin:0">Cargando…</p>';
+  let totalVentasProp = 0, totalIngManual = 0, totalEgresos = 0;
+  if(desglose){
+    const medios = Object.keys(desglose);
+    ingresosHTML = medios.length ? medios.map(k => {
+      const d = desglose[k];
+      const sub = d.ventas + d.propinas;
+      totalVentasProp += sub;
+      return `<div class="arqpag-medio">
+          <div style="display:flex;justify-content:space-between">
+            <span>${esc(lamaMedioNom(k))}</span><span>${plata(sub)}</span></div>
+          ${d.ventas   ? `<div class="arqpag-sub"><span>Ventas</span><span>${plata(d.ventas)}</span></div>` : ''}
+          ${d.propinas ? `<div class="arqpag-sub"><span>Propinas</span><span>${plata(d.propinas)}</span></div>` : ''}
+        </div>`;
+    }).join('') : '<p class="cab" style="margin:0">Sin cobros en este turno.</p>';
+  }
+  if(movs){
+    totalIngManual = movs.filter(m => m.tipo === 'ingreso').reduce((s,m) => s+(+m.monto||0), 0);
+    totalEgresos   = movs.filter(m => m.tipo === 'egreso').reduce((s,m) => s+(+m.monto||0), 0);
+  }
+  const totalGeneral = (+a.monto_inicial||0) + totalVentasProp + totalIngManual - totalEgresos;
+
+  let estadoHTML;
+  if(abierta){
+    estadoHTML = '<span class="arqpag-chip abierta">Abierta</span>';
+  } else {
+    const dif = +a.diferencia || 0;
+    const clase = dif === 0 ? 'cuadrada' : (dif > 0 ? 'sobra' : 'falta');
+    const txt   = dif === 0 ? 'Cuadrada' : (dif > 0 ? 'Sobra ' : 'Falta ') + plata(Math.abs(dif));
+    estadoHTML = `<span class="arqpag-chip ${clase}">${txt}</span>`;
+  }
+  const rotulo = s => `<div style="margin:14px 0 4px;font-size:11.5px;font-weight:700;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.04em">${s}</div>`;
+
+  cont.innerHTML = `<div class="arq-ficha" data-arqfondo="1" role="dialog" aria-modal="true" aria-label="Detalle del arqueo">
+    <div class="arq-tarj" style="max-width:440px">
+      <h4>Arqueo de caja</h4>
+      <p class="cab">${esc((SEDES[SEDE] && SEDES[SEDE].corto) || SEDE || '')} · ${estadoHTML}</p>
+      <div class="arq-ren"><span class="n">Abrió</span><span class="v">${esc(a.abierto_por || '—')} · ${hIni}</span></div>
+      ${a.cerrado_por ? `<div class="arq-ren"><span class="n">Cerró</span><span class="v">${esc(a.cerrado_por)} · ${hFin}</span></div>` : ''}
+      <div class="arq-ren"><span class="n">Monto inicial</span><span class="v">${plata(a.monto_inicial)}</span></div>
+      ${rotulo('Ingresos')}
+      ${ingresosHTML}
+      ${totalIngManual ? `<div class="arq-ren"><span class="n">Ingresos de mano</span><span class="v">${plata(totalIngManual)}</span></div>` : ''}
+      <div class="arq-ren"><span class="n">Egresos de mano</span><span class="v">${plata(totalEgresos)}</span></div>
+      <div class="arq-tot verde"><span class="n">Total</span><span>${plata(totalGeneral)}</span></div>
+      ${!abierta ? `
+        ${rotulo('Efectivo, según quien cerró')}
+        <div class="arq-ren"><span class="n">Sistema</span><span class="v">${plata(a.efectivo_esperado)}</span></div>
+        <div class="arq-ren"><span class="n">Contado</span><span class="v">${plata(a.efectivo_contado)}</span></div>
+        ${a.comentario ? `<div class="arq-ren"><span class="n">Comentario</span><span class="v gris">${esc(a.comentario)}</span></div>` : ''}
+      ` : `<p class="cab" style="margin-top:14px">Este turno sigue abierto — anotá movimientos o cerralo desde Mesas.</p>`}
+      ${movs && movs.length ? `${rotulo('Movimientos de mano')}
+        <div class="arq-lista">${movs.map(m => `<div class="arq-mov"><span class="n">${esc(m.nota)}</span>
+          <span class="v ${m.tipo}">${m.tipo==='ingreso'?'+ ':'− '}${plata(m.monto)}</span></div>`).join('')}</div>` : ''}
+      <div class="arq-btns"><button type="button" class="btn btn-gris" style="flex:1" data-arqpagcerrar="1">Cerrar</button></div>
+    </div>
+  </div>`;
+}
+
+function arqPagEngancharUnaVez(){
+  const cuerpo = $('arqpag-cuerpo');
+  if(cuerpo && !cuerpo.dataset.enganchado){
+    cuerpo.dataset.enganchado = '1';
+    cuerpo.addEventListener('click', e => {
+      const f = e.target.closest('[data-arqpagver]'); if(!f) return;
+      arqPagAbrirDetalle(+f.dataset.arqpagver);
+    });
+  }
+  const det = $('arqpag-detalle');
+  if(det && !det.dataset.enganchado){
+    det.dataset.enganchado = '1';
+    det.addEventListener('click', e => {
+      if((e.target.dataset && e.target.dataset.arqfondo) || e.target.closest('[data-arqpagcerrar]'))
+        arqPagCerrarDetalle();
+    });
+  }
+}
+
+/* ================================================================
+   MOVIMIENTOS DE CAJA — su propia página, igual que en Fudo. Anotar acá es
+   LA MISMA función (`arqueo_movimiento`) que el botón "Movimiento" dentro
+   de la tarjeta del turno en Mesas — dos puertas, una sola escritura.
+   ================================================================ */
+let MOVCAJA_LISTA = [];
+let MOVCAJA_NUEVO = {tipo:'egreso', monto:'', nota:''};
+
+async function movCajaCargar(){
+  const form = $('movcaja-form'), lista = $('movcaja-lista');
+  if(!form || !lista) return;
+  movCajaEngancharUnaVez();
+  lista.innerHTML = '<div class="empty">Cargando…</div>';
+  await lamaArqCargar();
+  movCajaPintarForm();
+  if(!LAMA_ARQ_SQL){
+    lista.innerHTML = '<div class="arqpag-vacio">Todavía no está corrido<br><code>sql/2026-09-lama-arqueo.sql</code>.</div>';
+    return;
+  }
+  const r = await sb.from('lama_caja_movimientos')
+    .select('*, lama_arqueos!inner(sede)')
+    .eq('lama_arqueos.sede', SEDE)
+    .order('created_at', {ascending:false}).limit(100);
+  MOVCAJA_LISTA = r.data || [];
+  movCajaPintarLista();
+}
+
+function movCajaPintarForm(){
+  const cont = $('movcaja-form'); if(!cont) return;
+  if(!LAMA_ARQ){
+    cont.innerHTML = `<div class="movcaja-cerrada">
+      <span>No hay una caja abierta en esta sede — abrila desde Mesas para poder anotar un movimiento.</span>
+    </div>`;
+    return;
+  }
+  const m = MOVCAJA_NUEVO;
+  cont.innerHTML = `<div class="movcaja-form">
+    <h3>Anotar un movimiento</h3>
+    <div class="fila2">
+      <div class="arq-campo"><label>Tipo</label>
+        <select id="movcaja-tipo">
+          <option value="egreso"${m.tipo==='egreso'?' selected':''}>Egreso — sale plata</option>
+          <option value="ingreso"${m.tipo==='ingreso'?' selected':''}>Ingreso — entra plata</option>
+        </select></div>
+      <div class="arq-campo"><label>Monto</label>
+        <input type="number" inputmode="decimal" id="movcaja-monto" placeholder="$ 0" value="${esc(m.monto)}"></div>
+    </div>
+    <div class="arq-campo"><label>Nota</label>
+      <input type="text" id="movcaja-nota" placeholder="Para qué es" value="${esc(m.nota)}"></div>
+    <div class="arq-btns"><button type="button" class="btn btn-orange" style="flex:1" data-movcaja="guardar">Guardar</button></div>
+  </div>`;
+}
+
+function movCajaPintarLista(){
+  const cont = $('movcaja-lista'); if(!cont) return;
+  if(!MOVCAJA_LISTA.length){
+    cont.innerHTML = '<div class="arqpag-vacio">Todavía no hay ningún movimiento anotado.</div>';
+    return;
+  }
+  cont.innerHTML = MOVCAJA_LISTA.map(m => {
+    const fecha = new Date(m.created_at).toLocaleString('es-CL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    return `<div class="movcaja-fila">
+      <div class="n"><b>${esc(m.nota)}</b><span>${fecha}${m.creado_por ? ' · '+esc(m.creado_por) : ''}</span></div>
+      <div class="v ${m.tipo}">${m.tipo==='ingreso'?'+ ':'− '}${plata(m.monto)}</div>
+    </div>`;
+  }).join('');
+}
+
+async function movCajaGuardar(){
+  if(!LAMA_ARQ) return;
+  const m = MOVCAJA_NUEVO;
+  const monto = +String(m.monto).replace(/[^\d.-]/g,'');
+  if(!monto || monto <= 0){ avisar('El monto tiene que ser mayor que cero.'); return; }
+  if(!String(m.nota||'').trim()){ avisar('Escribí para qué es este movimiento.'); return; }
+  const r = await lamaLlamar('arqueo_movimiento', {
+    p_arqueo_id: LAMA_ARQ.id, p_tipo: m.tipo, p_monto: monto,
+    p_nota: m.nota.trim(), p_quien: NOMBRE});
+  if(!r) return;
+  MOVCAJA_NUEVO = {tipo:'egreso', monto:'', nota:''};
+  aviso('✓ Anotado');
+  await movCajaCargar();
+}
+
+function movCajaEngancharUnaVez(){
+  const form = $('movcaja-form');
+  if(!form || form.dataset.enganchado) return;
+  form.dataset.enganchado = '1';
+  form.addEventListener('click', e => {
+    if(e.target.closest('[data-movcaja="guardar"]')) movCajaGuardar();
+  });
+  form.addEventListener('input', e => {
+    if(e.target.id === 'movcaja-monto') MOVCAJA_NUEVO.monto = e.target.value;
+    if(e.target.id === 'movcaja-nota')  MOVCAJA_NUEVO.nota  = e.target.value;
+  });
+  form.addEventListener('change', e => {
+    if(e.target.id === 'movcaja-tipo') MOVCAJA_NUEVO.tipo = e.target.value;
+  });
+}
+
 function lamaPintar(){
   lamaCobrarEngancharUnaVez();
   lamaAnularEngancharUnaVez();
@@ -7017,7 +7399,15 @@ function lamaPintarPlano(){
     ? LAMA_MESAS.filter(m => lamaSecciones(LAMA_PAGINA).some(x => x.id === m.area_id))
     : LAMA_MESAS.filter(m => m.salon === LAMA_SALON);
   cont.classList.toggle('con-secciones', conAreas);
-  if(!mesas.length){
+  /* BUG DEL 2026-09-22: con la página en cero mesas, este `return` cortaba
+     ANTES de llegar al renderizador de secciones — y ese es el único lugar
+     que dibuja el "+" de agregar mesa y los botones de agregar sección o
+     página. Resultado: entrar a editar una página vacía (como "ADM" recién
+     creada) mostraba el cartel de "no tiene mesas" y ninguna forma de
+     arreglarlo. Editando SÍ hay algo que hacer con una página vacía —
+     agregarle algo—, así que edición se deja pasar al renderizador de
+     siempre, que ya sabe dibujar una sección sin mesas (línea ~7079). */
+  if(!mesas.length && !(conAreas && LAMA_EDITA)){
     cont.innerHTML = conAreas
       ? '<div class="empty">Esta página todavía no tiene mesas.</div>'
       : '<div class="empty">Esta sede todavía no tiene mesas.</div>';
@@ -15755,6 +16145,8 @@ function pickTab(tab){
   $('view-repcentral').style.display = esEnvios ? 'block':'none';
   $('view-aplaza').style.display     = (tab==='aplaza') ? 'block':'none';
   $('view-lama').style.display       = (tab==='lama') ? 'block':'none';
+  $('view-arqueo').style.display     = (tab==='arqueo') ? 'block':'none';
+  $('view-movcaja').style.display    = (tab==='movcaja') ? 'block':'none';
   if(tab==='aplaza') apAbrir();
   if(tab==='enlaces'){ enlPintarPendientes(); enlPintarDesde(); }
   $('view-hist').style.display = tab==='hist'?'block':'none';
@@ -15785,6 +16177,8 @@ function pickTab(tab){
      todo —otro garzón abrió mesas, cerró otras— y esta pantalla es la más
      dinámica de la app. Es barato: cuatro consultas chicas. */
   if(tab==='lama') lamaCargar();
+  if(tab==='arqueo') arqPagCargar();
+  if(tab==='movcaja') movCajaCargar();
   if(tab==='ajustes'){
     $('aj-volver-txt').textContent = 'Volver a ' + (SEDE ? SEDES[SEDE].label : 'el inventario');
     pintarAjustes();

@@ -163,6 +163,24 @@ ofrece ni un botón que lo intente.
 en las cuatro funciones y las tablas nuevas en 0 filas. **El arqueo está vivo
 en Mesas**, de punta a punta.
 
+🟢 **2026-09-22 · dos pestañas propias, como en Fudo.** Jhon pidió que el
+arqueo tuviera su propia página —historial completo + detalle por
+turno—, en vez de vivir solo escondido detrás de un enlace en Mesas.
+Quedaron **"Arqueo"** (la lista de todos los turnos con su diferencia, y al
+tocar uno el detalle: monto inicial, lo cobrado por medio separado en
+ventas y propinas —igual que la pantalla real de Fudo—, movimientos de
+mano, total) y **"Movimientos"** (el libro de ingresos/egresos de mano,
+con su propio formulario para anotar uno, sin tener que pasar por Mesas).
+Abrir y cerrar la caja **siguen viviendo solo en Mesas** — a propósito, un
+turno se abre parado frente al mesón, no revisando un historial.
+
+⚠️ **Bug de arrastre encontrado y corregido el mismo día:** una página del
+plano con cero mesas (como "ADM" recién creada) no dejaba agregar ninguna
+en modo edición — el cartel de "esta página no tiene mesas" se dibujaba
+ANTES de llegar al código que pinta el "+" de agregar. Con el modo edición
+puesto, ahora sí se llega a esa parte del dibujo aunque la página esté
+vacía.
+
 ### Conexión Lama ↔ Stock — 0 de 3 ⬜
 
 Que cerrar una mesa descuente el inventario · que anular lo devuelva · leer

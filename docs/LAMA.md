@@ -1864,6 +1864,13 @@ poder crearlas ella:
 4. **Qué detalle lleva el ticket** — editable, con su propia pantalla. Sale de A2
 5. ~~**El tamaño y la POSICIÓN de las mesas.**~~ — **resuelto el 2026-09-05/08**: el tamaño se ajusta con el ⚙ del plano (por dispositivo), y la posición quedó resuelta como *páginas → secciones → mesas*, no como coordenadas libres — la mesa 7 se ubica agrupándola en su sección ("junto a la ventana" es un nombre de sección, no una coordenada en un mapa). Reordenar las secciones es con flechas, no arrastrando (F4, `docs/propuesta-lama-mesas.html`).
 6. ~~**Dónde queda registrada la anulación**~~ — **resuelto el 2026-09-01**: en las columnas `anulado_at`, `anulado_por`, `anulado_motivo` y `anulado_comentario` de `cuenta_items`, y los motivos en `lama_motivos_anulacion`. **Lo que falta es la pantalla** para que Adriana cree motivos nuevos, y un listado de lo anulado del día para el arqueo.
+7. **Pedido por Jhon el 2026-09-22:** un interruptor en Ajustes para prender
+   o apagar la conexión con Fudo — no un detalle de qué sincroniza (eso ya
+   lo hacen los `FUDO_ACCIONES` de §0.65), sino un apagado general, de un
+   solo botón. Todavía no está construido: falta decidir qué significa
+   "apagado" sin dejar un hueco (§2.2) — ¿deja de correr el reloj
+   automático? ¿el botón ⟳ sigue leyendo el catálogo pero no empuja stock?
+   Se pregunta antes de escribir el interruptor, no se asume.
 
 ---
 
