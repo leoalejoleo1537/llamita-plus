@@ -171,23 +171,19 @@ await caso('el cuadrito NO muestra quién abrió la mesa', async () =>
   !(await page.textContent('[data-lamamesa="101"]')).includes('adriana')
   || 'pinta el correo de quien la abrió, y eso es ruido');
 
-/* ⚠️ REVERSA A PROPÓSITO 2026-09-11. Hasta hoy los tres colores eran SÓLIDOS
-   con el número en blanco, como en Fudo — la prueba se llamaba "las mesas son
-   sólidas, no un tono pálido del fondo" y este mismo comentario decía que el
-   azul de "cobrando" no se despegaba del fondo si era pálido.
-
-   La maqueta que trajo Jhon (Claude Diseño, 2026-09-11) pide lo contrario:
-   "las mesas mantienen fondo lleno, pero en versión tinte... sin grito", con
-   el color pleno reservado a la mesa SELECCIONADA (ver el caso del halo, más
-   abajo). No es un olvido de esta prueba: es la decisión vieja, cambiada por
-   la persona que puede cambiarla. */
-await caso('las mesas son un tinte, no un relleno sólido', async () => {
+/* ⚠️ REVERSA A PROPÓSITO 2026-09-22, Y OTRA VEZ. La maqueta del 2026-09-11
+   había pedido tinte pálido para los tres estados, y esta prueba se
+   actualizó para exigirlo. Jhon, usando la app de verdad: "el color está
+   en los números, no en la mesa... no puedo verlo bien". Vuelve a ser
+   relleno sólido, como Fudo — la decisión de nuevo cambiada por la persona
+   que puede cambiarla, y otra vez no es un olvido de esta prueba. */
+await caso('las mesas NO libres son un relleno sólido, con el número en blanco', async () => {
   const c = await page.evaluate(()=>{
     const e = document.querySelector('[data-lamamesa="102"]');   // la que está cobrando
     const s = getComputedStyle(e);
     return {fondo:s.backgroundColor, texto:s.color};
   });
-  return (c.fondo === 'rgb(250, 241, 221)' && c.texto === 'rgb(156, 98, 9)')
+  return (c.fondo === 'rgb(156, 98, 9)' && c.texto === 'rgb(255, 255, 255)')
     || 'quedó '+JSON.stringify(c);
 });
 /* El glosario de colores se sacó: tres cuadritos de colores no necesitan pie
@@ -240,13 +236,13 @@ await caso('la mesa elegida se marca con un halo, no con un anillo', async () =>
   return (/rgba\(176, 84, 44/.test(s) && /px/.test(s) && !/0px 0px 0px 3px rgb/.test(s))
     || 'la marca no es un halo: '+s;
 });
-/* La OCUPADA pasó de sólida a tinte (mismo cambio que "cobrando", arriba). */
-await caso('la OCUPADA es un tinte, con el número en su color', async () => {
+/* La OCUPADA vuelve a sólida (mismo cambio que "cobrando", arriba). */
+await caso('la OCUPADA es un relleno sólido naranja, número en blanco', async () => {
   const c = await page.evaluate(()=>{
     const s = getComputedStyle(document.querySelector('[data-lamamesa="101"]'));
     return {f:s.backgroundColor, t:s.color};
   });
-  return (c.f === 'rgb(251, 238, 230)' && c.t === 'rgb(143, 68, 37)') || 'quedó '+JSON.stringify(c);
+  return (c.f === 'rgb(176, 84, 44)' && c.t === 'rgb(255, 255, 255)') || 'quedó '+JSON.stringify(c);
 });
 /* ⚠️ REGRESIÓN REAL — 2026-09-16. Jhon, mirando la app: "necesito que las
    mesas queden fijas!!! porque cuando paso de una mesa a otra estas se

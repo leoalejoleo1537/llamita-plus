@@ -964,7 +964,15 @@
      dispositivo (localStorage), no en la base: es comodidad de quien mira,
      no un dato del negocio. */
   @media (min-width:720px){
-    .lama-mesas{--mesa:82px;grid-template-columns:repeat(auto-fill,minmax(var(--mesa),1fr));
+    /* TAMAÑO FIJO, DE VERDAD — bug reportado el 2026-09-22: con
+       `minmax(var(--mesa),1fr)` la mesa mide "al menos --mesa, pero
+       estírate si sobra sitio". Al elegir una mesa el plano se angosta
+       (`.con-panel` de abajo) y entran menos columnas, así que a las que
+       quedan les tocaba más ancho cada una — la mesa 6 se veía el doble
+       de grande apenas se tocaba. Con el máximo IGUAL al mínimo, la mesa
+       mide siempre `--mesa` exacto: lo que cambia con el ancho disponible
+       es CUÁNTAS entran por fila, nunca el tamaño de cada una. */
+    .lama-mesas{--mesa:82px;grid-template-columns:repeat(auto-fill,minmax(var(--mesa),var(--mesa)));
       gap:10px;max-height:none;overflow:visible}
   }
 
@@ -990,7 +998,7 @@
     .lama-sec{padding:10px 11px 12px;margin-bottom:10px}
     .lama-sec-cab{font-size:12px;padding:0 2px 9px}
     .lama-sec-cab .c{font-size:11.5px}
-    .lama-rej{grid-template-columns:repeat(auto-fill,minmax(var(--mesa,82px),1fr));gap:10px}
+    .lama-rej{grid-template-columns:repeat(auto-fill,minmax(var(--mesa,82px),var(--mesa,82px)));gap:10px}
   }
   .lama-sec.c-a{background:#E9F1FC;color:#2C5AA0}
   .lama-sec.c-b{background:#E6F2E8;color:#2E7D32}
@@ -1136,9 +1144,17 @@
     .lama-mesa{aspect-ratio:1;padding:0;border-radius:var(--r-sec)}
     .lama-mesa .n{font-size:22px}
   }
+  /* VUELTA AL RELLENO SÓLIDO — pedido por Jhon el 2026-09-22, usando la app
+     de verdad: "el color está en los números, no en la mesa... no puedo
+     verlo bien". El tinte pálido del 2026-09-11 se pensó para que cuatro
+     fondos no compitieran entre sí, pero en la pantalla real la jerarquía
+     dejó de leerse de un vistazo — que es la única razón de ser del
+     cuadrito (línea de arriba). Entre las dos, gana la que se lee sin
+     esfuerzo: sólido, como Fudo, con "libre" como única excepción pálida
+     porque una mesa libre es la que menos necesita gritar. */
   .lama-mesa.libre{background:var(--green-bg);color:var(--green-fg)}
-  .lama-mesa.ocupada{background:var(--mesa-ocu-bg);color:var(--mesa-ocu-fg)}
-  .lama-mesa.cobrando{background:var(--azul-bg);color:var(--azul-fg)}
+  .lama-mesa.ocupada{background:var(--orange);color:#fff}
+  .lama-mesa.cobrando{background:var(--azul-fg);color:#fff}
   /* La mesa elegida se ENCIENDE, no se enmarca. Un halo terracota difuso que la
      levanta del plano, sin contorno duro — el anillo grueso anterior se leia
      como un ovalo con reborde, que es justo lo que la casa no usa. Y ahora,
