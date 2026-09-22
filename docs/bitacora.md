@@ -8,6 +8,32 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-09-22 (noche)** — **Una tanda de pedidos de Jhon usando la app.**
+  - **Abrir una mesa: de 648 ms a 87 ms**, medido con 300 ms de red simulada.
+    Se esperaban dos consultas, una detrás de la otra, antes de pintar nada.
+    Ahora la mesa y su panel aparecen al toque ("Cargando…" en el cuerpo, sin
+    botones — una mesa llena que se ve vacía un instante ofrecería "Cerrar
+    mesa"), las dos consultas van a la vez, y abrir una mesa libre ya no le
+    pregunta a la base por productos que no puede tener. De paso se tapó un
+    agujero: si se tocaban dos mesas rápido, los productos de la primera
+    podían pintarse en el panel de la segunda.
+  - **El buscador de la mesa se cierra al elegir** (con el dedo o el mouse) y
+    suelta el campo, para tocar enseguida el producto que entró. Es la
+    reversa de una decisión vieja ("seguir escribiendo"), y su prueba se
+    reescribió diciendo por qué. Con el teclado: ↓ ↑ para recorrer, Enter
+    para agregar, y el foco se queda en el campo para el próximo.
+  - **Arqueo:** el detalle dejó de ser tarjeta — es la columna derecha entera,
+    pegada al borde y hasta el fondo. El monto inicial es un dato más de la
+    lista, no una barra. Tarjeta nueva de **Propinas** (solo del abierto; las
+    tarjetas son todas del abierto). Y **Borrar arqueo**: no borra la fila, la
+    marca "eliminada" y la deja tachada en la lista — necesita
+    `sql/2026-09-lama-arqueo-eliminar.sql`.
+  - **Un bug que encontró la prueba nueva:** en el teléfono, "Caja abierta" en
+    Mesas mandaba a la lista de arqueos en vez de a la caja.
+  - **No se construyó, a propósito:** la fecha y hora de apertura (Jhon pidió
+    preguntar antes) y la unión Stock ↔ Plus (la F7, con la trampa del doble
+    descuento). Las dos listas de preguntas están al final de `docs/LAMA.md`.
+
 - **2026-09-22 (tarde)** — **La página de Arqueo, calcada de Fudo.** Jhon
   mandó las capturas de un arqueo ABIERTO de verdad (el de las 15:15 de Joan
   Ríos) y pidió dejar la ventana emergente: *"nos apeguemos fielmente a la

@@ -35,6 +35,11 @@ const ARQUEOS = [
    abierto_at:'2026-09-17T09:00:00-03:00', cerrado_at:'2026-09-17T15:05:06-03:00', cerrado_por:'Adriana',
    total_esperado:565659, total_declarado:565909, diferencia_total:250,
    efectivo_esperado:120000, efectivo_contado:120250, diferencia:250, comentario:'Sobró sencillo'},
+  /* El que Jhon abrió de prueba el 21 a las 21:30 y eliminó: en Fudo se ve
+     tachado, "$100.000 · Eliminado". */
+  {id:47, sede:'plaza', estado:'eliminada', estado_previo:'abierta', monto_inicial:100000,
+   abierto_por:'Jhon', abierto_at:'2026-09-21T21:30:42-03:00',
+   eliminado_por:'Jhon', eliminado_at:'2026-09-21T21:40:00-03:00'},
 ];
 const T0 = HOY+'16:00:00-03:00';
 const CUENTAS = [{id:900, sede:'plaza', mesa_id:null, estado:'cerrada', total:0}];
@@ -126,6 +131,12 @@ async function montar(page, {ancho = 1400, ciego = false} = {}){
           {arqueo_id:a.id, medio:'debito',   ventas:435680, propinas:40109, sistema:475789, usuario:475789, diferencia:0});
         return Promise.resolve({data:a, error:null});
       }
+      if(fn === 'arqueo_eliminar'){
+        const a = T.lama_arqueos.find(x => x.id === args.p_arqueo_id);
+        Object.assign(a, {estado_previo:a.estado, estado:'eliminada', eliminado_por:args.p_quien,
+                          eliminado_at:new Date().toISOString()});
+        return Promise.resolve({data:a, error:null});
+      }
       if(fn === 'arqueo_abrir'){
         const a = {id:51, sede:args.p_sede, estado:'abierta', monto_inicial:args.p_monto_inicial,
                    abierto_por:args.p_quien, abierto_at:new Date().toISOString()};
@@ -169,7 +180,7 @@ await caso('en el computador se ven las DOS mitades a la vez', async () =>
   || 'falta la lista o el detalle');
 await caso('el ABIERTO va primero en la lista', async () => {
   const est = await page.$$eval('#arqpag-cuerpo .arqp-fila[data-arqpagver] .c-est', e => e.map(x => x.textContent.trim()));
-  return (est[0] === 'Abierto' && est.slice(1).every(x => x === 'Cerrado')) || 'quedó ' + est.join(',');
+  return (est[0] === 'Abierto' && est.slice(1).every(x => x !== 'Abierto')) || 'quedó ' + est.join(',');
 });
 await caso('el abierto: Sistema en vivo, Usuario y Diferencia en "-"', async () => {
   const f = await txt(page, '.arqp-fila[data-arqpagver="50"]');
@@ -181,6 +192,25 @@ await caso('un cerrado con sobrante se ve en verde', async () =>
 await caso('las tarjetas de arriba: saldo actual y total de ventas', async () => {
   const r = await txt(page, '.arqp-resumen');
   return (/Saldo actual \$604\.609/.test(r) && /Total de ventas \$504\.609/.test(r)) || 'quedó ' + r;
+});
+await caso('y la tarjeta nueva: la propina del arqueo abierto ($2.420 + $40.109)', async () => {
+  const r = await txt(page, '.arqp-resumen');
+  return /Propinas \$42\.529/.test(r) || 'quedó ' + r;
+});
+await caso('el eliminado sigue en la lista: gris, tachado, "Eliminado"', async () => {
+  const f = await page.$eval('.arqp-fila[data-arqpagver="47"]', e => ({
+    c:e.className, td:getComputedStyle(e).textDecorationLine, est:e.querySelector('.c-est').textContent.trim(),
+    sis:e.querySelector('.c-num').textContent.trim()}));
+  return (/eliminado/.test(f.c) && f.td.includes('line-through') && f.est === 'Eliminado' && f.sis === '$100.000')
+    || JSON.stringify(f);
+});
+await caso('el detalle NO es una tarjeta: es la columna derecha, pegada al borde', async () => {
+  const r = await page.evaluate(() => {
+    const d = document.getElementById('arqpag-detalle').getBoundingClientRect();
+    const a = getComputedStyle(document.querySelector('#arqpag-detalle .arqd'));
+    return {der: Math.round(d.right), ancho: innerWidth, radio: a.borderTopLeftRadius, alto: Math.round(d.height), vh: innerHeight};
+  });
+  return (Math.abs(r.der - r.ancho) <= 16 && r.radio === '0px' && r.alto >= r.vh - 2) || JSON.stringify(r);
 });
 
 console.log('\nEl detalle del abierto, en el orden de Fudo:');
@@ -261,6 +291,7 @@ await caso('ya no hay caja abierta: aparece "+ Nuevo arqueo de caja"', async () 
 
 console.log('\nAbrir uno nuevo:');
 await page.click('[data-arqp="nuevo"]'); await page.waitForTimeout(300);
+const anchoMonto = await page.$eval('#arqd-monto', e => e.getBoundingClientRect().width);
 await page.fill('#arqd-monto', '100000');
 await page.click('[data-arqp="iniciar"]'); await page.waitForTimeout(900);
 await caso('llama a arqueo_abrir con el monto inicial', async () => {
@@ -272,17 +303,44 @@ await caso('y queda abierto, primero en la lista', async () => {
   return est[0] === 'Abierto' || est.join(',');
 });
 
+await caso('el campo del monto inicial es del tamaño de un dato, no una barra', async () =>
+  anchoMonto <= 200 || 'mide ' + anchoMonto + ' px');
+
+console.log('\nBorrar un arqueo:');
+await page.click('.arqp-fila[data-arqpagver="51"]'); await page.waitForTimeout(400);
+await page.click('[data-arqp="eliminar"]'); await page.waitForTimeout(300);
+await caso('pregunta antes, y avisa que NO desaparece', async () =>
+  /no desaparece/i.test(await txt(page, '#ask-detalle')) || 'no preguntó o no lo dijo');
+await page.click('#ask-ok'); await page.waitForTimeout(900);
+await caso('llama a arqueo_eliminar, nunca a un delete', async () => {
+  const c = await page.evaluate(() => window.__rpc.find(x => x.fn === 'arqueo_eliminar'));
+  return (c && c.args.p_arqueo_id === 51 && c.args.p_quien === 'Jhon') || JSON.stringify(c);
+});
+await caso('queda tachado en la lista, y la caja queda sin abrir', async () => {
+  const cl = await page.$eval('.arqp-fila[data-arqpagver="51"]', e => e.className);
+  return (/eliminado/.test(cl) && await page.isVisible('[data-arqp="nuevo"]')) || cl;
+});
+await caso('su detalle dice quién lo eliminó', async () =>
+  /Estado Eliminado/.test(await det()) && /Eliminado por Jhon/.test(await det()) || (await det()).slice(0, 300));
+
 console.log('\nEl aviso de Mesas lleva acá:');
 await page.click('#tabLama'); await page.waitForTimeout(700);
 await caso('Mesas ya no tiene su propia ventana de arqueo', async () =>
   !(await page.$('#lama-arqueo')) || 'sigue el contenedor viejo');
-await page.click('[data-lamaarq="turno"]'); await page.waitForTimeout(800);
-await caso('tocar "Caja abierta" abre la página de Arqueo', async () =>
-  await page.isVisible('#view-arqueo .arqd') || 'no navegó');
+/* Recién se borró el abierto, así que el aviso dice "no está abierta · Abrir":
+   ese botón tiene que llevar al formulario de un arqueo nuevo. */
+await page.click('[data-lamaarq="abrir"]'); await page.waitForTimeout(800);
+await caso('"Abrir" en el aviso de Mesas lleva al arqueo nuevo', async () =>
+  (await page.isVisible('#view-arqueo .arqd') && await page.isVisible('#arqd-monto')) || 'no navegó');
 
 console.log('\nEn el teléfono:');
 const tel = await browser.newPage(ZONA);
 await montar(tel, {ancho:390});
+await tel.click('#tabLama'); await tel.waitForTimeout(600);
+await tel.click('[data-lamaarq="turno"]'); await tel.waitForTimeout(800);
+await caso('"Caja abierta" en Mesas lleva DIRECTO al detalle de la caja', async () =>
+  (await tel.isVisible('#arqpag-detalle .arqd') && /Estado Abierto/.test(await txt(tel, '#arqpag-detalle')))
+  || 'no llegó al detalle');
 await tel.click('#tabArqueo'); await tel.waitForTimeout(700);
 await caso('se ve la lista primero, sin el detalle', async () =>
   (await tel.isVisible('#arqpag-cuerpo .arqp-tabla') && !(await tel.isVisible('#arqpag-detalle .arqd'))) || 'no');

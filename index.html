@@ -1322,6 +1322,9 @@
     max-height:min(48vh,330px);overflow-y:auto;padding:8px;-webkit-overflow-scrolling:touch}
   .lama-qp-lista .lama-prod{margin-bottom:6px}
   .lama-qp-lista .lama-prod:last-child{margin-bottom:0}
+  /* La fila elegida con las flechas. Un anillo de foco, no un borde de
+     diseño: es la misma señal que el navegador usa para el teclado. */
+  .lama-qp-lista .lama-prod.kb{outline:2px solid var(--orange);outline-offset:-2px}
   .lama-qp-nada{padding:16px 12px;text-align:center;color:var(--muted);font-size:14px}
 
   /* LAS PÍLDORAS. Cuatro, en dos columnas. Son los que más se comandan, para
@@ -1451,9 +1454,17 @@
      Fudo): esta página no vive dentro de #view-lama. */
   #view-arqueo{max-width:none}
   .arqp{display:grid;grid-template-columns:1fr;gap:16px;align-items:start}
+  /* EL DETALLE NO ES UNA TARJETA: ES LA COLUMNA DERECHA ENTERA (Jhon,
+     2026-09-22: "aquí no busco estética, sino funcionalidad"). En el
+     computador se pega al borde derecho y baja hasta el fondo de la
+     pantalla, con su propio scroll, como el panel de Fudo. Los márgenes
+     negativos devuelven el relleno de `.wrap`, que si no lo dejaría flotando
+     a 16 px de todos los bordes. */
   @media (min-width:1000px){
-    .arqp{grid-template-columns:minmax(0,1fr) 430px}
-    .arqp-der{position:sticky;top:12px}
+    .arqp{grid-template-columns:minmax(0,1fr) minmax(420px,36%);gap:20px}
+    .arqp-der{position:sticky;top:0;align-self:start;margin:-14px -16px 0 0;
+      height:100vh;overflow-y:auto;background:var(--card);box-shadow:-1px 0 0 var(--border)}
+    .arqp-der .arqd{border-radius:0;box-shadow:none;min-height:100%}
   }
   @media (max-width:999px){
     .arqp .arqp-der{display:none}
@@ -1484,6 +1495,9 @@
   .arqp-fila .c-dif.pos{color:var(--green-fg)}
   .arqp-fila .c-dif.neg{color:var(--red-fg)}
   .arqp-fila .c-est{text-align:right}
+  /* Eliminado: gris y tachado, el mismo efecto que un producto anulado. */
+  .arqp-fila.eliminado{color:var(--muted);text-decoration:line-through;opacity:.62}
+  .arqp-fila.eliminado .c-dif{text-decoration:none}
   @media (max-width:640px){
     .arqp-fila{grid-template-columns:minmax(0,1.35fr) .95fr .8fr .7fr;font-size:12.5px;padding:11px 12px}
     .arqp-fila .c-caja, .arqp-fila .c-usr{display:none}
@@ -1495,6 +1509,7 @@
   .arqd-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;
     background:var(--orange);color:#fff;padding:13px 18px}
   .arqd-cab h3{margin:0;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.02em}
+  .arqd-icos{display:flex;gap:8px}
   .arqd-ico{width:36px;height:36px;border:none;border-radius:9px;background:rgba(0,0,0,.14);
     color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto}
   .arqd-ico:active{transform:scale(.92)}
@@ -1506,6 +1521,13 @@
   .arqd-dato{display:grid;grid-template-columns:140px minmax(0,1fr);gap:10px;padding:6px 0;font-size:14px}
   .arqd-dato .t{color:var(--muted)}
   .arqd-dato .v{font-weight:700;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+  /* El monto inicial es UN DATO MÁS de la lista, del tamaño de los otros —
+     no una barra que atraviesa la columna entera (Jhon: "desproporcionada"). */
+  .arqd-dato-campo{align-items:center}
+  .arqd-dato-campo input{width:160px;max-width:100%;border:1.5px solid var(--border);border-radius:9px;
+    padding:7px 10px;font:inherit;font-size:14.5px;font-weight:700;text-align:right;background:#fff;
+    color:var(--text);font-variant-numeric:tabular-nums}
+  .arqd-dato-campo input:focus{outline:none;border-color:var(--orange)}
   .arqd-fechas{display:flex;align-items:center;gap:9px;background:var(--gray-bg);color:var(--gray-fg);
     font-weight:800;font-size:14.5px;padding:12px 18px;white-space:pre}
   .arqd-fechas svg{width:18px;height:18px;flex:0 0 auto}
@@ -6479,6 +6501,7 @@ let BODEGA_PROD = {};
 let LAMA_MESAS   = [];      // el plano de la sede
 let LAMA_CUENTAS = [];      // las cuentas vivas, por mesa_id
 let LAMA_ITEMS   = [];      // los items de la cuenta abierta
+let LAMA_ITEMS_CARGANDO = false; // ¿los productos de la mesa elegida todavía vienen en camino?
 let LAMA_SALON   = null;    // el salón elegido (el modelo viejo, sin páginas)
 /* EL PLANO CON PÁGINAS Y SECCIONES (maqueta aprobada el 2026-09-05).
    `lama_areas` guarda los dos niveles con una sola forma: sin padre es una
@@ -6503,6 +6526,7 @@ let LAMA_PAPEL   = null;    // el texto de la última comanda o precuenta
 let LAMA_CARTA   = [];      // el catálogo vendible de esta sede
 let LAMA_Q       = '';      // lo escrito en el buscador de la carta completa
 let LAMA_QP      = '';      // y lo escrito en el buscador del panel de la mesa
+let LAMA_QP_IDX  = -1;      // la fila marcada con las flechas en esa lista (-1 = ninguna)
 let LAMA_TOP     = [];      // los nombres mas pedidos, para ordenar la carta
 let LAMA_TOP_SEDE = null;   // para cuál sede se contaron
 let LAMA_TOP_AT  = 0;       // cuándo, para no recontar en cada aviso en vivo
@@ -6698,16 +6722,22 @@ async function lamaCargarItems(forzar){
   if(!forzar && lamaEsEcoPropio()) return;
   const c = LAMA_SEL ? lamaCuentaDe(LAMA_SEL) : null;
   if(!c){ LAMA_ITEMS = []; LAMA_PAGOS_PAR = []; return; }
-  const r = await sb.from('cuenta_items').select('*').eq('cuenta_id', c.id).order('id').limit(500);
+  /* A1 · Lo ya cobrado de a poco se pide junto con los productos, porque los
+     dos contestan la misma pregunta —cuánto falta—. Y se piden A LA VEZ, no
+     una detrás de la otra (2026-09-22): en serie eran dos viajes a la base
+     antes de poder mostrar la mesa, ~650 ms medidos con la red de Chile. */
+  const [r, pp] = await Promise.all([
+    sb.from('cuenta_items').select('*').eq('cuenta_id', c.id).order('id').limit(500),
+    LAMA_HAY_PARCIAL
+      ? sb.from('cuenta_pagos').select('*').eq('cuenta_id', c.id).eq('parcial', true).order('id')
+      : null,
+  ]);
+  /* Si mientras llegaba se tocó otra mesa, esto es de la anterior: pintarlo
+     mostraría los productos de una mesa en el panel de otra. */
+  const ahora = LAMA_SEL ? lamaCuentaDe(LAMA_SEL) : null;
+  if(!ahora || ahora.id !== c.id) return;
   LAMA_ITEMS = r.data || [];
-  /* A1 · Lo ya cobrado de a poco. Se pide junto con los productos porque los
-     dos contestan la misma pregunta —cuánto falta— y pedirlos por separado
-     deja una ventana en la que la pantalla muestra un número viejo. */
-  if(LAMA_HAY_PARCIAL){
-    const pp = await sb.from('cuenta_pagos').select('*')
-      .eq('cuenta_id', c.id).eq('parcial', true).order('id');
-    LAMA_PAGOS_PAR = pp.data || [];
-  } else LAMA_PAGOS_PAR = [];
+  LAMA_PAGOS_PAR = pp ? (pp.data || []) : [];
 }
 
 /* La ventana de cobro NO se repinta desde acá a propósito. Un aviso en vivo
@@ -6954,21 +6984,31 @@ async function arqPagCargar(){
   if(ARQPAG_SEL !== 'nuevo' && !ARQPAG_LISTA.some(a => a.id === ARQPAG_SEL))
     ARQPAG_SEL = ARQPAG_LISTA.length ? ARQPAG_LISTA[0].id : null;
   arqPagPintar();
-  await arqPagElegir(ARQPAG_SEL, false);
+  /* Sin segundo argumento: quién decide si en el teléfono se ve el detalle
+     es quien pidió entrar (el aviso de Mesas, una fila tocada), no la carga.
+     Con `false` acá, el aviso de Mesas mandaba a la lista en vez de a la caja. */
+  await arqPagElegir(ARQPAG_SEL);
 }
 
 function arqPagFilaHTML(a){
   const abierta = a.estado === 'abierta';
-  const sis = abierta ? (ARQPAG_VIVO ? plata(ARQPAG_VIVO.totalSis) : '…') : plata(arqSisCerrado(a));
-  const usr = abierta ? '-' : plata(arqUsrCerrado(a));
-  const dif = abierta ? null : arqDifCerrado(a);
-  return `<button type="button" class="arqp-fila${a.id === ARQPAG_SEL ? ' sel' : ''}" data-arqpagver="${a.id}">
+  /* ELIMINADO: sigue en la lista, en gris y tachado (Jhon, 2026-09-22) —
+     el mismo efecto que un producto anulado en la mesa, y lo mismo que hace
+     Fudo. Muestra lo que alcanzó a tener y nada más: no tiene conteo. */
+  const elim = a.estado === 'eliminada';
+  const sis = abierta ? (ARQPAG_VIVO ? plata(ARQPAG_VIVO.totalSis) : '…')
+            : elim ? plata(a.total_esperado != null ? a.total_esperado : a.monto_inicial)
+            : plata(arqSisCerrado(a));
+  const usr = (abierta || elim) ? '-' : plata(arqUsrCerrado(a));
+  const dif = (abierta || elim) ? null : arqDifCerrado(a);
+  const estado = abierta ? 'Abierto' : elim ? 'Eliminado' : 'Cerrado';
+  return `<button type="button" class="arqp-fila${a.id === ARQPAG_SEL ? ' sel' : ''}${elim ? ' eliminado' : ''}" data-arqpagver="${a.id}">
     <span class="c-caja">Principal</span>
     <span class="c-fecha"><b>${arqFechaHora(a.abierto_at)}</b>${a.cerrado_at ? `<br>${arqFechaHora(a.cerrado_at)}` : ''}</span>
     <span class="c-num">${sis}</span>
     <span class="c-num c-usr">${usr}</span>
     <span class="c-num c-dif ${dif === null ? '' : arqClaseDif(dif)}">${dif === null ? '-' : arqSigno(dif)}</span>
-    <span class="c-est">${abierta ? 'Abierto' : 'Cerrado'}</span>
+    <span class="c-est">${estado}</span>
   </button>`;
 }
 
@@ -6976,6 +7016,11 @@ function arqPagPintar(){
   const cuerpo = $('arqpag-cuerpo'); if(!cuerpo) return;
   const v = ARQPAG_VIVO;
   const tarj = (tit, val) => `<div class="arqp-tarj"><span class="t">${tit}</span><span class="v">${val}</span></div>`;
+  /* LAS TARJETAS SON DEL ARQUEO ABIERTO Y DE NINGÚN OTRO (Jhon, 2026-09-22):
+     cuánto hay AHORA en el turno que corre. Sin caja abierta, todo en $0.
+     "Total de ventas" INCLUYE la propina, como en Fudo (la captura: $504.609
+     = ventas + propinas); la tarjeta de Propinas dice cuánto de eso es. */
+  const propinas = v ? v.filas.reduce((s,f) => s + f.propinas, 0) : 0;
   cuerpo.innerHTML = `
     <div class="arqp-barra">
       <h2>Arqueos de caja</h2>
@@ -6985,6 +7030,7 @@ function arqPagPintar(){
       ${tarj('Arqueo de caja', LAMA_ARQ ? '1 caja' : 'Abrí uno para seguir las ventas')}
       ${tarj('Saldo actual',   plata(v ? v.totalSis  : 0))}
       ${tarj('Total de ventas', plata(v ? v.ventasTot : 0))}
+      ${tarj('Propinas', plata(propinas))}
       ${tarj('Ingresos', plata(v ? v.ingMan : 0))}
       ${tarj('Egresos',  plata(v ? v.egrMan : 0))}
     </div>
@@ -7017,6 +7063,7 @@ async function arqPagElegir(id, verDet){
     `<div class="arqd arqd-vacio">No hay ninguna caja abierta.<br><br>
        <button type="button" class="btn btn-orange" data-arqp="nuevo">+ Nuevo arqueo de caja</button></div>`; return; }
   if(a.estado === 'abierta'){ arqPagPintarDetalle(a, ARQPAG_VIVO, true); return; }
+  if(a.estado === 'eliminada'){ arqPagPintarEliminado(a); return; }
   if(!ARQPAG_DET || ARQPAG_DET.id !== a.id){
     $('arqpag-detalle').innerHTML = '<div class="arqd"><p class="arqd-cargando">Cargando…</p></div>';
     const [rm, movsR] = await Promise.all([
@@ -7108,7 +7155,10 @@ function arqPagPintarDetalle(a, c, abierta, movsCerrado){
   cont.innerHTML = `<div class="arqd">
     <div class="arqd-cab">
       <h3>Arqueo de caja</h3>
-      <button type="button" class="arqd-ico" data-arqp="refrescar" title="Actualizar" aria-label="Actualizar">${ICONO_REFRESCAR}</button>
+      <span class="arqd-icos">
+        <button type="button" class="arqd-ico" data-arqp="refrescar" title="Traer las ventas nuevas" aria-label="Actualizar">${ICONO_REFRESCAR}</button>
+        <button type="button" class="arqd-ico" data-arqp="eliminar" title="Borrar arqueo" aria-label="Borrar arqueo">${TRASH_SVG}</button>
+      </span>
     </div>
     <button type="button" class="arqd-volver" data-arqp="volver">← Todos los arqueos</button>
     <div class="arqd-datos">
@@ -7152,6 +7202,51 @@ function arqPagTotales(){
   const fin = $('arqd-fin'); if(fin) fin.disabled = ins.some(i => String(i.value).trim() === '');
 }
 
+function arqPagPintarEliminado(a){
+  const cont = $('arqpag-detalle'); if(!cont) return;
+  const dato = (t, v) => `<div class="arqd-dato"><span class="t">${t}</span><span class="v">${v}</span></div>`;
+  cont.innerHTML = `<div class="arqd">
+    <div class="arqd-cab"><h3>Arqueo de caja</h3></div>
+    <button type="button" class="arqd-volver" data-arqp="volver">← Todos los arqueos</button>
+    <div class="arqd-datos">
+      ${dato('Caja', 'Principal')}
+      ${dato('Hora de apertura', arqFechaHora(a.abierto_at))}
+      ${dato('Creado por', esc(a.abierto_por || '—'))}
+      ${a.cerrado_at ? dato('Hora de cierre', arqFechaHora(a.cerrado_at)) : ''}
+      ${dato('Estado', 'Eliminado')}
+      ${a.eliminado_at ? dato('Eliminado', arqFechaHora(a.eliminado_at)) : ''}
+      ${dato('Eliminado por', esc(a.eliminado_por || '—'))}
+    </div>
+    <div class="arqd-fila b"><span class="n">Monto inicial</span><span class="v">${plata(a.monto_inicial)}</span></div>
+    <p class="arqd-cargando">Un arqueo eliminado no cuenta: queda acá solo para saber que existió.</p>
+  </div>`;
+}
+
+/* BORRAR. No borra la fila: la marca "eliminada" con quién y cuándo, y se
+   sigue viendo tachada. Si el .sql todavía no se pegó, se dice eso, en vez
+   del texto crudo de la base. */
+async function arqPagEliminar(){
+  const a = ARQPAG_LISTA.find(x => x.id === ARQPAG_SEL); if(!a) return;
+  const ok = await preguntar('¿Borrar este arqueo?',
+    'No desaparece: queda en la lista, tachado, con tu nombre y la hora. Sus números dejan de contar' +
+    (a.estado === 'abierta' ? ', y la caja queda sin abrir hasta que se abra otro.' : '.'),
+    'Borrar');
+  if(!ok) return;
+  const {data, error} = await sb.rpc('arqueo_eliminar', {p_arqueo_id: a.id, p_quien: NOMBRE});
+  if(error){
+    avisar(/arqueo_eliminar|function|eliminada/i.test(error.message || '')
+      ? 'Todavía no se puede borrar.\n\nFalta pegar sql/2026-09-lama-arqueo-eliminar.sql en Supabase.'
+      : (error.message || 'No se pudo borrar. Revisa tu señal e inténtalo de nuevo.'));
+    return;
+  }
+  if(!data) return;
+  if(a.estado === 'abierta'){ ARQPAG_BORRADOR = {}; ARQPAG_COMENT = ''; }
+  ARQPAG_DET = null;
+  aviso('Arqueo borrado');
+  await arqPagCargar();
+  lamaArqPintarBanner();
+}
+
 function arqPagPintarNuevo(){
   const cont = $('arqpag-detalle'); if(!cont) return;
   cont.innerHTML = `<div class="arqd">
@@ -7161,10 +7256,9 @@ function arqPagPintarNuevo(){
       <div class="arqd-dato"><span class="t">Caja</span><span class="v">Principal</span></div>
       <div class="arqd-dato"><span class="t">Hora de apertura</span><span class="v">${arqFechaHora(Date.now())}</span></div>
       <div class="arqd-dato"><span class="t">Creado por</span><span class="v">${esc(NOMBRE || '—')}</span></div>
-    </div>
-    <div class="arq-campo" style="margin-top:14px">
-      <label for="arqd-monto">Monto inicial — el fondo de cambio</label>
-      <input type="number" inputmode="decimal" min="0" id="arqd-monto" placeholder="$ 0" value="${esc(ARQPAG_MONTO)}">
+      <div class="arqd-dato arqd-dato-campo"><label class="t" for="arqd-monto">Monto inicial</label>
+        <span class="v"><input type="number" inputmode="decimal" min="0" id="arqd-monto"
+          placeholder="$ 0" value="${esc(ARQPAG_MONTO)}"></span></div>
     </div>
     <div class="arqd-pie">
       <button type="button" class="btn btn-gris" data-arqp="cancelar-nuevo">Cancelar</button>
@@ -7244,6 +7338,7 @@ function arqPagEngancharUnaVez(){
     if(acc === 'cancelar-nuevo') { ARQPAG_MONTO = ''; await arqPagElegir(ARQPAG_LISTA.length ? ARQPAG_LISTA[0].id : null, false); return; }
     if(acc === 'iniciar')        { await arqPagIniciar(); return; }
     if(acc === 'finalizar')      { await arqPagFinalizar(); return; }
+    if(acc === 'eliminar')       { await arqPagEliminar(); return; }
     if(acc === 'refrescar')      { ARQPAG_DET = null; await arqPagCargar(); return; }
     if(acc === 'volver')         { ARQPAG_VER_DET = false; const c = vista.querySelector('.arqp'); if(c) c.classList.remove('ver-det'); return; }
   });
@@ -7666,6 +7761,17 @@ function lamaPintarPanel(){
     return;
   }
 
+  if(LAMA_ITEMS_CARGANDO){
+    cont.innerHTML = `<div class="lama-caja">
+      <div class="lama-cab ${c.estado === 'precuenta' ? 'cobrando' : ''}">
+        <span class="tit"><b>Mesa ${m.numero}</b><span>${c.estado === 'precuenta' ? 'Cobrando' : 'Ocupada'}</span></span>
+        <button type="button" data-lamaacc="cerrar-panel" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="lama-cuerpo"><div class="lama-vacio">Cargando…</div></div>
+    </div>`;
+    return;
+  }
+
   const nuevos     = LAMA_ITEMS.filter(i => i.estado === 'nuevo');
   const salidos    = LAMA_ITEMS.filter(i => i.estado !== 'nuevo');
   const totalNuevo = nuevos.reduce((s,i) => s + (+i.cantidad||0) * (+i.precio||0), 0);
@@ -8003,6 +8109,27 @@ function lamaPanelResultados(){
 function lamaPintarPanelResultados(){
   const caja = $('lama-qp-lista'); if(!caja) return;
   caja.innerHTML = lamaPanelResultados();
+  lamaMarcarFilaQP();
+}
+
+/* Cierra la lista del buscador. `soltar` le saca también el foco al campo:
+   al elegir con el dedo o el mouse, lo que sigue es tocar el producto que
+   entró, no escribir otro — y en el teléfono eso además baja el teclado. */
+function lamaCerrarBuscador(soltar){
+  LAMA_QP = ''; LAMA_QP_IDX = -1;
+  const q = $('lama-qp'); if(q){ q.value = ''; if(soltar) q.blur(); }
+  if(soltar && document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  lamaPintarPanelResultados();
+}
+
+/* LAS FLECHAS (Jhon, 2026-09-22): buscar "coca", bajar con ↓ hasta la que
+   es y Enter, sin soltar el teclado. La fila marcada se ve y se mantiene a
+   la vista si la lista hace scroll. */
+function lamaMarcarFilaQP(){
+  const filas = [...document.querySelectorAll('#lama-qp-lista .lama-prod')];
+  filas.forEach((f, i) => f.classList.toggle('kb', i === LAMA_QP_IDX));
+  const f = filas[LAMA_QP_IDX];
+  if(f) f.scrollIntoView({block:'nearest'});
 }
 
 /* Cuántos van de cada uno. Se lee de los items de verdad y no de un contador
@@ -8095,8 +8222,11 @@ async function lamaMas(){
      para después negar cada uno sería una burla. */
   if(lamaTrabadaPorPrecuenta(cm)){ await lamaAvisarTrabada(); return; }
   LAMA_CARTA_ABIERTA = true; LAMA_Q = '';
-  lamaPintar();
-  const inp = $('lama-q'); if(inp) setTimeout(()=>inp.focus(), 60);
+  /* Solo lo que cambia: la carta y el +. Repintar el plano y el panel enteros
+     para abrir una ventana encima era trabajo tirado, y en el computador del
+     local se nota como un tiempo muerto entre el toque y la carta. */
+  lamaPintarCarta(); lamaPintarFab();
+  const inp = $('lama-q'); if(inp) inp.focus();
 }
 
 /* ==================================================================
@@ -8197,7 +8327,22 @@ async function lamaSeleccionar(mesaId){
   LAMA_SEL = mesaId; LAMA_PAPEL = null; LAMA_Q = '';
   LAMA_MENU = false; LAMA_MODO = null; LAMA_ELEGIDOS = []; LAMA_CARTA_ABIERTA = false;
   LAMA_DESC = null;
-  await lamaCargarItems(true);
+  /* LA MESA RESPONDE AL TOQUE (2026-09-22). Antes se esperaba a la base antes
+     de pintar nada, y tocar una mesa abierta se sentía trabado: uno vuelve a
+     tocar creyendo que no agarró. Ahora se marca la mesa y aparece su panel
+     al instante, con "Cargando…" en el cuerpo; los productos llegan detrás.
+     El cuerpo NO se dibuja vacío mientras tanto: una mesa con productos que
+     por un momento se ve vacía ofrece "Cerrar mesa", y eso sí sería grave. */
+  const c = lamaCuentaDe(mesaId);
+  LAMA_ITEMS = []; LAMA_PAGOS_PAR = [];
+  LAMA_ITEMS_CARGANDO = !!c;
+  lamaPintar();
+  if(!c) return;
+  /* En un `finally`: si la red se corta a mitad, el panel no puede quedarse
+     diciendo "Cargando…" para siempre (la regla de `actualizarTodo`). */
+  try{ await lamaCargarItems(true); }
+  finally{ if(LAMA_SEL === mesaId) LAMA_ITEMS_CARGANDO = false; }
+  if(LAMA_SEL !== mesaId) return;              // ya se eligió otra
   lamaPintar();
 }
 
@@ -8207,7 +8352,9 @@ async function lamaAbrirMesa(){
   const c = await lamaLlamar('mesa_abrir', {p_mesa_id: mesaId, p_quien: NOMBRE});
   if(!c) return;
   LAMA_CUENTAS = LAMA_CUENTAS.filter(x => x.mesa_id !== mesaId).concat(c);
-  await lamaCargarItems(true);
+  /* Una cuenta que se acaba de crear no tiene productos: preguntárselo a la
+     base era un viaje de ida y vuelta para escuchar "ninguno". */
+  LAMA_ITEMS = []; LAMA_PAGOS_PAR = []; LAMA_ITEMS_CARGANDO = false;
   lamaPintar();
 }
 
@@ -10216,9 +10363,18 @@ $('view-lama').addEventListener('click', async e => {
     return;
   }
   const cp = e.target.closest('[data-lamacartamas]');
-  if(cp){ await lamaAgregar(cp.dataset.lamacartamas); return; }
-
   const ad = e.target.closest('[data-lamaadd]');
+  /* ELEGIR DE LA LISTA DEL BUSCADOR LA CIERRA (Jhon, 2026-09-22). Antes la
+     lista seguía abierta para seguir escribiendo, y para tocar el producto
+     recién agregado —su cantidad, su comentario— había que cerrarla primero
+     tocando un espacio en blanco: un toque de más en cada pedido. Ahora se
+     elige, la lista se va, y el producto queda a la vista en "Pendiente". */
+  if((cp || ad) && e.target.closest('#lama-qp-lista')){
+    lamaCerrarBuscador(true);
+    await lamaAgregar((cp || ad).dataset[cp ? 'lamacartamas' : 'lamaadd']);
+    return;
+  }
+  if(cp){ await lamaAgregar(cp.dataset.lamacartamas); return; }
   if(ad){ await lamaAgregar(ad.dataset.lamaadd); return; }
 
   /* ACÁ VIVÍAN `data-lamamas` y `data-lamamenos`, y se sacaron el 2026-09-04:
@@ -10299,6 +10455,32 @@ $('view-lama').addEventListener('click', async e => {
   if(LAMA_MENU){ LAMA_MENU = false; lamaPintarPanel(); }
 });
 
+$('view-lama').addEventListener('keydown', async e => {
+  if(e.target.id !== 'lama-qp') return;
+  const filas = [...document.querySelectorAll('#lama-qp-lista .lama-prod')];
+  if(e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+    if(!filas.length) return;
+    e.preventDefault();                          // que el cursor no salte dentro del texto
+    LAMA_QP_IDX = e.key === 'ArrowDown'
+      ? Math.min(filas.length - 1, LAMA_QP_IDX + 1)
+      : Math.max(0, LAMA_QP_IDX - 1);
+    lamaMarcarFilaQP();
+    return;
+  }
+  if(e.key === 'Enter'){
+    /* Enter sin haber bajado elige la primera: con "coca" escrito y una sola
+       coca en la carta, obligar a apretar ↓ antes sería un paso de más. */
+    const f = filas[LAMA_QP_IDX >= 0 ? LAMA_QP_IDX : 0];
+    if(!f || !f.dataset.lamaadd) return;
+    e.preventDefault();
+    const id = f.dataset.lamaadd;
+    /* Con el teclado el foco SE QUEDA en el campo: quien viene tecleando
+       sigue con el próximo producto sin tocar el mouse. */
+    lamaCerrarBuscador(false);
+    await lamaAgregar(id);
+  }
+});
+
 /* Escape sale de a un paso: primero el menú, después el modo mover. Sin esto,
    quedarse dentro del modo mover sin encontrar la salida es una pantalla
    trabada — y la banda naranja tapa el plano. */
@@ -10347,7 +10529,7 @@ $('view-lama').addEventListener('input', e => {
   /* El buscador del panel repinta SOLO su lista. Repintar el panel entero le
      saca el foco al campo y en el teléfono el teclado se cierra en la primera
      letra: se escribe una y hay que volver a tocar la caja. */
-  if(e.target.id === 'lama-qp'){ LAMA_QP = e.target.value; lamaPintarPanelResultados(); }
+  if(e.target.id === 'lama-qp'){ LAMA_QP = e.target.value; LAMA_QP_IDX = -1; lamaPintarPanelResultados(); }
   /* La cantidad y el comentario de la ventana se guardan en LAMA_PP mientras
      se escribe, para que repintar no borre lo tecleado. */
   if(e.target.id === 'lama-pp-com' && LAMA_PP) LAMA_PP.comentario = e.target.value;

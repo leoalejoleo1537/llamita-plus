@@ -197,15 +197,66 @@ await caso('escribir no le saca el foco al buscador', async () => {
   const donde = await page.evaluate(() => document.activeElement && document.activeElement.id);
   return donde === 'lama-qp' || 'el foco quedó en: ' + donde;
 });
-await caso('agregar desde la lista NO vacía el buscador', async () => {
+/* ⚠️ REVERSA A PROPÓSITO 2026-09-22. Estos dos casos pedían lo contrario
+   —que la lista siguiera abierta y el foco volviera al campo, para seguir
+   escribiendo—. Jhon, usándolo: para tocar el producto recién agregado
+   (cantidad, comentario) había que cerrar la lista tocando un espacio en
+   blanco. Ahora elegir con el dedo o el mouse CIERRA la lista y suelta el
+   campo. Con el teclado (Enter) el foco se queda, porque quien teclea sigue
+   tecleando: eso se prueba abajo, en LAS FLECHAS. */
+await caso('elegir de la lista la CIERRA y vacía el buscador', async () => {
   await page.click('.lama-qp-lista .lama-prod'); await page.waitForTimeout(600);
   const v = await page.evaluate(() => {
     const e = document.querySelector('#lama-qp'); return e ? e.value : null; });
-  return v === 'Sánd' || 'el buscador quedó en: ' + JSON.stringify(v);
+  const lista = await page.isVisible('.lama-qp-lista');
+  return (v === '' && !lista) || 'buscador: ' + JSON.stringify(v) + ' · lista abierta: ' + lista;
 });
-await caso('y el foco vuelve al campo, para seguir escribiendo', async () => {
+await caso('y suelta el campo: lo siguiente es tocar el producto que entró', async () => {
+  const donde = await page.evaluate(() => document.activeElement && document.activeElement.id);
+  return donde !== 'lama-qp' || 'el foco se quedó en el buscador';
+});
+await caso('el producto quedó en Pendiente, listo para tocarlo', async () =>
+  /Sándwich 1/.test(await page.textContent('.lama-pend') || '') || 'no está en Pendiente');
+
+console.log('\nLAS FLECHAS — elegir sin soltar el teclado:');
+await page.click('#lama-qp');
+await page.fill('#lama-qp', 'Café'); await page.waitForTimeout(300);
+await caso('↓ marca la primera fila', async () => {
+  await page.keyboard.press('ArrowDown'); await page.waitForTimeout(80);
+  const k = await page.$$eval('.lama-qp-lista .lama-prod', fs => fs.map(f => f.classList.contains('kb')));
+  return (k[0] === true && k.filter(Boolean).length === 1) || JSON.stringify(k);
+});
+await caso('otra ↓ baja a la segunda, y ↑ vuelve', async () => {
+  await page.keyboard.press('ArrowDown'); await page.waitForTimeout(80);
+  const k2 = await page.$$eval('.lama-qp-lista .lama-prod', fs => fs.findIndex(f => f.classList.contains('kb')));
+  await page.keyboard.press('ArrowUp'); await page.waitForTimeout(80);
+  const k1 = await page.$$eval('.lama-qp-lista .lama-prod', fs => fs.findIndex(f => f.classList.contains('kb')));
+  return (k2 === 1 && k1 === 0) || `bajó a ${k2}, volvió a ${k1}`;
+});
+await caso('↑ en la primera no se sale de la lista', async () => {
+  await page.keyboard.press('ArrowUp'); await page.waitForTimeout(80);
+  const k = await page.$$eval('.lama-qp-lista .lama-prod', fs => fs.findIndex(f => f.classList.contains('kb')));
+  return k === 0 || 'quedó en ' + k;
+});
+await caso('Enter agrega la marcada y cierra la lista', async () => {
+  await page.keyboard.press('ArrowDown'); await page.waitForTimeout(80);   // la segunda: Café Cortado
+  const nombre = await page.$eval('.lama-qp-lista .lama-prod.kb .nm', e => e.textContent.trim());
+  await page.evaluate(() => { window.__rpc = []; });
+  await page.keyboard.press('Enter'); await page.waitForTimeout(500);
+  const r = await page.evaluate(() => window.__rpc.find(x => (x.nombre || x.fn) === 'cuenta_agregar'));
+  const lista = await page.isVisible('.lama-qp-lista');
+  return (r && r.args.p_nombre === nombre && !lista) || JSON.stringify({nombre, r, lista});
+});
+await caso('y con el teclado el foco SE QUEDA en el campo, para el próximo', async () => {
   const donde = await page.evaluate(() => document.activeElement && document.activeElement.id);
   return donde === 'lama-qp' || 'el foco quedó en: ' + donde;
+});
+await caso('Enter sin haber bajado elige la primera', async () => {
+  await page.fill('#lama-qp', 'Mocacc'); await page.waitForTimeout(300);
+  await page.evaluate(() => { window.__rpc = []; });
+  await page.keyboard.press('Enter'); await page.waitForTimeout(500);
+  const r = await page.evaluate(() => window.__rpc.find(x => (x.nombre || x.fn) === 'cuenta_agregar'));
+  return (r && r.args.p_nombre === 'Café Mocaccino') || JSON.stringify(r);
 });
 
 console.log('\nCÓMO SE CIERRA:');
