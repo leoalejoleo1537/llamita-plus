@@ -176,8 +176,26 @@ const medir = () => page.evaluate(() => {
   };
 });
 
+/* Después de cambiar el tamaño se espera a que el carril SE DETENGA, no un
+   tiempo fijo. Con 250 ms fijos la prueba medía el carril en pleno vuelo
+   apenas la barra tuvo dos pestañas más (Arqueo y Movimientos, 2026-09-22):
+   más recorrido, mismo tiempo, y el rebote de la animación todavía no
+   terminaba. Esperar a que se quede quieto NO regala el caso: si se detiene
+   en el lugar equivocado, `carrilTapa` sigue saliendo rojo. */
+const carrilQuieto = async () => {
+  let antes = '';
+  for(let i = 0; i < 30; i++){
+    const ahora = await page.evaluate(() => {
+      const r = document.getElementById('tabCarril').getBoundingClientRect();
+      return [r.top, r.left, r.width, r.height].map(Math.round).join(',');
+    });
+    if(ahora === antes) return;
+    antes = ahora;
+    await page.waitForTimeout(60);
+  }
+};
 const ir = async (w,h) => { await page.setViewportSize({width:w, height:h});
-                            await page.waitForTimeout(250); };
+                            await page.waitForTimeout(250); await carrilQuieto(); };
 
 await montar({puedeLama:true});
 /* Con permiso de Lama la app aterriza en Mesas, así que el inventario está

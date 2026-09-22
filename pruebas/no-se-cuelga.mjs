@@ -30,6 +30,11 @@ const PRODUCTOS = [
    stock_actual:4, stock_min:2, stock_max:10, activo:'SÍ'},
 ];
 const page = await browser.newPage();
+/* EN EL TELÉFONO, a propósito (2026-09-22). Con el panel fijado —computador—
+   el botón Actualizar de arriba se esconde, porque ya vive en el riel (Jhon
+   lo pidió por redundante). En el teléfono sigue siendo el único camino
+   rápido, y es ahí donde un botón colgado le arruina el turno a alguien. */
+await page.setViewportSize({width:390, height:844});
 await page.addInitScript(({PRODUCTOS}) => {
   window.__invocada = [];
   /* Cada función de Fudo se comporta como diga esto. 'cuelga' es el caso del

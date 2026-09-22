@@ -1427,34 +1427,9 @@
     font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;border:none;
     width:100%;text-align:left;font-family:inherit}
   .lama-arq-pill b{color:var(--text)}
-  /* El enlace al historial — siempre presente, en las dos posiciones del
-     aviso, para que "el historial de arqueos" (paso 5 de la maqueta) no
-     necesite un botón propio pisando el aviso principal. */
-  .lama-arq-hist{display:block;background:none;border:none;color:var(--muted);
-    font:inherit;font-size:12.5px;font-weight:700;text-decoration:underline;
-    padding:0 2px 12px;margin-top:-6px;cursor:pointer}
   .lama-arq-pill:active{transform:scale(.99)}
 
-  /* LA VENTANA — mismo patrón que `.cfg-ficha`: un recuadro centrado sobre
-     el fondo desenfocado, y no una hoja que sube desde abajo (esto no es
-     el cobro, es un trámite corto de una sola pantalla a la vez). */
-  .arq-ficha{position:fixed;inset:0;z-index:46;background:rgba(15,30,49,.42);
-    backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px}
-  .arq-tarj{background:var(--card);border-radius:var(--r-card);box-shadow:var(--sombra);
-    padding:20px;width:100%;max-width:400px;max-height:88vh;overflow-y:auto}
-  .arq-tarj h4{margin:0 0 3px;font-size:18px}
-  .arq-tarj .cab{color:var(--muted);font-size:13px;margin:0 0 16px}
-  .arq-ren{display:flex;align-items:center;gap:10px;padding:9px 1px;font-size:14.5px}
-  .arq-ren + .arq-ren{border-top:1px solid var(--linea)}
-  .arq-ren .n{flex:1;min-width:0}
-  .arq-ren .v{font-weight:700;font-variant-numeric:tabular-nums;flex:0 0 auto}
-  .arq-ren .v.gris{color:var(--muted);font-weight:600}
-  .arq-tot{margin-top:10px;padding:12px 14px;border-radius:14px;background:var(--bg);
-    display:flex;gap:10px;align-items:center;font-weight:800;font-size:16.5px}
-  .arq-tot .n{flex:1}
-  .arq-tot.verde{background:var(--green-bg);color:var(--green-fg)}
-  .arq-tot.rojo{background:var(--red-bg);color:var(--red-fg)}
-  .arq-tot.oculto{background:var(--azul-bg);color:var(--azul-fg);font-weight:700;font-size:13.5px}
+  /* Los campos y botones que comparten el arqueo nuevo y Movimientos. */
   .arq-campo{margin:0 0 13px}
   .arq-campo label{display:block;font-size:11.5px;color:var(--muted);margin:0 0 5px;
     text-transform:uppercase;letter-spacing:.04em;font-weight:700}
@@ -1465,65 +1440,120 @@
     padding:11px 13px;font:inherit;font-size:15px;color:var(--text)}
   .arq-btns{display:flex;gap:10px;margin-top:16px}
   .arq-btns .btn{flex:1}
-  .arq-lista{display:flex;flex-direction:column;gap:2px;margin:4px 0 0}
-  .arq-mov{display:flex;align-items:center;gap:9px;padding:8px 1px;font-size:13.5px}
-  .arq-mov .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .arq-mov .v{font-weight:700;font-variant-numeric:tabular-nums;flex:0 0 auto}
-  .arq-mov .v.ingreso{color:var(--green-fg)}
-  .arq-mov .v.egreso{color:var(--red-fg)}
-  .arq-mov .v.gris{color:var(--muted);font-weight:600}
-  .arq-mov + .arq-mov{border-top:1px solid var(--linea)}
-
-  /* ══════════ LA PÁGINA DE ARQUEO — 2026-09-22 ══════════
-     Una tarjeta por turno, igual que `.hist-card`, con una píldora de
-     estado y el color de la diferencia — la misma idea que Fudo resuelve
-     con una tabla ancha, adaptada a una columna porque acá el aparato que
-     manda es el teléfono. */
-  .arqpag-fila{background:var(--card);border:1px solid var(--border);border-radius:14px;
-    padding:13px 15px;margin-bottom:9px;cursor:pointer;display:flex;
-    align-items:center;gap:12px}
-  .arqpag-fila:active{transform:scale(.99)}
-  .arqpag-fila .cent{flex:1;min-width:0}
-  .arqpag-fila .f{font-size:14.5px;font-weight:700;color:var(--text)}
-  .arqpag-fila .m{font-size:12.5px;color:var(--muted);margin-top:2px}
-  .arqpag-fila .der{text-align:right;flex:0 0 auto}
-  .arqpag-fila .sist{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
-  .arqpag-chip{display:inline-block;border-radius:999px;padding:3px 10px;font-size:11.5px;
-    font-weight:800;margin-top:4px}
-  .arqpag-chip.abierta{background:var(--azul-bg);color:var(--azul-fg)}
-  .arqpag-chip.cuadrada{background:var(--green-bg);color:var(--green-fg)}
-  .arqpag-chip.sobra{background:var(--green-bg);color:var(--green-fg)}
-  .arqpag-chip.falta{background:var(--red-bg);color:var(--red-fg)}
-  /* El desglose por medio, indentado — Efectivo/Débito arriba, sus Ventas y
-     Propinas debajo, más chico y gris. Sin interactividad de abrir/cerrar
-     a propósito: con dos o tres medios por turno, mostrarlo entero de una
-     vez es más simple que un acordeón que hay que tocar para cada uno. */
-  .arqpag-medio{font-weight:700;font-size:14.5px;margin-top:2px}
-  .arqpag-medio:first-child{margin-top:0}
-  .arqpag-sub{display:flex;justify-content:space-between;padding:2px 0 2px 16px;
-    font-size:12.5px;color:var(--muted)}
-  .arqpag-cab{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-  .arqpag-cab h2{margin:0;font-size:17px}
   .arqpag-vacio{text-align:center;color:var(--muted);padding:30px 10px;font-size:14px}
 
-  /* ══════════ DECLARAR CADA MEDIO, EN VIVO — 2026-09-22 ══════════
-     Reconstruido después de que NotebookLM confirmara cómo lo hace Fudo
-     de verdad: un renglón editable POR MEDIO, no un solo campo de
-     efectivo. El campo se guarda al salir (blur/Enter), nunca en cada
-     tecla — evita mandar una escritura por letra tipeada. */
-  .arqviv-lista{display:flex;flex-direction:column;gap:2px;margin:8px 0 0}
-  .arqviv-fila{padding:9px 1px;border-top:1px solid var(--linea)}
-  .arqviv-fila:first-child{border-top:none}
-  .arqviv-cab{display:flex;justify-content:space-between;align-items:baseline;font-size:14.5px;font-weight:700}
-  .arqviv-cab .s{font-size:12px;font-weight:600;color:var(--muted)}
-  .arqviv-in{width:100%;border:1.5px solid var(--border);background:var(--bg);border-radius:10px;
-    padding:9px 12px;font:inherit;font-size:15px;color:var(--text);margin-top:6px;
+  /* ══════════ LA PÁGINA DE ARQUEO, COMO FUDO — 2026-09-22 ══════════
+     Las dos mitades de la pantalla real: la lista de arqueos a la
+     izquierda (el abierto primero) y el detalle a la derecha, con el mismo
+     orden y las mismas palabras que la captura. En el teléfono no caben
+     las dos: se ve una por vez, la lista primero, y el detalle trae su
+     "← Todos los arqueos" para volver. La paleta es la de Stock (naranja
+     Fudo): esta página no vive dentro de #view-lama. */
+  #view-arqueo{max-width:none}
+  .arqp{display:grid;grid-template-columns:1fr;gap:16px;align-items:start}
+  @media (min-width:1000px){
+    .arqp{grid-template-columns:minmax(0,1fr) 430px}
+    .arqp-der{position:sticky;top:12px}
+  }
+  @media (max-width:999px){
+    .arqp .arqp-der{display:none}
+    .arqp.ver-det .arqp-izq{display:none}
+    .arqp.ver-det .arqp-der{display:block}
+  }
+  .arqp-barra{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    margin:0 0 12px;flex-wrap:wrap}
+  .arqp-barra h2{margin:0;font-size:18px}
+  .arqp-barra .btn{height:40px;font-size:14px;padding:0 16px}
+  .arqp-resumen{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:8px;margin:0 0 14px}
+  .arqp-tarj{background:var(--card);border-radius:12px;box-shadow:var(--sombra);padding:11px 13px;min-width:0}
+  .arqp-tarj .t{display:block;font-size:12px;font-weight:700;color:var(--muted)}
+  .arqp-tarj .v{display:block;font-size:15px;font-weight:800;margin-top:3px;
+    font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+  .arqp-tabla{background:var(--card);border-radius:14px;box-shadow:var(--sombra);overflow:hidden}
+  .arqp-fila{display:grid;grid-template-columns:78px minmax(0,1.5fr) 1fr 1fr .9fr .75fr;gap:8px;
+    align-items:center;width:100%;border:none;background:none;font:inherit;text-align:left;
+    padding:12px 14px;cursor:pointer;color:var(--text);font-size:13.5px;transition:background .15s ease}
+  .arqp-fila + .arqp-fila{border-top:1px solid var(--border)}
+  .arqp-fila.arqp-th{cursor:default;background:var(--gray-bg);color:var(--gray-fg);font-weight:700;font-size:12.5px}
+  .arqp-fila.sel{background:var(--amber-bg)}
+  .arqp-fila:not(.arqp-th):active{transform:scale(.995)}
+  .arqp-fila .c-caja{font-weight:800}
+  .arqp-fila .c-fecha{font-size:12.5px;line-height:1.35;font-variant-numeric:tabular-nums}
+  .arqp-fila .c-num{text-align:right;font-variant-numeric:tabular-nums}
+  .arqp-fila .c-dif{font-weight:800}
+  .arqp-fila .c-dif.pos{color:var(--green-fg)}
+  .arqp-fila .c-dif.neg{color:var(--red-fg)}
+  .arqp-fila .c-est{text-align:right}
+  @media (max-width:640px){
+    .arqp-fila{grid-template-columns:minmax(0,1.35fr) .95fr .8fr .7fr;font-size:12.5px;padding:11px 12px}
+    .arqp-fila .c-caja, .arqp-fila .c-usr{display:none}
+    .arqp-fila .c-fecha{font-size:11.5px}
+  }
+
+  /* El detalle: la columna derecha de Fudo, de arriba abajo. */
+  .arqd{background:var(--card);border-radius:16px;box-shadow:var(--sombra);overflow:hidden}
+  .arqd-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:var(--orange);color:#fff;padding:13px 18px}
+  .arqd-cab h3{margin:0;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.02em}
+  .arqd-ico{width:36px;height:36px;border:none;border-radius:9px;background:rgba(0,0,0,.14);
+    color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto}
+  .arqd-ico:active{transform:scale(.92)}
+  .arqd-ico svg{width:17px;height:17px}
+  .arqd-volver{display:none;background:none;border:none;color:var(--muted);font:inherit;
+    font-weight:700;font-size:13px;padding:12px 18px 0;cursor:pointer}
+  @media (max-width:999px){ .arqd-volver{display:block} }
+  .arqd-datos{padding:10px 18px 14px}
+  .arqd-dato{display:grid;grid-template-columns:140px minmax(0,1fr);gap:10px;padding:6px 0;font-size:14px}
+  .arqd-dato .t{color:var(--muted)}
+  .arqd-dato .v{font-weight:700;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+  .arqd-fechas{display:flex;align-items:center;gap:9px;background:var(--gray-bg);color:var(--gray-fg);
+    font-weight:800;font-size:14.5px;padding:12px 18px;white-space:pre}
+  .arqd-fechas svg{width:18px;height:18px;flex:0 0 auto}
+  .arqd-fila{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
+    border:none;background:none;font:inherit;text-align:left;color:var(--text);
+    padding:10px 18px;font-size:14px;border-top:1px solid var(--border)}
+  .arqd-fila .n{min-width:0;display:flex;align-items:center}
+  .arqd-fila .v{font-variant-numeric:tabular-nums;flex:0 0 auto}
+  .arqd-fila.b .n{font-weight:800;text-transform:uppercase;font-size:13px;letter-spacing:.02em}
+  .arqd-fila.n2{padding-left:34px;border-top:none}
+  .arqd-fila.n3{padding-left:58px;border-top:none;font-size:13px;color:var(--muted)}
+  .arqd-fila.vacia{color:var(--muted);font-size:13px}
+  .arqd-fila.plegable{cursor:pointer}
+  .arqd-fila .chev{display:inline-flex;width:15px;height:15px;margin-right:6px;flex:0 0 auto;
+    transition:transform .18s ease}
+  .arqd-fila .chev svg{width:15px;height:15px}
+  .arqd-fila.plegable.abierto .chev{transform:rotate(180deg)}
+  .arqd-total{display:flex;justify-content:space-between;align-items:center;gap:10px;
+    background:var(--gray-bg);padding:13px 18px;font-size:15px}
+  .arqd-total span:last-child{font-size:19px;font-variant-numeric:tabular-nums}
+  .arqd-sec{background:var(--gray-fg);color:#fff;font-weight:800;text-transform:uppercase;
+    font-size:14px;letter-spacing:.02em;padding:13px 18px;margin-top:14px}
+  .arqd-tr{display:grid;grid-template-columns:minmax(0,1fr) 108px 118px;gap:10px;align-items:center;
+    padding:8px 18px;font-size:14px;border-top:1px solid var(--border)}
+  .arqd-tabla.ciega .arqd-tr{grid-template-columns:minmax(0,1fr) 140px}
+  .arqd-tr.th{border-top:none;font-weight:800;font-size:13px;color:var(--muted)}
+  .arqd-tr .s,.arqd-tr .u{text-align:right;font-variant-numeric:tabular-nums}
+  .arqd-tr i{color:var(--red-fg);font-style:normal}
+  .arqd-tr input{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:9px 10px;
+    font:inherit;font-size:15px;text-align:right;background:#fff;color:var(--text);
     font-variant-numeric:tabular-nums}
-  .arqviv-in:focus{outline:none;border-color:var(--orange)}
-  .arqviv-dif{margin-top:5px;font-size:12.5px;font-weight:700}
-  .arqviv-dif.gris{color:var(--muted)}
-  .arqviv-dif.ingreso{color:var(--green-fg)}
-  .arqviv-dif.egreso{color:var(--red-fg)}
+  .arqd-tr input:focus{outline:none;border-color:var(--orange)}
+  .arqd-dif{display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding:14px 18px;font-size:16px;color:#fff;font-weight:700;transition:background .2s ease}
+  .arqd-dif .v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+  .arqd-dif.neg{background:var(--red-fg)}
+  .arqd-dif.pos{background:var(--green-fg)}
+  .arqd-dif.cero{background:var(--gray-fg)}
+  .arqd-coment{padding:14px 18px 0}
+  .arqd-coment label{display:block;font-size:13px;color:var(--muted);font-weight:700;margin-bottom:6px}
+  .arqd-coment textarea{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px;
+    font:inherit;font-size:14px;resize:vertical;color:var(--text)}
+  .arqd-coment textarea:focus{outline:none;border-color:var(--orange)}
+  .arqd-coment p{margin:0 0 14px;font-size:14px}
+  .arqd-pie{display:flex;gap:10px;justify-content:flex-end;padding:14px 18px 18px}
+  .arqd-pie .btn:disabled{opacity:.42;cursor:default}
+  .arqd-cargando,.arqd-vacio{padding:26px 18px;text-align:center;color:var(--muted);margin:0}
+  @media (prefers-reduced-motion: reduce){ .arqd-fila .chev,.arqd-dif,.arqp-fila{transition:none} }
 
   /* ══════════ MOVIMIENTOS DE CAJA — su propia página ══════════ */
   .movcaja-fila{display:flex;align-items:center;gap:11px;background:var(--card);
@@ -3696,7 +3726,6 @@
   <div id="lama-pp"></div>
   <div id="lama-cob"></div>
   <div id="lama-anu"></div>
-  <div id="lama-arqueo"></div>
 </div>
 
 <!-- ================= ARQUEO DE CAJA — su propia página =================
@@ -3706,8 +3735,10 @@
      mismos datos que ya carga Mesas (`LAMA_ARQ`, `lamaArqCargar`,
      `lamaArqVivoCalcular`) — dos pantallas, un solo dueño de la verdad. -->
 <div class="wrap" id="view-arqueo" style="display:none">
-  <div id="arqpag-cuerpo"><div class="empty">Cargando…</div></div>
-  <div id="arqpag-detalle"></div>
+  <div class="arqp">
+    <section class="arqp-izq" id="arqpag-cuerpo"><div class="empty">Cargando…</div></section>
+    <aside class="arqp-der" id="arqpag-detalle"></aside>
+  </div>
 </div>
 
 <!-- ================= MOVIMIENTOS DE CAJA — su propia página =============
@@ -6466,7 +6497,6 @@ let LAMA_PAGINA  = null;    // la página elegida (id)
    siempre — publicar antes de que Jhon pegue el .sql no puede romper nada. */
 let LAMA_ARQ      = null;   // el arqueo abierto de esta sede, o null
 let LAMA_ARQ_MOVS = [];     // sus ingresos y egresos de mano
-let LAMA_ARQ_MODAL = null;  // {modo:'abrir'|'turno'|'movimiento'|'cerrar'|'cerrada', ...}
 let LAMA_EDITA   = false;   // ¿está puesto el modo edición del plano?
 let LAMA_SEL     = null;    // id de la mesa abierta en el panel
 let LAMA_PAPEL   = null;    // el texto de la última comanda o precuenta
@@ -6718,23 +6748,37 @@ function lamaAnularEngancharUnaVez(){
 }
 
 /* ================================================================
-   F6 · EL ARQUEO DE CAJA — reconstruido el 2026-09-22 sobre lo que
-   contestó NotebookLM (con toda la info de Fudo) después de que la
-   primera versión resultara "un prototipo de juguete": comparaba solo el
-   efectivo. La real de Fudo compara CADA medio de pago contra su propio
-   sistema, y la diferencia final es la SUMA de esas diferencias.
+   F6 · EL ARQUEO DE CAJA — tercera forma, 2026-09-22.
 
-   Un aviso, nunca un candado (la maqueta original, §2a): se puede vender
-   con la caja sin abrir — lo único que hace el aviso es avisar, porque
-   una venta cobrada sin arqueo abierto queda fuera del cuadre del turno.
+   1ª (21/09): una ventana emergente que solo comparaba el efectivo.
+   2ª (22/09): cada medio contra su propio sistema (NotebookLM), pero
+      todavía dentro de una ventana emergente sobre Mesas.
+   3ª (esta): la pantalla de Fudo tal cual — Jhon mandó las capturas de un
+      arqueo ABIERTO de verdad: la lista a la izquierda (el abierto primero,
+      después los cerrados) y el detalle a la derecha, en el mismo orden y
+      con las mismas palabras: Caja · Hora de apertura · Creado por · Estado
+      · Monto inicial · Ingreso (por medio, y cada medio en propinas y
+      ventas) · Egreso · Total · Según usuario (Sistema | Usuario) · Total ·
+      Diferencia · Comentario · Finalizar arqueo.
 
-   LA DIFERENCIA A PROPÓSITO CON FUDO: "Según usuario" se guarda apenas se
-   tipea, no solo al cerrar. Fudo lo pierde si se recarga la página antes
-   de terminar (confirmado por NotebookLM) — es una limitación de ellos,
-   no algo que convenga copiar en un sistema que se usa desde el teléfono.
+   Mesas ya no tiene su propia ventana de arqueo: su aviso lleva a esta
+   página. Dos pantallas para cerrar la misma caja son dos dueños del mismo
+   número — el error que este archivo ya pagó varias veces.
+
+   LO QUE SE COPIA DE FUDO Y LO QUE NO:
+   · Se copia: los campos de "Usuario" nacen VACÍOS y valen $0 mientras no
+     se llenan, así que la Diferencia arranca en rojo por el total entero.
+     Es lo que muestra la captura (-$604.609): contar es obligatorio para
+     TODOS los medios, incluida la tarjeta, porque el voucher de Transbank
+     es la otra verdad que no miente (Jhon, 22/09). "Finalizar arqueo" no
+     se habilita hasta que están todos.
+   · No se copia: Fudo pierde lo tipeado si se recarga la página antes de
+     finalizar (NotebookLM). Acá cada medio se guarda al salir del campo —
+     en un teléfono, perder el conteo por tocar "atrás" es un problema real.
+   · No se copia: el basurero. Un arqueo no se borra (§4 de la maqueta).
    ================================================================ */
 let LAMA_ARQ_SQL  = true;   // se pone en false solo si el .sql todavía no se corrió
-let LAMA_ARQ_DECL = {};     // medio -> lo que ya se declaró del arqueo abierto
+let LAMA_ARQ_DECL = {};     // medio -> lo ya declarado (guardado) del arqueo abierto
 
 async function lamaArqCargar(){
   if(!SEDE) return;
@@ -6750,11 +6794,11 @@ async function lamaArqCargar(){
   ]);
   LAMA_ARQ_MOVS = rm.data || [];
   LAMA_ARQ_DECL = {};
-  for(const d of (rd.data || [])) LAMA_ARQ_DECL[d.medio] = d.monto;
+  for(const d of (rd.data || [])) LAMA_ARQ_DECL[d.medio] = +d.monto;
 }
 
 /* Lo cobrado entre dos fechas, por medio, separando venta de propina — la
-   misma pareja que despliega la pantalla real de Fudo. `hasta` en null es
+   misma pareja que Fudo despliega debajo de cada medio. `hasta` en null es
    "hasta ahora", para un turno todavía abierto. */
 async function arqDesglose(desde, hasta){
   let qp = sb.from('cuenta_pagos').select('medio,monto,cuentas!inner(sede)').eq('cuentas.sede', SEDE).gte('created_at', desde);
@@ -6773,554 +6817,446 @@ async function arqDesglose(desde, hasta){
   return out;
 }
 
-/* EL CÁLCULO EN VIVO — lo que pasaría si se cerrara la caja AHORA MISMO,
-   medio por medio. Es la MISMA cuenta que hace `arqueo_cerrar()` en la
-   base (efectivo suma monto inicial + ingresos - egresos; el resto son
-   solo sus ventas y propinas), para que la pantalla nunca prometa un
-   número distinto del que la base va a firmar al cerrar. */
+/* El orden de los medios es el de Configuración, con el efectivo primero —
+   como en la captura: Efectivo, después Tarj. Débito. */
+function arqOrdenMedio(m){
+  if(m === 'efectivo') return -1;
+  const i = LAMA_MEDIOS.findIndex(x => x.codigo === m);
+  return i < 0 ? 999 : i;
+}
+
+/* LA CUENTA, UNA SOLA VEZ. Es la MISMA que hace `arqueo_cerrar()` en la
+   base: el efectivo suma además el monto inicial y los movimientos de mano
+   (son plata del cajón, no ventas); cada otro medio es solo lo que cobró.
+   La suma de la columna "Sistema" es el Total. Si la pantalla calculara
+   distinto que la base, prometería un número que la base no va a firmar. */
+function arqArmarCuentas(a, desglose, movs, decl){
+  const ingMan = movs.filter(m => m.tipo === 'ingreso').reduce((s,m) => s+(+m.monto||0), 0);
+  const egrMan = movs.filter(m => m.tipo === 'egreso').reduce((s,m) => s+(+m.monto||0), 0);
+  const medios = new Set(['efectivo', ...Object.keys(desglose), ...Object.keys(decl)]);
+  const filas = [...medios].map(medio => {
+    const d = desglose[medio] || {ventas:0, propinas:0};
+    let sistema = d.ventas + d.propinas;
+    if(medio === 'efectivo') sistema += (+a.monto_inicial || 0) + ingMan - egrMan;
+    const declarado = Object.prototype.hasOwnProperty.call(decl, medio) ? +decl[medio] : null;
+    return {medio, ventas:d.ventas, propinas:d.propinas, sistema, declarado};
+  }).sort((x,y) => arqOrdenMedio(x.medio) - arqOrdenMedio(y.medio) || x.medio.localeCompare(y.medio));
+  const ventasTot = filas.reduce((s,f) => s + f.ventas + f.propinas, 0);
+  return {filas, ingMan, egrMan, ventasTot,
+          totalSis: (+a.monto_inicial || 0) + ventasTot + ingMan - egrMan};
+}
+
 async function lamaArqVivoCalcular(){
   if(!LAMA_ARQ) return null;
   const desglose = await arqDesglose(LAMA_ARQ.abierto_at, null);
-  const ingresos = LAMA_ARQ_MOVS.filter(m => m.tipo === 'ingreso').reduce((s,m) => s+(+m.monto||0), 0);
-  const egresos  = LAMA_ARQ_MOVS.filter(m => m.tipo === 'egreso').reduce((s,m) => s+(+m.monto||0), 0);
-  const medios = new Set(['efectivo', ...Object.keys(desglose), ...Object.keys(LAMA_ARQ_DECL)]);
-  const filas = [];
-  let totalSis = 0, totalUsr = 0;
-  for(const medio of medios){
-    const d = desglose[medio] || {ventas:0, propinas:0};
-    let sistema = d.ventas + d.propinas;
-    if(medio === 'efectivo') sistema += (+LAMA_ARQ.monto_inicial || 0) + ingresos - egresos;
-    const hayDeclarado = Object.prototype.hasOwnProperty.call(LAMA_ARQ_DECL, medio);
-    const declarado = hayDeclarado ? LAMA_ARQ_DECL[medio] : null;
-    const usuario = declarado === null ? sistema : declarado;
-    filas.push({medio, ventas:d.ventas, propinas:d.propinas, sistema, declarado, usuario});
-    totalSis += sistema; totalUsr += usuario;
-  }
-  filas.sort((a,b) => (a.medio === 'efectivo' ? -1 : b.medio === 'efectivo' ? 1 : a.medio.localeCompare(b.medio)));
-  return {filas, totalSis, totalUsr};
+  return arqArmarCuentas(LAMA_ARQ, desglose, LAMA_ARQ_MOVS, LAMA_ARQ_DECL);
 }
 
-/* La fila editable de un medio: nombre, "Según sistema" (oculto en modo
-   ciego), Ventas/Propinas si hubo, el campo donde se tipea el conteo, y
-   la diferencia de ESE medio en cuanto hay algo declarado. Se usa tanto
-   en la tarjeta del turno (Mesas) como en la página de Arqueo — una sola
-   forma de dibujarlo para que las dos pantallas digan lo mismo. */
-function arqVivoFilasHTML(filas, ciego){
-  return filas.map(f => {
-    const dif = f.usuario - f.sistema;
-    const claseDif = f.declarado === null ? '' : (dif === 0 ? 'gris' : (dif > 0 ? 'ingreso' : 'egreso'));
-    const etiquetaDif = dif === 0 ? 'Cuadra' : (dif > 0 ? 'Sobra ' : 'Falta ') + plata(Math.abs(dif));
-    return `<div class="arqviv-fila">
-      <div class="arqviv-cab">
-        <span class="n">${esc(lamaMedioNom(f.medio))}</span>
-        ${!ciego ? `<span class="s">Sistema ${plata(f.sistema)}</span>` : ''}
-      </div>
-      ${(f.ventas || f.propinas) ? `
-        <div class="arqpag-sub"><span>Ventas</span><span>${plata(f.ventas)}</span></div>
-        ${f.propinas ? `<div class="arqpag-sub"><span>Propinas</span><span>${plata(f.propinas)}</span></div>` : ''}
-      ` : ''}
-      <input type="number" inputmode="decimal" class="arqviv-in" data-arqvivmedio="${esc(f.medio)}"
-        placeholder="${ciego ? '$ ¿cuánto hay?' : 'Según sistema · ' + plata(f.sistema)}"
-        value="${f.declarado === null ? '' : f.declarado}">
-      ${(!ciego && f.declarado !== null) ? `<div class="arqviv-dif ${claseDif}">${etiquetaDif}</div>` : ''}
-    </div>`;
-  }).join('');
-}
-
-/* Guardar lo que se tipeó para UN medio — se llama al salir del campo
-   (blur/Enter), no en cada tecla. Refresca las dos pantallas que puedan
-   estar mostrando este mismo turno (la tarjeta de Mesas y la página de
-   Arqueo), para que nunca digan cosas distintas. */
+/* Guardar lo que se tipeó para UN medio — al salir del campo, no en cada
+   tecla. No repinta: el Total y la Diferencia ya se movieron mientras se
+   escribía (arqPagTotales). */
 async function lamaArqDeclarar(medio, valorTexto){
   if(!LAMA_ARQ) return;
-  const monto = +String(valorTexto).replace(/[^\d.-]/g, '');
-  if(valorTexto === '' || isNaN(monto) || monto < 0) return;   // vacío = todavía no se declaró, no es un error
+  const t = String(valorTexto).trim();
+  if(t === '') return;                          // vacío = todavía no se contó
+  const monto = +t.replace(/[^\d.-]/g, '');
+  if(isNaN(monto) || monto < 0) return;
+  if(LAMA_ARQ_DECL[medio] === monto) return;    // nada nuevo que guardar
   const r = await lamaLlamar('arqueo_declarar',
     {p_arqueo_id: LAMA_ARQ.id, p_medio: medio, p_monto: monto, p_quien: NOMBRE});
   if(r === null) return;
   LAMA_ARQ_DECL[medio] = monto;
-  const vivo = await lamaArqVivoCalcular();
-  if(LAMA_ARQ_MODAL && (LAMA_ARQ_MODAL.modo === 'turno' || LAMA_ARQ_MODAL.modo === 'cerrar')){
-    LAMA_ARQ_MODAL.vivo = vivo;
-    lamaArqPintarModal();
-  }
-  if(ARQPAG_SEL === LAMA_ARQ.id) arqPagPintarDetalleAbierta(LAMA_ARQ, vivo);
-  aviso('✓ Guardado');
 }
 
+/* EL AVISO DE MESAS. Sigue siendo un aviso y no un candado (se puede
+   vender con la caja sin abrir), pero ya no abre una ventana propia: lleva
+   a la página de Arqueo, que es donde se abre, se cuenta y se cierra. */
 function lamaArqPintarBanner(){
   const cont = $('lama-arq-banner'); if(!cont) return;
   if(!LAMA_ARQ_SQL){ cont.innerHTML = ''; return; }   // el .sql todavía no se corrió
-  const hist = `<button type="button" class="lama-arq-hist" data-lamaarq="historial">Ver arqueos anteriores</button>`;
   if(!LAMA_ARQ){
     cont.innerHTML = `<div class="lama-arq-av">
       <span>La caja del turno no está abierta</span>
       <button type="button" data-lamaarq="abrir">Abrir</button>
-    </div>` + hist;
+    </div>`;
     return;
   }
   const hora = new Date(LAMA_ARQ.abierto_at).toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'});
   cont.innerHTML = `<button type="button" class="lama-arq-pill" data-lamaarq="turno">
       <span>Caja abierta desde las <b>${hora}</b></span>
-    </button>` + hist;
-}
-
-/* PASO 5 DE LA MAQUETA ORIGINAL · el historial de arqueos, de solo
-   lectura. Solo lee `lama_arqueos` cerrados de esta sede — ni un botón de
-   editar ni de reabrir, porque un arqueo cerrado no se reabre jamás. */
-async function lamaArqCargarHistorial(){
-  const r = await sb.from('lama_arqueos').select('*')
-    .eq('sede', SEDE).eq('estado', 'cerrada')
-    .order('cerrado_at', {ascending:false}).limit(20);
-  return r.data || [];
-}
-
-function lamaArqAbrirHistorial(){
-  LAMA_ARQ_MODAL = {modo:'historial', lista:[]};
-  lamaArqPintarModal();
-  lamaArqCargarHistorial().then(lista => {
-    if(!LAMA_ARQ_MODAL || LAMA_ARQ_MODAL.modo !== 'historial') return;   // se cerró mientras cargaba
-    LAMA_ARQ_MODAL.lista = lista;
-    lamaArqPintarModal();
-  });
-}
-
-function lamaArqCerrarModal(){ LAMA_ARQ_MODAL = null; lamaArqPintarModal(); }
-
-function lamaArqAbrirModal(){
-  LAMA_ARQ_MODAL = {modo:'abrir', monto_inicial:''};
-  lamaArqPintarModal();
-}
-
-async function lamaArqAbrirTurno(){
-  if(!LAMA_ARQ) return;
-  LAMA_ARQ_MODAL = {modo:'turno', vivo:null};
-  lamaArqPintarModal();
-  const vivo = await lamaArqVivoCalcular();
-  if(!LAMA_ARQ_MODAL || LAMA_ARQ_MODAL.modo !== 'turno') return;
-  LAMA_ARQ_MODAL.vivo = vivo;
-  lamaArqPintarModal();
-}
-
-function lamaArqAbrirMovimiento(){
-  LAMA_ARQ_MODAL = {modo:'movimiento', tipo:'egreso', monto:'', nota:''};
-  lamaArqPintarModal();
-}
-
-/* La pantalla final antes de cerrar: ya no vuelve a pedir plata —eso se
-   fue declarando en la tarjeta del turno—, solo confirma con el total en
-   vivo y deja un comentario opcional. */
-function lamaArqAbrirCerrar(){
-  if(!LAMA_ARQ) return;
-  const vivoPrevio = (LAMA_ARQ_MODAL && LAMA_ARQ_MODAL.vivo) || null;
-  LAMA_ARQ_MODAL = {modo:'cerrar', vivo:vivoPrevio, comentario:''};
-  lamaArqPintarModal();
-  if(!vivoPrevio) lamaArqVivoCalcular().then(vivo => {
-    if(LAMA_ARQ_MODAL && LAMA_ARQ_MODAL.modo === 'cerrar'){ LAMA_ARQ_MODAL.vivo = vivo; lamaArqPintarModal(); }
-  });
-}
-
-async function lamaArqMostrarCerrada(arqueo){
-  const rm = await sb.from('lama_arqueo_cierre_medios').select('*').eq('arqueo_id', arqueo.id).order('medio');
-  LAMA_ARQ_MODAL = {modo:'cerrada', arqueo, medios: rm.data || []};
-  lamaArqPintarModal();
-}
-
-function lamaArqPintarModal(){
-  const cont = $('lama-arqueo'); if(!cont) return;
-  const m = LAMA_ARQ_MODAL;
-  if(!m){ cont.innerHTML = ''; return; }
-  const sedeLabel = (SEDES[SEDE] && SEDES[SEDE].corto) || SEDE || '';
-  const ciego = ajVal('arqueo_ciego', SEDE, false);
-
-  if(m.modo === 'abrir'){
-    cont.innerHTML = `<div class="arq-ficha" data-arqfondo="1" role="dialog" aria-modal="true" aria-label="Abrir la caja">
-      <div class="arq-tarj">
-        <h4>Abrir la caja</h4>
-        <p class="cab">${esc(new Date().toLocaleString('es-CL',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}))} · ${esc(sedeLabel)}</p>
-        <div class="arq-campo">
-          <label>Monto inicial — el fondo de cambio</label>
-          <input type="number" inputmode="decimal" id="arq-in-monto" placeholder="$ 0" value="${esc(m.monto_inicial)}">
-        </div>
-        <div class="arq-btns">
-          <button type="button" class="btn btn-gris" data-lamaarq="cancelar">Cancelar</button>
-          <button type="button" class="btn btn-orange" data-lamaarq="confirmar-abrir">Abrir</button>
-        </div>
-      </div>
-    </div>`;
-    return;
-  }
-
-  if(m.modo === 'turno'){
-    if(!LAMA_ARQ){ cont.innerHTML = ''; return; }
-    const hora = new Date(LAMA_ARQ.abierto_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
-    const v = m.vivo;
-    const dif = v ? v.totalUsr - v.totalSis : 0;
-    cont.innerHTML = `<div class="arq-ficha" data-arqfondo="1" role="dialog" aria-modal="true" aria-label="Caja abierta">
-      <div class="arq-tarj">
-        <h4>Caja abierta</h4>
-        <p class="cab">Desde las ${hora}${LAMA_ARQ.abierto_por ? ' · la abrió '+esc(LAMA_ARQ.abierto_por) : ''}</p>
-        ${!v ? '<p class="cab">Cargando…</p>' : `
-          ${!ciego ? `<div class="arq-tot ${dif>=0?'verde':'rojo'}">
-              <span class="n">Debería haber, en todos los medios</span><span>${plata(v.totalSis)}</span></div>` : ''}
-          <div class="arqviv-lista">${arqVivoFilasHTML(v.filas, ciego)}</div>
-        `}
-        ${LAMA_ARQ_MOVS.length ? `<div class="arq-lista">${LAMA_ARQ_MOVS.slice().reverse().map(x => `<div class="arq-mov"><span class="n">${esc(x.nota)}</span><span class="v ${x.tipo}">${x.tipo==='ingreso'?'+ ':'− '}${plata(x.monto)}</span></div>`).join('')}</div>` : ''}
-        <div class="arq-btns">
-          <button type="button" class="btn btn-gris" data-lamaarq="movimiento">Movimiento</button>
-          <button type="button" class="btn btn-orange" data-lamaarq="ir-cerrar">Cerrar caja</button>
-        </div>
-      </div>
-    </div>`;
-    return;
-  }
-
-  if(m.modo === 'movimiento'){
-    cont.innerHTML = `<div class="arq-ficha" data-arqfondo="1" role="dialog" aria-modal="true" aria-label="Movimiento de caja">
-      <div class="arq-tarj">
-        <h4>Movimiento</h4>
-        <p class="cab">Plata que entra o sale del cajón sin ser una venta</p>
-        <div class="arq-campo">
-          <label>Tipo</label>
-          <select id="arq-in-tipo">
-            <option value="egreso"${m.tipo==='egreso'?' selected':''}>Egreso — sale plata</option>
-            <option value="ingreso"${m.tipo==='ingreso'?' selected':''}>Ingreso — entra plata</option>
-          </select>
-        </div>
-        <div class="arq-campo"><label>Monto</label>
-          <input type="number" inputmode="decimal" id="arq-in-mmonto" placeholder="$ 0" value="${esc(m.monto)}"></div>
-        <div class="arq-campo"><label>Nota</label>
-          <input type="text" id="arq-in-nota" placeholder="Para qué es" value="${esc(m.nota)}"></div>
-        <div class="arq-btns">
-          <button type="button" class="btn btn-gris" data-lamaarq="volver-turno">Cancelar</button>
-          <button type="button" class="btn btn-orange" data-lamaarq="confirmar-movimiento">Guardar</button>
-        </div>
-      </div>
-    </div>`;
-    return;
-  }
-
-  if(m.modo === 'cerrar'){
-    const v = m.vivo;
-    const dif = v ? v.totalUsr - v.totalSis : 0;
-    cont.innerHTML = `<div class="arq-ficha" data-arqfondo="1" role="dialog" aria-modal="true" aria-label="Cerrar la caja">
-      <div class="arq-tarj">
-        <h4>Cerrar la caja</h4>
-        <p class="cab">Lo que no se haya declarado se completa solo, igual al sistema.</p>
-        ${!ciego && v
-          ? `<div class="arq-tot ${dif===0?'verde':(dif>0?'verde':'rojo')}">
-               <span class="n">${dif===0?'Cuadra':(dif>0?'Sobra':'Falta')}</span><span>${plata(Math.abs(dif))}</span></div>`
-          : `<div class="arq-tot oculto">La diferencia se ve recién al cerrar</div>`}
-        <div class="arq-campo"><label>Comentario (opcional)</label>
-          <input type="text" id="arq-in-coment" placeholder="Si pasó algo raro, acá" value="${esc(m.comentario)}"></div>
-        <div class="arq-btns">
-          <button type="button" class="btn btn-gris" data-lamaarq="volver-turno">Volver</button>
-          <button type="button" class="btn btn-orange" data-lamaarq="confirmar-cerrar">Cerrar caja</button>
-        </div>
-      </div>
-    </div>`;
-    return;
-  }
-
-  if(m.modo === 'cerrada'){
-    const a = m.arqueo;
-    const hIni = new Date(a.abierto_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
-    const hFin = new Date(a.cerrado_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
-    const dif = +a.diferencia_total || 0;
-    const claseTot = dif === 0 ? 'verde' : (dif > 0 ? 'verde' : 'rojo');
-    const etiqueta  = dif === 0 ? 'Cuadrada' : (dif > 0 ? 'Sobra' : 'Falta');
-    const medios = m.medios || [];
-    cont.innerHTML = `<div class="arq-ficha" data-arqfondo="1" role="dialog" aria-modal="true" aria-label="Caja cerrada">
-      <div class="arq-tarj">
-        <h4>Caja cerrada</h4>
-        <p class="cab">${hIni} → ${hFin}${a.cerrado_por ? ' · la cerró '+esc(a.cerrado_por) : ''}</p>
-        ${medios.map(x => `<div class="arq-ren"><span class="n">${esc(lamaMedioNom(x.medio))}</span>
-            <span class="v${x.diferencia===0?' gris':''}">${plata(x.usuario)}</span></div>`).join('')}
-        <div class="arq-tot ${claseTot}"><span class="n">${etiqueta}</span><span>${plata(Math.abs(dif))}</span></div>
-        <div class="arq-btns"><button type="button" class="btn btn-orange" style="flex:1" data-lamaarq="cancelar">Listo</button></div>
-      </div>
-    </div>`;
-    return;
-  }
-
-  if(m.modo === 'historial'){
-    const filas = m.lista || [];
-    cont.innerHTML = `<div class="arq-ficha" data-arqfondo="1" role="dialog" aria-modal="true" aria-label="Arqueos anteriores">
-      <div class="arq-tarj">
-        <h4>Arqueos anteriores</h4>
-        <p class="cab">${esc(sedeLabel)} · los últimos ${filas.length}</p>
-        ${filas.length ? `<div class="arq-lista">${filas.map(a => {
-            const dia  = new Date(a.abierto_at).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit'});
-            const hIni = new Date(a.abierto_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
-            const hFin = a.cerrado_at ? new Date(a.cerrado_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}) : '—';
-            const dif  = +a.diferencia_total || 0;
-            const clase    = dif === 0 ? 'gris' : (dif > 0 ? 'ingreso' : 'egreso');
-            const etiqueta = dif === 0 ? 'cuadrada' : (dif > 0 ? 'sobra' : 'falta');
-            return `<div class="arq-mov">
-              <span class="n"><b>${dia} · ${hIni}→${hFin}</b>${a.cerrado_por ? ' · '+esc(a.cerrado_por) : ''}</span>
-              <span class="v ${clase}">${etiqueta}${dif !== 0 ? ' '+plata(Math.abs(dif)) : ''}</span>
-            </div>`;
-          }).join('')}</div>`
-          : `<p class="cab" style="margin:4px 0 0">Todavía no hay ninguno cerrado.</p>`}
-        <div class="arq-btns"><button type="button" class="btn btn-gris" style="flex:1" data-lamaarq="cancelar">Cerrar</button></div>
-      </div>
-    </div>`;
-    return;
-  }
-
-  cont.innerHTML = '';
-}
-
-async function lamaArqConfirmarAbrir(){
-  const m = LAMA_ARQ_MODAL; if(!m) return;
-  const monto = +String(m.monto_inicial).replace(/[^\d.-]/g,'');
-  if(m.monto_inicial === '' || isNaN(monto) || monto < 0){
-    avisar('Escribí el monto inicial de la caja.'); return;
-  }
-  const r = await lamaLlamar('arqueo_abrir', {p_sede: SEDE, p_monto_inicial: monto, p_quien: NOMBRE});
-  if(!r) return;
-  LAMA_ARQ = r; LAMA_ARQ_MOVS = []; LAMA_ARQ_DECL = {};
-  LAMA_ARQ_MODAL = null;
-  lamaArqPintarBanner(); lamaArqPintarModal();
-  aviso('✓ Caja abierta');
-}
-
-async function lamaArqConfirmarMovimiento(){
-  const m = LAMA_ARQ_MODAL; if(!m || !LAMA_ARQ) return;
-  const monto = +String(m.monto).replace(/[^\d.-]/g,'');
-  if(!monto || monto <= 0){ avisar('El monto tiene que ser mayor que cero.'); return; }
-  if(!String(m.nota||'').trim()){ avisar('Escribí para qué es este movimiento.'); return; }
-  const r = await lamaLlamar('arqueo_movimiento', {
-    p_arqueo_id: LAMA_ARQ.id, p_tipo: m.tipo, p_monto: monto,
-    p_nota: m.nota.trim(), p_quien: NOMBRE});
-  if(!r) return;
-  LAMA_ARQ_MOVS.push(r);
-  aviso('✓ Anotado');
-  await lamaArqAbrirTurno();   // vuelve a la tarjeta del turno, ya actualizada
-}
-
-async function lamaArqConfirmarCerrar(){
-  const m = LAMA_ARQ_MODAL; if(!m || !LAMA_ARQ) return;
-  const r = await lamaLlamar('arqueo_cerrar', {
-    p_arqueo_id: LAMA_ARQ.id,
-    p_comentario: String(m.comentario||'').trim() || null,
-    p_quien: NOMBRE});
-  if(!r) return;
-  LAMA_ARQ = null; LAMA_ARQ_MOVS = []; LAMA_ARQ_DECL = {};
-  lamaArqPintarBanner();
-  await lamaArqMostrarCerrada(r);
+    </button>`;
 }
 
 function lamaArqEngancharUnaVez(){
   const banner = $('lama-arq-banner');
-  if(banner && !banner.dataset.enganchado){
-    banner.dataset.enganchado = '1';
-    banner.addEventListener('click', e => {
-      const b = e.target.closest('[data-lamaarq]'); if(!b) return;
-      const acc = b.dataset.lamaarq;
-      if(acc === 'abrir') lamaArqAbrirModal();
-      else if(acc === 'turno') lamaArqAbrirTurno();
-      else if(acc === 'historial') lamaArqAbrirHistorial();
-    });
-  }
-  const modal = $('lama-arqueo');
-  if(modal && !modal.dataset.enganchado){
-    modal.dataset.enganchado = '1';
-    modal.addEventListener('click', async e => {
-      if(!LAMA_ARQ_MODAL) return;
-      if(e.target.dataset && e.target.dataset.arqfondo){ lamaArqCerrarModal(); return; }
-      const b = e.target.closest('[data-lamaarq]'); if(!b) return;
-      const acc = b.dataset.lamaarq;
-      if(acc === 'cancelar')             { lamaArqCerrarModal(); return; }
-      if(acc === 'volver-turno')         { await lamaArqAbrirTurno(); return; }
-      if(acc === 'movimiento')           { lamaArqAbrirMovimiento(); return; }
-      if(acc === 'ir-cerrar')            { lamaArqAbrirCerrar(); return; }
-      if(acc === 'confirmar-abrir')      { await lamaArqConfirmarAbrir(); return; }
-      if(acc === 'confirmar-movimiento') { await lamaArqConfirmarMovimiento(); return; }
-      if(acc === 'confirmar-cerrar')     { await lamaArqConfirmarCerrar(); return; }
-    });
-    /* Como en `lamaAnularEngancharUnaVez`: guardar en el estado sin repintar,
-       para no perder el foco en la primera letra. Los campos de declarar un
-       medio (`arqvivmedio`) son la excepción: se guardan en `change`
-       (al salir del campo), no en cada tecla — ver más abajo. */
-    modal.addEventListener('input', e => {
-      if(!LAMA_ARQ_MODAL) return;
-      const id = e.target.id;
-      if(id === 'arq-in-monto')   LAMA_ARQ_MODAL.monto_inicial = e.target.value;
-      if(id === 'arq-in-mmonto')  LAMA_ARQ_MODAL.monto = e.target.value;
-      if(id === 'arq-in-nota')    LAMA_ARQ_MODAL.nota = e.target.value;
-      if(id === 'arq-in-coment')  LAMA_ARQ_MODAL.comentario = e.target.value;
-    });
-    modal.addEventListener('change', e => {
-      if(LAMA_ARQ_MODAL && e.target.id === 'arq-in-tipo') LAMA_ARQ_MODAL.tipo = e.target.value;
-      const dm = e.target.closest('[data-arqvivmedio]');
-      if(dm) lamaArqDeclarar(dm.dataset.arqvivmedio, e.target.value);
-    });
-  }
+  if(!banner || banner.dataset.enganchado) return;
+  banner.dataset.enganchado = '1';
+  banner.addEventListener('click', e => {
+    const b = e.target.closest('[data-lamaarq]'); if(!b) return;
+    ARQPAG_SEL = b.dataset.lamaarq === 'abrir' ? 'nuevo' : (LAMA_ARQ ? LAMA_ARQ.id : null);
+    ARQPAG_ENTRAR_DET = true;   // en el teléfono, entrar directo al detalle
+    pickTab('arqueo');
+  });
 }
 
 /* ================================================================
-   LA PÁGINA DE ARQUEO — pedida por Jhon el 2026-09-22 mirando la pantalla
-   real de Fudo (Arqueos de Caja: historial a la izquierda, detalle a la
-   derecha). Acá el detalle es una ficha superpuesta, no una columna — el
-   aparato que manda es el teléfono. Reusa el mismo estado y las mismas
-   consultas que el aviso de Mesas (`LAMA_ARQ`, `lamaArqCargar`,
-   `lamaArqVivoCalcular`), así que las dos pantallas nunca pueden decir
-   cosas distintas sobre el mismo turno: una verdad, dos vitrinas.
+   LA PÁGINA DE ARQUEO
+   ================================================================ */
+let ARQPAG_LISTA    = [];     // arqueos de esta sede, el abierto primero
+let ARQPAG_SEL      = null;   // id del arqueo en el detalle, 'nuevo', o null
+let ARQPAG_VIVO     = null;   // las cuentas del arqueo abierto, en vivo
+let ARQPAG_DET      = null;   // {id, cuentas, movs} del arqueo cerrado en el detalle
+let ARQPAG_VER_DET  = false;  // en el teléfono: ¿se está mirando el detalle y no la lista?
+let ARQPAG_ENTRAR_DET = false; // lo pide el aviso de Mesas: abrir ya en el detalle
+let ARQPAG_PLEGADO  = new Set();   // qué desplegables están cerrados ('ingreso', 'egreso', 'm:efectivo'…)
+let ARQPAG_BORRADOR = {};     // lo tipeado y todavía no guardado, por medio
+let ARQPAG_COMENT   = '';     // el comentario, que se guarda al finalizar (como en Fudo)
+let ARQPAG_MONTO    = '';     // el monto inicial del arqueo nuevo
 
-   Abrir y cerrar la caja SIGUEN viviendo solo en Mesas — acá no hay botón
-   para eso. No es una limitación de esta pantalla: es que un turno se abre
-   parado frente al mesón, no revisando el historial. Declarar cuánto hay
-   de cada medio SÍ se puede hacer acá, porque es la misma escritura que
-   ya vive en la tarjeta del turno — dos puertas, una sola función. */
-let ARQPAG_LISTA = [];   // arqueos de esta sede, abiertos y cerrados, recientes primero
-let ARQPAG_SEL   = null; // el id del que está mostrando el detalle, o null
+/* Las fechas se arman A MANO, con barras, como las escribe Fudo
+   (22/09/26 15:15:21). `toLocaleDateString('es-CL')` en Chrome las escribe
+   con guiones (22-09-26): parecido no es igual, y el equipo lee las dos
+   pantallas lado a lado. */
+const arqDos = n => String(n).padStart(2, '0');
+const arqFecha = t => { const d = new Date(t);
+  return arqDos(d.getDate()) + '/' + arqDos(d.getMonth() + 1) + '/' + arqDos(d.getFullYear() % 100); };
+const arqFechaHora = t => { const d = new Date(t);
+  return arqFecha(d) + ' ' + arqDos(d.getHours()) + ':' + arqDos(d.getMinutes()) + ':' + arqDos(d.getSeconds()); };
+const arqSigno = n => (n < 0 ? '-' : '') + plata(Math.abs(n));
+const arqClaseDif = n => n === 0 ? 'cero' : (n > 0 ? 'pos' : 'neg');
+/* Lo que se muestra de un cerrado. Los que se cerraron con la primera
+   versión (solo efectivo) no tienen los totales nuevos: se cae al efectivo,
+   que es lo único que esa versión llegó a comparar. */
+const arqSisCerrado = a => a.total_esperado  != null ? +a.total_esperado  : +(a.efectivo_esperado || 0);
+const arqUsrCerrado = a => a.total_declarado != null ? +a.total_declarado : +(a.efectivo_contado  || 0);
+const arqDifCerrado = a => a.diferencia_total != null ? +a.diferencia_total : +(a.diferencia || 0);
 
 async function arqPagCargar(){
   const cuerpo = $('arqpag-cuerpo'); if(!cuerpo) return;
   arqPagEngancharUnaVez();
   cuerpo.innerHTML = '<div class="empty">Cargando…</div>';
+  await lamaCargarMedios();
   await lamaArqCargar();
   if(!LAMA_ARQ_SQL){
     cuerpo.innerHTML = '<div class="arqpag-vacio">Todavía no está corrido<br><code>sql/2026-09-lama-arqueo-fudo.sql</code>.</div>';
+    $('arqpag-detalle').innerHTML = '';
     return;
   }
   const r = await sb.from('lama_arqueos').select('*')
-    .eq('sede', SEDE).order('abierto_at', {ascending:false}).limit(30);
-  ARQPAG_LISTA = r.data || [];
+    .eq('sede', SEDE).order('abierto_at', {ascending:false}).limit(40);
+  const lista = r.data || [];
+  /* El abierto va PRIMERO siempre, aunque otro tenga fecha más nueva. */
+  ARQPAG_LISTA = [...lista.filter(a => a.estado === 'abierta'), ...lista.filter(a => a.estado !== 'abierta')];
+  ARQPAG_VIVO = LAMA_ARQ ? await lamaArqVivoCalcular() : null;
+  /* Qué se muestra a la derecha: lo que se pidió (desde Mesas o tocando una
+     fila), y si no hay nada pedido, el abierto — que es el que importa hoy. */
+  if(ARQPAG_SEL === 'nuevo' && LAMA_ARQ) ARQPAG_SEL = LAMA_ARQ.id;
+  if(ARQPAG_SEL !== 'nuevo' && !ARQPAG_LISTA.some(a => a.id === ARQPAG_SEL))
+    ARQPAG_SEL = ARQPAG_LISTA.length ? ARQPAG_LISTA[0].id : null;
   arqPagPintar();
+  await arqPagElegir(ARQPAG_SEL, false);
 }
 
 function arqPagFilaHTML(a){
   const abierta = a.estado === 'abierta';
-  const dIni = new Date(a.abierto_at).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit'});
-  const hIni = new Date(a.abierto_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
-  const hFin = a.cerrado_at ? new Date(a.cerrado_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}) : null;
-  let chip, sistTxt;
-  if(abierta){
-    chip = '<span class="arqpag-chip abierta">Abierta</span>';
-    sistTxt = '—';
-  } else {
-    const dif = +a.diferencia_total || 0;
-    const clase    = dif === 0 ? 'cuadrada' : (dif > 0 ? 'sobra' : 'falta');
-    const etiqueta = dif === 0 ? 'Cuadrada' : (dif > 0 ? 'Sobra ' : 'Falta ') + plata(Math.abs(dif));
-    chip = `<span class="arqpag-chip ${clase}">${etiqueta}</span>`;
-    sistTxt = plata(a.total_esperado);
-  }
-  return `<div class="arqpag-fila" data-arqpagver="${a.id}">
-    <div class="cent">
-      <div class="f">${dIni} · ${hIni}${hFin ? ' → ' + hFin : ''}</div>
-      <div class="m">${a.abierto_por ? 'Abrió ' + esc(a.abierto_por) : ''}${a.cerrado_por ? ' · Cerró ' + esc(a.cerrado_por) : ''}</div>
-      ${chip}
-    </div>
-    <div class="der"><div class="sist">${sistTxt}</div></div>
-  </div>`;
+  const sis = abierta ? (ARQPAG_VIVO ? plata(ARQPAG_VIVO.totalSis) : '…') : plata(arqSisCerrado(a));
+  const usr = abierta ? '-' : plata(arqUsrCerrado(a));
+  const dif = abierta ? null : arqDifCerrado(a);
+  return `<button type="button" class="arqp-fila${a.id === ARQPAG_SEL ? ' sel' : ''}" data-arqpagver="${a.id}">
+    <span class="c-caja">Principal</span>
+    <span class="c-fecha"><b>${arqFechaHora(a.abierto_at)}</b>${a.cerrado_at ? `<br>${arqFechaHora(a.cerrado_at)}` : ''}</span>
+    <span class="c-num">${sis}</span>
+    <span class="c-num c-usr">${usr}</span>
+    <span class="c-num c-dif ${dif === null ? '' : arqClaseDif(dif)}">${dif === null ? '-' : arqSigno(dif)}</span>
+    <span class="c-est">${abierta ? 'Abierto' : 'Cerrado'}</span>
+  </button>`;
 }
 
 function arqPagPintar(){
   const cuerpo = $('arqpag-cuerpo'); if(!cuerpo) return;
-  const cab = '<div class="arqpag-cab"><h2>Arqueo de caja</h2></div>';
-  cuerpo.innerHTML = cab + (ARQPAG_LISTA.length
-    ? ARQPAG_LISTA.map(arqPagFilaHTML).join('')
-    : '<div class="arqpag-vacio">Todavía no hay ningún arqueo en esta sede.</div>');
+  const v = ARQPAG_VIVO;
+  const tarj = (tit, val) => `<div class="arqp-tarj"><span class="t">${tit}</span><span class="v">${val}</span></div>`;
+  cuerpo.innerHTML = `
+    <div class="arqp-barra">
+      <h2>Arqueos de caja</h2>
+      ${LAMA_ARQ ? '' : '<button type="button" class="btn btn-orange" data-arqp="nuevo">+ Nuevo arqueo de caja</button>'}
+    </div>
+    <div class="arqp-resumen">
+      ${tarj('Arqueo de caja', LAMA_ARQ ? '1 caja' : 'Abrí uno para seguir las ventas')}
+      ${tarj('Saldo actual',   plata(v ? v.totalSis  : 0))}
+      ${tarj('Total de ventas', plata(v ? v.ventasTot : 0))}
+      ${tarj('Ingresos', plata(v ? v.ingMan : 0))}
+      ${tarj('Egresos',  plata(v ? v.egrMan : 0))}
+    </div>
+    <div class="arqp-tabla">
+      <div class="arqp-fila arqp-th">
+        <span class="c-caja">Caja</span><span class="c-fecha">Apertura / Cierre</span>
+        <span class="c-num">$ Sistema</span><span class="c-num c-usr">$ Usuario</span>
+        <span class="c-num">Diferencia</span><span class="c-est">Estado</span>
+      </div>
+      ${ARQPAG_LISTA.length ? ARQPAG_LISTA.map(arqPagFilaHTML).join('')
+        : '<div class="arqpag-vacio">Todavía no hay ningún arqueo en esta sede.</div>'}
+    </div>`;
+  const caja = $('view-arqueo').querySelector('.arqp');
+  if(caja) caja.classList.toggle('ver-det', ARQPAG_VER_DET);
 }
 
-async function arqPagAbrirDetalle(id){
-  const a = ARQPAG_LISTA.find(x => x.id === id); if(!a) return;
+/* Elegir qué va a la derecha. Un cerrado se lee de lo CONGELADO al cerrar
+   (`lama_arqueo_cierre_medios`), nunca se recalcula: el arqueo del martes
+   tiene que seguir diciendo lo que dijo el martes. */
+async function arqPagElegir(id, verDet){
   ARQPAG_SEL = id;
-  if(a.estado === 'abierta'){
-    arqPagPintarDetalleAbierta(a, null);
-    const vivo = await lamaArqVivoCalcular();
-    if(ARQPAG_SEL !== id) return;
-    arqPagPintarDetalleAbierta(a, vivo);
-  } else {
-    arqPagPintarDetalleCerrada(a, [], []);
+  if(verDet !== undefined) ARQPAG_VER_DET = verDet;
+  document.querySelectorAll('#arqpag-cuerpo .arqp-fila[data-arqpagver]').forEach(f =>
+    f.classList.toggle('sel', +f.dataset.arqpagver === id));
+  const caja = $('view-arqueo').querySelector('.arqp');
+  if(caja) caja.classList.toggle('ver-det', ARQPAG_VER_DET);
+  if(id === 'nuevo'){ arqPagPintarNuevo(); return; }
+  const a = ARQPAG_LISTA.find(x => x.id === id);
+  if(!a){ $('arqpag-detalle').innerHTML = LAMA_ARQ ? '' :
+    `<div class="arqd arqd-vacio">No hay ninguna caja abierta.<br><br>
+       <button type="button" class="btn btn-orange" data-arqp="nuevo">+ Nuevo arqueo de caja</button></div>`; return; }
+  if(a.estado === 'abierta'){ arqPagPintarDetalle(a, ARQPAG_VIVO, true); return; }
+  if(!ARQPAG_DET || ARQPAG_DET.id !== a.id){
+    $('arqpag-detalle').innerHTML = '<div class="arqd"><p class="arqd-cargando">Cargando…</p></div>';
     const [rm, movsR] = await Promise.all([
-      sb.from('lama_arqueo_cierre_medios').select('*').eq('arqueo_id', a.id).order('medio'),
+      sb.from('lama_arqueo_cierre_medios').select('*').eq('arqueo_id', a.id),
       sb.from('lama_caja_movimientos').select('*').eq('arqueo_id', a.id).order('id')
     ]);
-    if(ARQPAG_SEL !== id) return;
-    arqPagPintarDetalleCerrada(a, rm.data || [], movsR.data || []);
+    const movs = movsR.data || [];
+    let cuentas;
+    if((rm.data || []).length){
+      const filas = rm.data.map(x => ({medio:x.medio, ventas:+x.ventas||0, propinas:+x.propinas||0,
+                                       sistema:+x.sistema||0, declarado:+x.usuario||0}))
+        .sort((x,y) => arqOrdenMedio(x.medio) - arqOrdenMedio(y.medio) || x.medio.localeCompare(y.medio));
+      const ingMan = movs.filter(m => m.tipo === 'ingreso').reduce((s,m) => s+(+m.monto||0), 0);
+      const egrMan = movs.filter(m => m.tipo === 'egreso').reduce((s,m) => s+(+m.monto||0), 0);
+      cuentas = {filas, ingMan, egrMan, ventasTot: filas.reduce((s,f) => s+f.ventas+f.propinas, 0),
+                 totalSis: arqSisCerrado(a)};
+    } else {
+      /* Cerrado con la primera versión: no hay desglose congelado. Se arma
+         con las ventas de esa franja, y como esa versión solo contaba el
+         efectivo, lo demás se da por declarado igual al sistema. */
+      const desglose = await arqDesglose(a.abierto_at, a.cerrado_at);
+      cuentas = arqArmarCuentas(a, desglose, movs, a.efectivo_contado != null ? {efectivo:a.efectivo_contado} : {});
+      cuentas.filas.forEach(f => { if(f.declarado === null) f.declarado = f.sistema; });
+    }
+    ARQPAG_DET = {id:a.id, cuentas, movs};
   }
+  if(ARQPAG_SEL !== a.id) return;              // se eligió otro mientras cargaba
+  arqPagPintarDetalle(a, ARQPAG_DET.cuentas, false, ARQPAG_DET.movs);
 }
 
-function arqPagCerrarDetalle(){ ARQPAG_SEL = null; const d = $('arqpag-detalle'); if(d) d.innerHTML = ''; }
+const ICONO_CHEVRON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>';
+const ICONO_CALENDARIO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"></rect><path d="M3.5 10h17M8 3v4M16 3v4"></path></svg>';
+const ICONO_REFRESCAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"></path><polyline points="21 3 21 9 15 9"></polyline></svg>';
 
-function arqPagPintarDetalleAbierta(a, vivo){
+function arqPagPintarDetalle(a, c, abierta, movsCerrado){
   const cont = $('arqpag-detalle'); if(!cont) return;
+  if(!c){ cont.innerHTML = '<div class="arqd"><p class="arqd-cargando">Cargando…</p></div>'; return; }
+  const movs = abierta ? LAMA_ARQ_MOVS : (movsCerrado || []);
+  /* Arqueo ciego (Ajustes → Interruptores): mientras la caja está abierta
+     se esconde TODO lo que es "según sistema" —el desglose, la columna y la
+     diferencia—, así el que cuenta no puede acomodar el conteo al número.
+     Cerrada ya no hay nada que acomodar, y se ve entera. */
+  const ciego = abierta && ajVal('arqueo_ciego', SEDE, false);
+  const abiertoDesp = k => !ARQPAG_PLEGADO.has(k);
+  const pleg = (k, clase, etiqueta, valor) => `<button type="button" class="arqd-fila ${clase} plegable${abiertoDesp(k) ? ' abierto' : ''}" data-arqpleg="${esc(k)}">
+      <span class="n"><span class="chev">${ICONO_CHEVRON}</span>${etiqueta}</span><span class="v">${valor}</span></button>`;
+  const dato = (t, v) => `<div class="arqd-dato"><span class="t">${t}</span><span class="v">${v}</span></div>`;
+  const egresos = movs.filter(m => m.tipo === 'egreso');
+  const ingresos = movs.filter(m => m.tipo === 'ingreso');
+  const conVentas = c.filas.filter(f => f.ventas || f.propinas);
+
+  let sistemaHTML = '';
+  if(!ciego){
+    sistemaHTML = `
+      <div class="arqd-fila b"><span class="n">Monto inicial</span><span class="v">${plata(a.monto_inicial)}</span></div>
+      ${pleg('ingreso', 'b', 'Ingreso', plata(c.ventasTot + c.ingMan))}
+      ${abiertoDesp('ingreso') ? conVentas.map(f => `
+        ${pleg('m:' + f.medio, 'n2', esc(lamaMedioNom(f.medio)), plata(f.ventas + f.propinas))}
+        ${abiertoDesp('m:' + f.medio) ? `
+          <div class="arqd-fila n3"><span class="n">Propinas</span><span class="v">${plata(f.propinas)}</span></div>
+          <div class="arqd-fila n3"><span class="n">Ventas</span><span class="v">${plata(f.ventas)}</span></div>` : ''}`).join('')
+        + (c.ingMan ? `<div class="arqd-fila n2"><span class="n">Movimientos de caja</span><span class="v">${plata(c.ingMan)}</span></div>` : '')
+        + (!conVentas.length && !c.ingMan ? '<div class="arqd-fila n2 vacia"><span class="n">Sin ingresos todavía</span></div>' : '')
+      : ''}
+      ${egresos.length ? pleg('egreso', 'b', 'Egreso', plata(c.egrMan))
+        : `<div class="arqd-fila b"><span class="n">Egreso</span><span class="v">${plata(c.egrMan)}</span></div>`}
+      ${egresos.length && abiertoDesp('egreso') ? egresos.map(m =>
+        `<div class="arqd-fila n3"><span class="n">${esc(m.nota)}</span><span class="v">${plata(m.monto)}</span></div>`).join('') : ''}
+      <div class="arqd-total"><span>Total</span><span>${plata(c.totalSis)}</span></div>`;
+  }
+
+  /* SEGÚN USUARIO. Abierto: un campo por medio, vacío hasta que se cuenta
+     (vale $0 mientras tanto, como en Fudo). Cerrado: lo que se declaró. */
+  const valorCampo = f => Object.prototype.hasOwnProperty.call(ARQPAG_BORRADOR, f.medio)
+    ? ARQPAG_BORRADOR[f.medio] : (f.declarado === null ? '' : f.declarado);
+  const usrTot = c.filas.reduce((s,f) => s + (abierta ? (+String(valorCampo(f)).replace(/[^\d.-]/g,'') || 0) : f.declarado), 0);
+  const dif = usrTot - c.totalSis;
+  const faltan = abierta && c.filas.some(f => String(valorCampo(f)).trim() === '');
+
+  const filasUsr = c.filas.map(f => `<div class="arqd-tr">
+      <span class="n">${esc(lamaMedioNom(f.medio))}${abierta ? ' <i>*</i>' : ''}</span>
+      ${ciego ? '' : `<span class="s">${plata(f.sistema)}</span>`}
+      <span class="u">${abierta
+        ? `<input type="number" inputmode="decimal" min="0" data-arqvivmedio="${esc(f.medio)}"
+             aria-label="${esc(lamaMedioNom(f.medio))} según usuario" value="${esc(valorCampo(f))}">`
+        : plata(f.declarado)}</span>
+    </div>`).join('');
+
+  cont.innerHTML = `<div class="arqd">
+    <div class="arqd-cab">
+      <h3>Arqueo de caja</h3>
+      <button type="button" class="arqd-ico" data-arqp="refrescar" title="Actualizar" aria-label="Actualizar">${ICONO_REFRESCAR}</button>
+    </div>
+    <button type="button" class="arqd-volver" data-arqp="volver">← Todos los arqueos</button>
+    <div class="arqd-datos">
+      ${dato('Caja', 'Principal')}
+      ${dato('Hora de apertura', arqFechaHora(a.abierto_at))}
+      ${dato('Creado por', esc(a.abierto_por || '—'))}
+      ${a.cerrado_at ? dato('Hora de cierre', arqFechaHora(a.cerrado_at)) : ''}
+      ${a.cerrado_at ? dato('Cerrado por', esc(a.cerrado_por || '—')) : ''}
+      ${dato('Estado', abierta ? 'Abierto' : 'Cerrado')}
+    </div>
+    <div class="arqd-fechas">${ICONO_CALENDARIO}<span>${arqFecha(a.abierto_at)}  -  ${arqFecha(a.cerrado_at || Date.now())}</span></div>
+    ${sistemaHTML}
+    <div class="arqd-sec">Según usuario</div>
+    <div class="arqd-tabla${ciego ? ' ciega' : ''}">
+      <div class="arqd-tr th"><span class="n"></span>${ciego ? '' : '<span class="s">$ Sistema</span>'}<span class="u">$ Usuario</span></div>
+      ${filasUsr}
+    </div>
+    <div class="arqd-total"><span>Total</span><span id="arqd-tot-usr">${plata(usrTot)}</span></div>
+    ${ciego ? '' : `<div class="arqd-dif ${arqClaseDif(dif)}" id="arqd-dif"><span>Diferencia</span><span class="v">${arqSigno(dif)}</span></div>`}
+    ${abierta ? `
+      <div class="arqd-coment"><label for="arqd-coment">Comentario</label>
+        <textarea id="arqd-coment" rows="3">${esc(ARQPAG_COMENT)}</textarea></div>
+      <div class="arqd-pie"><button type="button" class="btn btn-orange" id="arqd-fin" data-arqp="finalizar"${faltan ? ' disabled' : ''}>Finalizar arqueo</button></div>`
+    : (a.comentario ? `<div class="arqd-coment"><label>Comentario</label><p>${esc(a.comentario)}</p></div>` : '')}
+  </div>`;
+}
+
+/* El Total y la Diferencia se mueven MIENTRAS se escribe, sin repintar
+   (repintar le quitaría el foco al campo en la primera tecla). */
+function arqPagTotales(){
+  const det = $('arqpag-detalle'); if(!det || !ARQPAG_VIVO) return;
+  const ins = [...det.querySelectorAll('[data-arqvivmedio]')];
+  const usr = ins.reduce((s,i) => s + (+String(i.value).replace(/[^\d.-]/g,'') || 0), 0);
+  const tot = $('arqd-tot-usr'); if(tot) tot.textContent = plata(usr);
+  const d = $('arqd-dif');
+  if(d){
+    const dif = usr - ARQPAG_VIVO.totalSis;
+    d.className = 'arqd-dif ' + arqClaseDif(dif);
+    d.querySelector('.v').textContent = arqSigno(dif);
+  }
+  const fin = $('arqd-fin'); if(fin) fin.disabled = ins.some(i => String(i.value).trim() === '');
+}
+
+function arqPagPintarNuevo(){
+  const cont = $('arqpag-detalle'); if(!cont) return;
+  cont.innerHTML = `<div class="arqd">
+    <div class="arqd-cab"><h3>Nuevo arqueo de caja</h3></div>
+    <button type="button" class="arqd-volver" data-arqp="volver">← Todos los arqueos</button>
+    <div class="arqd-datos">
+      <div class="arqd-dato"><span class="t">Caja</span><span class="v">Principal</span></div>
+      <div class="arqd-dato"><span class="t">Hora de apertura</span><span class="v">${arqFechaHora(Date.now())}</span></div>
+      <div class="arqd-dato"><span class="t">Creado por</span><span class="v">${esc(NOMBRE || '—')}</span></div>
+    </div>
+    <div class="arq-campo" style="margin-top:14px">
+      <label for="arqd-monto">Monto inicial — el fondo de cambio</label>
+      <input type="number" inputmode="decimal" min="0" id="arqd-monto" placeholder="$ 0" value="${esc(ARQPAG_MONTO)}">
+    </div>
+    <div class="arqd-pie">
+      <button type="button" class="btn btn-gris" data-arqp="cancelar-nuevo">Cancelar</button>
+      <button type="button" class="btn btn-orange" data-arqp="iniciar">Iniciar arqueo</button>
+    </div>
+  </div>`;
+}
+
+async function arqPagIniciar(){
+  const t = String(ARQPAG_MONTO).trim();
+  const monto = +t.replace(/[^\d.-]/g,'');
+  if(t === '' || isNaN(monto) || monto < 0){ avisar('Escribí el monto inicial de la caja.'); return; }
+  const r = await lamaLlamar('arqueo_abrir', {p_sede: SEDE, p_monto_inicial: monto, p_quien: NOMBRE});
+  if(!r) return;
+  ARQPAG_MONTO = ''; ARQPAG_BORRADOR = {}; ARQPAG_COMENT = '';
+  ARQPAG_SEL = r.id;
+  aviso('✓ Caja abierta');
+  await arqPagCargar();
+  lamaArqPintarBanner();
+}
+
+/* FINALIZAR. Antes de cerrar se guarda lo que quede tipeado y sin guardar
+   —el último campo puede no haber perdido el foco todavía—, y recién ahí
+   se cierra. Al revés, la base cerraría con un medio sin su conteo. */
+async function arqPagFinalizar(){
+  if(!LAMA_ARQ) return;
+  const det = $('arqpag-detalle');
+  const ins = [...det.querySelectorAll('[data-arqvivmedio]')];
+  if(ins.some(i => String(i.value).trim() === '')){
+    avisar('Falta contar algún medio.\n\nCada medio de pago necesita su monto: el efectivo, lo que hay en el cajón; la tarjeta, lo que dice el voucher de Transbank.');
+    return;
+  }
+  const usr = ins.reduce((s,i) => s + (+i.value || 0), 0);
+  const dif = usr - (ARQPAG_VIVO ? ARQPAG_VIVO.totalSis : 0);
   const ciego = ajVal('arqueo_ciego', SEDE, false);
-  const hIni = new Date(a.abierto_at).toLocaleString('es-CL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-  const dif = vivo ? vivo.totalUsr - vivo.totalSis : 0;
-  cont.innerHTML = `<div class="arq-ficha" data-arqfondo="1" role="dialog" aria-modal="true" aria-label="Detalle del arqueo">
-    <div class="arq-tarj" style="max-width:440px">
-      <h4>Arqueo de caja</h4>
-      <p class="cab">${esc((SEDES[SEDE] && SEDES[SEDE].corto) || SEDE || '')} · <span class="arqpag-chip abierta">Abierta</span></p>
-      <div class="arq-ren"><span class="n">Abrió</span><span class="v">${esc(a.abierto_por || '—')} · ${hIni}</span></div>
-      ${!vivo ? '<p class="cab">Cargando…</p>' : `
-        ${!ciego ? `<div class="arq-tot ${dif>=0?'verde':'rojo'}">
-            <span class="n">Debería haber, en todos los medios</span><span>${plata(vivo.totalSis)}</span></div>` : ''}
-        <div class="arqviv-lista">${arqVivoFilasHTML(vivo.filas, ciego)}</div>
-      `}
-      <p class="cab" style="margin-top:14px">Lo que anotes acá se guarda igual que en Mesas — es el mismo turno. Abrir, cerrar y los movimientos de mano se hacen desde ahí.</p>
-      <div class="arq-btns"><button type="button" class="btn btn-gris" style="flex:1" data-arqpagcerrar="1">Cerrar</button></div>
-    </div>
-  </div>`;
-}
-
-function arqPagPintarDetalleCerrada(a, medios, movs){
-  const cont = $('arqpag-detalle'); if(!cont) return;
-  const hIni = new Date(a.abierto_at).toLocaleString('es-CL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-  const hFin = a.cerrado_at ? new Date(a.cerrado_at).toLocaleString('es-CL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : null;
-  const dif = +a.diferencia_total || 0;
-  const clase = dif === 0 ? 'cuadrada' : (dif > 0 ? 'sobra' : 'falta');
-  const etiqueta = dif === 0 ? 'Cuadrada' : (dif > 0 ? 'Sobra ' : 'Falta ') + plata(Math.abs(dif));
-  const rotulo = s => `<div style="margin:14px 0 4px;font-size:11.5px;font-weight:700;color:var(--muted);
-    text-transform:uppercase;letter-spacing:.04em">${s}</div>`;
-  cont.innerHTML = `<div class="arq-ficha" data-arqfondo="1" role="dialog" aria-modal="true" aria-label="Detalle del arqueo">
-    <div class="arq-tarj" style="max-width:440px">
-      <h4>Arqueo de caja</h4>
-      <p class="cab">${esc((SEDES[SEDE] && SEDES[SEDE].corto) || SEDE || '')} · <span class="arqpag-chip ${clase}">${etiqueta}</span></p>
-      <div class="arq-ren"><span class="n">Abrió</span><span class="v">${esc(a.abierto_por || '—')} · ${hIni}</span></div>
-      ${a.cerrado_por ? `<div class="arq-ren"><span class="n">Cerró</span><span class="v">${esc(a.cerrado_por)} · ${hFin}</span></div>` : ''}
-      ${rotulo('Por medio')}
-      ${medios.map(x => `<div class="arqpag-medio">
-          <div style="display:flex;justify-content:space-between">
-            <span>${esc(lamaMedioNom(x.medio))}</span><span>${plata(x.usuario)}</span></div>
-          ${x.ventas   ? `<div class="arqpag-sub"><span>Ventas</span><span>${plata(x.ventas)}</span></div>` : ''}
-          ${x.propinas ? `<div class="arqpag-sub"><span>Propinas</span><span>${plata(x.propinas)}</span></div>` : ''}
-          ${x.diferencia !== 0 ? `<div class="arqpag-sub"><span>Según sistema</span><span>${plata(x.sistema)}</span></div>` : ''}
-        </div>`).join('')}
-      <div class="arq-tot ${clase==='falta'?'rojo':'verde'}"><span class="n">Total</span><span>${plata(a.total_declarado)}</span></div>
-      ${a.comentario ? `<div class="arq-ren"><span class="n">Comentario</span><span class="v gris">${esc(a.comentario)}</span></div>` : ''}
-      ${movs.length ? `${rotulo('Movimientos de mano')}
-        <div class="arq-lista">${movs.map(x => `<div class="arq-mov"><span class="n">${esc(x.nota)}</span>
-          <span class="v ${x.tipo}">${x.tipo==='ingreso'?'+ ':'− '}${plata(x.monto)}</span></div>`).join('')}</div>` : ''}
-      <div class="arq-btns"><button type="button" class="btn btn-gris" style="flex:1" data-arqpagcerrar="1">Cerrar</button></div>
-    </div>
-  </div>`;
+  const ok = await preguntar('¿Finalizar el arqueo?',
+    (ciego ? '' : (dif === 0 ? 'La caja cuadra. ' : `Diferencia: ${arqSigno(dif)}. `)) +
+    'Un arqueo finalizado no se vuelve a abrir, y las ventas de este turno dejan de poder anularse.',
+    'Finalizar');
+  if(!ok) return;
+  for(const i of ins){
+    const medio = i.dataset.arqvivmedio, monto = +i.value;
+    if(LAMA_ARQ_DECL[medio] === monto) continue;
+    const r = await lamaLlamar('arqueo_declarar',
+      {p_arqueo_id: LAMA_ARQ.id, p_medio: medio, p_monto: monto, p_quien: NOMBRE});
+    if(r === null) return;                    // no se cierra con un conteo a medio guardar
+    LAMA_ARQ_DECL[medio] = monto;
+  }
+  const id = LAMA_ARQ.id;
+  const r = await lamaLlamar('arqueo_cerrar',
+    {p_arqueo_id: id, p_comentario: ARQPAG_COMENT.trim() || null, p_quien: NOMBRE});
+  if(!r) return;
+  ARQPAG_BORRADOR = {}; ARQPAG_COMENT = ''; ARQPAG_DET = null;
+  ARQPAG_SEL = id;
+  aviso('✓ Arqueo finalizado');
+  await arqPagCargar();
+  lamaArqPintarBanner();
 }
 
 function arqPagEngancharUnaVez(){
-  const cuerpo = $('arqpag-cuerpo');
-  if(cuerpo && !cuerpo.dataset.enganchado){
-    cuerpo.dataset.enganchado = '1';
-    cuerpo.addEventListener('click', e => {
-      const f = e.target.closest('[data-arqpagver]'); if(!f) return;
-      arqPagAbrirDetalle(+f.dataset.arqpagver);
-    });
-  }
-  const det = $('arqpag-detalle');
-  if(det && !det.dataset.enganchado){
-    det.dataset.enganchado = '1';
-    det.addEventListener('click', e => {
-      if((e.target.dataset && e.target.dataset.arqfondo) || e.target.closest('[data-arqpagcerrar]'))
-        arqPagCerrarDetalle();
-    });
-    det.addEventListener('change', e => {
-      const dm = e.target.closest('[data-arqvivmedio]');
-      if(dm) lamaArqDeclarar(dm.dataset.arqvivmedio, e.target.value);
-    });
-  }
+  const vista = $('view-arqueo');
+  if(!vista || vista.dataset.enganchado) return;
+  vista.dataset.enganchado = '1';
+  vista.addEventListener('click', async e => {
+    const fila = e.target.closest('[data-arqpagver]');
+    if(fila){ await arqPagElegir(+fila.dataset.arqpagver, true); return; }
+    const pl = e.target.closest('[data-arqpleg]');
+    if(pl){
+      const k = pl.dataset.arqpleg;
+      ARQPAG_PLEGADO.has(k) ? ARQPAG_PLEGADO.delete(k) : ARQPAG_PLEGADO.add(k);
+      await arqPagElegir(ARQPAG_SEL);
+      return;
+    }
+    const b = e.target.closest('[data-arqp]'); if(!b) return;
+    const acc = b.dataset.arqp;
+    if(acc === 'nuevo')          { await arqPagElegir('nuevo', true); return; }
+    if(acc === 'cancelar-nuevo') { ARQPAG_MONTO = ''; await arqPagElegir(ARQPAG_LISTA.length ? ARQPAG_LISTA[0].id : null, false); return; }
+    if(acc === 'iniciar')        { await arqPagIniciar(); return; }
+    if(acc === 'finalizar')      { await arqPagFinalizar(); return; }
+    if(acc === 'refrescar')      { ARQPAG_DET = null; await arqPagCargar(); return; }
+    if(acc === 'volver')         { ARQPAG_VER_DET = false; const c = vista.querySelector('.arqp'); if(c) c.classList.remove('ver-det'); return; }
+  });
+  vista.addEventListener('input', e => {
+    const dm = e.target.closest('[data-arqvivmedio]');
+    if(dm){ ARQPAG_BORRADOR[dm.dataset.arqvivmedio] = e.target.value; arqPagTotales(); return; }
+    if(e.target.id === 'arqd-coment') ARQPAG_COMENT = e.target.value;
+    if(e.target.id === 'arqd-monto')  ARQPAG_MONTO  = e.target.value;
+  });
+  vista.addEventListener('change', e => {
+    const dm = e.target.closest('[data-arqvivmedio]');
+    if(dm) lamaArqDeclarar(dm.dataset.arqvivmedio, e.target.value);
+  });
 }
 
 /* ================================================================
@@ -16278,7 +16214,9 @@ function pickTab(tab){
      todo —otro garzón abrió mesas, cerró otras— y esta pantalla es la más
      dinámica de la app. Es barato: cuatro consultas chicas. */
   if(tab==='lama') lamaCargar();
-  if(tab==='arqueo') arqPagCargar();
+  /* Entrar por la pestaña muestra la lista; entrar desde el aviso de Mesas
+     (en el teléfono) va directo al detalle de la caja. */
+  if(tab==='arqueo'){ ARQPAG_VER_DET = ARQPAG_ENTRAR_DET; ARQPAG_ENTRAR_DET = false; arqPagCargar(); }
   if(tab==='movcaja') movCajaCargar();
   if(tab==='ajustes'){
     $('aj-volver-txt').textContent = 'Volver a ' + (SEDE ? SEDES[SEDE].label : 'el inventario');

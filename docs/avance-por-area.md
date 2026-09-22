@@ -212,6 +212,14 @@ Fudo) las cinco preguntas que hacían falta para no adivinar de nuevo.
 en las tres funciones y las dos tablas nuevas en 0 filas. **El arqueo por
 medio está vivo**, de punta a punta.
 
+🟢 **2026-09-22 (tarde) · la pantalla, calcada de Fudo.** Se fue la ventana
+emergente: la pestaña **Arqueo** es ahora la pantalla de Fudo en dos mitades
+—lista a la izquierda, detalle a la derecha—, con los campos de "Usuario"
+vacíos hasta contar (como en la captura: la diferencia arranca en -$604.609)
+y **Finalizar arqueo** apagado hasta que todos los medios tengan su monto.
+Mesas ya no tiene ventana de arqueo propia: su aviso lleva acá. Prueba:
+`pruebas/lama-arqueo.mjs`, 31 casos.
+
 ### Conexión Lama ↔ Stock — 0 de 3 ⬜
 
 Que cerrar una mesa descuente el inventario · que anular lo devuelva · leer

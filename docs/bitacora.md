@@ -8,6 +8,44 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-09-22 (tarde)** — **La página de Arqueo, calcada de Fudo.** Jhon
+  mandó las capturas de un arqueo ABIERTO de verdad (el de las 15:15 de Joan
+  Ríos) y pidió dejar la ventana emergente: *"nos apeguemos fielmente a la
+  interfaz de fudo"*. Quedó la pantalla de ellos en dos mitades: la lista a la
+  izquierda (el abierto primero, con Caja · Apertura/Cierre · $ Sistema ·
+  $ Usuario · Diferencia · Estado, y las cinco tarjetas de resumen arriba) y el
+  detalle a la derecha en el mismo orden y con las mismas palabras — Caja,
+  Hora de apertura, Creado por, Estado, la franja de fechas, Monto inicial,
+  Ingreso (desplegable por medio, y cada medio en Propinas y Ventas), Egreso,
+  Total, Según usuario con sus dos columnas, Total, Diferencia, Comentario y
+  Finalizar arqueo. En el teléfono se ve una mitad por vez.
+
+  **Un cambio de fondo respecto de la versión de la mañana:** los campos de
+  "Usuario" nacen VACÍOS y valen $0, así que la diferencia arranca en rojo por
+  el total entero — exactamente el -$604.609 de la captura. La mañana los
+  autocompletaba con el sistema. Contar es obligatorio en todos los medios
+  porque el voucher de Transbank es la otra verdad que no miente; "Finalizar"
+  no se enciende hasta que están todos.
+
+  **Mesas perdió su ventana de arqueo**: el aviso ahora lleva a esta página.
+  Dos pantallas para cerrar la misma caja son dos dueños del mismo número.
+
+  **Un detalle encontrado por la prueba, no por el ojo:** Chrome escribe la
+  fecha chilena con guiones (22-09-26) y Fudo con barras (22/09/26). Se arma a
+  mano. Prueba nueva, `pruebas/lama-arqueo.mjs`, 31 casos, con los números
+  exactos de la captura.
+
+  ⚠️ **Y una falla de método mía, de la mañana, que se pagó a la tarde.** Las
+  dos tandas de la mañana (pestañas Arqueo/Movimientos, y esconder Actualizar
+  en el computador) se publicaron corriendo **solo las pruebas de Lama**. Las
+  dos tocaban la barra, que es de Stock, y dejaron dos pruebas en rojo sin que
+  nadie lo viera: `pc-riel` (medía el carril en pleno vuelo — la barra creció)
+  y `no-se-cuelga` (apretaba un botón que ya no se ve en el computador). Se
+  encontraron recién al comparar la batería COMPLETA contra `origin/master`,
+  que es lo que pide §0.9. Las dos se arreglaron sin aflojar lo que miran, y
+  la de `pc-riel` se comprobó rompiendo el carril a propósito. **Si un cambio
+  toca la barra, la batería que corre es la entera.**
+
 - **2026-09-22** — **El arqueo de caja se reconstruyó entero**, un día
   después de publicarse. La primera versión (§F6, aprobada sobre una
   maqueta) solo comparaba el efectivo. Jhon lo usó, lo comparó contra
