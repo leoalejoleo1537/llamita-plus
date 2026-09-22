@@ -8,6 +8,33 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-09-22** — **El arqueo de caja se reconstruyó entero**, un día
+  después de publicarse. La primera versión (§F6, aprobada sobre una
+  maqueta) solo comparaba el efectivo. Jhon lo usó, lo comparó contra
+  capturas de la pantalla real de Fudo, y encontró la diferencia: Fudo
+  compara CADA medio de pago por separado contra su propio "según
+  sistema", y la diferencia final es la suma de todas. Antes de tocar el
+  `.sql`, se le mandaron cinco preguntas a NotebookLM (que tiene toda la
+  info real de Fudo) para no adivinar por segunda vez — es la lección de
+  §0.1.6: si la evidencia contradice el modelo, se para y se pregunta, no
+  se sigue parchando.
+
+  Lo nuevo: `lama_arqueo_declarado` (declarar cuánto hay de cada medio
+  MIENTRAS la caja sigue abierta — y a diferencia de Fudo, que lo pierde
+  si se recarga la página, acá se guarda al tipear); `lama_arqueo_cierre_
+  medios` (el desglose congelado por medio al cerrar); y `arqueo_cerrar()`
+  reescrito para sumar la diferencia de todos los medios, no solo el
+  efectivo. Un medio que nadie declaró se autocompleta igual al sistema,
+  el mismo comportamiento de fábrica que tiene Fudo para tarjetas.
+
+  De paso: dos páginas propias, "Arqueo" y "Movimientos de caja", junto a
+  Mesas — Jhon las pidió mirando que en Fudo el arqueo tiene su propio
+  lugar, no solo un aviso arriba del plano. Y dos bugs reales encontrados
+  usando la app: las mesas cambiaban de tamaño al elegir una (el grid
+  usaba `minmax(mesa,1fr)`, que estira si sobra sitio) y el color de
+  "ocupada"/"cobrando" había quedado demasiado pálido para leerse de un
+  vistazo — los dos, arreglados el mismo día.
+
 - **2026-09-11** — **Lama se retiñe a la dirección "terracota cálida"** que
   trajo Jhon armada con Claude Diseño ("Llamita Stock UI"). Pedido textual:
   *"arreglar el tema visual en lotes grandes de mejora... implementemos este

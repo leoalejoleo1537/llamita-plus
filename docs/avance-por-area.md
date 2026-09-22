@@ -39,7 +39,7 @@ Eso significa dos cosas que conviene tener claras:
 | **Lama · configuración** | **83 %** | 5 de 6 | 🟢 **hecha** · falta el detalle del ticket, que depende de F5 |
 | **Lama · el plano de mesas** | **100 %** | 5 de 5 | 🟢 **terminado** |
 | **Lama · impresión** | **83 %** | 5 de 6 | 🟡 **falta ir al local** · todo lo demás está |
-| **Lama · arqueo de caja** | **100 %** | 5 de 5 | 🟢 |
+| **Lama · arqueo de caja** | **100 %** | 5 de 5 | 🟡 construido de nuevo, **falta que Jhon pegue el `.sql`** |
 | **Conexión Lama ↔ Stock** | **0 %** | 0 de 3 | ⬜ va última a propósito |
 | **Producto multi-cliente** | **0 %** | 0 de 4 | ⬜ no empezado |
 
@@ -180,6 +180,37 @@ en modo edición — el cartel de "esta página no tiene mesas" se dibujaba
 ANTES de llegar al código que pinta el "+" de agregar. Con el modo edición
 puesto, ahora sí se llega a esa parte del dibujo aunque la página esté
 vacía.
+
+🔴 **2026-09-22 · reconstruido entero, porque la primera versión estaba
+mal.** Jhon la usó, comparó contra capturas de la pantalla REAL de Fudo, y
+encontró que el arqueo solo miraba el efectivo — Fudo compara **cada medio
+de pago por separado** (efectivo, débito, crédito…) contra su propio
+"según sistema", y la diferencia final es la SUMA de todas. Antes de
+tocar una línea, le mandé a NotebookLM (que tiene toda la info real de
+Fudo) las cinco preguntas que hacían falta para no adivinar de nuevo.
+
+**Lo que cambió de fondo:**
+- `arqueo_cerrar()` ya no pide un solo número de efectivo: recorre cada
+  medio que tuvo ventas (más 'efectivo', siempre, aunque no se haya
+  vendido nada — el fondo de cambio ya está ahí para contar), compara su
+  "sistema" contra lo declarado, y suma las diferencias.
+- Nueva tabla `lama_arqueo_declarado`: el cajero puede escribir cuánto
+  hay de CADA medio **mientras la caja sigue abierta**, no solo al
+  cerrar — y a diferencia de Fudo, que pierde ese conteo si se recarga
+  la página (confirmado por NotebookLM), acá se guarda apenas se tipea.
+- Un medio que nadie declaró se autocompleta igual al sistema —el
+  comportamiento de fábrica de Fudo para tarjetas—, así que su
+  diferencia da $0 sola.
+- Nueva tabla `lama_arqueo_cierre_medios`: el desglose congelado por
+  medio (ventas, propinas, sistema, usuario, diferencia), para el
+  detalle que se ve después de cerrado.
+- La tarjeta del turno en Mesas y el detalle de la página Arqueo ahora
+  muestran la MISMA tabla editable de "cuánto hay de cada medio", en vivo,
+  con o sin el arqueo ciego.
+
+🔴 **Pegar el `.sql` nuevo es lo único que falta**: `sql/2026-09-lama-
+arqueo-fudo.sql`, en `docs/sql-pendientes.md`. No pisa nada de lo ya
+corrido — agrega tablas y reemplaza solo la función de cerrar.
 
 ### Conexión Lama ↔ Stock — 0 de 3 ⬜
 
