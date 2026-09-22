@@ -39,7 +39,7 @@ Eso significa dos cosas que conviene tener claras:
 | **Lama · configuración** | **83 %** | 5 de 6 | 🟢 **hecha** · falta el detalle del ticket, que depende de F5 |
 | **Lama · el plano de mesas** | **100 %** | 5 de 5 | 🟢 **terminado** |
 | **Lama · impresión** | **83 %** | 5 de 6 | 🟡 **falta ir al local** · todo lo demás está |
-| **Lama · arqueo de caja** | **100 %** | 5 de 5 | 🟡 construido de nuevo, **falta que Jhon pegue el `.sql`** |
+| **Lama · arqueo de caja** | **100 %** | 5 de 5 | 🟢 reconstruido y el `.sql` ya está corrido |
 | **Conexión Lama ↔ Stock** | **0 %** | 0 de 3 | ⬜ va última a propósito |
 | **Producto multi-cliente** | **0 %** | 0 de 4 | ⬜ no empezado |
 
@@ -208,9 +208,9 @@ Fudo) las cinco preguntas que hacían falta para no adivinar de nuevo.
   muestran la MISMA tabla editable de "cuánto hay de cada medio", en vivo,
   con o sin el arqueo ciego.
 
-🔴 **Pegar el `.sql` nuevo es lo único que falta**: `sql/2026-09-lama-
-arqueo-fudo.sql`, en `docs/sql-pendientes.md`. No pisa nada de lo ya
-corrido — agrega tablas y reemplaza solo la función de cerrar.
+✅ **El `.sql` ya está corrido** (2026-09-22) — bloque 8 confirmó "1 firma"
+en las tres funciones y las dos tablas nuevas en 0 filas. **El arqueo por
+medio está vivo**, de punta a punta.
 
 ### Conexión Lama ↔ Stock — 0 de 3 ⬜
 
