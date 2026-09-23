@@ -8,6 +8,13 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-09-23** — Jhon corrió `sql/2026-09-lama-arqueo-eliminar.sql` y
+  `sql/2026-09-lama-arqueo-horario.sql`, los dos sanos (1 firma en
+  `arqueo_eliminar`, `arqueo_abrir` y `arqueo_cerrar`; 0 arqueos sin hora
+  real). **El arqueo queda completo y vivo:** borrar sin que desaparezca,
+  fecha/hora de apertura hacia atrás, y sin contar dos veces. Aplica solo a
+  Llamita Plus. `docs/sql-pendientes.md` queda sin nada pendiente.
+
 - **2026-09-23** — **La fecha y hora de apertura del arqueo**, construida
   recién después de que NotebookLM contestara las ocho preguntas (quedaron en
   `docs/atlas-fudo.md`, H4). El arqueo nuevo pide fecha y hora, nace con la de
