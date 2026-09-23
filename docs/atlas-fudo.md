@@ -1071,6 +1071,31 @@ Los restaurantes y comercios gastronómicos activan el arqueo ciego por varias r
 
 ---
 
+### H4 · Las fechas y las horas del arqueo
+
+> ✅ **Contestado por NotebookLM el 2026-09-22**, a partir de las ocho preguntas
+> que dejó la sesión en `docs/LAMA.md`. Resumido — es lo que decide cómo se
+> construyó `sql/2026-09-lama-arqueo-horario.sql`.
+
+| Pregunta | Lo que hace Fudo |
+|---|---|
+| **¿Abrir con la hora hacia atrás, pisando un arqueo cerrado?** | Se puede. Pero **no reabre ni toca lo cerrado**: el arqueo nuevo solo recoge las ventas "huérfanas", las cobradas sin ninguna caja abierta. Si la caja ya tiene uno abierto, no deja abrir otro |
+| **¿Y con una hora en el futuro?** | El formulario nace con la hora de ahora. Una hora futura deja fuera todas las ventas cobradas entre ahora y esa hora → faltantes. Fudo lo desaconseja; **Llamita lo frena** |
+| **¿Una venta es del arqueo en que se abrió la mesa, o en que se cobró?** | **En que se COBRÓ.** Mesa abierta 14:50 (AM), cobrada 15:20 (PM) → va al PM. La mesa abierta no suma nada hasta cobrarse |
+| **¿Se puede cerrar con mesas abiertas?** | Sí, no bloquea ni avisa. Lo que se cobre después va al arqueo que esté abierto entonces. Recomienda revisar el plano antes: una mesa que ya pagó y nadie cerró es un sobrante sin explicación. **Llamita lo avisa** al finalizar |
+| **¿Una venta cobrada en el hueco entre dos cajas se pierde?** | No se pierde de las ventas; queda sin arqueo. Se recoge abriendo el siguiente **con la hora hacia atrás** hasta el cierre anterior. Si no, al contar sale como sobrante |
+| **¿Se corrige la hora de apertura después de abrir?** | **No.** Solo se elige al crear. Si quedó mal: cerrar y abrir otro. **El cierre es siempre el momento de apretar "Finalizar"**, sin selector |
+| **¿Propinas y movimientos de caja?** | Los movimientos van al arqueo abierto al cargarlos (`arqueo_id`). Las propinas van con su venta: al arqueo abierto cuando se cobra |
+| **¿Un turno que cruza la medianoche?** | Una sola fila, con fecha y hora completas de apertura (día 1) y cierre (día 2). Los reportes por calendario reparten las ventas por su día |
+| **¿Queda la hora real si alguien pone 09:00 y llegó 09:40?** | Sí: además de la hora elegida, el servidor guarda la hora real en que se apretó el botón, y nadie la puede cambiar |
+
+**Lo que Llamita hace distinto, a propósito:** frena la hora futura (Fudo solo la
+desaconseja), avisa las mesas abiertas al finalizar (Fudo no avisa), y **muestra**
+la hora real en el detalle cuando difiere de la elegida (Fudo la guarda pero no
+la enseña). Ninguna de las tres cambia qué se cuenta: son avisos.
+
+---
+
 # I · LO VISUAL — no va acá, pero se anota dónde va
 
 Esto **no** sale de NotebookLM. Se mide sobre Fudo abierto, con botón derecho

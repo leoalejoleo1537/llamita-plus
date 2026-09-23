@@ -42,7 +42,9 @@ const ARQUEOS = [
    eliminado_por:'Jhon', eliminado_at:'2026-09-21T21:40:00-03:00'},
 ];
 const T0 = HOY+'16:00:00-03:00';
-const CUENTAS = [{id:900, sede:'plaza', mesa_id:null, estado:'cerrada', total:0}];
+const CUENTAS = [{id:900, sede:'plaza', mesa_id:null, estado:'cerrada', total:0},
+  /* Una mesa que sigue abierta: Finalizar tiene que AVISARLA, no frenarla. */
+                 {id:901, sede:'plaza', mesa_id:1, estado:'abierta', total:0}];
 const PAGOS = [
   {id:1, cuenta_id:900, medio:'efectivo', monto:26400,  created_at:T0, cuentas:{sede:'plaza'}},
   {id:2, cuenta_id:900, medio:'debito',   monto:435680, created_at:T0, cuentas:{sede:'plaza'}},
@@ -100,6 +102,7 @@ async function montar(page, {ancho = 1400, ciego = false} = {}){
           return String(val) === String(v); }); return api; },
         gte(c,v){ filas = filas.filter(f => f[c] != null && new Date(f[c]) >= new Date(v)); return api; },
         lte(c,v){ filas = filas.filter(f => f[c] != null && new Date(f[c]) <= new Date(v)); return api; },
+        gt(c,v){ filas = filas.filter(f => f[c] != null && new Date(f[c]) > new Date(v)); return api; },
         neq(){return api;}, in(){return api;}, order(){return api;}, limit(){return api;},
         not(){return api;}, is(){return api;}, or(){return api;}, ilike(){return api;},
         maybeSingle(){return Promise.resolve({data:filas[0] || null, error:null});},
@@ -138,8 +141,9 @@ async function montar(page, {ancho = 1400, ciego = false} = {}){
         return Promise.resolve({data:a, error:null});
       }
       if(fn === 'arqueo_abrir'){
+        const ahora = new Date().toISOString();
         const a = {id:51, sede:args.p_sede, estado:'abierta', monto_inicial:args.p_monto_inicial,
-                   abierto_por:args.p_quien, abierto_at:new Date().toISOString()};
+                   abierto_por:args.p_quien, abierto_at:args.p_abierto_at || ahora, creado_at:ahora};
         T.lama_arqueos.unshift(a);
         return Promise.resolve({data:a, error:null});
       }
@@ -276,6 +280,8 @@ await page.fill('#arqd-coment', 'Todo en orden');
 await page.click('#arqd-fin'); await page.waitForTimeout(300);
 await caso('pregunta antes de cerrar, y dice que cuadra', async () =>
   /cuadra/i.test(await txt(page, '#ask-detalle')) || 'no preguntó o no lo dijo');
+await caso('y avisa la mesa que sigue abierta (sin frenar el cierre)', async () =>
+  /Quedan 1 mesa abierta/.test(await txt(page, '#ask-detalle')) || await txt(page, '#ask-detalle'));
 await page.click('#ask-ok'); await page.waitForTimeout(900);
 await caso('llama a arqueo_cerrar con el comentario', async () => {
   const c = await page.evaluate(() => window.__rpc.find(x => x.fn === 'arqueo_cerrar'));
@@ -289,14 +295,61 @@ await caso('el arqueo queda Cerrado y su detalle se lee de lo congelado', async 
 await caso('ya no hay caja abierta: aparece "+ Nuevo arqueo de caja"', async () =>
   await page.isVisible('[data-arqp="nuevo"]') || 'no aparece el botón');
 
-console.log('\nAbrir uno nuevo:');
-await page.click('[data-arqp="nuevo"]'); await page.waitForTimeout(300);
+console.log('\nAbrir uno nuevo, con fecha y hora:');
+/* Una venta cobrada DESPUÉS de cerrar la caja de la tarde (20:56) y sin
+   ninguna abierta: es la "huérfana" que Fudo deja recoger abriendo hacia atrás. */
+await page.evaluate(() => window.__T.cuenta_pagos.push({id:9, cuenta_id:900, medio:'efectivo', monto:5000,
+  created_at:'2026-09-22T21:10:00-03:00', cuentas:{sede:'plaza'}}));
+await page.click('[data-arqp="nuevo"]'); await page.waitForTimeout(600);
 const anchoMonto = await page.$eval('#arqd-monto', e => e.getBoundingClientRect().width);
+await caso('pide la hora de apertura, y nace con la de ahora', async () => {
+  /* Se compara ADENTRO de la página: el campo está en la hora del aparato
+     (Chile) y el proceso de la prueba corre en UTC. */
+  const r = await page.evaluate(() => { const v = document.getElementById('arqd-hora').value;
+    return {v, dif: Math.abs(new Date(v) - Date.now())}; });
+  return (r.dif < 120000) || 'nació con ' + r.v;
+});
+await caso('avisa lo cobrado SIN caja desde el último cierre', async () => {
+  const h = await txt(page, '.arqd-hueco');
+  return /20:56:42/.test(h) && /\$5\.000/.test(h) || 'dice: ' + h;
+});
+await page.click('[data-arqp="desde-hueco"]'); await page.waitForTimeout(150);
+await caso('"Abrir desde esa hora" pone la hora del último cierre', async () =>
+  (await page.inputValue('#arqd-hora')) === '2026-09-22T20:56:42' || await page.inputValue('#arqd-hora'));
 await page.fill('#arqd-monto', '100000');
+/* El campo trae `max` = ahora, así que el calendario del navegador ya no
+   deja elegir el futuro (Playwright ni siquiera deja escribirlo). Se mete a
+   la fuerza para probar la SEGUNDA red — la de la app —, que es la que
+   cuenta cuando un navegador ignora el `max` al teclear. */
+await page.evaluate(() => { const h = document.getElementById('arqd-hora');
+  h.removeAttribute('max'); h.value = '2099-01-01T10:00:00';
+  h.dispatchEvent(new Event('input', {bubbles:true})); });
+await page.evaluate(() => { window.__rpc = []; });
+await page.click('[data-arqp="iniciar"]'); await page.waitForTimeout(400);
+await caso('una hora en el FUTURO se frena, y no llega a la base', async () => {
+  const txtAviso = await page.isVisible('#overlay-ask') ? await txt(page, '#overlay-ask') : '';
+  const r = await page.evaluate(() => window.__rpc.filter(x => x.fn === 'arqueo_abrir').length);
+  return (/futuro/i.test(txtAviso) && r === 0) || JSON.stringify({txtAviso: txtAviso.slice(0, 80), r});
+});
+await page.click('#ask-ok').catch(() => {}); await page.waitForTimeout(250);
+/* Hacia atrás hasta las 15:00: la franja se PISA con la caja de la tarde
+   (15:15–20:56), que ya se cerró con sus $504.609. Esos no se vuelven a
+   contar: solo entran los $5.000 huérfanos. */
+await page.evaluate(() => { const h = document.getElementById('arqd-hora');
+  h.value = '2026-09-22T15:00:00'; h.dispatchEvent(new Event('input', {bubbles:true})); });
 await page.click('[data-arqp="iniciar"]'); await page.waitForTimeout(900);
-await caso('llama a arqueo_abrir con el monto inicial', async () => {
+await caso('llama a arqueo_abrir con el monto y la hora elegida', async () => {
   const c = await page.evaluate(() => window.__rpc.find(x => x.fn === 'arqueo_abrir'));
-  return (c && c.args.p_monto_inicial === 100000 && c.args.p_sede === 'plaza') || JSON.stringify(c);
+  return (c && c.args.p_monto_inicial === 100000 && c.args.p_sede === 'plaza'
+          && c.args.p_abierto_at === new Date('2026-09-22T15:00:00-03:00').toISOString()) || JSON.stringify(c);
+});
+await caso('lo ya contado en la caja anterior NO se vuelve a contar', async () => {
+  const d = await det();
+  return (/INGRESO \$5\.000/i.test(d) && !/\$504\.609/.test(d)) || d.slice(0, 500);
+});
+await caso('muestra la hora elegida Y la hora real en que se apretó', async () => {
+  const d = await det();
+  return (/Hora de apertura 22\/09\/26 15:00:00/.test(d) && /Hora real de apertura/.test(d)) || d.slice(0, 300);
 });
 await caso('y queda abierto, primero en la lista', async () => {
   const est = await page.$$eval('#arqpag-cuerpo .arqp-fila[data-arqpagver] .c-est', e => e.map(x => x.textContent.trim()));

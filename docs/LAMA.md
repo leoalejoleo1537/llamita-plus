@@ -1885,33 +1885,35 @@ poder crearlas ella:
 | Qué | Dónde está planteada | Qué desbloquea |
 |---|---|---|
 | **Una visita al local** para instalar el puente de impresión | §2.3 de `CLAUDE.md` | **F5**, y con ella el detalle del ticket que dejó a F3 en 5 de 6 |
-| **La fecha y hora de apertura del arqueo** — Jhon pidió que se pregunten ANTES de construir. Las preguntas para NotebookLM están en el mensaje del 2026-09-22 (tarde) y abajo, en "LAS PREGUNTAS DE FECHA Y HORA" | este archivo, al final | que el arqueo nuevo pida fecha y hora, y turnos AM/PM que no se mezclen |
-| **Unir Llamita Stock con Llamita Plus** (la F7) — pedido por Jhon el 2026-09-22. Es la conexión que la regla de §0.9 dejaba para el final. Antes de escribir una línea hay que contestar qué quiere decir "funcionar como stock" y cómo se evita el doble descuento con Fudo | este archivo, al final, "LAS PREGUNTAS DE LA UNIÓN" | la F7 entera |
+| **El plan de la unión Stock ↔ Plus** (la F7) — Jhon contestó la primera pregunta el 2026-09-23 y pidió **hacer un plan antes de construir, en el chat siguiente**. Su modelo está abajo, en "LA UNIÓN: EL MODELO DE JHON". Quedan las preguntas 2 a 5 | este archivo, al final | la F7 entera |
 | **Decidir sobre la API de Fudo** — vos preguntaste cuánto ayudaría. La respuesta está escrita, con un corte: **leer es barato y seguro; escribir tocaría el POS real del café** | [`docs/fudo-api-cuanto-sirve.md`](fudo-api-cuanto-sirve.md) | la **Fase 4** (11 Edge Functions ya escritas y apagadas) y el descuadre del conteo nocturno |
 | **¿Dividir la cuenta en partes iguales entre N personas, además del pago parcial por producto que ya existe?** La maqueta de terracota (2026-09-11) muestra "Entre 4 personas · $3.325 cada uno", pero el atlas ya había decidido lo contrario en su momento: *"solo por producto... un abono en plata sin decir qué cubre no se puede desarmar en el arqueo"* — y por eso existe F1 (pago parcial por producto). No se sabe si cambiaste de opinión al armar la maqueta o si es una idea de esa sesión que nunca se contrastó con la regla vieja, así que no se construyó ninguna versión | sección "LA DIRECCIÓN TERRACOTA CÁLIDA" de arriba | una función nueva de cobro, si decís que sí |
 
-### LAS PREGUNTAS DE FECHA Y HORA (2026-09-22, para NotebookLM)
+### ✅ LAS PREGUNTAS DE FECHA Y HORA — contestadas el 2026-09-22
 
-1. Al abrir un arqueo con la hora **hacia atrás**, ¿Fudo deja poner una hora
-   que se superponga con un arqueo ya cerrado de la misma caja? ¿Y una hora
-   hacia adelante (en el futuro)?
-2. ¿Qué decide a qué arqueo entra una venta: la hora en que **se cobró** (se
-   cerró la mesa) o la hora en que **se abrió** la mesa? Caso: mesa abierta a
-   las 14:50 en el turno AM, cobrada a las 15:20 cuando ya corre el PM.
-3. ¿Fudo deja cerrar un arqueo con **mesas todavía abiertas**? ¿Avisa? ¿Qué pasa
-   con esas mesas cuando se cobran?
-4. Una venta cobrada en el **hueco** entre el cierre del AM y la apertura del PM
-   (sin ningún arqueo abierto): ¿queda fuera para siempre, o hay forma de
-   meterla en uno?
-5. ¿Se puede **corregir la hora de apertura** después de abierto el arqueo? ¿Y la
-   hora de cierre se elige o es siempre el momento de apretar "Finalizar"?
-6. Las **propinas** y los **movimientos de caja**, ¿entran por la hora en que se
-   registraron o por el arqueo que estaba abierto en ese momento?
-7. Un turno que **cruza la medianoche** (abre 18:00, cierra 01:30): ¿cómo lo
-   muestra Fudo en la lista y en la franja de fechas?
-8. Para la trazabilidad de la llegada del personal: ¿Fudo guarda la hora
-   **real** en que se apretó "Nuevo arqueo" además de la hora que se escribió?
-   (si alguien pone 09:00 habiendo llegado 09:40, ¿queda rastro?)
+Las ocho las contestó NotebookLM; están resumidas en `docs/atlas-fudo.md`, **H4**,
+que es donde vive lo que se sabe de Fudo. Con eso se construyó la fecha y hora
+de apertura (`sql/2026-09-lama-arqueo-horario.sql`).
+
+### LA UNIÓN: EL MODELO DE JHON (2026-09-23)
+
+A la pregunta 1 contestó, textual: *"hay que dividir dos cosas: una cosa es el
+control de stock y otra sería el producto como tal. Pensemos en la torta de
+zanahoria: eso se descuenta del inventario. Pero pensemos en el café americano:
+no está en el inventario, pero existe. Así que habría que crear una carta y un
+inventario; la carta se alimenta del inventario, y éste se alimenta del control
+de stock… lo mejor es hacer un plan para verificar todo esto mejor."*
+
+Tres capas, entonces, **y es la base del plan del próximo chat**:
+
+| Capa | Qué es | Ejemplo |
+|---|---|---|
+| **Carta** | lo que se VENDE en Mesas, con su precio | Café americano, Torta de zanahoria |
+| **Inventario** | lo que se CUENTA | Torta de zanahoria (sí) · Café americano (no: existe en la carta y no se cuenta) |
+| **Control de stock** | cómo se mueve lo contado: repartos, mermas, conteos | lo que ya hace Llamita Stock |
+
+**No se construye nada de esto sin el plan.** Y el plan tiene que contestar las
+preguntas que siguen (la 1 ya quedó contestada arriba).
 
 ### LAS PREGUNTAS DE LA UNIÓN STOCK ↔ PLUS (2026-09-22, para Jhon)
 

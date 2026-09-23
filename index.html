@@ -1528,6 +1528,14 @@
     padding:7px 10px;font:inherit;font-size:14.5px;font-weight:700;text-align:right;background:#fff;
     color:var(--text);font-variant-numeric:tabular-nums}
   .arqd-dato-campo input:focus{outline:none;border-color:var(--orange)}
+  .arqd-dato-campo input[type=datetime-local]{width:220px;text-align:left;font-size:14px}
+  /* El hueco entre turnos: plata cobrada sin caja. Ámbar, como todo lo que
+     pide una decisión, con la salida al lado. */
+  .arqd-hueco{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--amber-bg);
+    color:var(--amber-fg);border-radius:10px;padding:9px 12px;margin:6px 0;font-size:13px}
+  .arqd-hueco span{flex:1;min-width:180px}
+  .arqd-hueco button{border:none;background:var(--amber-fg);color:#fff;font:inherit;font-weight:800;
+    font-size:12.5px;padding:7px 12px;border-radius:999px;cursor:pointer}
   .arqd-fechas{display:flex;align-items:center;gap:9px;background:var(--gray-bg);color:var(--gray-fg);
     font-weight:800;font-size:14.5px;padding:12px 18px;white-space:pre}
   .arqd-fechas svg{width:18px;height:18px;flex:0 0 auto}
@@ -6827,24 +6835,49 @@ async function lamaArqCargar(){
   for(const d of (rd.data || [])) LAMA_ARQ_DECL[d.medio] = +d.monto;
 }
 
-/* Lo cobrado entre dos fechas, por medio, separando venta de propina — la
-   misma pareja que Fudo despliega debajo de cada medio. `hasta` en null es
-   "hasta ahora", para un turno todavía abierto. */
-async function arqDesglose(desde, hasta){
-  let qp = sb.from('cuenta_pagos').select('medio,monto,cuentas!inner(sede)').eq('cuentas.sede', SEDE).gte('created_at', desde);
-  let qt = sb.from('cuenta_propinas').select('medio,monto,cuentas!inner(sede)').eq('cuentas.sede', SEDE).gte('created_at', desde);
+/* Lo cobrado en la franja de un arqueo, por medio, separando venta de
+   propina — la misma pareja que Fudo despliega debajo de cada medio.
+
+   UNA VENTA ES DEL ARQUEO QUE ESTABA ABIERTO CUANDO SE COBRÓ (NotebookLM,
+   2026-09-22). Por eso, si este arqueo se abrió con la hora hacia atrás y
+   su franja se pisa con la de un arqueo ANTERIOR ya cerrado, lo cobrado en
+   ese pedazo NO se cuenta acá: ya se contó y se firmó allá. Lo que sí
+   recoge la hora hacia atrás son las ventas "huérfanas", cobradas sin
+   ninguna caja abierta. Es la misma regla que `arqueo_cerrar()` en la base
+   (sql/2026-09-lama-arqueo-horario.sql): si las dos contaran distinto, la
+   pantalla prometería un número que la base no va a firmar. */
+async function arqDesglose(a){
+  const desde = a.abierto_at, hasta = a.cerrado_at || null;
+  let qp = sb.from('cuenta_pagos').select('medio,monto,created_at,cuentas!inner(sede)').eq('cuentas.sede', SEDE).gte('created_at', desde);
+  let qt = sb.from('cuenta_propinas').select('medio,monto,created_at,cuentas!inner(sede)').eq('cuentas.sede', SEDE).gte('created_at', desde);
   if(hasta){ qp = qp.lte('created_at', hasta); qt = qt.lte('created_at', hasta); }
-  const [rp, rt] = await Promise.all([qp, qt]);
+  const qa = sb.from('lama_arqueos').select('id,abierto_at,cerrado_at')
+    .eq('sede', SEDE).eq('estado', 'cerrada').gte('cerrado_at', desde);
+  const [rp, rt, ra] = await Promise.all([qp, qt, qa]);
+  const antes = (ra.data || []).filter(y => y.id < a.id && y.cerrado_at);
+  const yaContada = x => { const t = new Date(x.created_at);
+    return antes.some(y => t >= new Date(y.abierto_at) && t <= new Date(y.cerrado_at)); };
   const out = {};
-  for(const p of (rp.data || [])){
+  for(const p of (rp.data || []).filter(x => !yaContada(x))){
     if(!out[p.medio]) out[p.medio] = {ventas:0, propinas:0};
     out[p.medio].ventas += (+p.monto || 0);
   }
-  for(const p of (rt.data || [])){
+  for(const p of (rt.data || []).filter(x => !yaContada(x))){
     if(!out[p.medio]) out[p.medio] = {ventas:0, propinas:0};
     out[p.medio].propinas += (+p.monto || 0);
   }
   return out;
+}
+
+/* Lo cobrado SIN CAJA desde que cerró la última: el hueco entre turnos.
+   Si hay algo, el arqueo nuevo ofrece abrirse desde esa hora para
+   recogerlo — la salida de Fudo ("apertura retrospectiva"). */
+async function arqHueco(desde){
+  const [rp, rt] = await Promise.all([
+    sb.from('cuenta_pagos').select('monto,cuentas!inner(sede)').eq('cuentas.sede', SEDE).gt('created_at', desde),
+    sb.from('cuenta_propinas').select('monto,cuentas!inner(sede)').eq('cuentas.sede', SEDE).gt('created_at', desde),
+  ]);
+  return [...(rp.data || []), ...(rt.data || [])].reduce((s,x) => s + (+x.monto || 0), 0);
 }
 
 /* El orden de los medios es el de Configuración, con el efectivo primero —
@@ -6878,7 +6911,7 @@ function arqArmarCuentas(a, desglose, movs, decl){
 
 async function lamaArqVivoCalcular(){
   if(!LAMA_ARQ) return null;
-  const desglose = await arqDesglose(LAMA_ARQ.abierto_at, null);
+  const desglose = await arqDesglose(LAMA_ARQ);
   return arqArmarCuentas(LAMA_ARQ, desglose, LAMA_ARQ_MOVS, LAMA_ARQ_DECL);
 }
 
@@ -6942,6 +6975,8 @@ let ARQPAG_PLEGADO  = new Set();   // qué desplegables están cerrados ('ingres
 let ARQPAG_BORRADOR = {};     // lo tipeado y todavía no guardado, por medio
 let ARQPAG_COMENT   = '';     // el comentario, que se guarda al finalizar (como en Fudo)
 let ARQPAG_MONTO    = '';     // el monto inicial del arqueo nuevo
+let ARQPAG_HORA     = '';     // la fecha y hora de apertura elegida ('' = ahora)
+let ARQPAG_HUECO    = null;   // {desde, monto}: lo cobrado sin caja desde el último cierre
 
 /* Las fechas se arman A MANO, con barras, como las escribe Fudo
    (22/09/26 15:15:21). `toLocaleDateString('es-CL')` en Chrome las escribe
@@ -6952,6 +6987,14 @@ const arqFecha = t => { const d = new Date(t);
   return arqDos(d.getDate()) + '/' + arqDos(d.getMonth() + 1) + '/' + arqDos(d.getFullYear() % 100); };
 const arqFechaHora = t => { const d = new Date(t);
   return arqFecha(d) + ' ' + arqDos(d.getHours()) + ':' + arqDos(d.getMinutes()) + ':' + arqDos(d.getSeconds()); };
+const arqHoraCampo = t => { const d = new Date(t);
+  return d.getFullYear() + '-' + arqDos(d.getMonth() + 1) + '-' + arqDos(d.getDate()) + 'T' +
+         arqDos(d.getHours()) + ':' + arqDos(d.getMinutes()) + ':' + arqDos(d.getSeconds()); };
+/* La hora REAL en que se apretó el botón, solo si difiere más de un minuto
+   de la elegida: es la trazabilidad que pidió Jhon (quién abrió hacia atrás,
+   y cuánto). Si las dos coinciden, repetirla sería ruido. */
+const arqHoraReal = a => (a.creado_at && Math.abs(new Date(a.creado_at) - new Date(a.abierto_at)) > 60000)
+  ? arqFechaHora(a.creado_at) : '';
 const arqSigno = n => (n < 0 ? '-' : '') + plata(Math.abs(n));
 const arqClaseDif = n => n === 0 ? 'cero' : (n > 0 ? 'pos' : 'neg');
 /* Lo que se muestra de un cerrado. Los que se cerraron con la primera
@@ -6986,8 +7029,10 @@ async function arqPagCargar(){
   arqPagPintar();
   /* Sin segundo argumento: quién decide si en el teléfono se ve el detalle
      es quien pidió entrar (el aviso de Mesas, una fila tocada), no la carga.
-     Con `false` acá, el aviso de Mesas mandaba a la lista en vez de a la caja. */
-  await arqPagElegir(ARQPAG_SEL);
+     Con `false` acá, el aviso de Mesas mandaba a la lista en vez de a la caja.
+     El arqueo nuevo pasa por su propia puerta, que además mira el hueco. */
+  if(ARQPAG_SEL === 'nuevo') await arqPagAbrirNuevo();
+  else await arqPagElegir(ARQPAG_SEL);
 }
 
 function arqPagFilaHTML(a){
@@ -7084,7 +7129,7 @@ async function arqPagElegir(id, verDet){
       /* Cerrado con la primera versión: no hay desglose congelado. Se arma
          con las ventas de esa franja, y como esa versión solo contaba el
          efectivo, lo demás se da por declarado igual al sistema. */
-      const desglose = await arqDesglose(a.abierto_at, a.cerrado_at);
+      const desglose = await arqDesglose(a);
       cuentas = arqArmarCuentas(a, desglose, movs, a.efectivo_contado != null ? {efectivo:a.efectivo_contado} : {});
       cuentas.filas.forEach(f => { if(f.declarado === null) f.declarado = f.sistema; });
     }
@@ -7164,6 +7209,7 @@ function arqPagPintarDetalle(a, c, abierta, movsCerrado){
     <div class="arqd-datos">
       ${dato('Caja', 'Principal')}
       ${dato('Hora de apertura', arqFechaHora(a.abierto_at))}
+      ${arqHoraReal(a) ? dato('Hora real de apertura', arqHoraReal(a)) : ''}
       ${dato('Creado por', esc(a.abierto_por || '—'))}
       ${a.cerrado_at ? dato('Hora de cierre', arqFechaHora(a.cerrado_at)) : ''}
       ${a.cerrado_at ? dato('Cerrado por', esc(a.cerrado_por || '—')) : ''}
@@ -7247,14 +7293,40 @@ async function arqPagEliminar(){
   lamaArqPintarBanner();
 }
 
+/* EL ARQUEO NUEVO PIDE FECHA Y HORA (Jhon, 2026-09-22): "sirve para
+   diferenciar el turno AM del PM, y para la trazabilidad de la hora de
+   llegada del personal". Nace con la hora de ahora; se puede mover HACIA
+   ATRÁS (para recoger lo cobrado sin caja) y nunca hacia adelante. La hora
+   real en que se apretó el botón la guarda la base aparte, y no se puede
+   cambiar: si alguien pone 09:00 habiendo llegado 09:40, queda escrito. */
+async function arqPagAbrirNuevo(){
+  ARQPAG_HORA = ''; ARQPAG_HUECO = null;
+  await arqPagElegir('nuevo', true);
+  const ult = ARQPAG_LISTA.filter(a => a.estado === 'cerrada' && a.cerrado_at)
+    .sort((x,y) => new Date(y.cerrado_at) - new Date(x.cerrado_at))[0];
+  if(!ult) return;
+  const monto = await arqHueco(ult.cerrado_at);
+  if(ARQPAG_SEL !== 'nuevo') return;
+  ARQPAG_HUECO = {desde: ult.cerrado_at, monto};
+  if(monto > 0) arqPagPintarNuevo();
+}
+
 function arqPagPintarNuevo(){
   const cont = $('arqpag-detalle'); if(!cont) return;
+  const ahora = arqHoraCampo(Date.now());
+  const h = ARQPAG_HUECO;
   cont.innerHTML = `<div class="arqd">
     <div class="arqd-cab"><h3>Nuevo arqueo de caja</h3></div>
     <button type="button" class="arqd-volver" data-arqp="volver">← Todos los arqueos</button>
     <div class="arqd-datos">
       <div class="arqd-dato"><span class="t">Caja</span><span class="v">Principal</span></div>
-      <div class="arqd-dato"><span class="t">Hora de apertura</span><span class="v">${arqFechaHora(Date.now())}</span></div>
+      <div class="arqd-dato arqd-dato-campo"><label class="t" for="arqd-hora">Hora de apertura</label>
+        <span class="v"><input type="datetime-local" step="1" id="arqd-hora" max="${ahora}"
+          value="${esc(ARQPAG_HORA || ahora)}"></span></div>
+      ${h && h.monto > 0 ? `<div class="arqd-hueco">
+          <span>Cobrado sin caja desde las <b>${arqFechaHora(h.desde)}</b>: <b>${plata(h.monto)}</b></span>
+          <button type="button" data-arqp="desde-hueco">Abrir desde esa hora</button>
+        </div>` : ''}
       <div class="arqd-dato"><span class="t">Creado por</span><span class="v">${esc(NOMBRE || '—')}</span></div>
       <div class="arqd-dato arqd-dato-campo"><label class="t" for="arqd-monto">Monto inicial</label>
         <span class="v"><input type="number" inputmode="decimal" min="0" id="arqd-monto"
@@ -7271,9 +7343,30 @@ async function arqPagIniciar(){
   const t = String(ARQPAG_MONTO).trim();
   const monto = +t.replace(/[^\d.-]/g,'');
   if(t === '' || isNaN(monto) || monto < 0){ avisar('Escribí el monto inicial de la caja.'); return; }
-  const r = await lamaLlamar('arqueo_abrir', {p_sede: SEDE, p_monto_inicial: monto, p_quien: NOMBRE});
+  /* Sin tocar el campo, la hora la pone la base (la de verdad, al apretar).
+     Tocado, se manda lo elegido — y el futuro se frena acá, antes de viajar:
+     una caja abierta "más tarde" dejaría fuera las ventas de ahora mismo. */
+  let desde = null;
+  if(ARQPAG_HORA){
+    const d = new Date(ARQPAG_HORA);
+    if(isNaN(d)){ avisar('La fecha y hora de apertura no se entiende.'); return; }
+    if(d.getTime() > Date.now() + 2 * 60 * 1000){
+      avisar('La hora de apertura no puede ser en el futuro.\n\nLas ventas que se cobren entre ahora y esa hora quedarían fuera de la caja.');
+      return;
+    }
+    desde = d.toISOString();
+  }
+  const {data:r, error} = await sb.rpc('arqueo_abrir', desde
+    ? {p_sede: SEDE, p_monto_inicial: monto, p_quien: NOMBRE, p_abierto_at: desde}
+    : {p_sede: SEDE, p_monto_inicial: monto, p_quien: NOMBRE});
+  if(error){
+    avisar(desde && /arqueo_abrir|p_abierto_at|function/i.test(error.message || '')
+      ? 'Todavía no se puede elegir la hora de apertura.\n\nFalta pegar sql/2026-09-lama-arqueo-horario.sql en Supabase. Sin tocar la hora, la caja se abre igual.'
+      : (error.message || 'No se pudo abrir. Revisa tu señal e inténtalo de nuevo.'));
+    return;
+  }
   if(!r) return;
-  ARQPAG_MONTO = ''; ARQPAG_BORRADOR = {}; ARQPAG_COMENT = '';
+  ARQPAG_MONTO = ''; ARQPAG_HORA = ''; ARQPAG_HUECO = null; ARQPAG_BORRADOR = {}; ARQPAG_COMENT = '';
   ARQPAG_SEL = r.id;
   aviso('✓ Caja abierta');
   await arqPagCargar();
@@ -7294,8 +7387,15 @@ async function arqPagFinalizar(){
   const usr = ins.reduce((s,i) => s + (+i.value || 0), 0);
   const dif = usr - (ARQPAG_VIVO ? ARQPAG_VIVO.totalSis : 0);
   const ciego = ajVal('arqueo_ciego', SEDE, false);
+  /* LAS MESAS ABIERTAS NO FRENAN EL CIERRE (Fudo tampoco lo impide), pero SE
+     AVISAN: lo que se cobre después va a la caja siguiente, y una mesa que
+     ya pagó y nadie cerró en la pantalla es plata en el cajón que el sistema
+     no conoce — justo el sobrante que después nadie sabe explicar. */
+  const rc = await sb.from('cuentas').select('id,estado').eq('sede', SEDE).neq('estado', 'cerrada').limit(500);
+  const abiertas = (rc.data || []).filter(x => x.estado !== 'cerrada').length;
   const ok = await preguntar('¿Finalizar el arqueo?',
     (ciego ? '' : (dif === 0 ? 'La caja cuadra. ' : `Diferencia: ${arqSigno(dif)}. `)) +
+    (abiertas ? `Quedan ${abiertas} mesa${abiertas === 1 ? '' : 's'} abierta${abiertas === 1 ? '' : 's'}: lo que se cobre ahí va al próximo arqueo. ` : '') +
     'Un arqueo finalizado no se vuelve a abrir, y las ventas de este turno dejan de poder anularse.',
     'Finalizar');
   if(!ok) return;
@@ -7334,7 +7434,12 @@ function arqPagEngancharUnaVez(){
     }
     const b = e.target.closest('[data-arqp]'); if(!b) return;
     const acc = b.dataset.arqp;
-    if(acc === 'nuevo')          { await arqPagElegir('nuevo', true); return; }
+    if(acc === 'nuevo')          { await arqPagAbrirNuevo(); return; }
+    if(acc === 'desde-hueco' && ARQPAG_HUECO){
+      ARQPAG_HORA = arqHoraCampo(ARQPAG_HUECO.desde);
+      const h = $('arqd-hora'); if(h) h.value = ARQPAG_HORA;
+      return;
+    }
     if(acc === 'cancelar-nuevo') { ARQPAG_MONTO = ''; await arqPagElegir(ARQPAG_LISTA.length ? ARQPAG_LISTA[0].id : null, false); return; }
     if(acc === 'iniciar')        { await arqPagIniciar(); return; }
     if(acc === 'finalizar')      { await arqPagFinalizar(); return; }
@@ -7347,6 +7452,7 @@ function arqPagEngancharUnaVez(){
     if(dm){ ARQPAG_BORRADOR[dm.dataset.arqvivmedio] = e.target.value; arqPagTotales(); return; }
     if(e.target.id === 'arqd-coment') ARQPAG_COMENT = e.target.value;
     if(e.target.id === 'arqd-monto')  ARQPAG_MONTO  = e.target.value;
+    if(e.target.id === 'arqd-hora')   ARQPAG_HORA   = e.target.value;
   });
   vista.addEventListener('change', e => {
     const dm = e.target.closest('[data-arqvivmedio]');

@@ -8,6 +8,32 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-09-23** — **La fecha y hora de apertura del arqueo**, construida
+  recién después de que NotebookLM contestara las ocho preguntas (quedaron en
+  `docs/atlas-fudo.md`, H4). El arqueo nuevo pide fecha y hora, nace con la de
+  ahora, se puede mover **hacia atrás** y nunca hacia adelante (una caja abierta
+  "más tarde" dejaría fuera las ventas de ahora; Fudo lo desaconseja, Llamita
+  lo frena). La hora real en que se apretó el botón se guarda aparte
+  (`creado_at`) y el detalle la muestra si difiere: la trazabilidad de la
+  llegada del personal que pidió Jhon.
+
+  **Lo que cambió de fondo, y no se veía:** hasta ayer la caja contaba ventas
+  por franja de horas. Con la apertura hacia atrás eso se rompe — una caja PM
+  abierta a las 15:00 contaba otra vez lo que la AM ya había cerrado hasta las
+  15:14. Fudo lo evita anotando en cada venta el arqueo abierto al cobrarla. Acá
+  se resolvió con la regla equivalente, sin tocar las funciones de cobro: **una
+  venta es del arqueo cuya franja la cubre, menos lo que ya cae en un arqueo
+  anterior cerrado**. Probado en un Postgres de verdad armado con los `.sql` del
+  repo: con la función de ayer el caso contaba 1.500, con la nueva 500.
+
+  Dos avisos que Fudo no da: el **hueco** (lo cobrado sin caja desde el último
+  cierre, con un botón "Abrir desde esa hora") y las **mesas abiertas** al
+  finalizar — no frenan, avisan.
+
+  **La unión Stock ↔ Plus quedó para planificar en el chat siguiente**, con el
+  modelo de Jhon en tres capas (carta ← inventario ← control de stock) anotado
+  al final de `docs/LAMA.md`.
+
 - **2026-09-22 (noche)** — **Una tanda de pedidos de Jhon usando la app.**
   - **Abrir una mesa: de 648 ms a 87 ms**, medido con 300 ms de red simulada.
     Se esperaban dos consultas, una detrás de la otra, antes de pintar nada.

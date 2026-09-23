@@ -39,7 +39,7 @@ Eso significa dos cosas que conviene tener claras:
 | **Lama · configuración** | **83 %** | 5 de 6 | 🟢 **hecha** · falta el detalle del ticket, que depende de F5 |
 | **Lama · el plano de mesas** | **100 %** | 5 de 5 | 🟢 **terminado** |
 | **Lama · impresión** | **83 %** | 5 de 6 | 🟡 **falta ir al local** · todo lo demás está |
-| **Lama · arqueo de caja** | **100 %** | 5 de 5 | 🟢 reconstruido y el `.sql` ya está corrido |
+| **Lama · arqueo de caja** | **100 %** | 5 de 5 | 🟡 fecha/hora y borrar construidos · **faltan 2 `.sql` de Jhon** |
 | **Conexión Lama ↔ Stock** | **0 %** | 0 de 3 | ⬜ va última a propósito |
 | **Producto multi-cliente** | **0 %** | 0 de 4 | ⬜ no empezado |
 
@@ -219,6 +219,13 @@ vacíos hasta contar (como en la captura: la diferencia arranca en -$604.609)
 y **Finalizar arqueo** apagado hasta que todos los medios tengan su monto.
 Mesas ya no tiene ventana de arqueo propia: su aviso lleva acá. Prueba:
 `pruebas/lama-arqueo.mjs`, 31 casos.
+
+🟡 **2026-09-23 · fecha y hora de apertura** — construida con las respuestas de
+NotebookLM (`docs/atlas-fudo.md`, H4): se elige hacia atrás, nunca adelante; la
+hora real queda guardada aparte; lo ya contado en una caja cerrada no se cuenta
+en la siguiente; avisa el hueco entre cajas y las mesas abiertas al finalizar.
+**Falta que Jhon pegue `sql/2026-09-lama-arqueo-horario.sql`** (y el de borrar).
+Prueba: 47 casos.
 
 ### Conexión Lama ↔ Stock — 0 de 3 ⬜
 
