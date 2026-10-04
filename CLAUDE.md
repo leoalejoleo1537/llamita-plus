@@ -1661,10 +1661,16 @@ texto por red local e imprime— y no tiene por qué saber nada de inventario.
 
 ## 5. Flujo de trabajo con git (para Claude)
 
-- Rama de trabajo: `claude/inventory-permission-issue-520xhr` (desarrollar aquí).
-- Para que un cambio llegue a producción: **fusionar a `master` y push** (Vercel despliega).
+- Todo cambio que Jhon pida explícitamente para **Llamita Plus** se prueba y se
+  envía a la rama **`master`** en la misma tanda; no se deja solo en una rama
+  local ni en una rama de trabajo pendiente. Vercel publica `master`, así que
+  el cambio debe quedar visible allí para que Jhon pueda comprobarlo.
+- Esta regla solo aplica a este repositorio. **Nunca** autoriza tocar, hacer
+  commit o hacer push en `inventario-mall-plaza` ni en ningún recurso de Café
+  del Desierto (ver la prohibición de arriba).
 - Mensajes de commit claros, en español, describiendo el porqué.
-- Nunca push a `master` sin que el cambio esté probado/confirmado.
+- Antes del push: ejecutar las pruebas pertinentes y confirmar que el diff solo
+  contiene lo pedido. Si una prueba falla, no publicar ese cambio.
 
 ---
 

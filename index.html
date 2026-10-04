@@ -4575,7 +4575,7 @@ function pedirTexto(titulo, valor){
    que la pantalla se vea a medio terminar. */
 function refrescarMenu(){
   const a = $('drawerSede'), b = $('drawerUser');
-  if(a) a.textContent = SEDE ? SEDES[SEDE].label : '—';
+  if(a) a.textContent = SEDE ? (SEDE === 'plaza' ? 'Proyecto Llamita Plus' : SEDES[SEDE].label) : '—';
   if(b) b.textContent = saludo();
 }
 function abrirMenu(){
