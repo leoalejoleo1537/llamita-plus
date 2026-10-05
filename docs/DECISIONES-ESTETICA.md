@@ -25,6 +25,14 @@ en desplegables; la búsqueda mantiene su comportamiento de soltar los filtros.
 Esta decisión sustituye para **Llamita Plus** la paleta y la navegación históricas
 que se documentan a continuación. No se aplica a Café del Desierto.
 
+## Login y selector de sede — 2026-10-05
+
+Se reutiliza el icono oficial `icons/icon-512.png` (512×512, PNG transparente)
+en el panel de marca de la pantalla de login y en el selector de sede. El login
+usa dos columnas desde 900 px; en pantallas menores prioriza el formulario y
+coloca el logo a 72 px arriba. En el selector el logo queda centrado a 104 px.
+La navegación lateral permanece sin marca.
+
 ## Nueva selección de paletas — 2026-10-05
 
 Se reemplazaron las cinco opciones anteriores por seis combinaciones para un

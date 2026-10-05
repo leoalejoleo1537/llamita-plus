@@ -8,6 +8,16 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-10-05** — **Logo oficial en login y selector de sede.** Se reutilizó
+  `icons/icon-512.png`, versión cuadrada transparente de mayor resolución que
+  trae el repositorio. Login: dos columnas a partir de 900 px, formulario a la
+  izquierda y logo en panel despejado a la derecha; en móvil el panel se oculta
+  y el logo pasa arriba a 72 px. El selector muestra el mismo icono centrado a
+  104 px sobre Cafetería 1, Cafetería 2 y Bodega (el código conserva los rótulos
+  actuales Local 1/Local 2/Bodega). La sidebar sigue sin logo. No cambió la
+  autenticación ni la selección de sede. Chromium: login y selector en móvil y
+  escritorio, asset/natural ratio, login/QR y consola, 25/25. Solo Llamita Plus.
+
 - **2026-10-05** — **Seis paletas para Llamita Plus.** Se sustituyeron las cinco
   anteriores por Grafito y azul eléctrico (valor inicial), Pizarra y cian, Azul
   marino ejecutivo, Carbón y esmeralda, Gris mineral y violeta, y Arena fría y

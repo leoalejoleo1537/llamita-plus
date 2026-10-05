@@ -58,6 +58,7 @@ async function montar(){
 
 const errores = [];
 page.on('pageerror', e=>errores.push(String(e)));
+page.on('console', m=>{if(m.type()==='error')errores.push(m.text());});
 
 let ok=0, mal=0;
 const caso = async (n, fn) => {
@@ -66,15 +67,19 @@ const caso = async (n, fn) => {
   catch(e){ mal++; console.log('  ✗ '+n+'  → '+e.message.split('\n')[0]); }
 };
 
-console.log('\nEN EL TELÉFONO · acceso simple, sin marca gráfica:');
+console.log('\nEN EL TELÉFONO · acceso prioritario y logo oficial:');
 await page.setViewportSize({width:390, height:844});
 await montar();
+if(process.env.CAPTURA_LOGIN) await page.screenshot({path:`${process.env.CAPTURA_LOGIN}-login-movil.png`});
 await caso('la pantalla de login está a la vista (no hay sesión previa)', async () =>
   await page.isVisible('#login-gate') || 'no se ve el login');
-await caso('se conserva el nombre tipográfico y no hay imagen de logo', async () =>
-  (await page.textContent('.login-logo-tel')) === 'Llamita'
-  && !(await page.locator('#login-gate img').count()) || 'el nombre no está o apareció un logo');
-await caso('el panel decorativo NO se dibuja acá', async () =>
+await caso('el logo oficial aparece arriba y carga sin deformarse', async () => page.evaluate(()=>{
+  const img=document.querySelector('.login-logo-tel');
+  return img?.complete&&img.naturalWidth===512&&img.naturalHeight===512
+    &&getComputedStyle(img).display!=='none'
+    &&Math.abs(img.getBoundingClientRect().width/img.getBoundingClientRect().height-1)<.01;
+}));
+await caso('el panel visual se simplifica en móvil', async () =>
   !(await page.isVisible('.login-visual')) || 'el panel de escritorio se coló en el teléfono');
 await caso('los tres campos y el botón están', async () => {
   const falt = [];
@@ -121,15 +126,18 @@ await caso('el botón cerrar también cierra el panel QR',async()=>{
     &&await page.evaluate(()=>document.activeElement.id==='login-qr-open');
 });
 
-console.log('\nEN EL COMPUTADOR · se mantiene la misma tarjeta centrada:');
+console.log('\nEN EL COMPUTADOR · dos columnas y logo oficial:');
 await page.setViewportSize({width:1440, height:900});
 await montar();
-await caso('no aparece segunda columna ni marca gráfica', async () =>
-  !(await page.isVisible('.login-visual')) && !(await page.locator('#login-gate img').count())
-  || 'apareció un panel o logo');
-await caso('la tarjeta no se estira en escritorio', async () =>
-  await page.evaluate(() => document.querySelector('.login-card').getBoundingClientRect().width < 500)
-  || 'la tarjeta se estiró a dos columnas');
+if(process.env.CAPTURA_LOGIN) await page.screenshot({path:`${process.env.CAPTURA_LOGIN}-login-escritorio.png`});
+await caso('el formulario y el panel oficial forman dos columnas amplias', async () => page.evaluate(()=>{
+  const card=document.querySelector('.login-card'), form=document.querySelector('.login-form');
+  const visual=document.querySelector('.login-visual'), logo=visual.querySelector('img');
+  return card.getBoundingClientRect().width>800&&getComputedStyle(visual).display==='flex'
+    &&form.getBoundingClientRect().left<visual.getBoundingClientRect().left
+    &&logo.complete&&logo.naturalWidth===512&&logo.naturalHeight===512
+    &&Math.abs(logo.getBoundingClientRect().width/logo.getBoundingClientRect().height-1)<.01;
+}));
 await caso('"Bienvenido" está, que en el teléfono no hace falta', async () =>
   ((await page.textContent('.login-h1')) || '').includes('Bienvenido') || 'no dice Bienvenido');
 await caso('en escritorio el panel QR abre y Escape lo cierra',async()=>{
@@ -144,19 +152,6 @@ await caso('en escritorio el panel QR abre y Escape lo cierra',async()=>{
   return ciclo&&vuelve&&ancho<=360&&!(await page.locator('#login-qr-overlay.open').count())
     &&await page.evaluate(()=>document.activeElement.id==='login-qr-open');
 });
-await caso('el logo del teléfono no se duplica acá', async () =>
-  !(await page.locator('#login-gate img').count()) || 'hay una imagen de marca');
-
-console.log('\nEL NOMBRE TIPOGRÁFICO — no se rediseña el logo:');
-await caso('ya no es el sans-serif grueso de antes', async () => {
-  const peso = await page.evaluate(() => getComputedStyle(document.querySelector('.login-logo-tel')).fontWeight);
-  return (peso === '400' || peso === 'normal') || 'sigue en negrita: ' + peso;
-});
-await caso('es una serif, no la sans del resto de la app', async () => {
-  const f = await page.evaluate(() => getComputedStyle(document.querySelector('.login-logo-tel')).fontFamily);
-  return /georgia|serif/i.test(f) || 'quedó en: ' + f;
-});
-
 console.log('\nEL LOGO ORIGINAL, de vuelta:');
 await caso('el mosaico tiene azules y rojos de verdad, no es el de hojas verdes', async () => {
   /* Se lee el pixel con Python/PIL, AFUERA del navegador: bajo `file://`
@@ -166,14 +161,20 @@ await caso('el mosaico tiene azules y rojos de verdad, no es el de hojas verdes'
   const { execFileSync } = await import('node:child_process');
   const salida = execFileSync('python3', ['-c', `
 from PIL import Image
-im = Image.open(${JSON.stringify(join(raiz,'icons','icon-192.png'))}).convert('RGB')
-w,h = im.size
-print(im.getpixel((int(w*0.5), int(h*0.08))))
+im = Image.open(${JSON.stringify(join(raiz,'icons','icon-512.png'))}).convert('RGBA')
+blue=red=0
+pixels=im.tobytes()
+for i in range(0,len(pixels),4):
+    r,g,b,a=pixels[i:i+4]
+    if a<160: continue
+    blue += b>r*1.25 and b>g*1.1
+    red += r>g*1.25 and r>b*1.25
+print(blue,red)
 `]).toString().trim();
-  const [r,g,b] = salida.replace(/[()]/g,'').split(',').map(n=>+n.trim());
-  const esVerde = g > r && g > b;
-  return !esVerde || `sigue viéndose verde arriba: rgb(${r},${g},${b})`;
+  const [azules,rojos] = salida.split(' ').map(Number);
+  return azules>1000&&rojos>100 || `el asset ya no contiene el mosaico azul/rojo: ${salida}`;
 });
+
 
 console.log('\nMOSTRAR LA CONTRASEÑA:');
 await page.fill('#login-pass', 'unaClave123');
@@ -228,6 +229,24 @@ await caso('destildada, sí se cierra al cerrar la pestaña', async () => {
   await page.waitForTimeout(100);
   return (await page.evaluate(() => window.__cerrada)) || 'no se cerró';
 });
+
+
+await montar();
+await page.fill('#login-email','jhon@cafe.cl');await page.fill('#login-pass','unaClave123');
+await page.click('#login-btn');await page.waitForTimeout(350);
+for(const [width,height,nombre] of [[1440,900,'escritorio'],[390,844,'móvil']]){
+  await page.setViewportSize({width,height});
+  if(process.env.CAPTURA_LOGIN) await page.screenshot({path:`${process.env.CAPTURA_LOGIN}-sede-${nombre}.png`});
+  await caso(`selector de sede en ${nombre}: logo y tres opciones visibles sin desborde`,async()=>page.evaluate(()=>{
+    const gate=document.querySelector('#gate'),img=gate.querySelector('.selector-marca'),r=img.getBoundingClientRect();
+    return getComputedStyle(gate).display!=='none'&&img.complete&&img.naturalWidth===512
+      &&Math.abs(r.width/r.height-1)<.01
+      &&[...gate.querySelectorAll('.gate-btn')].map(x=>x.textContent.trim()).join('|')==='Local 1|Local 2|Bodega'
+      &&document.documentElement.scrollWidth<=document.documentElement.clientWidth
+      &&document.documentElement.scrollHeight<=document.documentElement.clientHeight;
+  })||'logo, opciones o espacio incorrectos');
+}
+await caso('la sidebar sigue sin contener el logo oficial',async()=>await page.locator('#drawer img').count()===0);
 
 console.log('\nY NINGÚN ERROR DE JAVASCRIPT:');
 await caso('la consola quedó limpia', async () => errores.length === 0 || errores[0]);
