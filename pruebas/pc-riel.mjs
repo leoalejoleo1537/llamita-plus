@@ -113,6 +113,7 @@ async function montar({puedeLama}){
   await page.route('**/supabase-js*', r=>r.fulfill({status:200,contentType:'application/javascript',body:''}));
   await page.goto(pathToFileURL(join(raiz,'index.html')).href);
   await page.waitForTimeout(400);
+  if(process.env.CAPTURA_SIDEBAR) await page.screenshot({path:`${process.env.CAPTURA_SIDEBAR}-login.png`,fullPage:true});
   await page.click('.gate-btn[data-sede="plaza"]');
   await page.waitForTimeout(700);
 }
@@ -120,6 +121,7 @@ async function montar({puedeLama}){
 
 const errores = [];
 page.on('pageerror', e=>errores.push(String(e)));
+page.on('console', m=>{if(m.type()==='error') errores.push(m.text());});
 
 let ok=0, mal=0;
 const caso = async (n, fn) => {
@@ -207,11 +209,14 @@ await page.waitForTimeout(350);
 console.log('\nEN EL COMPUTADOR (1440 px) · el riel:');
 await ir(1440, 900);
 let m = await medir();
+if(process.env.CAPTURA_SIDEBAR) await page.screenshot({path:`${process.env.CAPTURA_SIDEBAR}-fijado.png`,fullPage:true});
 await caso('la clase `pc-ancho` está puesta', async () => m.clase || 'no se puso');
 await caso('la barra se paró: es un riel fijo a la izquierda', async () =>
-  (m.pos === 'fixed' && m.anchoTabs > 180 && m.anchoTabs < 240) || `pos=${m.pos} ancho=${m.anchoTabs}`);
+  (m.pos === 'fixed' && m.anchoTabs > 250 && m.anchoTabs < 280) || `pos=${m.pos} ancho=${m.anchoTabs}`);
 await caso('el contenido se corre y NO queda debajo del riel', async () =>
-  (m.padL >= 200 && m.invLeft >= 200) || `padL=${m.padL} left=${m.invLeft}`);
+  (m.padL >= 240 && m.invLeft >= 240) || `padL=${m.padL} left=${m.invLeft}`);
+await caso('la cabecera visible usa nombre neutral de demo', async () =>
+  (await page.textContent('#topTitle')) === 'Local 1' || await page.textContent('#topTitle'));
 await caso('el inventario aprovecha el ancho (era 900)', async () =>
   m.invW > 1000 || `mide ${m.invW}`);
 await caso('la marca "Llamita Plus" aparece arriba del riel', async () =>
@@ -309,10 +314,29 @@ await caso('Actualizar, Historial y Cambiar sede están a la vista', async () =>
   return faltan.length === 0 || 'no se ven: ' + faltan.join(', ');
 });
 await caso('el nombre de la sede se lee (no quedó en "—")', async () =>
-  ((await page.textContent('#drawerSede')) || '').includes('Plaza')
+  ((await page.textContent('#drawerSede')) || '').includes('Local 1')
   || 'dice: ' + (await page.textContent('#drawerSede')));
 await caso('la chincheta está, chiquita y a la vista', async () =>
   await page.isVisible('#fijarRiel') || 'no hay cómo soltarlo');
+const estiloFijo = await page.evaluate(() => {
+  const d = document.getElementById('drawer'), c = getComputedStyle(d);
+  return {width:Math.round(d.getBoundingClientRect().width), background:c.backgroundColor,
+    shadow:c.boxShadow, padding:c.padding, font:getComputedStyle(d.querySelector('.drawer-item')).fontSize,
+    header:getComputedStyle(d.querySelector('.drawer-sede')).fontSize};
+});
+await page.click('#fijarRiel'); await page.waitForTimeout(450);
+await page.click('#btnMenu'); await page.waitForTimeout(350);
+const estiloSuelto = await page.evaluate(() => {
+  const d = document.getElementById('drawer'), c = getComputedStyle(d);
+  return {width:Math.round(d.getBoundingClientRect().width), background:c.backgroundColor,
+    shadow:c.boxShadow, padding:c.padding, font:getComputedStyle(d.querySelector('.drawer-item')).fontSize,
+    header:getComputedStyle(d.querySelector('.drawer-sede')).fontSize};
+});
+if(process.env.CAPTURA_SIDEBAR) await page.screenshot({path:`${process.env.CAPTURA_SIDEBAR}-desplegado.png`,fullPage:true});
+await caso('fijado y desplegado conserva la misma piel y escala', async () =>
+  JSON.stringify(estiloFijo) === JSON.stringify(estiloSuelto)
+    || `fijo=${JSON.stringify(estiloFijo)} suelto=${JSON.stringify(estiloSuelto)}`);
+await page.click('#fijarMenu'); await page.waitForTimeout(450);
 
 console.log('\nAL SOLTARLO · el panel se va ENTERO, no se queda a medias:');
 await page.click('#fijarRiel'); await page.waitForTimeout(500);
@@ -356,6 +380,9 @@ await caso('al recargar sigue suelto, no vuelve solo', async () =>
 
 console.log('\nEN EL TELÉFONO la chincheta NO existe:');
 await ir(390, 844);
+await page.click('#btnMenu'); await page.waitForTimeout(300);
+if(process.env.CAPTURA_SIDEBAR) await page.screenshot({path:`${process.env.CAPTURA_SIDEBAR}-movil.png`,fullPage:true});
+await page.keyboard.press('Escape'); await page.waitForTimeout(250);
 await caso('no se ofrece fijar nada', async () =>
   !(await page.isVisible('#fijarMenu')) || 'ofrece algo que no se puede hacer en un teléfono');
 await caso('y el menú sigue siendo el cajón de siempre', async () =>

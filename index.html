@@ -69,7 +69,7 @@
        de tarjetas desperdicia espacio, que es lo que pasaba en el panel de la
        mesa. Una raya que se nota es un reborde; esta apenas se intuye. */
     --linea:rgba(31,58,92,.085);
-    --riel:212px;   /* el ancho del riel de la izquierda en PC */
+    --riel:260px;   /* 236 px útiles: mismo ancho que el menú desplegado en PC */
     --r-card:20px; --r-sec:18px;
   }
   *{box-sizing:border-box}
@@ -81,9 +81,8 @@
   .gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
   .gate.hidden{display:none}
   .gate-box{background:#fff;border-radius:18px;padding:40px 30px 30px;max-width:380px;width:100%;text-align:center;box-shadow:0 10px 45px rgba(15,30,49,.12)}
-  /* El logo es el archivo que entrega Jhon, redimensionado. Nunca se
-     redibuja por código (regla 2.1). */
-  .gate-marca{display:block;margin:0 auto 12px;border-radius:22px}
+  /* La pantalla de acceso evita una marca gráfica hasta que haya una
+     versión final aprobada; el nombre tipográfico se conserva como texto. */
   /* EL NOMBRE, MÁS FINO. Era sans-serif a peso 800 — grueso a propósito para
      leerse en una pantalla chica. Jhon pidió "algo más elegante y fino, no
      grueso": una serif del sistema a peso normal cumple sin sumar una
@@ -107,20 +106,15 @@
   .gate-link{background:none;border:none;color:var(--muted);font-size:12.5px;cursor:pointer;text-decoration:underline;margin-top:16px;padding:0}
   .gate-link:hover{color:var(--orange)}
   /* ══════════════════════════════════════════════════════════════
-     LA PANTALLA DE INICIO DE SESIÓN — REHECHA 2026-09-08
+     LA PANTALLA DE INICIO DE SESIÓN — PRESENTACIÓN SOBRIA
      ══════════════════════════════════════════════════════════════
-     Sale de la maqueta que trajo Jhon ("1b · propuesta nueva · escritorio").
-     En el teléfono se queda la tarjeta simple de siempre — el panel
-     decorativo no cabe en un ancho de 66px y no aporta nada ahí. De 900px
-     para arriba aparece el panel de la izquierda, que es lo que la maqueta
-     pedía para el computador. */
+     La tarjeta de acceso mantiene una sola columna en escritorio y móvil;
+     sin logo gráfico ni panel decorativo que compitan con la tarea. */
   .login-card{background:#fff;border-radius:22px;box-shadow:0 20px 60px -20px rgba(15,30,49,.28);
     overflow:hidden;max-width:400px;width:100%}
-  .login-visual{display:none}
   .login-form{box-shadow:none;border-radius:0;max-width:none;padding:38px 30px 30px}
   .login-h1{display:none}
   .login-sub{display:none}
-  .login-marca-tel{display:block}
   .login-logo-tel{display:block}
 
   /* Los campos con ícono. Un solo contenedor por campo, y el ícono adentro
@@ -153,27 +147,7 @@
   .login-olvide:hover{color:var(--orange)}
 
   @media (min-width:900px){
-    /* EL PANEL SE ABRE EN DOS. Contenido a la izquierda (el logo, las formas),
-       el formulario a la derecha — como en la maqueta. */
-    .login-card{max-width:860px;display:flex;border-radius:26px}
-    .login-visual{display:flex;flex-direction:column;align-items:center;justify-content:center;
-      position:relative;overflow:hidden;flex:0 0 380px;background:var(--bg)}
-    /* Las formas son puro adorno — círculos suaves de la propia paleta,
-       nunca un color nuevo. Se recortan con el propio panel: `overflow:hidden`
-       arriba hace de marco. */
-    .login-blob{position:absolute;border-radius:50%}
-    .login-blob.b1{width:210px;height:210px;top:-60px;left:-50px;background:rgba(15,30,49,.10)}
-    .login-blob.b2{width:150px;height:150px;top:20px;right:-40px;background:rgba(220,68,5,.14)}
-    .login-blob.b3{width:170px;height:170px;top:150px;left:-60px;background:rgba(15,30,49,.16)}
-    .login-blob.b4{width:130px;height:130px;bottom:70px;left:20px;background:rgba(15,30,49,.10)}
-    .login-blob.b5{width:190px;height:190px;bottom:-70px;right:-40px;background:rgba(15,30,49,.10)}
-    .login-visual-logo{position:relative;width:128px;height:128px;border-radius:28px;
-      box-shadow:0 14px 34px -12px rgba(15,30,49,.35)}
-    .login-visual-marca{position:relative;margin-top:16px;font-family:Georgia,'Iowan Old Style',
-      'Palatino Linotype',Palatino,serif;font-weight:400;font-size:32px;color:var(--orange);
-      letter-spacing:.2px}
-    .login-marca-tel,.login-logo-tel{display:none}
-
+    .login-card{max-width:460px;border-radius:26px}
     .login-form{flex:1;padding:52px 48px;display:flex;flex-direction:column;justify-content:center}
     .login-h1{display:block;font-size:27px;font-weight:800;color:var(--text);margin:0 0 6px;
       letter-spacing:-.01em}
@@ -315,9 +289,9 @@
   /* ---------- menú lateral ---------- */
   .scrim{position:fixed;inset:0;background:rgba(10,20,35,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
   .scrim.open{opacity:1;pointer-events:auto}
-  .drawer{position:fixed;top:0;left:0;bottom:0;width:82%;max-width:320px;background:#fff;z-index:61;
+  .drawer{position:fixed;top:0;left:0;bottom:0;width:min(82vw,320px);max-width:calc(100vw - 56px);background:#fff;z-index:61;
           transform:translateX(-100%);transition:transform .22s cubic-bezier(.2,.7,.3,1);
-          display:flex;flex-direction:column;padding:18px 0 14px;overflow-y:auto;box-shadow:2px 0 24px rgba(15,30,49,.18)}
+          display:flex;flex-direction:column;padding:18px 0 14px;overflow-y:auto}
   .drawer.open{transform:translateX(0)}
   .drawer-top{padding:0 20px 14px;border-bottom:1px solid var(--border);margin-bottom:6px}
   .drawer-sede{font-size:17px;font-weight:800;color:var(--text);margin-bottom:6px}
@@ -332,35 +306,14 @@
   .drawer-salir{width:40px;height:40px;border:none;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
   .drawer-salir svg{width:21px;height:21px}
   .drawer .live{display:inline-flex;background:var(--gray-bg);border-radius:999px;color:var(--gray-fg);padding:5px 11px;font-size:12.5px}
-  /* ══════════ EL PANEL FIJO SE COME AL CAJÓN (2026-09-07) ══════════
-     En el computador había DOS paneles a la izquierda: el riel de secciones,
-     siempre puesto, y el cajón del menú, que se abría con el botón de las tres
-     rayas. Dos paneles para el mismo costado de la pantalla es espacio tirado.
-
-     Ahora el cajón **se muda adentro del riel**. Y se muda de verdad: es el
-     MISMO elemento, movido de lugar en la página, no una copia. Copiar el
-     menú habría dejado dos dueños del mismo botón — el error que este archivo
-     ya pagó varias veces.
-
-     Con el panel fijo, el botón de las tres rayas desaparece: no queda nada
-     que abrir, porque ya está todo a la vista. */
-  .drawer.en-riel{position:static;width:auto;max-width:none;transform:none;
-    box-shadow:none;background:transparent;z-index:auto;overflow:visible;
-    padding:14px 0 0;margin-top:12px;border-top:1px solid var(--linea)}
-  .drawer.en-riel .drawer-top{padding:0 6px 10px;border-bottom:none;margin-bottom:0}
-  .drawer.en-riel .drawer-sede{font-size:14px;margin-bottom:5px}
-  .drawer.en-riel .drawer-sec{padding:12px 6px 4px;font-size:11px;
-    text-transform:uppercase;letter-spacing:.05em}
-  .drawer.en-riel .drawer-item{padding:9px 10px;font-size:14px;gap:10px;
-    border-radius:10px}
-  .drawer.en-riel .drawer-item:hover{background:var(--card)}
-  .drawer.en-riel .drawer-item svg{width:18px;height:18px}
-  .drawer.en-riel .drawer-online{padding:2px 8px 4px;font-size:12.5px}
-  .drawer.en-riel .drawer-foot{padding:12px 8px 0;border-top:1px solid var(--linea);
-    margin-top:14px}
-  .drawer.en-riel .drawer-user{font-size:13px}
-  .drawer.en-riel .drawer-salir{width:32px;height:32px}
-  .drawer.en-riel .drawer-salir svg{width:18px;height:18px}
+  /* Un mismo menú vive en el cajón temporal o en el riel. La posición cambia,
+     no la superficie ni su escala tipográfica. */
+  .drawer.en-riel{position:static;width:100%;max-width:236px;left:auto;top:auto;bottom:auto;
+    transform:none;z-index:auto;flex:0 0 auto}
+  body.pc-ancho .tabs{background:#fff}
+  body.pc-ancho .tabs .inner{width:236px;margin-left:0;margin-right:0}
+  body.pc-ancho .drawer.en-riel{box-shadow:none;overflow-y:visible}
+  body.es-pc:not(.menu-fijo) .drawer{width:236px;max-width:calc(100vw - 56px)}
   /* Suelto, el "Fijar el panel" del cajón. Fijo, no tiene sentido: la
      chincheta del riel hace lo mismo y está más cerca. */
   .drawer.en-riel #fijarMenu{display:none}
@@ -2980,22 +2933,11 @@
 <body>
 
 <!-- ================= INICIO DE SESIÓN (obligatorio al abrir) =================
-     REHECHA el 2026-09-08 sobre la maqueta que trajo Jhon ("1b · propuesta
-     nueva · escritorio"). En el teléfono queda la tarjeta simple de siempre
-     —.login-visual se esconde y no hay nada que perder—; de 900px para
-     arriba aparece el panel izquierdo con las formas y el logo grande, que
-     es lo que la maqueta pedía para el computador. -->
+     Una tarjeta centrada en escritorio y móvil, sin logo gráfico mientras
+     se define la identidad visual final. -->
 <div class="gate top login-gate" id="login-gate">
   <div class="login-card">
-    <div class="login-visual" aria-hidden="true">
-      <span class="login-blob b1"></span><span class="login-blob b2"></span>
-      <span class="login-blob b3"></span><span class="login-blob b4"></span>
-      <span class="login-blob b5"></span>
-      <img class="login-visual-logo" src="icons/icon-192.png" alt="" width="128" height="128">
-      <div class="login-visual-marca">Llamita</div>
-    </div>
     <div class="gate-box login-form">
-      <img class="gate-marca login-marca-tel" src="icons/icon-192.png" alt="" width="80" height="80">
       <div class="gate-logo login-logo-tel">Llamita</div>
       <h1 class="login-h1">Bienvenido</h1>
       <p class="login-sub">Ingresá a tu cuenta para continuar</p>
@@ -3029,11 +2971,10 @@
 <!-- ================= SELECTOR DE SEDE (tras iniciar sesión) ================= -->
 <div class="gate" id="gate">
   <div class="gate-box">
-    <img class="gate-marca" src="icons/icon-192.png" alt="" width="88" height="88">
     <div class="gate-logo">Llamita</div>
     <p class="gate-sub">Elige tu local para comenzar</p>
-    <button class="gate-btn" data-sede="plaza">Café Mall Plaza</button>
-    <button class="gate-btn" data-sede="angamos">Parque Angamos</button>
+    <button class="gate-btn" data-sede="plaza">Local 1</button>
+    <button class="gate-btn" data-sede="angamos">Local 2</button>
     <button class="gate-btn" data-sede="central">Bodega</button>
     <div class="gate-foot" id="gateUser">Sincronizado en tiempo real</div>
     <button class="gate-link" id="btnSalir">Cerrar sesión</button>
@@ -3997,6 +3938,10 @@ const SEDES = {
   angamos: { label:'Parque Angamos',   corto:'Angamos',    excel:'angamos' },
   central: { label:'Bodega',           corto:'Bodega',     excel:'bodega'  },
 };
+/* En los lugares más visibles de la interfaz se usan nombres neutrales para
+   que la demo no quede asociada a un cliente o local real. Las etiquetas
+   operativas e históricas de cada sede siguen usando SEDES.label. */
+const etiquetaSedeUI = s => s === 'plaza' ? 'Local 1' : s === 'angamos' ? 'Local 2' : (SEDES[s]?.label || s || '—');
 /* el título de la barra dice en qué estás, como en Fudo */
 const TITULOS = {inv:'Inventario', reparto:'Reparto', recepcion:'Lo que llega a bodega', envios:'Enviar a los locales', aplaza:'Enviar a Mall Plaza', hist:'Historial', recetas:'Recetas', mermas:'Mermas', enlaces:'Enlaces', lama:'Mesas', arqueo:'Arqueo de caja', movcaja:'Movimientos de caja', ajustes:'Ajustes'};
 let SEDE = null;
@@ -4591,7 +4536,7 @@ function pedirTexto(titulo, valor){
    que la pantalla se vea a medio terminar. */
 function refrescarMenu(){
   const a = $('drawerSede'), b = $('drawerUser');
-  if(a) a.textContent = SEDE ? (SEDE === 'plaza' ? 'Proyecto Llamita Plus' : SEDES[SEDE].label) : '—';
+  if(a) a.textContent = etiquetaSedeUI(SEDE);
   if(b) b.textContent = saludo();
 }
 function abrirMenu(){
@@ -4731,9 +4676,9 @@ function pickSede(s){
   /* Con el panel fijo el cajón nunca se abre, así que su nombre de sede hay
      que refrescarlo acá: es el momento en que deja de ser "—". */
   setTimeout(refrescarMenu, 0);
-  $('topTitle').textContent = SEDES[s].label;
+  $('topTitle').textContent = etiquetaSedeUI(s);
   $('topSede').textContent = TITULOS.inv;
-  $('footText').textContent = SEDES[s].label + ' · sincronizado en tiempo real';
+  $('footText').textContent = etiquetaSedeUI(s) + ' · sincronizado en tiempo real';
   // reset estado/filtros
   DATA=[]; filterState=null; modalProd=null; carrito=[];
   /* los conteos de las otras sedes se descartan al cambiar de sede: si no, al
@@ -16525,7 +16470,7 @@ function pickTab(tab){
   /* El título es la sede y el subtítulo la pantalla: al revés de como estaba.
      Ver el comentario del <h1> en la barra. */
   vistaActual=tab;
-  $('topTitle').textContent = SEDE ? SEDES[SEDE].label : '—';
+  $('topTitle').textContent = etiquetaSedeUI(SEDE);
   $('topSede').textContent  = TITULOS[tab] || TITULOS.inv;
   /* En Ajustes se esconden las pestañas y la franja del motor: se entró a
      otra zona, y dejar la navegación de la anterior encima haría dudar de

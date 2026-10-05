@@ -8,6 +8,16 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-10-05** — **Un solo lenguaje visual para la navegación lateral**, sin
+  duplicar el componente: el mismo `#drawer` conserva fondo, ancho útil,
+  tipografía, padding y jerarquía al pasar del cajón temporal al rail fijado.
+  Se retiró del inicio el logo gráfico sin rediseñarlo y los nombres visibles
+  de Plaza/Angamos se neutralizaron como Local 1/Local 2; etiquetas
+  operativas e históricas quedan intactas. Rutas, permisos y módulos de
+  stock/ventas no cambian. Verificación: `pc-riel.mjs` 51/51,
+  `login-screen.mjs` 22/22, `ajustes-navegacion.mjs` 40/40 y
+  `modo-demostracion.mjs` 23/23. Aplica solo a Llamita Plus.
+
 - **2026-10-04** — Modo demostración global en Ajustes: concentra la
   navegación en inventario, movimientos, mermas e historial y aparta ventas,
   caja y módulos experimentales. Usa la tabla `ajustes` existente; no cambia

@@ -1,9 +1,8 @@
-/* LA PANTALLA DE LOGIN — rehecha 2026-09-08 sobre la maqueta de escritorio.
+/* LA PANTALLA DE LOGIN — presentación sobria sin marca gráfica.
    node pruebas/login-screen.mjs
 
-   Se prueba en las dos formas: la tarjeta simple del teléfono (que no puede
-   perder nada de lo que ya tenía) y el panel partido del computador (lo
-   nuevo). Y las tres cosas que dejaron de ser solo dibujo: mostrar la
+   Se prueba en teléfono y computador: una misma tarjeta centrada, sin logos
+   ni panel decorativo. También mostrar la
    contraseña, "olvidaste tu contraseña" pidiéndole a Supabase el correo de
    verdad, y que la sesión se cierre sola si "mantener sesión" queda
    destildado.
@@ -64,13 +63,14 @@ const caso = async (n, fn) => {
   catch(e){ mal++; console.log('  ✗ '+n+'  → '+e.message.split('\n')[0]); }
 };
 
-console.log('\nEN EL TELÉFONO · la tarjeta simple, sin el panel decorativo:');
+console.log('\nEN EL TELÉFONO · acceso simple, sin marca gráfica:');
 await page.setViewportSize({width:390, height:844});
 await montar();
 await caso('la pantalla de login está a la vista (no hay sesión previa)', async () =>
   await page.isVisible('#login-gate') || 'no se ve el login');
-await caso('el logo del teléfono está', async () =>
-  await page.isVisible('.login-marca-tel') || 'no se ve el logo del teléfono');
+await caso('se conserva el nombre tipográfico y no hay imagen de logo', async () =>
+  (await page.textContent('.login-logo-tel')) === 'Llamita'
+  && !(await page.locator('#login-gate img').count()) || 'el nombre no está o apareció un logo');
 await caso('el panel decorativo NO se dibuja acá', async () =>
   !(await page.isVisible('.login-visual')) || 'el panel de escritorio se coló en el teléfono');
 await caso('los tres campos y el botón están', async () => {
@@ -82,26 +82,27 @@ await caso('nada se sale del ancho de la pantalla', async () =>
   (await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1))
   || 'hay scroll horizontal');
 
-console.log('\nEN EL COMPUTADOR · el panel partido de la maqueta:');
+console.log('\nEN EL COMPUTADOR · se mantiene la misma tarjeta centrada:');
 await page.setViewportSize({width:1440, height:900});
 await montar();
-await caso('aparece el panel de la izquierda', async () =>
-  await page.isVisible('.login-visual') || 'no se ve');
-await caso('con el logo grande y el nombre', async () =>
-  (await page.isVisible('.login-visual-logo')) && (await page.isVisible('.login-visual-marca'))
-  || 'falta el logo o el nombre del panel');
+await caso('no aparece segunda columna ni marca gráfica', async () =>
+  !(await page.isVisible('.login-visual')) && !(await page.locator('#login-gate img').count())
+  || 'apareció un panel o logo');
+await caso('la tarjeta no se estira en escritorio', async () =>
+  await page.evaluate(() => document.querySelector('.login-card').getBoundingClientRect().width < 500)
+  || 'la tarjeta se estiró a dos columnas');
 await caso('"Bienvenido" está, que en el teléfono no hace falta', async () =>
   ((await page.textContent('.login-h1')) || '').includes('Bienvenido') || 'no dice Bienvenido');
 await caso('el logo del teléfono no se duplica acá', async () =>
-  !(await page.isVisible('.login-marca-tel')) || 'se ven dos logos a la vez');
+  !(await page.locator('#login-gate img').count()) || 'hay una imagen de marca');
 
-console.log('\nEL NOMBRE, MÁS FINO — lo que pidió Jhon:');
+console.log('\nEL NOMBRE TIPOGRÁFICO — no se rediseña el logo:');
 await caso('ya no es el sans-serif grueso de antes', async () => {
-  const peso = await page.evaluate(() => getComputedStyle(document.querySelector('.login-visual-marca')).fontWeight);
+  const peso = await page.evaluate(() => getComputedStyle(document.querySelector('.login-logo-tel')).fontWeight);
   return (peso === '400' || peso === 'normal') || 'sigue en negrita: ' + peso;
 });
 await caso('es una serif, no la sans del resto de la app', async () => {
-  const f = await page.evaluate(() => getComputedStyle(document.querySelector('.login-visual-marca')).fontFamily);
+  const f = await page.evaluate(() => getComputedStyle(document.querySelector('.login-logo-tel')).fontFamily);
   return /georgia|serif/i.test(f) || 'quedó en: ' + f;
 });
 
