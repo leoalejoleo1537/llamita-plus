@@ -133,6 +133,28 @@ await caso('muestra productos, categorías y motivos realistas',async()=>
   (await page.textContent('#mermas-charts')).includes('Tortas')
     && (await page.textContent('#mermas-charts')).includes('Vencimiento')
     && (await page.textContent('#mermas-list')).includes('Sándwich Pollo Palta'));
+await caso('categorías permiten inspeccionar su top de productos y KPI prioriza producto',async()=>{
+  const kpis=await page.textContent('#mermas-kpis');
+  await page.hover('[data-mermas-categoria="Bollería"]');
+  const detalle=await page.textContent('#mermas-category-detail');
+  return kpis.includes('Producto más mermado')&&!kpis.includes('Productos afectados')
+    &&detalle.includes('Top productos · Bollería')&&detalle.includes('Muffin Arándano');
+});
+await caso('el detalle de categoría también se puede navegar con teclado',async()=>{
+  await page.focus('[data-mermas-categoria="Tortas"]');
+  return (await page.textContent('#mermas-category-detail')).includes('Top productos · Tortas');
+});
+await caso('el anillo y su leyenda quedan centrados en el panel',async()=>
+  await page.evaluate(()=>{
+    const w=document.querySelector('.mermas-donut-wrap'),s=getComputedStyle(w);
+    return s.justifyContent==='center'&&w.getBoundingClientRect().width>0;
+  }));
+await caso('el registro queda contenido en una tarjeta con desplazamiento propio',async()=>
+  await page.evaluate(()=>{
+    const l=document.querySelector('#mermas-list'),s=getComputedStyle(l);
+    return l.scrollHeight>l.clientHeight&&['auto','scroll'].includes(s.overflowY)
+      &&s.backgroundColor!=='rgba(0, 0, 0, 0)';
+  }));
 await page.waitForTimeout(5000);
 await page.screenshot({path:'/tmp/llamita-mermas-escritorio.png',fullPage:true});
 await page.setViewportSize({width:390,height:844});

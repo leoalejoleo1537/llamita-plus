@@ -550,7 +550,7 @@
   .mermas-demo{display:none;background:var(--amber-bg);color:var(--amber-fg);font-size:11px;font-weight:700;
     padding:6px 9px;border-radius:999px;white-space:nowrap}
   .mermas-demo.on{display:inline-flex}
-  .mermas-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}
+  .mermas-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}
   .mermas-kpi,.mermas-panel{background:var(--card);border-radius:var(--r-card);box-shadow:var(--sombra)}
   .mermas-kpi{padding:14px 15px;min-width:0}
   .mermas-kpi-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
@@ -560,12 +560,13 @@
   .mermas-panel{padding:16px;min-width:0}
   .mermas-panel h2{font-size:14px;color:var(--navy);margin:0 0 12px}
   .mermas-bars{display:flex;flex-direction:column;gap:10px}
-  .mermas-bar-row{display:grid;grid-template-columns:minmax(78px,125px) minmax(30px,1fr) 40px;gap:9px;align-items:center;font-size:12px}
+  .mermas-bar-row{display:grid;grid-template-columns:minmax(78px,125px) minmax(30px,1fr) 40px;gap:9px;align-items:center;font-size:12px;border-radius:8px;padding:3px 5px;margin:-3px -5px;cursor:pointer;transition:background .15s ease}
+  .mermas-bar-row:hover,.mermas-bar-row:focus-visible,.mermas-bar-row.is-active{background:var(--gray-bg);outline:none}
   .mermas-bar-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);font-weight:600}
   .mermas-bar-track{height:10px;background:var(--gray-bg);border-radius:99px;overflow:hidden}
   .mermas-bar-fill{height:100%;background:#41628C;border-radius:inherit;min-width:2px}
   .mermas-bar-value{text-align:right;color:var(--muted);font-weight:700}
-  .mermas-donut-wrap{display:flex;align-items:center;gap:16px;min-height:168px}
+  .mermas-donut-wrap{display:flex;align-items:center;justify-content:center;gap:16px;min-height:168px;width:100%}
   .mermas-donut{width:142px;height:142px;flex:0 0 142px;border-radius:50%;position:relative;background:var(--gray-bg)}
   .mermas-donut::after{content:"";position:absolute;inset:27px;border-radius:50%;background:var(--card)}
   .mermas-donut-total{position:absolute;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;
@@ -576,9 +577,17 @@
   .mermas-dot{width:9px;height:9px;border-radius:50%;flex:0 0 9px}
   .mermas-legend-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
   .mermas-legend-n{font-weight:700;color:var(--muted)}
+  .mermas-category-detail{margin-top:14px;padding:10px 12px;border-radius:11px;background:var(--gray-bg);min-height:90px}
+  .mermas-category-detail h3{font-size:12px;color:var(--navy);margin:0 0 7px}
+  .mermas-category-detail ol{margin:0;padding-left:20px;display:grid;gap:4px;font-size:11px;color:var(--text)}
+  .mermas-category-detail li span{color:var(--muted);font-weight:700}
+  .mermas-category-hint{font-size:11px;color:var(--muted);margin:0}
   .mermas-table-title{display:flex;align-items:center;gap:10px;margin:0 2px 8px}
   .mermas-table-title h2{font-size:15px;margin:0;color:var(--navy)}
   .mermas-table-title span{font-size:11px;color:var(--muted);margin-left:auto}
+  #mermas-list.mermas-list-scroll{height:clamp(280px,48vh,480px);overflow-y:auto;overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;background:var(--card);border-radius:var(--r-card);box-shadow:var(--sombra);
+    padding:10px 14px;scrollbar-gutter:stable}
   .mermas-page{display:flex;justify-content:center;align-items:center;gap:12px;padding:12px;font-size:12px;color:var(--muted)}
   .mermas-page button{border:0;border-radius:10px;background:var(--card);box-shadow:var(--sombra);padding:8px 12px;font:inherit;font-weight:700;color:var(--navy)}
   .mermas-page button:disabled{opacity:.45}
@@ -3732,7 +3741,7 @@
   <div class="mermas-kpis" id="mermas-kpis"></div>
   <div class="mermas-charts" id="mermas-charts"></div>
   <div class="mermas-table-title"><h2>Registro de mermas</h2><span id="mermas-total">—</span></div>
-  <div id="mermas-list"><div class="empty">Cargando…</div></div>
+  <div id="mermas-list" class="mermas-list-scroll" role="region" aria-label="Lista de productos mermados"><div class="empty">Cargando…</div></div>
   <div class="mermas-page" id="mermas-pagination"></div>
 </div>
 
@@ -5504,29 +5513,51 @@ async function loadMermas(){
 
 function pintarAnaliticaMermas(rows){
   const vivas=rows.filter(m=>!m.deshecha_at), total=vivas.reduce((a,m)=>a+Math.abs(+m.cantidad||0),0);
-  const productos=new Set(vivas.map(m=>m.producto_id||m.producto)).size;
-  const porMotivo={},porTipo={};
+  const porMotivo={},porTipo={},productosPorTipo={};
   vivas.forEach(m=>{
     const motivo=m.motivo||'otro';porMotivo[motivo]=(porMotivo[motivo]||0)+Math.abs(+m.cantidad||0);
     const categoria=m.rubro_demo||MERMAS_PRODUCTOS.get(String(m.producto_id))||'Sin categoría';
-    porTipo[categoria]=(porTipo[categoria]||0)+Math.abs(+m.cantidad||0);
+    const cantidad=Math.abs(+m.cantidad||0), nombre=m.producto||'Producto sin nombre';
+    porTipo[categoria]=(porTipo[categoria]||0)+cantidad;
+    productosPorTipo[categoria]??={};productosPorTipo[categoria][nombre]=(productosPorTipo[categoria][nombre]||0)+cantidad;
   });
   const topMotivo=Object.entries(porMotivo).sort((a,b)=>b[1]-a[1])[0];
-  const topTipo=Object.entries(porTipo).sort((a,b)=>b[1]-a[1])[0];
+  const topProducto=Object.entries(productosPorTipo).flatMap(([categoria,items])=>Object.entries(items).map(([nombre,cantidad])=>({categoria,nombre,cantidad})))
+    .sort((a,b)=>b.cantidad-a.cantidad||a.nombre.localeCompare(b.nombre,'es'))[0];
   $('mermas-kpis').innerHTML=[
     ['Unidades mermadas',fmt(total),'Unidades netas vigentes'],
-    ['Productos afectados',productos,'Productos distintos'],
+    ['Producto más mermado',topProducto?topProducto.nombre:'—',topProducto?`${fmt(topProducto.cantidad)} unidades · ${topProducto.categoria}`:'Sin datos'],
     ['Causa principal',topMotivo?(MOT_MERMA_TXT[topMotivo[0]]||topMotivo[0]):'—',topMotivo?fmt(topMotivo[1])+' unidades':'Sin datos'],
-    ['Categoría más afectada',topTipo?topTipo[0]:'—',topTipo?fmt(topTipo[1])+' unidades':'Sin datos'],
   ].map(([l,v,n])=>`<div class="mermas-kpi"><div class="mermas-kpi-label">${esc(l)}</div><div class="mermas-kpi-value">${esc(String(v))}</div><div class="mermas-kpi-note">${esc(n)}</div></div>`).join('');
   const cat=Object.entries(porTipo).sort((a,b)=>b[1]-a[1]);
   const max=Math.max(1,...cat.map(x=>x[1]));
-  const barras=cat.length?cat.map(([k,v])=>`<div class="mermas-bar-row"><span class="mermas-bar-label" title="${esc(k)}">${esc(k)}</span><div class="mermas-bar-track"><div class="mermas-bar-fill" style="width:${Math.max(2,v/max*100)}%"></div></div><span class="mermas-bar-value">${fmt(v)}</span></div>`).join(''):'<div class="empty">Sin datos para este período.</div>';
+  const barras=cat.length?cat.map(([k,v],i)=>`<div class="mermas-bar-row" tabindex="0" role="button" data-mermas-categoria="${esc(k)}" aria-label="${esc(k)}: ${fmt(v)} unidades. Ver productos más mermados" aria-pressed="${i===0}"><span class="mermas-bar-label" title="${esc(k)}">${esc(k)}</span><div class="mermas-bar-track"><div class="mermas-bar-fill" style="width:${Math.max(2,v/max*100)}%"></div></div><span class="mermas-bar-value">${fmt(v)}</span></div>`).join(''):'<div class="empty">Sin datos para este período.</div>';
   const mot=Object.entries(porMotivo).sort((a,b)=>b[1]-a[1]);let acc=0;
   const grad=mot.length?`conic-gradient(${mot.map(([k,v],i)=>{const a=acc;acc+=total?v/total*100:0;return `${MERMA_COLORES[i%MERMA_COLORES.length]} ${a}% ${acc}%`;}).join(',')})`:'var(--gray-bg)';
   const leyenda=mot.map(([k,v],i)=>`<div class="mermas-legend-row"><i class="mermas-dot" style="background:${MERMA_COLORES[i%MERMA_COLORES.length]}"></i><span class="mermas-legend-label">${esc(MOT_MERMA_TXT[k]||k)}</span><span class="mermas-legend-n">${fmt(v)}</span></div>`).join('')||'<span class="mermas-kpi-note">Sin datos</span>';
-  $('mermas-charts').innerHTML=`<section class="mermas-panel"><h2>Unidades por categoría</h2><div class="mermas-bars">${barras}</div></section>
+  const categoriaInicial=cat[0]?.[0];
+  const detalleInicial=categoriaInicial?crearDetalleCategoriaMermas(categoriaInicial,productosPorTipo):'<p class="mermas-category-hint">Sin datos para este período.</p>';
+  $('mermas-charts').innerHTML=`<section class="mermas-panel"><h2>Unidades por categoría</h2><p class="mermas-category-hint">Selecciona o apunta a una categoría para ver sus productos más mermados.</p><div class="mermas-bars" id="mermas-bars">${barras}</div><div class="mermas-category-detail" id="mermas-category-detail" aria-live="polite">${detalleInicial}</div></section>
     <section class="mermas-panel"><h2>Unidades por motivo</h2><div class="mermas-donut-wrap"><div class="mermas-donut" style="background:${grad}"><div class="mermas-donut-total">${fmt(total)}<small>unidades</small></div></div><div class="mermas-legend">${leyenda}</div></div></section>`;
+  $('mermas-bars').addEventListener('pointerover',actualizarDetalleCategoriaMermas);
+  $('mermas-bars').addEventListener('focusin',actualizarDetalleCategoriaMermas);
+  $('mermas-bars').addEventListener('click',actualizarDetalleCategoriaMermas);
+  $('mermas-bars').addEventListener('keydown',evento=>{
+    if(evento.key==='Enter'||evento.key===' '){evento.preventDefault();actualizarDetalleCategoriaMermas(evento);}
+  });
+  $('mermas-bars').dataset.productos=JSON.stringify(productosPorTipo);
+}
+
+function crearDetalleCategoriaMermas(categoria, productos){
+  const top=Object.entries(productos[categoria]||{}).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'es')).slice(0,3);
+  return `<h3>Top productos · ${esc(categoria)}</h3>${top.length?`<ol>${top.map(([nombre,cantidad])=>`<li>${esc(nombre)} <span>${fmt(cantidad)} un.</span></li>`).join('')}</ol>`:'<p class="mermas-category-hint">Sin productos en esta categoría.</p>'}`;
+}
+
+function actualizarDetalleCategoriaMermas(evento){
+  const fila=evento.target.closest('[data-mermas-categoria]');if(!fila)return;
+  const barras=evento.currentTarget,productos=JSON.parse(barras.dataset.productos||'{}');
+  barras.querySelectorAll('[data-mermas-categoria]').forEach(x=>{const activo=x===fila;x.classList.toggle('is-active',activo);x.setAttribute('aria-pressed',String(activo));});
+  $('mermas-category-detail').innerHTML=crearDetalleCategoriaMermas(fila.dataset.mermasCategoria,productos);
 }
 
 /* En Bodega mostramos el tipo actual solo como apoyo; la categoría no está

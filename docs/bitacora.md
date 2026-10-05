@@ -8,6 +8,18 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-10-05** — **Detalle interactivo en Mermas y registros para la demo.**
+  Las barras por categoría ahora responden a cursor, clic y teclado mostrando
+  el top 3 de productos de esa categoría. El KPI de productos afectados se
+  reemplazó por el producto más mermado; el anillo y leyenda quedan centrados.
+  El registro conserva una tarjeta de altura fija con scroll propio. Para la
+  presentación se registraron 57 mermas de 1 unidad en 57 productos centrales
+  activos con stock suficiente y sin lotes vigentes, mediante `mermar`; el
+  stock restante mínimo es 1. Son datos ficticios del laboratorio, no pérdidas
+  reales de Café del Desierto. No se llamó a Fudo ni se tocó otro proyecto.
+  Pruebas: `npm test`, `modo-demostracion.mjs` 31/31 con Chromium; vista
+  comprobada en escritorio y móvil. Aplica solo a Llamita Plus.
+
 - **2026-10-05** — **Analítica de Mermas para demostración.** La vista suma
   filtro por período, KPIs, barras por tipo, anillo por motivo, exportación
   filtrada y lectura sin tope de 500 (lotes de 1.000; tabla de 100 por página).
