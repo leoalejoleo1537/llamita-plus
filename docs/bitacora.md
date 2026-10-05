@@ -8,6 +8,16 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-10-05** — **Gráficas de Mermas sin scroll y causas completas.** El
+  gráfico por categoría distribuye las columnas dentro de la tarjeta y se adapta
+  en móvil sin desplazamiento horizontal propio. El gráfico de motivos ahora
+  siempre muestra Vencimiento, Daño, Pérdida y Otro, incluidos los motivos con
+  cero unidades, y reparte el alto disponible entre las barras. La opción visible
+  "Robo" se renombró a "Pérdida"; conserva internamente la clave `robo` porque
+  la RPC de registro la valida, sin alterar lógica ni registros existentes. Solo
+  Llamita Plus; no se tocaron datos de stock ni Supabase. Verificación: `npm test`
+  y Chromium `modo-demostracion.mjs`, 36/36, escritorio/móvil y sin errores JS.
+
 - **2026-10-05** — **Refinamiento visual del dashboard de Mermas.** Cuatro KPI
   compactos vuelven a resumir unidades, productos afectados, motivo y categoría.
   El logo del riel se oculta mientras se está en esta pantalla.

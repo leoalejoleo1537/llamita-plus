@@ -156,10 +156,24 @@ await caso('las barras de categoría también se pueden inspeccionar con teclado
   await page.keyboard.press('Escape');
   return abierto&&await page.locator('#mermas-tooltip.on').count()===0;
 });
-await caso('el ranking de motivos usa barras y porcentajes legibles',async()=>
+await caso('el ranking incluye vencimiento, daño, pérdida y otro en barras legibles',async()=>
   await page.evaluate(()=>{
     const rows=[...document.querySelectorAll('.mermas-motive-row')];
-    return rows.length>0&&rows.every(r=>r.querySelector('.mermas-motive-fill').getBoundingClientRect().width>0&&r.textContent.includes('%'));
+    const etiquetas=rows.map(r=>r.querySelector('.mermas-motive-name').textContent.trim());
+    return ['Vencimiento','Daño','Pérdida','Otro'].every(m=>etiquetas.includes(m))
+      &&rows.every(r=>r.querySelector('.mermas-motive-fill').getBoundingClientRect().width>=0&&r.textContent.includes('%'))
+      &&MOT_MERMA_TXT.robo==='Pérdida'&&!MOTIVOS_MERMA.some(([,nombre])=>nombre==='Robo');
+  }));
+await caso('gráfica por categoría no agrega desplazamiento horizontal',async()=>
+  await page.evaluate(()=>{
+    const chart=document.querySelector('.mermas-category-chart');
+    return chart.scrollWidth<=chart.clientWidth+1&&!['auto','scroll'].includes(getComputedStyle(chart).overflowX);
+  }));
+await caso('las barras de motivos aprovechan el alto de la tarjeta',async()=>
+  await page.evaluate(()=>{
+    const panel=document.querySelector('.mermas-motives').closest('.mermas-panel').getBoundingClientRect();
+    const rows=[...document.querySelectorAll('.mermas-motive-row')];
+    return rows.length===4&&rows.at(-1).getBoundingClientRect().bottom>=panel.bottom-30;
   }));
 await caso('el filtro temporal actualiza la tabla y vuelve al rango de 30 días',async()=>{
   const tabla='#mermas-list tbody tr';

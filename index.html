@@ -559,22 +559,22 @@
   .mermas-kpi-value{font-size:20px;font-weight:750;color:#382719;line-height:1.15;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .mermas-kpi-note{font-size:10px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .mermas-charts{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(290px,.9fr);gap:12px;margin-bottom:14px;align-items:stretch}
-  .mermas-panel{padding:14px 15px;min-width:0;position:relative}
+  .mermas-panel{padding:14px 15px;min-width:0;position:relative;display:flex;flex-direction:column}
   .mermas-panel h2{font-size:14px;color:#382719;margin:0 0 11px;font-weight:750}
   .mermas-chart-note{font-size:10px;color:var(--muted);margin:-5px 0 8px}
-  .mermas-category-chart{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(58px,1fr);align-items:end;gap:8px;
-    height:202px;padding:3px 1px 0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
-  .mermas-cat-column{height:100%;min-width:0;padding:0 2px;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer;
+  .mermas-category-chart{display:grid;grid-template-columns:repeat(auto-fit,minmax(58px,1fr));grid-auto-rows:202px;align-items:end;gap:8px;
+    min-width:0;padding:3px 1px 0;flex:1}
+  .mermas-cat-column{height:202px;min-width:0;padding:0 2px;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer;
     display:flex;flex-direction:column;align-items:stretch;justify-content:flex-end;gap:5px;border-radius:8px}
   .mermas-cat-column:hover .mermas-cat-bar,.mermas-cat-column:focus-visible .mermas-cat-bar,.mermas-cat-column.is-active .mermas-cat-bar{background:#684326}
   .mermas-cat-column:focus-visible{outline:2px solid rgba(151,94,48,.35);outline-offset:2px}
   .mermas-cat-value{font-size:10px;color:#5d5145;font-weight:700;text-align:center;line-height:1.1}
-  .mermas-cat-plot{height:158px;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid rgba(92,67,45,.16);position:relative}
+  .mermas-cat-plot{height:146px;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid rgba(92,67,45,.16);position:relative}
   .mermas-cat-plot:before,.mermas-cat-plot:after{content:"";position:absolute;left:0;right:0;border-top:1px dashed rgba(92,67,45,.10);pointer-events:none}
   .mermas-cat-plot:before{top:33%}.mermas-cat-plot:after{top:66%}
   .mermas-cat-bar{width:min(100%,46px);height:var(--bar-height);min-height:2px;border-radius:4px 4px 0 0;background:#c58c50;position:relative;z-index:1;transition:background .15s ease,height .2s ease}
-  .mermas-cat-label{font-size:10px;line-height:1.15;text-align:center;color:#5d5145;white-space:nowrap;min-height:23px}
-  .mermas-motives{display:grid;gap:12px;padding:8px 1px 2px}
+  .mermas-cat-label{font-size:10px;line-height:1.15;text-align:center;color:#5d5145;white-space:normal;overflow-wrap:anywhere;min-height:23px}
+  .mermas-motives{display:grid;grid-auto-rows:minmax(30px,1fr);align-content:stretch;gap:8px;padding:8px 1px 2px;flex:1}
   .mermas-motive-row{display:grid;grid-template-columns:minmax(78px,98px) minmax(45px,1fr) minmax(62px,82px);gap:9px;align-items:center;font-size:11px}
   .mermas-motive-name{text-align:right;color:#5d5145;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .mermas-motive-track{height:13px;border-radius:3px;background:#f0ece7;overflow:hidden}
@@ -602,7 +602,7 @@
   .mermas-reason{display:inline-block;padding:3px 7px;border-radius:999px;background:#f5eee4;color:#76502f;white-space:nowrap}
   .mermas-reason[data-motivo="vencimiento"]{background:#f8e7e3;color:#9a4938}
   .mermas-reason[data-motivo="daño"]{background:#f8eddc;color:#8a5b24}
-  .mermas-reason[data-motivo="robo"]{background:#ece8f2;color:#65527d}
+  .mermas-reason[data-motivo="robo"]{background:#e9edf0;color:#4f626d}
   .mermas-reason[data-motivo="devolución"]{background:#e8f0e5;color:#526f47}
   .mermas-undone{font-size:10px;color:var(--muted)}
   .mermas-table .rep-deshacer{border:0;background:transparent;color:#80552f;font:inherit;font-weight:700;cursor:pointer;padding:4px}
@@ -612,7 +612,7 @@
   @media(max-width:860px){.mermas-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.mermas-charts{grid-template-columns:1fr}}
   @media(max-width:520px){.mermas-head{align-items:flex-start}.mermas-controls{width:100%}.mermas-controls select{flex:1}
     .mermas-date{width:100%}.mermas-date input{flex:1;min-width:0}.mermas-kpi{padding:10px}.mermas-kpi-value{font-size:18px}
-    .mermas-panel{padding:12px}.mermas-category-chart{grid-auto-columns:minmax(68px,1fr);height:190px}.mermas-cat-plot{height:145px}
+    .mermas-panel{padding:12px}.mermas-category-chart{grid-template-columns:repeat(auto-fit,minmax(68px,1fr));grid-auto-rows:190px}.mermas-cat-column{height:190px}.mermas-cat-plot{height:145px}
     .mermas-motive-row{grid-template-columns:minmax(72px,90px) minmax(40px,1fr) 65px;gap:7px}}
 
   /* ---- ENLACES (solo Bodega) ----
@@ -5254,7 +5254,7 @@ $('critSedes').addEventListener('click', e=>{
    señal en el medio, quedaría stock bajado sin anotar. */
 /* MOTIVOS_MERMA y no MOTIVOS: ese nombre ya lo usa Recetas para los motivos
    de "no lleva receta". Son dos listas distintas que se llaman parecido. */
-const MOTIVOS_MERMA = [['daño','Daño'],['robo','Robo'],['vencimiento','Vencimiento'],['otro','Otro']];
+const MOTIVOS_MERMA = [['vencimiento','Vencimiento'],['daño','Daño'],['robo','Pérdida'],['otro','Otro']];
 
 /* Cuánto se puede mermar de un producto: si tiene fechas, la suma de las
    fechas; si no, su stock. Nunca más que eso (regla 0.2). */
@@ -5557,12 +5557,15 @@ function pintarAnaliticaMermas(rows){
     return '<button type="button" class="mermas-cat-column" data-mermas-categoria="'+esc(categoria)+'" aria-label="'+esc(categoria)+': '+fmt(d.unidades)+' unidades. Mostrar detalle" aria-describedby="mermas-tooltip">'
       +'<span class="mermas-cat-value">'+fmt(d.unidades)+'</span><span class="mermas-cat-plot"><i class="mermas-cat-bar" style="--bar-height:'+px+'px"></i></span><span class="mermas-cat-label">'+esc(categoria)+'</span></button>';
   }).join(''):'<div class="empty">Sin datos para este período.</div>';
-  const motivos=Object.entries(porMotivo).sort((a,b)=>b[1]-a[1]);
+  const codigosMotivo=MOTIVOS_MERMA.map(([codigo])=>codigo);
+  const motivos=[...codigosMotivo,...Object.keys(porMotivo).filter(codigo=>!codigosMotivo.includes(codigo))]
+    .map(codigo=>[codigo,porMotivo[codigo]||0]);
   const maxMotivo=Math.max(1,...motivos.map(([,v])=>v));
-  const barrasMotivo=motivos.length?motivos.map(([motivo,unidades])=>{
+  const barrasMotivo=motivos.map(([motivo,unidades])=>{
     const pct=total?Math.round(unidades/total*100):0;
-    return '<div class="mermas-motive-row"><span class="mermas-motive-name">'+esc(MOT_MERMA_TXT[motivo]||motivo)+'</span><div class="mermas-motive-track"><div class="mermas-motive-fill" style="width:'+Math.max(2,unidades/maxMotivo*100)+'%"></div></div><span class="mermas-motive-value"><strong>'+fmt(unidades)+'</strong> · '+pct+'%</span></div>';
-  }).join(''):'<div class="empty">Sin datos para este período.</div>';
+    const ancho=unidades?Math.max(2,unidades/maxMotivo*100):0;
+    return '<div class="mermas-motive-row"><span class="mermas-motive-name">'+esc(MOT_MERMA_TXT[motivo]||motivo)+'</span><div class="mermas-motive-track"><div class="mermas-motive-fill" style="width:'+ancho+'%"></div></div><span class="mermas-motive-value"><strong>'+fmt(unidades)+'</strong> · '+pct+'%</span></div>';
+  }).join('');
   $('mermas-charts').innerHTML='<section class="mermas-panel"><h2>Mermas por categoría</h2><p class="mermas-chart-note">Unidades en el período · pasa sobre una barra para ver el detalle</p><div class="mermas-category-chart" id="mermas-category-chart" role="group" aria-label="Unidades mermadas por categoría">'+barras+'</div></section>'
     +'<section class="mermas-panel"><h2>Motivos de merma</h2><p class="mermas-chart-note">Participación sobre las unidades mermadas</p><div class="mermas-motives">'+barrasMotivo+'</div></section>'
     +'<div class="mermas-tooltip" id="mermas-tooltip" role="tooltip" aria-hidden="true"></div>';
