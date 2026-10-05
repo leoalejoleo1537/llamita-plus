@@ -106,6 +106,7 @@ await page.addInitScript(({PUSH, ENVIOS, ENV_ITEMS}) => {
   };
 }, {PUSH, ENVIOS, ENV_ITEMS});
 await page.route('**/supabase-js*', r=>r.fulfill({status:200,contentType:'application/javascript',body:''}));
+await page.route('**/xlsx.full.min.js*', r=>r.fulfill({status:200,contentType:'application/javascript',body:'/* usa el XLSX simulado de esta prueba */'}));
 const errores = [];
 page.on('pageerror', e=>errores.push(String(e)));
 await page.goto(pathToFileURL(join(raiz,'index.html')).href);

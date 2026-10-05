@@ -14,7 +14,7 @@ vista pasa por `pickTab`: un intento de abrir una vista oculta vuelve a
 Inventario. Esta es una preferencia de presentación; `app_permisos` y las
 políticas de la base no cambian. Apagado, se recupera la navegación anterior.
 
-## Mermas: diagnóstico para reportes futuros
+## Mermas: analítica e historial
 
 La aplicación registra mermas con `mermar(...)` en `public.movimientos`, con
 `tipo='merma'` y `cantidad` negativa. La ficha de producto ofrece el gesto de
@@ -27,8 +27,8 @@ Según el DDL del repositorio, cada movimiento tiene `id`, `sede`,
 migración de mermas agrega `nota`, `detalle` JSONB (lotes y fechas),
 `deshecha_at` y `deshecha_por`. La causa se guarda en `motivo` con las opciones
 `daño`, `robo`, `vencimiento` y `otro`; para «otro» se guarda texto en `nota`.
-La categoría **no se guarda** en el movimiento: se puede consultar el `rubro`
-actual del producto por `producto_id`, pero no reconstruir con seguridad su
+La categoría **no se guarda** en el movimiento: la pantalla consulta el `tipo`
+actual del producto por `producto_id`, pero no reconstruye con seguridad su
 categoría histórica. El turno tampoco se guarda; `created_at` permite agrupar
 por hora local si se define formalmente el horario de cada turno. El usuario
 queda como texto en `quien`, no como ID estable de Auth.
@@ -39,7 +39,27 @@ reporte futuro habría que decidir y guardar el costo unitario aplicado en
 cada merma, la moneda, la categoría histórica, el turno o sus límites por
 sede y un identificador estable del usuario. También habría que definir el
 tratamiento de mermas deshechas y el costo de productos con varios lotes.
-Nada de eso se agrega con este modo.
+Nada de eso se agrega con este modo. Los gráficos muestran unidades y no dinero.
 
-Este diagnóstico describe el código y el DDL versionados; no comprueba el
-esquema ni los datos de la base en línea.
+La pantalla ofrece períodos de 7, 30 y 90 días, mes actual, rango personalizado
+y todo el historial. Usa `created_at` en hora local de Chile. Los registros se
+leen en páginas de 1.000 para evitar el límite silencioso de la API; la tabla
+visible muestra 100 registros por página. Los gráficos excluyen mermas
+deshechas y agregan por motivo y tipo actual.
+
+Cuando el período y la sede no tienen registros, la vista muestra una muestra
+local sintética —Torta Matilda, Sándwich Pollo Palta, Jugos, bollería, bebidas
+envasadas y pizza— con motivos verosímiles. Lleva una etiqueta visible de
+“Datos ficticios de demostración”, no se inserta en Supabase, no modifica stock
+y su exportación declara su origen. No se presenta como historial real. Cuando
+hay al menos una merma real para la sede y el filtro seleccionado, se oculta la
+muestra completa.
+
+La rutina de limpieza versionada conserva indefinidamente los movimientos con
+`tipo='merma'`; los demás movimientos mantienen la retención de 30 días. Esto
+protege el historial si esa rutina se instala más adelante. La interfaz ya no
+aplica el límite de 500 registros.
+
+El repositorio apunta exclusivamente al proyecto Supabase `llamita-plus`
+(`iuryhsjucblmebdogewa`). No se insertaron ni modificaron datos en la base para
+esta mejora.

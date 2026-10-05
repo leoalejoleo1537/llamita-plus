@@ -8,6 +8,16 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-10-05** — **Analítica de Mermas para demostración.** La vista suma
+  filtro por período, KPIs, barras por tipo, anillo por motivo, exportación
+  filtrada y lectura sin tope de 500 (lotes de 1.000; tabla de 100 por página).
+  Si no hay registros para la sede y período, presenta fixtures locales
+  explícitamente ficticios, sin insertar datos en Supabase ni alterar stock.
+  La limpieza automática preserva mermas indefinidamente. Se verificó que el
+  proyecto configurado es `llamita-plus`; no se modificó ninguna base. Pruebas:
+  `mermas.mjs` 9/9, salud de pantalla y `modo-demostracion.mjs` 27/27 con
+  Chromium local; escritorio y móvil sin desborde. Aplica solo a Llamita Plus.
+
 - **2026-10-05** — **Un solo lenguaje visual para la navegación lateral**, sin
   duplicar el componente: el mismo `#drawer` conserva fondo, ancho útil,
   tipografía, padding y jerarquía al pasar del cajón temporal al rail fijado.

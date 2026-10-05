@@ -51,9 +51,13 @@ const PRODUCTOS = [
   {id:11, sede:'plaza', producto:'Cheesecake maracuyá', rubro:'Vitrina de tortas', stock_actual:8, stock_min:3, stock_max:10, activo:'SÍ'},
   {id:12, sede:'plaza', producto:'Azúcar morena',       rubro:'Mesones',    stock_actual:1, stock_min:3, stock_max:10, activo:'SÍ'},
 ];
+const fechaDemo = dias => {
+  const d=new Date(); d.setDate(d.getDate()+dias);
+  return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Santiago',year:'numeric',month:'2-digit',day:'2-digit'}).format(d);
+};
 const METAS = [{
   id:1, titulo:'Agua Bosqua', objetivo:100, premio:'Hotel y spa',
-  desde:'2026-08-01', hasta:'2026-08-31', cerrada_at:null, meta_productos:[],
+  desde:fechaDemo(-7), hasta:fechaDemo(7), cerrada_at:null, meta_productos:[],
 }];
 
 const page = await browser.newPage();
@@ -144,8 +148,8 @@ caso('el número de cada sede se lee (no es del color del fondo)', await page.ev
 console.log('\nY lo nuevo está donde tiene que estar:');
 caso('el botón dice Actualizar', await page.evaluate(() =>
   document.getElementById('btnActualizar').textContent.includes('Actualizar')) || 'no dice nada');
-caso('arriba se lee la SEDE, no "Inventario"', await page.evaluate(() =>
-  document.getElementById('topTitle').textContent.includes('Mall Plaza')) || 'sigue el título viejo');
+caso('arriba se lee la sede neutral, no el nombre anterior', await page.evaluate(() =>
+  document.getElementById('topTitle').textContent.includes('Local 1')) || 'sigue el título viejo');
 /* Las secciones arrancan CERRADAS —que es como se abre la app todos los
    días—, así que para mirar una fila primero hay que abrir una. Eso también
    comprueba que el acordeón sigue funcionando después del rediseño. */
@@ -210,7 +214,12 @@ console.log('\nDeslizar mueve la fila, no solo el símbolo:');
   await page.waitForTimeout(300);
 }
 
-caso('el carril de las pestañas se colocó', await page.evaluate(() => {
+/* En escritorio la navegación se aloja en el drawer y puede estar cerrada;
+   medirla en ese estado no es una prueba del carril visible. En móvil sí
+   está expuesta como pestañas horizontales, que es el uso que se verifica. */
+await page.setViewportSize({width:390,height:844});
+await page.waitForTimeout(100);
+caso('el carril de navegación móvil se midió', await page.evaluate(() => {
   const c = document.getElementById('tabCarril');
   return !!c && c.classList.contains('listo') && parseFloat(c.style.width) > 0;
 }) || 'el carril no se midió');

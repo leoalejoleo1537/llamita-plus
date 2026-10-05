@@ -34,7 +34,8 @@
 --   historial_auto   30 días · la foto automática. ES LA QUE MÁS CRECE:
 --                              dos por día por cada producto de cada sede,
 --                              o sea ~40.000 filas al mes
---   movimientos      30 días · mermas y entradas. El registro de Actividad
+--   movimientos      30 días · actividad y entradas. Las mermas se conservan
+--                              indefinidamente porque son el libro de pérdidas
 --   fudo_stock_push   2 días · contesta "¿alguien ya empujó hace un rato?",
 --                              y esa pregunta no mira más atrás que ayer
 --
@@ -97,7 +98,7 @@ select sede, fecha, row_number() over (partition by sede order by fecha desc) as
 select cron.unschedule(jobid) from cron.job where jobname = 'limpieza-diaria';
 
 select cron.schedule('limpieza-diaria', '30 3 * * *',
- 'with borra_hist as (delete from public.historial h using public.dias_de_historial d where d.sede = h.sede and d.fecha = h.fecha and d.puesto > 5 and h.fecha < (current_date - 30) returning 1), borra_auto as (delete from public.historial_auto a using public.dias_de_historial_auto d where d.sede = a.sede and d.fecha = a.fecha and d.puesto > 5 and a.fecha < (current_date - 30) returning 1), borra_mov as (delete from public.movimientos where created_at < (now() - interval ''30 days'') returning 1), borra_push as (delete from public.fudo_stock_push where created_at < (now() - interval ''2 days'') returning 1) insert into public.limpiezas (historial, auto, movimientos, empujes) select (select count(*) from borra_hist), (select count(*) from borra_auto), (select count(*) from borra_mov), (select count(*) from borra_push);'
+ 'with borra_hist as (delete from public.historial h using public.dias_de_historial d where d.sede = h.sede and d.fecha = h.fecha and d.puesto > 5 and h.fecha < (current_date - 30) returning 1), borra_auto as (delete from public.historial_auto a using public.dias_de_historial_auto d where d.sede = a.sede and d.fecha = a.fecha and d.puesto > 5 and a.fecha < (current_date - 30) returning 1), borra_mov as (delete from public.movimientos where tipo <> ''merma'' and created_at < (now() - interval ''30 days'') returning 1), borra_push as (delete from public.fudo_stock_push where created_at < (now() - interval ''2 days'') returning 1) insert into public.limpiezas (historial, auto, movimientos, empujes) select (select count(*) from borra_hist), (select count(*) from borra_auto), (select count(*) from borra_mov), (select count(*) from borra_push);'
 );
 
 
@@ -123,7 +124,7 @@ select 'el candado de las 5 fotos se puede leer',
 
 insert into public.migraciones_aplicadas (archivo, quien, como_se_supo, nota)
 values ('2026-08-limpieza-automatica.sql', 'Jhon', 'lo corrió Jhon',
-        'Limpieza diaria 03:30 — historial, historial_auto y movimientos a 30 días; empujes a Fudo a 2. Nunca deja una sede con menos de 5 fotos')
+        'Limpieza diaria 03:30 — historial, historial_auto y movimientos no merma a 30 días; conserva mermas indefinidamente; empujes a Fudo a 2. Nunca deja una sede con menos de 5 fotos')
 on conflict (archivo) do update set aplicado_at = now(), nota = excluded.nota;
 
 

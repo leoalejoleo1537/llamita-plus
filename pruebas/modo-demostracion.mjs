@@ -31,8 +31,8 @@ await page.addInitScript(() => {
       eq(c,v){filas=filas.filter(f=>String(f[c])===String(v));return api;},
       neq(c,v){filas=filas.filter(f=>String(f[c])!==String(v));return api;},
       in(c,vs){filas=filas.filter(f=>vs.map(String).includes(String(f[c])));return api;},
-      order(){return api;}, limit(){return api;}, gte(){return api;},
-      lte(){return api;}, is(){return api;}, not(){return api;},
+      order(){return api;}, limit(){return api;}, range(){return api;}, gte(){return api;},
+      lte(){return api;}, lt(){return api;}, is(){return api;}, not(){return api;},
       or(){return api;}, ilike(){return api;},
       maybeSingle(){return Promise.resolve({data:filas[0] || null,error:null});},
       single(){return Promise.resolve({data:filas[0] || null,error:null});},
@@ -122,6 +122,26 @@ await page.waitForFunction(() => SEDE==='central' && AJUSTES_VAL !== null);
 await caso('en Bodega se ven Recibir, Enviar y Mermas', async()=>
   await page.isVisible('#tabRecepcion') && await page.isVisible('#tabEnvios')
     && await page.isVisible('#tabMermas'));
+await page.evaluate(()=>pickTab('mermas'));
+await page.waitForFunction(()=>document.querySelector('#mermas-demo-badge')?.classList.contains('on'));
+await caso('Mermas ofrece KPIs, filtro y gráficos con etiqueta ficticia',async()=>
+  await page.isVisible('#mermas-kpis .mermas-kpi')
+    && await page.isVisible('#mermas-periodo')
+    && await page.isVisible('#mermas-charts .mermas-donut')
+    && (await page.textContent('#mermas-demo-badge')).includes('ficticios'));
+await caso('muestra productos, categorías y motivos realistas',async()=>
+  (await page.textContent('#mermas-charts')).includes('Tortas')
+    && (await page.textContent('#mermas-charts')).includes('Vencimiento')
+    && (await page.textContent('#mermas-list')).includes('Sándwich Pollo Palta'));
+await page.waitForTimeout(5000);
+await page.screenshot({path:'/tmp/llamita-mermas-escritorio.png',fullPage:true});
+await page.setViewportSize({width:390,height:844});
+await page.screenshot({path:'/tmp/llamita-mermas-movil.png',fullPage:true});
+await caso('Mermas móvil no desborda el ancho de pantalla',async()=>
+  await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+1));
+await page.setViewportSize({width:1360,height:900});
+await caso('los fixtures no escriben datos en Supabase',async()=>
+  await page.evaluate(()=>__writes.every(w=>w.tabla==='ajustes')));
 await page.evaluate(()=>pickTab('reparto'));
 await caso('Bodega redirige un reparto local que no le corresponde', ()=>page.isVisible('#view-inv'));
 await page.evaluate(()=>pickSede('angamos'));
