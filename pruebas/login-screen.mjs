@@ -14,6 +14,7 @@
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { readFileSync } from 'node:fs';
+import jsQR from 'jsqr';
 import { abrirNavegador } from './navegador.mjs';
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -27,6 +28,8 @@ async function montar(){
   await page.addInitScript(() => {
     window.__reset = null;
     window.__cerrada = false;
+    window.__clipboardText = null;
+    Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async text=>{window.__clipboardText=text;}}});
     window.supabase = { createClient: () => ({
       from(){ const a={select:()=>a,eq:()=>a,order:()=>a,limit:()=>a,in:()=>a,is:()=>a,not:()=>a,
         or:()=>a,ilike:()=>a,gte:()=>a,lte:()=>a,neq:()=>a,
@@ -81,6 +84,42 @@ await caso('los tres campos y el botón están', async () => {
 await caso('nada se sale del ancho de la pantalla', async () =>
   (await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1))
   || 'hay scroll horizontal');
+await caso('el QR del teléfono abre solo la URL canónica y se puede copiar',async()=>{
+  await page.click('#login-qr-open');
+  await page.waitForSelector('#login-qr-overlay.open');
+  await page.screenshot({path:'/tmp/llamita-login-qr-movil.png'});
+  const decodificado=await page.evaluate(async()=>{
+    const svg=document.querySelector('#login-qr-code svg');
+    if(!svg)return null;
+    const texto=new XMLSerializer().serializeToString(svg),blob=new Blob([texto],{type:'image/svg+xml'});
+    const url=URL.createObjectURL(blob),img=new Image();img.src=url;await img.decode();
+    const canvas=document.createElement('canvas');canvas.width=420;canvas.height=420;
+    const contexto=canvas.getContext('2d',{willReadFrequently:true});contexto.drawImage(img,0,0,420,420);
+    URL.revokeObjectURL(url);
+    const imagen=contexto.getImageData(0,0,420,420);
+    return Array.from(imagen.data);
+  });
+  const contenido=decodificado&&jsQR(Uint8ClampedArray.from(decodificado),420,420);
+  await page.click('#login-qr-copy');
+  await page.waitForFunction(()=>document.querySelector('#login-qr-feedback')?.textContent==='Enlace copiado');
+  const valores=await page.evaluate(()=>({copiado:window.__clipboardText,url:document.querySelector('#login-qr-url').textContent,
+    instruccion:document.querySelector('#login-qr-instruction').textContent,ancho:document.querySelector('#login-qr-dialog')?.getBoundingClientRect().width,
+    abierto:document.querySelector('#login-qr-overlay').classList.contains('open'),viewport:innerWidth}));
+  return contenido?.data==='https://llamita-plus.vercel.app/'&&valores.copiado===contenido.data
+    &&valores.url===contenido.data&&!/[?#](token|access_token|code|session)/i.test(contenido.data)
+    &&valores.instruccion==='Escanea este código con la cámara de tu teléfono para abrir Llamita Plus.'
+    &&valores.abierto&&valores.ancho<=valores.viewport;
+});
+await caso('en móvil el QR se cierra al tocar fuera y restaura el foco',async()=>{
+  await page.mouse.click(4,4);
+  return !(await page.locator('#login-qr-overlay.open').count())
+    &&await page.evaluate(()=>document.activeElement.id==='login-qr-open');
+});
+await caso('el botón cerrar también cierra el panel QR',async()=>{
+  await page.click('#login-qr-open');await page.click('#login-qr-close');
+  return !(await page.locator('#login-qr-overlay.open').count())
+    &&await page.evaluate(()=>document.activeElement.id==='login-qr-open');
+});
 
 console.log('\nEN EL COMPUTADOR · se mantiene la misma tarjeta centrada:');
 await page.setViewportSize({width:1440, height:900});
@@ -93,6 +132,18 @@ await caso('la tarjeta no se estira en escritorio', async () =>
   || 'la tarjeta se estiró a dos columnas');
 await caso('"Bienvenido" está, que en el teléfono no hace falta', async () =>
   ((await page.textContent('.login-h1')) || '').includes('Bienvenido') || 'no dice Bienvenido');
+await caso('en escritorio el panel QR abre y Escape lo cierra',async()=>{
+  await page.click('#login-qr-open');
+  const ancho=await page.locator('#login-qr-dialog').evaluate(e=>e.getBoundingClientRect().width);
+  await page.screenshot({path:'/tmp/llamita-login-qr-escritorio.png'});
+  await page.keyboard.press('Shift+Tab');
+  const ciclo=await page.evaluate(()=>document.activeElement.id==='login-qr-copy');
+  await page.keyboard.press('Tab');
+  const vuelve=await page.evaluate(()=>document.activeElement.id==='login-qr-close');
+  await page.keyboard.press('Escape');
+  return ciclo&&vuelve&&ancho<=360&&!(await page.locator('#login-qr-overlay.open').count())
+    &&await page.evaluate(()=>document.activeElement.id==='login-qr-open');
+});
 await caso('el logo del teléfono no se duplica acá', async () =>
   !(await page.locator('#login-gate img').count()) || 'hay una imagen de marca');
 

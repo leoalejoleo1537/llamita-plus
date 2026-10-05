@@ -8,6 +8,17 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-10-05** — **Acceso al login desde teléfono por QR.** En la pantalla
+  de inicio se añadió el control secundario “Abrir en mi teléfono” con un panel
+  compacto, QR local y botón para copiar con confirmación breve. Vercel verificó
+  como dominio activo de producción `llamita-plus.vercel.app`; el QR codifica
+  únicamente `https://llamita-plus.vercel.app/`, la página normal de login.
+  No incluye datos de sesión ni parámetros, y no cambia autenticación. Se añadió
+  `qrcode-generator` (MIT, archivo local) para no enviar la URL a un tercero y
+  `jsqr` como herramienta de prueba para decodificar la imagen. Solo Llamita Plus.
+  Chromium: `login-screen.mjs` 26/26, escritorio/móvil, copiar/cerrar/decodificar
+  y consola limpia.
+
 - **2026-10-05** — **Gráficas de Mermas sin scroll y causas completas.** El
   gráfico por categoría distribuye las columnas dentro de la tarjeta y se adapta
   en móvil sin desplazamiento horizontal propio. El gráfico de motivos ahora

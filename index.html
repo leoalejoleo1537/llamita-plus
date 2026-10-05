@@ -27,6 +27,8 @@
      EL NAVEGADOR para comprobar que sirve la librería, y recién entonces subir. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.111.0"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="vendor/qrcode-generator/qrcode.js"></script>
+<script src="vendor/qrcode-generator/qrcode_UTF8.js"></script>
 <style>
   /* ══════════ PALETA "ACERO" (Jhon, 2026-08-20) ══════════
      Elegida entre cinco celestes, con este argumento: es la que más contraste
@@ -145,6 +147,30 @@
   .login-olvide{background:none;border:none;color:var(--muted);font-size:12.5px;
     text-decoration:underline;cursor:pointer;padding:0;font-family:inherit}
   .login-olvide:hover{color:var(--orange)}
+  .login-qr-trigger{display:flex;align-items:center;justify-content:center;gap:7px;margin:20px auto 0;padding:5px 7px;
+    border:0;background:transparent;color:var(--muted);font:inherit;font-size:12.5px;cursor:pointer}
+  .login-qr-trigger:hover{color:var(--text)}
+  .login-qr-trigger svg{width:16px;height:16px}
+  .login-qr-trigger:active,.login-qr-copy:active,.login-qr-close:active{transform:scale(.97)}
+  .overlay.login-qr-overlay{z-index:120}
+  .login-qr-dialog{position:relative;width:min(100%,360px);max-height:calc(100vh - 32px);overflow:auto;padding:25px 24px 22px;
+    border-radius:16px;background:#fff;box-shadow:0 18px 48px rgba(15,30,49,.2);text-align:center}
+  .login-qr-close{position:absolute;top:10px;right:10px;width:34px;height:34px;display:grid;place-items:center;
+    border:0;border-radius:999px;background:transparent;color:var(--muted);font-size:22px;cursor:pointer}
+  .login-qr-close:hover{background:var(--bg);color:var(--text)}
+  .login-qr-title{margin:2px 35px 5px;font-size:18px;color:var(--text)}
+  .login-qr-instruction{margin:0 auto 16px;max-width:275px;color:var(--muted);font-size:12.5px;line-height:1.45}
+  .login-qr-code{display:flex;align-items:center;justify-content:center;width:252px;height:252px;max-width:100%;margin:0 auto 13px;
+    border-radius:10px;background:#fff}
+  .login-qr-code svg{display:block;width:240px;height:240px;max-width:100%;max-height:100%;shape-rendering:crispEdges}
+  .login-qr-url{margin:0 0 13px;color:var(--muted);font-size:11px;overflow-wrap:anywhere}
+  .login-qr-copy{width:100%;height:42px;border:1px solid var(--border);border-radius:10px;background:#fff;color:var(--text);
+    font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+  .login-qr-copy:hover{background:#f7f9fc}
+  .login-qr-feedback{min-height:17px;margin:7px 0 0;color:var(--green-fg);font-size:11px}
+  .login-qr-feedback.error{color:var(--red-fg)}
+  @media(max-width:520px){.login-qr-dialog{padding:24px 20px 19px}.login-qr-code{width:236px;height:236px}.login-qr-code svg{width:224px;height:224px}}
+  @media(prefers-reduced-motion:reduce){.login-qr-trigger,.login-qr-copy,.login-qr-close{transition:none}}
 
   @media (min-width:900px){
     .login-card{max-width:460px;border-radius:26px}
@@ -3041,9 +3067,24 @@
         </label>
         <button type="button" class="login-olvide" id="login-olvide">¿Olvidaste tu contraseña?</button>
       </div>
+      <button type="button" class="login-qr-trigger" id="login-qr-open" aria-haspopup="dialog" aria-controls="login-qr-overlay">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6.5" y="2.8" width="11" height="18.4" rx="2.1"></rect><path d="M10 18h4"></path></svg>
+        <span>Abrir en mi teléfono</span>
+      </button>
       <div class="gate-foot">¿Sin cuenta? Pídesela al administrador</div>
     </div>
   </div>
+</div>
+<div class="overlay login-qr-overlay" id="login-qr-overlay" aria-hidden="true">
+  <section class="login-qr-dialog" id="login-qr-dialog" role="dialog" aria-modal="true" aria-labelledby="login-qr-title" aria-describedby="login-qr-instruction" tabindex="-1">
+    <button type="button" class="login-qr-close" id="login-qr-close" aria-label="Cerrar">&times;</button>
+    <h2 class="login-qr-title" id="login-qr-title">Abrir Llamita Plus</h2>
+    <p class="login-qr-instruction" id="login-qr-instruction">Escanea este código con la cámara de tu teléfono para abrir Llamita Plus.</p>
+    <div class="login-qr-code" id="login-qr-code" role="img" aria-label="Código QR para abrir Llamita Plus"></div>
+    <p class="login-qr-url" id="login-qr-url"></p>
+    <button type="button" class="login-qr-copy" id="login-qr-copy">Copiar enlace</button>
+    <p class="login-qr-feedback" id="login-qr-feedback" role="status" aria-live="polite"></p>
+  </section>
 </div>
 
 <!-- ================= SELECTOR DE SEDE (tras iniciar sesión) ================= -->
@@ -4862,6 +4903,55 @@ document.querySelectorAll('.gate-btn').forEach(b=>b.addEventListener('click',()=
 
 /* ---------------- inicio de sesión + quién está en línea ---------------- */
 let USER=null, NOMBRE=null, presChannel=null;
+
+/* El QR siempre abre la URL canónica pública, sin credenciales ni parámetros.
+   Es la misma página de login que se abre al entrar normalmente. */
+const LLAMITA_URL_PUBLICA='https://llamita-plus.vercel.app/';
+let loginQrCopiadoTimer=null;
+function abrirQrLogin(){
+  const panel=$('login-qr-overlay'),codigo=$('login-qr-code');
+  $('login-qr-url').textContent=LLAMITA_URL_PUBLICA;
+  $('login-qr-feedback').textContent='';$('login-qr-feedback').classList.remove('error');
+  if(window.qrcode){
+    const qr=qrcode(0,'M');qr.addData(LLAMITA_URL_PUBLICA,'Byte');qr.make();
+    codigo.innerHTML=qr.createSvgTag({cellSize:7,margin:4,scalable:true});
+  } else codigo.textContent='No se pudo cargar el código QR. Puedes copiar el enlace.';
+  panel.classList.add('open');panel.setAttribute('aria-hidden','false');
+  $('login-qr-close').focus();
+}
+function cerrarQrLogin(){
+  const panel=$('login-qr-overlay');
+  if(!panel.classList.contains('open'))return;
+  panel.classList.remove('open');panel.setAttribute('aria-hidden','true');
+  $('login-qr-open').focus();
+}
+$('login-qr-open').addEventListener('click',abrirQrLogin);
+$('login-qr-close').addEventListener('click',cerrarQrLogin);
+$('login-qr-overlay').addEventListener('click',e=>{if(e.target===$('login-qr-overlay'))cerrarQrLogin();});
+document.addEventListener('keydown',e=>{
+  const panel=$('login-qr-overlay');if(!panel.classList.contains('open'))return;
+  if(e.key==='Escape'){cerrarQrLogin();return;}
+  if(e.key==='Tab'){
+    const botones=[$('login-qr-close'),$('login-qr-copy')],primero=botones[0],ultimo=botones[botones.length-1];
+    if(e.shiftKey&&document.activeElement===primero){e.preventDefault();ultimo.focus();}
+    else if(!e.shiftKey&&document.activeElement===ultimo){e.preventDefault();primero.focus();}
+  }
+});
+$('login-qr-copy').addEventListener('click',async()=>{
+  const feedback=$('login-qr-feedback');let copiado=false;
+  try{
+    if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(LLAMITA_URL_PUBLICA);copiado=true;}
+  }catch{}
+  if(!copiado){
+    const campo=document.createElement('textarea');campo.value=LLAMITA_URL_PUBLICA;campo.setAttribute('readonly','');
+    campo.style.cssText='position:fixed;left:-9999px;top:0';document.body.appendChild(campo);campo.select();
+    try{copiado=document.execCommand('copy');}catch{}campo.remove();
+  }
+  feedback.classList.toggle('error',!copiado);
+  feedback.textContent=copiado?'Enlace copiado':'No se pudo copiar el enlace';
+  clearTimeout(loginQrCopiadoTimer);
+  if(copiado)loginQrCopiadoTimer=setTimeout(()=>{feedback.textContent='';},2200);
+});
 
 async function doLogin(){
   const email=$('login-email').value.trim(), pass=$('login-pass').value;
