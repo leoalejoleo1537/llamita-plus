@@ -13,7 +13,8 @@
    Acá se busca el ejecutable de verdad, y si no aparece se dice y la prueba
    se salta en vez de fallar por algo que no es del código.                  */
 import { existsSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 export function rutaChrome(){
   if (process.env.CHROME_PATH && existsSync(process.env.CHROME_PATH)) return process.env.CHROME_PATH;
@@ -40,7 +41,27 @@ export async function abrirNavegador(){
   catch { return null; }
   const exe = rutaChrome();
   if (!exe) return null;
-  return chromium.launch({ executablePath: exe, args: ['--no-sandbox'] });
+  const browser = await chromium.launch({ executablePath: exe, args: ['--no-sandbox'] });
+  /* Algunos Chromium administrados bloquean file://. El servidor local sirve
+     los mismos archivos sin alterar los escenarios ni sus mocks de Supabase. */
+  if (process.env.PRUEBAS_HTTP_BASE) {
+    const newPage = browser.newPage.bind(browser);
+    const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
+    browser.newPage = async (...args) => {
+      const page = await newPage(...args);
+      const goto = page.goto.bind(page);
+      page.goto = (url, options) => {
+        if (typeof url === 'string' && url.startsWith('file:')) {
+          const ruta = relative(raiz, fileURLToPath(url));
+          if (ruta.startsWith('..')) throw new Error('La prueba salió del repositorio');
+          url = new URL(ruta.replaceAll('\\', '/'), process.env.PRUEBAS_HTTP_BASE + '/').href;
+        }
+        return goto(url, options);
+      };
+      return page;
+    };
+  }
+  return browser;
 }
 
 /* ABRIR EL MENÚ, desde donde esté.

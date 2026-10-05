@@ -2709,6 +2709,21 @@
      todo el ancho que se gana se lo lleva el contenido. Es lo mismo que ya
      hace `#view-lama`. */
   #view-ajustes{max-width:none;padding-left:18px;padding-right:18px}
+  body.demo-activo .tab[data-tab="lama"],
+  body.demo-activo .tab[data-tab="arqueo"],
+  body.demo-activo .tab[data-tab="movcaja"],
+  body.demo-activo .tab[data-tab="recetas"],
+  body.demo-activo .tab[data-tab="enlaces"],
+  body.demo-activo #btnActualizar,
+  body.demo-activo #drActualizar,
+  body.demo-activo #btnTareas,
+  body.demo-activo #motorAviso,
+  body.demo-activo #metaPortada,
+  body.demo-activo #btnNuevo,
+  body.demo-activo #m-fudo,
+  body.demo-activo #adm-nuevo,
+  body.demo-activo [data-ajir="recetas"],
+  body.demo-activo [data-ajir="enlaces"]{display:none!important}
   .aj{display:flex;gap:16px;align-items:flex-start}
   .aj-rail{width:232px;flex-shrink:0;background:#fff;border-radius:14px;padding:8px;
     box-shadow:0 1px 3px rgba(15,30,49,.06);position:sticky;top:8px}
@@ -4313,9 +4328,9 @@ function aplicarPermisos(){
      corre al final de pickSede—, y si se decidiera allá la pestaña no
      aparecería hasta cambiar de sede. */
   const tl = $('tabLama');
-  const hayLama = !!(PERMISOS.puede_lama && SEDE && SEDE !== 'central');
+  const hayLama = !!(PERMISOS.puede_lama && SEDE && SEDE !== 'central' && !modoDemo());
   if(tl) tl.style.display = hayLama ? '' : 'none';
-  if(!PERMISOS.puede_lama && vistaActual === 'lama') pickTab('inv');
+  if(!hayLama && vistaActual === 'lama') pickTab('inv');
   /* Arqueo y Movimientos de caja son del mismo permiso que Mesas — cuadrar
      la caja no es un trabajo aparte de vender, así que no se inventa un
      candado nuevo (§0.8: un permiso se justifica por lo que decide, y acá
@@ -4331,7 +4346,7 @@ function aplicarPermisos(){
      inventario, sin haber tocado nada—: si ya se movió a otra pestaña
      mientras llegaban los permisos, mandarlo a Mesas sería quitarle la
      pantalla de las manos. */
-  if(LAMA_ATERRIZAR){
+  if(LAMA_ATERRIZAR && AJUSTES_VAL !== null){
     LAMA_ATERRIZAR = false;
     if(hayLama && vistaActual === 'inv') pickTab('lama');
   }
@@ -4340,6 +4355,7 @@ function aplicarPermisos(){
   if(!PERMISOS.puede_ajustes && vistaActual === 'ajustes') pickTab('inv');
   if(!PERMISOS.puede_editar) setModoEdicion(false);
   else recuperarModoEdicion();
+  aplicarNavegacionDemo();
 }
 
 /* EL MODO EDICIÓN SE RECUERDA, y esto cambia una decisión de julio.
@@ -4777,6 +4793,7 @@ function pickSede(s){
   $('view-aplaza').style.display='none';
   $('view-inv').style.display='block'; $('view-ajustes').style.display='none'; $('view-reparto').style.display='none'; $('view-hist').style.display='none'; $('view-recetas').style.display='none'; $('view-mermas').style.display='none'; $('view-enlaces').style.display='none'; $('view-repcentral').style.display='none'; $('view-lama').style.display='none';
   vistaActual='inv';
+  aplicarNavegacionDemo();
   barraPestanas(true);   // si se cambió de sede estando en Ajustes, estaba escondida
   listEl.innerHTML='';
   $('gate').classList.add('hidden');
@@ -13613,7 +13630,8 @@ const AJUSTES = [
 
 /* Las secciones que esta cuenta puede ver. Una sección sin `ver()` la ve
    todo el mundo, que es como se comportaban las nueve de antes. */
-const ajVisibles = () => AJUSTES.filter(a => !a.ver || a.ver());
+const DEMO_AJUSTES = new Set(['interruptores','productos','secciones','personas','respaldos']);
+const ajVisibles = () => AJUSTES.filter(a => (!modoDemo() || DEMO_AJUSTES.has(a.id)) && (!a.ver || a.ver()));
 
 /* ==================================================================
    AJUSTES · MESAS — la configuración del área de ventas
@@ -15529,8 +15547,28 @@ async function ajDeshacerFusion(id){
    fechas. Apagar eso no sería volver al estado anterior, sería quitar la
    red — y una red que se puede apagar por accidente no es una red.      */
 let AJUSTES_VAL = null;
+/* La sede vacía de public.ajustes significa alcance global. Mientras llega la
+   lectura se mantiene la navegación de inventario; después manda la base. */
+const DEMO_VISTAS = new Set(['inv','reparto','recepcion','envios','aplaza','hist','mermas','ajustes']);
+function modoDemo(){ return AJUSTES_VAL === null || !!ajVal('modo_demostracion', '', false); }
+function demoPermiteVista(tab){
+  if(!DEMO_VISTAS.has(tab)) return false;
+  if(tab==='reparto') return SEDE !== 'central';
+  if(tab==='recepcion' || tab==='envios') return SEDE === 'central';
+  if(tab==='aplaza') return SEDE === 'angamos';
+  if(tab==='ajustes') return !!PERMISOS.puede_ajustes;
+  return true;
+}
+function aplicarNavegacionDemo(){
+  document.body.classList.toggle('demo-activo', modoDemo());
+  $('tabInv').textContent = modoDemo() ? 'Inicio · Inventario' : 'Inventario';
+  if(SEDE && modoDemo() && !demoPermiteVista(vistaActual)) pickTab('inv');
+}
 
 const INTERRUPTORES = [
+  { clave:'modo_demostracion', porSede:[''], defecto:false,
+    tit:'Modo demostración',
+    sub:'Oculta temporalmente ventas, caja y módulos operativos para mostrar el control de inventario.' },
   { clave:'ciclo_fudo', porSede:['plaza','angamos'], defecto:true,
     tit:'Empuje automático a Fudo',
     sub:'Cada 15 minutos lee las ventas y le manda el inventario entero. Apagado, queda el botón ⟳.' },
@@ -15573,7 +15611,7 @@ function ajVal(clave, sede, defecto){
 
 function ajInterruptoresHTML(){
   if(AJUSTES_VAL === null) return '<div class="aj-caja"><p>Cargando…</p></div>';
-  return INTERRUPTORES.map(i=>`<div class="aj-caja">
+  return INTERRUPTORES.filter(i=>!modoDemo() || i.clave==='modo_demostracion').map(i=>`<div class="aj-caja">
       <h3>${esc(i.tit)}</h3>
       <p class="aj-nota">${esc(i.sub)}</p>
       <div style="margin-top:10px">${i.porSede.map(sd=>{
@@ -15581,7 +15619,9 @@ function ajInterruptoresHTML(){
         return `<div class="aj-fila">
           <div class="nm"><b>${sd ? esc(SEDES[sd].label) : 'En toda la app'}</b>
             <span>${on ? 'encendido' : 'apagado'}</span></div>
-          <button type="button" class="aj-sw${on?' on':''}" data-ajint="${i.clave}" data-sd="${sd}"></button>
+          <button type="button" class="aj-sw${on?' on':''}" role="switch" aria-checked="${on}"
+            aria-label="${esc(i.tit)}${sd ? ' · '+esc(SEDES[sd].label) : ''}"
+            data-ajint="${i.clave}" data-sd="${sd}"></button>
         </div>`;
       }).join('')}</div>
     </div>`).join('')
@@ -15619,6 +15659,7 @@ function aplicarInterruptores(){
   if(fila) fila.style.display = verEnl ? '' : 'none';
   if(!verEnl && vistaActual === 'recetas') modoRecetas('combos');
   if(!ajVal('aviso_motor','',true)) $('motorAviso').classList.remove('ver');
+  aplicarPermisos();
   /* Las dos de abajo ENCIENDEN y APAGAN, no solo apagan: cada una es la
      única dueña de lo suyo y se vuelve a preguntar el valor entero. */
   if(SEDE) cargarTareas();
@@ -16445,6 +16486,7 @@ function barraPestanas(ver){
 
 function pickTab(tab){
   if(!SEDE)return;
+  if(modoDemo() && !demoPermiteVista(tab)) tab='inv';
   /* En Bodega "Reparto" ya no existe como pestaña: son dos. Si algo llama
      con el nombre viejo, se manda a la de recibir en vez de dejar la
      pantalla en blanco. */

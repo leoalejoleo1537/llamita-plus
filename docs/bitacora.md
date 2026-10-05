@@ -8,6 +8,13 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-10-04** — Modo demostración global en Ajustes: concentra la
+  navegación en inventario, movimientos, mermas e historial y aparta ventas,
+  caja y módulos experimentales. Usa la tabla `ajustes` existente; no cambia
+  permisos ni datos operativos. El diagnóstico de mermas y los límites de sus
+  reportes futuros quedan en `docs/modo-demostracion.md`. Aplica solo a
+  Llamita Plus.
+
 - **2026-09-23** — Jhon corrió `sql/2026-09-lama-arqueo-eliminar.sql` y
   `sql/2026-09-lama-arqueo-horario.sql`, los dos sanos (1 firma en
   `arqueo_eliminar`, `arqueo_abrir` y `arqueo_cerrar`; 0 arqueos sin hora
