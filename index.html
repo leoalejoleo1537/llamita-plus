@@ -448,6 +448,7 @@
     body.pc-ancho .riel-marca{display:flex;align-items:center;gap:9px;
       padding:2px 6px 16px;font-size:15px;font-weight:800;letter-spacing:-.01em;
       color:var(--navy)}
+    body.pc-ancho.vista-mermas .riel-marca{display:none}
     body.pc-ancho .riel-marca img{width:26px;height:26px;border-radius:8px;display:block}
     body.pc-ancho .tab{text-align:left;padding:10px 15px;font-size:14px;
       box-shadow:none;background:transparent}
@@ -537,64 +538,82 @@
           text-decoration:none;margin-top:2px}
   .cs-hay .rep-deshacer{display:block;margin-top:3px}
 
-  /* Analítica de mermas: tinta sobre tarjetas claras y filas ligeras. */
-  .mermas-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  /* Mermas: visual analítico ligero, con acento café y auditoría legible. */
+  .mermas-head{display:flex;align-items:flex-end;gap:12px;margin-bottom:16px;flex-wrap:wrap}
   .mermas-title{flex:1;min-width:190px}
-  .mermas-title h1{font-size:22px;line-height:1.15;margin:0;color:var(--navy);letter-spacing:-.02em}
-  .mermas-title p{font-size:12px;color:var(--muted);margin:4px 0 0}
+  .mermas-title h1{font-size:25px;line-height:1.1;margin:0;color:#382719;letter-spacing:-.025em}
+  .mermas-title p{font-size:12px;color:var(--muted);margin:5px 0 0}
   .mermas-controls{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-  .mermas-controls select,.mermas-controls input{font:inherit;font-size:13px;color:var(--text);background:var(--card);
-    border:1px solid var(--border);border-radius:11px;padding:8px 10px;min-height:38px}
+  .mermas-controls select,.mermas-controls input{font:inherit;font-size:12px;color:var(--text);background:var(--card);
+    border:1px solid rgba(92,67,45,.12);border-radius:10px;padding:7px 10px;min-height:36px}
   .mermas-date{display:none;gap:6px;align-items:center}
   .mermas-date.on{display:flex}
-  .mermas-demo{display:none;background:var(--amber-bg);color:var(--amber-fg);font-size:11px;font-weight:700;
-    padding:6px 9px;border-radius:999px;white-space:nowrap}
+  .mermas-demo{display:none;background:#f8ead7;color:#76502f;font-size:10px;font-weight:700;
+    padding:5px 8px;border-radius:999px;white-space:nowrap}
   .mermas-demo.on{display:inline-flex}
-  .mermas-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}
-  .mermas-kpi,.mermas-panel{background:var(--card);border-radius:var(--r-card);box-shadow:var(--sombra)}
-  .mermas-kpi{padding:14px 15px;min-width:0}
-  .mermas-kpi-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-  .mermas-kpi-value{font-size:23px;font-weight:800;color:var(--navy);line-height:1.15;margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .mermas-kpi-note{font-size:11px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .mermas-charts{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(270px,.8fr);gap:12px;margin-bottom:16px}
-  .mermas-panel{padding:16px;min-width:0}
-  .mermas-panel h2{font-size:14px;color:var(--navy);margin:0 0 12px}
-  .mermas-bars{display:flex;flex-direction:column;gap:10px}
-  .mermas-bar-row{display:grid;grid-template-columns:minmax(78px,125px) minmax(30px,1fr) 40px;gap:9px;align-items:center;font-size:12px;border-radius:8px;padding:3px 5px;margin:-3px -5px;cursor:pointer;transition:background .15s ease}
-  .mermas-bar-row:hover,.mermas-bar-row:focus-visible,.mermas-bar-row.is-active{background:var(--gray-bg);outline:none}
-  .mermas-bar-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);font-weight:600}
-  .mermas-bar-track{height:10px;background:var(--gray-bg);border-radius:99px;overflow:hidden}
-  .mermas-bar-fill{height:100%;background:#41628C;border-radius:inherit;min-width:2px}
-  .mermas-bar-value{text-align:right;color:var(--muted);font-weight:700}
-  .mermas-donut-wrap{display:flex;align-items:center;justify-content:center;gap:16px;min-height:168px;width:100%}
-  .mermas-donut{width:142px;height:142px;flex:0 0 142px;border-radius:50%;position:relative;background:var(--gray-bg)}
-  .mermas-donut::after{content:"";position:absolute;inset:27px;border-radius:50%;background:var(--card)}
-  .mermas-donut-total{position:absolute;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;
-    flex-direction:column;color:var(--navy);font-size:19px;font-weight:800}
-  .mermas-donut-total small{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-  .mermas-legend{display:grid;gap:7px;min-width:0}
-  .mermas-legend-row{display:flex;gap:7px;align-items:center;font-size:11px;color:var(--text)}
-  .mermas-dot{width:9px;height:9px;border-radius:50%;flex:0 0 9px}
-  .mermas-legend-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-  .mermas-legend-n{font-weight:700;color:var(--muted)}
-  .mermas-category-detail{margin-top:14px;padding:10px 12px;border-radius:11px;background:var(--gray-bg);min-height:90px}
-  .mermas-category-detail h3{font-size:12px;color:var(--navy);margin:0 0 7px}
-  .mermas-category-detail ol{margin:0;padding-left:20px;display:grid;gap:4px;font-size:11px;color:var(--text)}
-  .mermas-category-detail li span{color:var(--muted);font-weight:700}
-  .mermas-category-hint{font-size:11px;color:var(--muted);margin:0}
-  .mermas-table-title{display:flex;align-items:center;gap:10px;margin:0 2px 8px}
-  .mermas-table-title h2{font-size:15px;margin:0;color:var(--navy)}
-  .mermas-table-title span{font-size:11px;color:var(--muted);margin-left:auto}
-  #mermas-list.mermas-list-scroll{height:clamp(280px,48vh,480px);overflow-y:auto;overscroll-behavior:contain;
-    -webkit-overflow-scrolling:touch;background:var(--card);border-radius:var(--r-card);box-shadow:var(--sombra);
-    padding:10px 14px;scrollbar-gutter:stable}
-  .mermas-page{display:flex;justify-content:center;align-items:center;gap:12px;padding:12px;font-size:12px;color:var(--muted)}
-  .mermas-page button{border:0;border-radius:10px;background:var(--card);box-shadow:var(--sombra);padding:8px 12px;font:inherit;font-weight:700;color:var(--navy)}
+  .mermas-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}
+  .mermas-kpi,.mermas-panel{background:var(--card);border:1px solid rgba(92,67,45,.09);border-radius:14px;
+    box-shadow:0 2px 9px rgba(58,42,27,.035)}
+  .mermas-kpi{padding:11px 13px;min-width:0}
+  .mermas-kpi-label{font-size:10px;font-weight:700;color:#827466;letter-spacing:.025em}
+  .mermas-kpi-value{font-size:20px;font-weight:750;color:#382719;line-height:1.15;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mermas-kpi-note{font-size:10px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mermas-charts{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(290px,.9fr);gap:12px;margin-bottom:14px;align-items:stretch}
+  .mermas-panel{padding:14px 15px;min-width:0;position:relative}
+  .mermas-panel h2{font-size:14px;color:#382719;margin:0 0 11px;font-weight:750}
+  .mermas-chart-note{font-size:10px;color:var(--muted);margin:-5px 0 8px}
+  .mermas-category-chart{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(58px,1fr);align-items:end;gap:8px;
+    height:202px;padding:3px 1px 0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
+  .mermas-cat-column{height:100%;min-width:0;padding:0 2px;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer;
+    display:flex;flex-direction:column;align-items:stretch;justify-content:flex-end;gap:5px;border-radius:8px}
+  .mermas-cat-column:hover .mermas-cat-bar,.mermas-cat-column:focus-visible .mermas-cat-bar,.mermas-cat-column.is-active .mermas-cat-bar{background:#684326}
+  .mermas-cat-column:focus-visible{outline:2px solid rgba(151,94,48,.35);outline-offset:2px}
+  .mermas-cat-value{font-size:10px;color:#5d5145;font-weight:700;text-align:center;line-height:1.1}
+  .mermas-cat-plot{height:158px;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid rgba(92,67,45,.16);position:relative}
+  .mermas-cat-plot:before,.mermas-cat-plot:after{content:"";position:absolute;left:0;right:0;border-top:1px dashed rgba(92,67,45,.10);pointer-events:none}
+  .mermas-cat-plot:before{top:33%}.mermas-cat-plot:after{top:66%}
+  .mermas-cat-bar{width:min(100%,46px);height:var(--bar-height);min-height:2px;border-radius:4px 4px 0 0;background:#c58c50;position:relative;z-index:1;transition:background .15s ease,height .2s ease}
+  .mermas-cat-label{font-size:10px;line-height:1.15;text-align:center;color:#5d5145;white-space:nowrap;min-height:23px}
+  .mermas-motives{display:grid;gap:12px;padding:8px 1px 2px}
+  .mermas-motive-row{display:grid;grid-template-columns:minmax(78px,98px) minmax(45px,1fr) minmax(62px,82px);gap:9px;align-items:center;font-size:11px}
+  .mermas-motive-name{text-align:right;color:#5d5145;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mermas-motive-track{height:13px;border-radius:3px;background:#f0ece7;overflow:hidden}
+  .mermas-motive-fill{height:100%;min-width:2px;border-radius:3px;background:#bd8750}
+  .mermas-motive-row:first-child .mermas-motive-fill{background:#744b2b}
+  .mermas-motive-value{font-size:10px;color:#61564c;white-space:nowrap}
+  .mermas-motive-value strong{font-size:11px;color:#382719}
+  .mermas-tooltip{position:fixed;z-index:10000;width:min(260px,calc(100vw - 24px));padding:11px 13px;border-radius:10px;
+    background:#fffdfa;border:1px solid rgba(92,67,45,.15);box-shadow:0 8px 24px rgba(39,29,19,.15);color:#47372a;
+    font-size:11px;line-height:1.45;pointer-events:none;opacity:0;visibility:hidden;transform:translateY(3px);transition:opacity .12s ease,transform .12s ease}
+  .mermas-tooltip.on{opacity:1;visibility:visible;transform:translateY(0)}
+  .mermas-tooltip strong{display:block;color:#382719;font-size:12px;margin-bottom:4px}
+  .mermas-tooltip div+div{margin-top:2px}
+  .mermas-table-title{display:flex;align-items:center;gap:10px;margin:0 2px 7px}
+  .mermas-table-title h2{font-size:14px;margin:0;color:#382719}
+  .mermas-table-title span{font-size:10px;color:var(--muted);margin-left:auto}
+  #mermas-list.mermas-list-scroll{height:clamp(260px,42vh,420px);overflow:auto;overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;background:var(--card);border:1px solid rgba(92,67,45,.09);border-radius:13px;
+    box-shadow:0 2px 9px rgba(58,42,27,.03);padding:0;scrollbar-gutter:stable}
+  .mermas-table{width:100%;border-collapse:collapse;min-width:680px;font-size:11px}
+  .mermas-table th{text-align:left;background:#f8f5f1;color:#76695b;font-weight:700;padding:9px 11px;white-space:nowrap}
+  .mermas-table td{padding:8px 11px;border-top:1px solid rgba(92,67,45,.075);color:#50453b;vertical-align:middle}
+  .mermas-table tbody tr:hover{background:#fcfaf7}
+  .mermas-table .mermas-qty{text-align:right;font-weight:700;color:#382719;white-space:nowrap}
+  .mermas-reason{display:inline-block;padding:3px 7px;border-radius:999px;background:#f5eee4;color:#76502f;white-space:nowrap}
+  .mermas-reason[data-motivo="vencimiento"]{background:#f8e7e3;color:#9a4938}
+  .mermas-reason[data-motivo="daño"]{background:#f8eddc;color:#8a5b24}
+  .mermas-reason[data-motivo="robo"]{background:#ece8f2;color:#65527d}
+  .mermas-reason[data-motivo="devolución"]{background:#e8f0e5;color:#526f47}
+  .mermas-undone{font-size:10px;color:var(--muted)}
+  .mermas-table .rep-deshacer{border:0;background:transparent;color:#80552f;font:inherit;font-weight:700;cursor:pointer;padding:4px}
+  .mermas-page{display:flex;justify-content:center;align-items:center;gap:12px;padding:10px;font-size:11px;color:var(--muted)}
+  .mermas-page button{border:1px solid rgba(92,67,45,.12);border-radius:8px;background:var(--card);padding:6px 10px;font:inherit;font-weight:700;color:#6b472b}
   .mermas-page button:disabled{opacity:.45}
-  @media(max-width:760px){.mermas-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.mermas-charts{grid-template-columns:1fr}}
-  @media(max-width:460px){.mermas-head{align-items:flex-start}.mermas-controls{width:100%}.mermas-controls select{flex:1}
-    .mermas-date{width:100%}.mermas-date input{flex:1;min-width:0}.mermas-kpi{padding:12px}.mermas-kpi-value{font-size:20px}
-    .mermas-donut-wrap{gap:10px}.mermas-donut{width:122px;height:122px;flex-basis:122px}.mermas-donut::after{inset:23px}}
+  @media(max-width:860px){.mermas-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.mermas-charts{grid-template-columns:1fr}}
+  @media(max-width:520px){.mermas-head{align-items:flex-start}.mermas-controls{width:100%}.mermas-controls select{flex:1}
+    .mermas-date{width:100%}.mermas-date input{flex:1;min-width:0}.mermas-kpi{padding:10px}.mermas-kpi-value{font-size:18px}
+    .mermas-panel{padding:12px}.mermas-category-chart{grid-auto-columns:minmax(68px,1fr);height:190px}.mermas-cat-plot{height:145px}
+    .mermas-motive-row{grid-template-columns:minmax(72px,90px) minmax(40px,1fr) 65px;gap:7px}}
 
   /* ---- ENLACES (solo Bodega) ----
      Copiado de la maqueta que Jhon aprobó (docs/propuesta-enlaces.html).
@@ -3740,7 +3759,7 @@
   </div>
   <div class="mermas-kpis" id="mermas-kpis"></div>
   <div class="mermas-charts" id="mermas-charts"></div>
-  <div class="mermas-table-title"><h2>Registro de mermas</h2><span id="mermas-total">—</span></div>
+  <div class="mermas-table-title"><h2>Registros recientes</h2><span id="mermas-total">—</span></div>
   <div id="mermas-list" class="mermas-list-scroll" role="region" aria-label="Lista de productos mermados"><div class="empty">Cargando…</div></div>
   <div class="mermas-page" id="mermas-pagination"></div>
 </div>
@@ -5400,7 +5419,6 @@ let MERMAS = [], MERMAS_TODAS = [], MERMAS_PAGINA = 0, MERMAS_POR_PAGINA = 100;
 let MERMAS_DEMO = false, MERMAS_ULTIMO_TOTAL = 0;
 let MERMAS_FILTRO = {periodo:'30',desde:'',hasta:''};
 const MOT_MERMA_TXT = Object.fromEntries(MOTIVOS_MERMA);
-const MERMA_COLORES = ['#41628C','#DC4405','#4F8A61','#D69C35','#8264A2','#4C9AA5','#C16658'];
 
 /* Fixtures sintéticos, presentados como demo y nunca insertados en Supabase.
    Solo se usan cuando la sede no tiene registros reales. */
@@ -5513,51 +5531,76 @@ async function loadMermas(){
 
 function pintarAnaliticaMermas(rows){
   const vivas=rows.filter(m=>!m.deshecha_at), total=vivas.reduce((a,m)=>a+Math.abs(+m.cantidad||0),0);
-  const porMotivo={},porTipo={},productosPorTipo={};
+  const porMotivo={},porTipo={},productosAfectados=new Set();
   vivas.forEach(m=>{
-    const motivo=m.motivo||'otro';porMotivo[motivo]=(porMotivo[motivo]||0)+Math.abs(+m.cantidad||0);
-    const categoria=m.rubro_demo||MERMAS_PRODUCTOS.get(String(m.producto_id))||'Sin categoría';
-    const cantidad=Math.abs(+m.cantidad||0), nombre=m.producto||'Producto sin nombre';
-    porTipo[categoria]=(porTipo[categoria]||0)+cantidad;
-    productosPorTipo[categoria]??={};productosPorTipo[categoria][nombre]=(productosPorTipo[categoria][nombre]||0)+cantidad;
+    const motivo=m.motivo||'otro',categoria=m.rubro_demo||MERMAS_PRODUCTOS.get(String(m.producto_id))||'Sin tipo';
+    const cantidad=Math.abs(+m.cantidad||0),nombre=m.producto||'Producto sin nombre';
+    porMotivo[motivo]=(porMotivo[motivo]||0)+cantidad;
+    productosAfectados.add(m.producto_id||nombre);
+    porTipo[categoria]??={unidades:0,registros:0,productos:{},motivos:{}};
+    const tipo=porTipo[categoria];tipo.unidades+=cantidad;tipo.registros++;
+    tipo.productos[nombre]=(tipo.productos[nombre]||0)+cantidad;
+    tipo.motivos[motivo]=(tipo.motivos[motivo]||0)+cantidad;
   });
   const topMotivo=Object.entries(porMotivo).sort((a,b)=>b[1]-a[1])[0];
-  const topProducto=Object.entries(productosPorTipo).flatMap(([categoria,items])=>Object.entries(items).map(([nombre,cantidad])=>({categoria,nombre,cantidad})))
-    .sort((a,b)=>b.cantidad-a.cantidad||a.nombre.localeCompare(b.nombre,'es'))[0];
+  const categorias=Object.entries(porTipo).sort((a,b)=>b[1].unidades-a[1].unidades);
+  const topTipo=categorias[0];
   $('mermas-kpis').innerHTML=[
-    ['Unidades mermadas',fmt(total),'Unidades netas vigentes'],
-    ['Producto más mermado',topProducto?topProducto.nombre:'—',topProducto?`${fmt(topProducto.cantidad)} unidades · ${topProducto.categoria}`:'Sin datos'],
-    ['Causa principal',topMotivo?(MOT_MERMA_TXT[topMotivo[0]]||topMotivo[0]):'—',topMotivo?fmt(topMotivo[1])+' unidades':'Sin datos'],
-  ].map(([l,v,n])=>`<div class="mermas-kpi"><div class="mermas-kpi-label">${esc(l)}</div><div class="mermas-kpi-value">${esc(String(v))}</div><div class="mermas-kpi-note">${esc(n)}</div></div>`).join('');
-  const cat=Object.entries(porTipo).sort((a,b)=>b[1]-a[1]);
-  const max=Math.max(1,...cat.map(x=>x[1]));
-  const barras=cat.length?cat.map(([k,v],i)=>`<div class="mermas-bar-row" tabindex="0" role="button" data-mermas-categoria="${esc(k)}" aria-label="${esc(k)}: ${fmt(v)} unidades. Ver productos más mermados" aria-pressed="${i===0}"><span class="mermas-bar-label" title="${esc(k)}">${esc(k)}</span><div class="mermas-bar-track"><div class="mermas-bar-fill" style="width:${Math.max(2,v/max*100)}%"></div></div><span class="mermas-bar-value">${fmt(v)}</span></div>`).join(''):'<div class="empty">Sin datos para este período.</div>';
-  const mot=Object.entries(porMotivo).sort((a,b)=>b[1]-a[1]);let acc=0;
-  const grad=mot.length?`conic-gradient(${mot.map(([k,v],i)=>{const a=acc;acc+=total?v/total*100:0;return `${MERMA_COLORES[i%MERMA_COLORES.length]} ${a}% ${acc}%`;}).join(',')})`:'var(--gray-bg)';
-  const leyenda=mot.map(([k,v],i)=>`<div class="mermas-legend-row"><i class="mermas-dot" style="background:${MERMA_COLORES[i%MERMA_COLORES.length]}"></i><span class="mermas-legend-label">${esc(MOT_MERMA_TXT[k]||k)}</span><span class="mermas-legend-n">${fmt(v)}</span></div>`).join('')||'<span class="mermas-kpi-note">Sin datos</span>';
-  const categoriaInicial=cat[0]?.[0];
-  const detalleInicial=categoriaInicial?crearDetalleCategoriaMermas(categoriaInicial,productosPorTipo):'<p class="mermas-category-hint">Sin datos para este período.</p>';
-  $('mermas-charts').innerHTML=`<section class="mermas-panel"><h2>Unidades por categoría</h2><p class="mermas-category-hint">Selecciona o apunta a una categoría para ver sus productos más mermados.</p><div class="mermas-bars" id="mermas-bars">${barras}</div><div class="mermas-category-detail" id="mermas-category-detail" aria-live="polite">${detalleInicial}</div></section>
-    <section class="mermas-panel"><h2>Unidades por motivo</h2><div class="mermas-donut-wrap"><div class="mermas-donut" style="background:${grad}"><div class="mermas-donut-total">${fmt(total)}<small>unidades</small></div></div><div class="mermas-legend">${leyenda}</div></div></section>`;
-  $('mermas-bars').addEventListener('pointerover',actualizarDetalleCategoriaMermas);
-  $('mermas-bars').addEventListener('focusin',actualizarDetalleCategoriaMermas);
-  $('mermas-bars').addEventListener('click',actualizarDetalleCategoriaMermas);
-  $('mermas-bars').addEventListener('keydown',evento=>{
-    if(evento.key==='Enter'||evento.key===' '){evento.preventDefault();actualizarDetalleCategoriaMermas(evento);}
+    ['Unidades mermadas',fmt(total),'En el período seleccionado'],
+    ['Productos afectados',fmt(productosAfectados.size),'Productos distintos con merma'],
+    ['Causa principal',topMotivo?(MOT_MERMA_TXT[topMotivo[0]]||topMotivo[0]):'—',topMotivo?fmt(topMotivo[1])+' un. · '+(total?Math.round(topMotivo[1]/total*100):0)+'% del total':'Sin datos'],
+    ['Categoría más afectada',topTipo?topTipo[0]:'—',topTipo?fmt(topTipo[1].unidades)+' un. · '+(total?Math.round(topTipo[1].unidades/total*100):0)+'% del total':'Sin datos'],
+  ].map(([l,v,n])=>'<div class="mermas-kpi"><div class="mermas-kpi-label">'+esc(l)+'</div><div class="mermas-kpi-value">'+esc(String(v))+'</div><div class="mermas-kpi-note">'+esc(n)+'</div></div>').join('');
+  const max=Math.max(1,...categorias.map(([,d])=>d.unidades));
+  const barras=categorias.length?categorias.map(([categoria,d])=>{
+    const px=Math.max(2,Math.round(d.unidades/max*146));
+    return '<button type="button" class="mermas-cat-column" data-mermas-categoria="'+esc(categoria)+'" aria-label="'+esc(categoria)+': '+fmt(d.unidades)+' unidades. Mostrar detalle" aria-describedby="mermas-tooltip">'
+      +'<span class="mermas-cat-value">'+fmt(d.unidades)+'</span><span class="mermas-cat-plot"><i class="mermas-cat-bar" style="--bar-height:'+px+'px"></i></span><span class="mermas-cat-label">'+esc(categoria)+'</span></button>';
+  }).join(''):'<div class="empty">Sin datos para este período.</div>';
+  const motivos=Object.entries(porMotivo).sort((a,b)=>b[1]-a[1]);
+  const maxMotivo=Math.max(1,...motivos.map(([,v])=>v));
+  const barrasMotivo=motivos.length?motivos.map(([motivo,unidades])=>{
+    const pct=total?Math.round(unidades/total*100):0;
+    return '<div class="mermas-motive-row"><span class="mermas-motive-name">'+esc(MOT_MERMA_TXT[motivo]||motivo)+'</span><div class="mermas-motive-track"><div class="mermas-motive-fill" style="width:'+Math.max(2,unidades/maxMotivo*100)+'%"></div></div><span class="mermas-motive-value"><strong>'+fmt(unidades)+'</strong> · '+pct+'%</span></div>';
+  }).join(''):'<div class="empty">Sin datos para este período.</div>';
+  $('mermas-charts').innerHTML='<section class="mermas-panel"><h2>Mermas por categoría</h2><p class="mermas-chart-note">Unidades en el período · pasa sobre una barra para ver el detalle</p><div class="mermas-category-chart" id="mermas-category-chart" role="group" aria-label="Unidades mermadas por categoría">'+barras+'</div></section>'
+    +'<section class="mermas-panel"><h2>Motivos de merma</h2><p class="mermas-chart-note">Participación sobre las unidades mermadas</p><div class="mermas-motives">'+barrasMotivo+'</div></section>'
+    +'<div class="mermas-tooltip" id="mermas-tooltip" role="tooltip" aria-hidden="true"></div>';
+  $('mermas-category-chart').addEventListener('pointerover',mostrarTooltipCategoriaMerma);
+  $('mermas-category-chart').addEventListener('pointerout',ocultarTooltipCategoriaMerma);
+  $('mermas-category-chart').addEventListener('focusin',mostrarTooltipCategoriaMerma);
+  $('mermas-category-chart').addEventListener('focusout',ocultarTooltipCategoriaMerma);
+  $('mermas-category-chart').addEventListener('click',mostrarTooltipCategoriaMerma);
+  $('mermas-category-chart').addEventListener('keydown',evento=>{
+    if(evento.key==='Enter'||evento.key===' '){evento.preventDefault();mostrarTooltipCategoriaMerma(evento);}
+    if(evento.key==='Escape')ocultarTooltipCategoriaMerma();
   });
-  $('mermas-bars').dataset.productos=JSON.stringify(productosPorTipo);
+  $('mermas-category-chart').dataset.categorias=JSON.stringify(porTipo);
 }
 
-function crearDetalleCategoriaMermas(categoria, productos){
-  const top=Object.entries(productos[categoria]||{}).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'es')).slice(0,3);
-  return `<h3>Top productos · ${esc(categoria)}</h3>${top.length?`<ol>${top.map(([nombre,cantidad])=>`<li>${esc(nombre)} <span>${fmt(cantidad)} un.</span></li>`).join('')}</ol>`:'<p class="mermas-category-hint">Sin productos en esta categoría.</p>'}`;
+function mostrarTooltipCategoriaMerma(evento){
+  const barra=evento.target.closest('[data-mermas-categoria]');if(!barra)return;
+  const datos=JSON.parse(evento.currentTarget.dataset.categorias||'{}')[barra.dataset.mermasCategoria];if(!datos)return;
+  const tooltip=$('mermas-tooltip'),motivo=Object.entries(datos.motivos).sort((a,b)=>b[1]-a[1])[0];
+  const producto=Object.entries(datos.productos).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'es'))[0];
+  tooltip.innerHTML='<strong>'+esc(barra.dataset.mermasCategoria)+' · '+fmt(datos.unidades)+' unidades</strong>'
+    +'<div>Motivo principal: '+esc(motivo?(MOT_MERMA_TXT[motivo[0]]||motivo[0]):'—')+'</div>'
+    +'<div>Producto más afectado: '+esc(producto?producto[0]:'—')+(producto?' · '+fmt(producto[1])+' un.':'')+'</div>'
+    +'<div>Registros: '+fmt(datos.registros)+'</div>';
+  tooltip.setAttribute('aria-hidden','false');tooltip.classList.add('on');
+  const r=barra.querySelector('.mermas-cat-bar').getBoundingClientRect(),panel=evento.currentTarget.closest('.mermas-panel').getBoundingClientRect();
+  const t=tooltip.getBoundingClientRect(),margen=10;
+  const left=Math.max(margen,Math.min(innerWidth-t.width-margen,r.left+r.width/2-t.width/2));
+  const topMin=Math.max(margen,panel.top+40),topMax=Math.max(topMin,panel.bottom-t.height-42);
+  let top=Math.max(topMin,Math.min(topMax,r.top-t.height-8));
+  top=Math.max(margen,Math.min(innerHeight-t.height-margen,top));
+  tooltip.style.left=left+'px';tooltip.style.top=top+'px';
 }
 
-function actualizarDetalleCategoriaMermas(evento){
-  const fila=evento.target.closest('[data-mermas-categoria]');if(!fila)return;
-  const barras=evento.currentTarget,productos=JSON.parse(barras.dataset.productos||'{}');
-  barras.querySelectorAll('[data-mermas-categoria]').forEach(x=>{const activo=x===fila;x.classList.toggle('is-active',activo);x.setAttribute('aria-pressed',String(activo));});
-  $('mermas-category-detail').innerHTML=crearDetalleCategoriaMermas(fila.dataset.mermasCategoria,productos);
+function ocultarTooltipCategoriaMerma(evento){
+  if(evento?.relatedTarget?.closest?.('[data-mermas-categoria]'))return;
+  const tooltip=$('mermas-tooltip');if(!tooltip)return;
+  tooltip.classList.remove('on');tooltip.setAttribute('aria-hidden','true');
 }
 
 /* En Bodega mostramos el tipo actual solo como apoyo; la categoría no está
@@ -5575,21 +5618,26 @@ async function cargarTiposMermas(rows){
 }
 
 function pintarMermas(){
-  const vivas=MERMAS.filter(m=>!m.deshecha_at);
   $('mermas-total').textContent=MERMAS_DEMO?'Muestra · '+MERMAS.length+' registros':(MERMAS_ULTIMO_TOTAL+' registros en el período');
-  if(!MERMAS.length){$('mermas-list').innerHTML='<div class="empty">Todavía no hay mermas registradas.</div>';}
-  else{
-    const dias=[...new Set(MERMAS.map(m=>fechaLocalMerma(m.created_at)))];
-    $('mermas-list').innerHTML=dias.map(d=>{
-      const delDia=MERMAS.filter(m=>fechaLocalMerma(m.created_at)===d);
-      return `<div class="turno"><div class="turno-lbl">${fmtFecha(d).toUpperCase()}</div>
-      ${delDia.map(m=>`<div class="cs-fila${m.deshecha_at?' cs-off':''}"><span class="cs-nm">${esc(m.producto)}
-        <span class="cs-sec">${SEDE==='central'&&!m.es_demo&&m.sede!=='central'?esc((SEDES[m.sede]||{}).label||m.sede)+' · ':''}${esc(MOT_MERMA_TXT[m.motivo]||m.motivo||'—')}${m.nota?' · '+esc(m.nota):''}${m.quien?' · '+esc(m.quien):''}</span></span>
-        <span class="cs-hay">${fmt(Math.abs(m.cantidad))}${m.deshecha_at?'<span class="cs-des">deshecha</span>':m.es_demo?'<span class="cs-des">demo</span>':`<button type="button" class="rep-deshacer" data-desmerma="${m.id}">Deshacer</button>`}</span></div>`).join('')}</div>`;
+  if(!MERMAS.length){
+    $('mermas-list').innerHTML='<div class="empty">Todavía no hay mermas registradas.</div>';
+  }else{
+    const fechaHora=m=>new Intl.DateTimeFormat('es-CL',{timeZone:'America/Santiago',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(m.created_at));
+    const filas=MERMAS.map(m=>{
+      const categoria=m.rubro_demo||MERMAS_PRODUCTOS.get(String(m.producto_id))||'Sin tipo';
+      const motivo=m.motivo||'otro';
+      const estado=m.deshecha_at?'<span class="mermas-undone">Deshecha</span>'
+        :m.es_demo?'<span class="mermas-undone">Muestra local</span>'
+        :'<button type="button" class="rep-deshacer" data-desmerma="'+m.id+'">Deshacer</button>';
+      return '<tr class="'+(m.deshecha_at?'cs-off':'')+'"><td>'+esc(fechaHora(m))+'</td><td>'+esc(m.producto||'—')+'</td>'
+        +'<td>'+esc(categoria)+'</td><td class="mermas-qty">'+fmt(Math.abs(+m.cantidad||0))+'</td>'
+        +'<td><span class="mermas-reason" data-motivo="'+esc(motivo)+'">'+esc(MOT_MERMA_TXT[motivo]||motivo)+'</span></td>'
+        +'<td>'+esc(m.quien||'—')+'</td><td>'+estado+'</td></tr>';
     }).join('');
+    $('mermas-list').innerHTML='<table class="mermas-table"><thead><tr><th>Fecha</th><th>Producto</th><th>Categoría</th><th>Cantidad</th><th>Motivo</th><th>Usuario</th><th></th></tr></thead><tbody>'+filas+'</tbody></table>';
   }
-  const pagina=$('mermas-pagination');
-  pagina.innerHTML=MERMAS_DEMO?'':`<button type="button" data-merma-pagina="prev" ${MERMAS_PAGINA===0?'disabled':''}>Anterior</button><span>${MERMAS_PAGINA+1} · ${Math.max(1,Math.ceil(MERMAS_ULTIMO_TOTAL/MERMAS_POR_PAGINA))}</span><button type="button" data-merma-pagina="next" ${((MERMAS_PAGINA+1)*MERMAS_POR_PAGINA>=MERMAS_ULTIMO_TOTAL)?'disabled':''}>Siguiente</button>`;
+  const pagina=$('mermas-pagination'),paginas=Math.max(1,Math.ceil(MERMAS_ULTIMO_TOTAL/MERMAS_POR_PAGINA));
+  pagina.innerHTML=MERMAS_DEMO?'':'<button type="button" data-merma-pagina="prev" '+(MERMAS_PAGINA===0?'disabled':'')+'>Anterior</button><span>'+ (MERMAS_PAGINA+1)+' · '+paginas+'</span><button type="button" data-merma-pagina="next" '+(((MERMAS_PAGINA+1)*MERMAS_POR_PAGINA>=MERMAS_ULTIMO_TOTAL)?'disabled':'')+'>Siguiente</button>';
 }
 
 $('mermas-list').addEventListener('click', async e=>{
@@ -16674,6 +16722,7 @@ function pickTab(tab){
      con el nombre viejo, se manda a la de recibir en vez de dejar la
      pantalla en blanco. */
   if(tab==='reparto' && SEDE==='central') tab='recepcion';
+  document.body.classList.toggle('vista-mermas',tab==='mermas');
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));
   moverCarril();
   $('view-inv').style.display = tab==='inv'?'block':'none';

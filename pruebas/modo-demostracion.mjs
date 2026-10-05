@@ -10,6 +10,7 @@ if (!browser) { console.log('(se salta: no hay navegador instalado)'); process.e
 const page = await browser.newPage();
 const errores = [];
 page.on('pageerror', e => errores.push(e.message));
+page.on('console',m=>{if(m.type()==='error')errores.push(m.text());});
 await page.setViewportSize({width:1360, height:900});
 await page.addInitScript(() => {
   const correo = 'jhon@prueba.cl';
@@ -124,37 +125,71 @@ await caso('en Bodega se ven Recibir, Enviar y Mermas', async()=>
     && await page.isVisible('#tabMermas'));
 await page.evaluate(()=>pickTab('mermas'));
 await page.waitForFunction(()=>document.querySelector('#mermas-demo-badge')?.classList.contains('on'));
-await caso('Mermas ofrece KPIs, filtro y gráficos con etiqueta ficticia',async()=>
-  await page.isVisible('#mermas-kpis .mermas-kpi')
+await caso('Mermas ofrece cuatro KPI, filtro y gráficos sin anillo',async()=>
+  (await page.locator('#mermas-kpis .mermas-kpi').count())===4
     && await page.isVisible('#mermas-periodo')
-    && await page.isVisible('#mermas-charts .mermas-donut')
+    && await page.isVisible('#mermas-charts .mermas-motive-row')
+    && await page.locator('#mermas-charts .mermas-donut').count()===0
     && (await page.textContent('#mermas-demo-badge')).includes('ficticios'));
-await caso('muestra productos, categorías y motivos realistas',async()=>
+await caso('la marca del riel se oculta durante Mermas',async()=>
+  await page.evaluate(()=>document.body.classList.contains('vista-mermas')
+    &&getComputedStyle(document.querySelector('.riel-marca')).display==='none'));
+await caso('barras muestran categorías, motivos y registros de auditoría',async()=>
   (await page.textContent('#mermas-charts')).includes('Tortas')
     && (await page.textContent('#mermas-charts')).includes('Vencimiento')
+    && await page.isVisible('#mermas-list table.mermas-table')
     && (await page.textContent('#mermas-list')).includes('Sándwich Pollo Palta'));
-await caso('categorías permiten inspeccionar su top de productos y KPI prioriza producto',async()=>{
-  const kpis=await page.textContent('#mermas-kpis');
+await caso('hover abre el tooltip contextual completo sin salirse del viewport',async()=>{
   await page.hover('[data-mermas-categoria="Bollería"]');
-  const detalle=await page.textContent('#mermas-category-detail');
-  return kpis.includes('Producto más mermado')&&!kpis.includes('Productos afectados')
-    &&detalle.includes('Top productos · Bollería')&&detalle.includes('Muffin Arándano');
+  const contenido=await page.textContent('#mermas-tooltip');
+  const dentro=await page.evaluate(()=>{
+    const t=document.querySelector('#mermas-tooltip').getBoundingClientRect();
+    const charts=document.querySelector('#mermas-charts').getBoundingClientRect();
+    return t.left>=0&&t.top>=charts.top&&t.right<=innerWidth&&t.bottom<=innerHeight;
+  });
+  return contenido.includes('Bollería')&&contenido.includes('Motivo principal:')
+    &&contenido.includes('Producto más afectado:')&&contenido.includes('Registros:')&&dentro;
 });
-await caso('el detalle de categoría también se puede navegar con teclado',async()=>{
+await caso('las barras de categoría también se pueden inspeccionar con teclado',async()=>{
   await page.focus('[data-mermas-categoria="Tortas"]');
-  return (await page.textContent('#mermas-category-detail')).includes('Top productos · Tortas');
+  const abierto=(await page.textContent('#mermas-tooltip')).includes('Tortas');
+  await page.keyboard.press('Escape');
+  return abierto&&await page.locator('#mermas-tooltip.on').count()===0;
 });
-await caso('el anillo y su leyenda quedan centrados en el panel',async()=>
+await caso('el ranking de motivos usa barras y porcentajes legibles',async()=>
   await page.evaluate(()=>{
-    const w=document.querySelector('.mermas-donut-wrap'),s=getComputedStyle(w);
-    return s.justifyContent==='center'&&w.getBoundingClientRect().width>0;
+    const rows=[...document.querySelectorAll('.mermas-motive-row')];
+    return rows.length>0&&rows.every(r=>r.querySelector('.mermas-motive-fill').getBoundingClientRect().width>0&&r.textContent.includes('%'));
   }));
+await caso('el filtro temporal actualiza la tabla y vuelve al rango de 30 días',async()=>{
+  const tabla='#mermas-list tbody tr';
+  const treinta=await page.locator(tabla).count();
+  await page.selectOption('#mermas-periodo','7');
+  await page.waitForTimeout(200);
+  const siete=await page.locator(tabla).count();
+  await page.selectOption('#mermas-periodo','30');
+  await page.waitForTimeout(200);
+  return treinta>=siete&&await page.locator(tabla).count()===treinta;
+});
+await caso('la tabla conserva la acción de deshacer para registros reales',async()=>{
+  await page.evaluate(()=>{
+    MERMAS_DEMO=false;MERMAS_ULTIMO_TOTAL=1;
+    MERMAS=[{id:987,producto_id:987,producto:'Torta de prueba',cantidad:-1,motivo:'vencimiento',
+      sede:'central',quien:'Jhon',created_at:new Date().toISOString(),deshecha_at:null}];
+    pintarMermas();
+  });
+  const preservada=await page.locator('#mermas-list [data-desmerma="987"]').count()===1;
+  await page.evaluate(()=>loadMermas());
+  await page.waitForFunction(()=>document.querySelector('#mermas-demo-badge')?.classList.contains('on'));
+  return preservada;
+});
 await caso('el registro queda contenido en una tarjeta con desplazamiento propio',async()=>
   await page.evaluate(()=>{
     const l=document.querySelector('#mermas-list'),s=getComputedStyle(l);
     return l.scrollHeight>l.clientHeight&&['auto','scroll'].includes(s.overflowY)
       &&s.backgroundColor!=='rgba(0, 0, 0, 0)';
   }));
+await page.mouse.move(0,0);
 await page.waitForTimeout(5000);
 await page.screenshot({path:'/tmp/llamita-mermas-escritorio.png',fullPage:true});
 await page.setViewportSize({width:390,height:844});

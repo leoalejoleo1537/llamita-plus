@@ -8,6 +8,18 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-10-05** — **Refinamiento visual del dashboard de Mermas.** Cuatro KPI
+  compactos vuelven a resumir unidades, productos afectados, motivo y categoría.
+  El logo del riel se oculta mientras se está en esta pantalla.
+  El gráfico principal usa columnas por tipo con tooltip accesible (hover,
+  clic/teclado) que informa unidades, causa, producto principal y registros;
+  los motivos pasan del anillo a barras horizontales con porcentaje. El
+  registro paginado se muestra como tabla, conservando Deshacer. Las categorías
+  sin tipo aparecen como `Sin tipo`; los tipos proceden del catálogo actual, no
+  de una fotografía histórica del movimiento. Pruebas de Chromium: 34/34,
+  escritorio/móvil, hover, filtro, tabla y consola sin errores; `npm test`
+  también pasó. Solo Llamita Plus.
+
 - **2026-10-05** — **Detalle interactivo en Mermas y registros para la demo.**
   Las barras por categoría ahora responden a cursor, clic y teclado mostrando
   el top 3 de productos de esa categoría. El KPI de productos afectados se
