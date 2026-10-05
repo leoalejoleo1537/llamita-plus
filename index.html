@@ -29,7 +29,7 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="vendor/qrcode-generator/qrcode.js"></script>
 <script src="vendor/qrcode-generator/qrcode_UTF8.js"></script>
-<script>try{const p=localStorage.getItem('llamita_paleta');if(['tierra','cacao','olivo','arcilla','petroleo'].includes(p))document.documentElement.dataset.paleta=p;}catch{}</script>
+<script>try{const p=localStorage.getItem('llamita_paleta');if(['grafito','cian','marino','esmeralda','violeta','arena'].includes(p))document.documentElement.dataset.paleta=p;}catch{}</script>
 <style>
   /* Los colores se centralizan en themes.css; aquí quedan las medidas base. */
   :root{--riel:260px;--r-card:20px;--r-sec:18px}
@@ -54,7 +54,7 @@
     font-size:36px;font-weight:400;color:var(--orange);letter-spacing:.2px;margin-bottom:4px}
   .gate-sub{font-size:14.5px;color:var(--muted);margin:0 0 26px}
   .gate-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:17px 20px;margin-bottom:12px;border-radius:10px;border:1.5px solid var(--border);background:#fff;font-size:16.5px;font-weight:700;color:var(--text);cursor:pointer;transition:.15s;text-align:left}
-  .gate-btn:hover,.gate-btn:active{border-color:var(--orange);background:#FFF7F3}
+  .gate-btn:hover,.gate-btn:active{border-color:var(--orange);background:var(--sec-bg)}
   .gate-btn::after{content:"›";color:var(--orange);font-size:22px;font-weight:800;line-height:1}
   .gate-btn:last-of-type{margin-bottom:0}
   .gate-foot{font-size:12px;color:var(--muted);margin-top:24px}
@@ -204,14 +204,14 @@
   .sync-btn.girando .cuerpo svg{animation:sync-spin 1.05s linear infinite}
   .sync-btn:disabled{cursor:default}
   @keyframes sync-onda{
-    0%  {opacity:.5;box-shadow:0 0 0 0 rgba(220,68,5,.45)}
-    70% {opacity:0; box-shadow:0 0 0 13px rgba(220,68,5,0)}
-    100%{opacity:0; box-shadow:0 0 0 0 rgba(220,68,5,0)}
+    0%  {opacity:.5;box-shadow:0 0 0 0 color-mix(in srgb, var(--orange) 20%, transparent)}
+    70% {opacity:0; box-shadow:0 0 0 13px transparent}
+    100%{opacity:0; box-shadow:0 0 0 0 transparent}
   }
   @keyframes sync-onda-mal{
-    0%  {opacity:.6;box-shadow:0 0 0 0 rgba(192,57,43,.5)}
-    70% {opacity:0; box-shadow:0 0 0 14px rgba(192,57,43,0)}
-    100%{opacity:0; box-shadow:0 0 0 0 rgba(192,57,43,0)}
+    0%  {opacity:.6;box-shadow:0 0 0 0 color-mix(in srgb, var(--red) 20%, transparent)}
+    70% {opacity:0; box-shadow:0 0 0 14px transparent}
+    100%{opacity:0; box-shadow:0 0 0 0 transparent}
   }
   /* en pantallas muy angostas el texto se va y queda el ícono, para no
      empujar el nombre de la sede fuera de la barra */
@@ -297,10 +297,10 @@
   .toast.hay-detalle{pointer-events:auto;cursor:pointer;padding-right:34px}
   .toast.hay-detalle::after{content:"";position:absolute;right:15px;top:50%;
     width:7px;height:7px;margin-top:-3.5px;border-radius:50%;background:var(--orange);
-    box-shadow:0 0 0 0 rgba(220,68,5,.55);animation:latir 2s ease-out infinite}
-  @keyframes latir{0%{box-shadow:0 0 0 0 rgba(220,68,5,.5)}
-                   70%{box-shadow:0 0 0 7px rgba(220,68,5,0)}
-                   100%{box-shadow:0 0 0 0 rgba(220,68,5,0)}}
+    box-shadow:0 0 0 0 color-mix(in srgb, var(--orange) 22%, transparent);animation:latir 2s ease-out infinite}
+  @keyframes latir{0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--orange) 20%, transparent)}
+                   70%{box-shadow:0 0 0 7px transparent}
+                   100%{box-shadow:0 0 0 0 transparent}}
   .toast.hay-detalle:active{transform:translate(-50%,0) scale(.96)}
   /* Con la burbuja abierta el aviso sube por ENCIMA del desenfoque: es el
      punto del que brota, y verlo borroso detrás rompe esa lectura. */
@@ -1873,7 +1873,7 @@
     border-radius:13px;padding:11px 14px;font:inherit;font-size:14.5px;font-weight:700;
     color:var(--text);cursor:pointer;text-align:left;transition:box-shadow .14s,background .14s}
   .lama-anu-op button.on{background:var(--red-bg);color:var(--red-fg);
-    box-shadow:var(--sombra),0 0 0 4px rgba(192,57,43,.14)}
+    box-shadow:var(--sombra),0 0 0 4px color-mix(in srgb, var(--red) 14%, transparent)}
   .lama-anu-caja textarea{width:100%;min-height:64px;padding:11px 13px;border:none;
     border-radius:14px;font:inherit;font-size:15px;background:var(--bg);color:var(--text);resize:none}
   .lama-anu-caja .mbtns{display:flex;gap:8px;margin-top:16px}
@@ -2104,7 +2104,7 @@
   .tl-cand{width:100%;display:flex;align-items:center;gap:11px;background:var(--card);border:1.5px solid var(--border);
            border-radius:11px;padding:11px 13px;margin-bottom:7px;cursor:pointer;text-align:left;font:inherit;color:inherit;
            transition:border-color .15s,background .15s,transform .12s}
-  .tl-cand:hover{border-color:var(--orange);background:#FFF7F3}
+  .tl-cand:hover{border-color:var(--orange);background:var(--sec-bg)}
   .tl-cand:active{transform:scale(.985)}
   .tl-cand .tk{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;
                display:flex;align-items:center;justify-content:center;font-weight:800;color:transparent;font-size:13px}
@@ -2125,7 +2125,7 @@
   .tl-hecho .s{color:var(--muted);font-size:13.5px}
   /* El candidato elegido. Se marca con el naranja de acción, que es el que en
      toda la app significa "esto está encendido". */
-  .tl-cand.on{border-color:var(--orange);background:#FFF7F3}
+  .tl-cand.on{border-color:var(--orange);background:var(--sec-bg)}
   .tl-cand.on .tk{border-color:var(--orange);background:var(--orange);color:#fff}
 
   /* La barra de confirmar, pegada abajo: con el pulgar en el teléfono queda a
@@ -2191,8 +2191,8 @@
   .row.vuelve{transition:transform .42s cubic-bezier(.18,1.5,.42,1), box-shadow .3s ease;z-index:3}
   /* Luz naranja que sale de ATRÁS, no un reborde: el borde se leía como
      gráfico de Excel. Fuerte durante el gesto, suave al quedar agregado. */
-  .row.al-reparto{box-shadow:0 0 22px 2px rgba(220,68,5,.55), 0 0 0 1px rgba(220,68,5,.25)}
-  .row.en-reparto{box-shadow:0 0 14px rgba(220,68,5,.30)}
+  .row.al-reparto{box-shadow:0 0 22px 2px color-mix(in srgb, var(--orange) 22%, transparent), 0 0 0 1px color-mix(in srgb, var(--orange) 14%, transparent)}
+  .row.en-reparto{box-shadow:0 0 14px color-mix(in srgb, var(--orange) 16%, transparent)}
 
   /* El símbolo que asoma DETRÁS de la fila y crece con el gesto, como el
      archivar de Gmail. Va fijo en la pantalla y por debajo de la fila, así
@@ -2200,13 +2200,13 @@
   #swipe-icono{position:fixed;z-index:1;display:none;align-items:center;justify-content:center;
     width:56px;height:56px;border-radius:50%;background:var(--orange);color:#fff;
     font-size:30px;font-weight:600;line-height:1;pointer-events:none;
-    box-shadow:0 4px 18px rgba(220,68,5,.5)}
+    box-shadow:0 4px 18px color-mix(in srgb, var(--orange) 20%, transparent)}
   #swipe-icono.ver{display:flex}
   /* En bodega el lado decide la sede, así que el símbolo deja de ser un "+" y
      dice el nombre: la píldora se ensancha para que quepa. */
   /* la merma va en ROJO, que es el color de lo que se pierde. Verlo asomar
      antes de soltar es lo que impide mermar por error */
-  #swipe-icono.mermar{background:var(--red-fg);box-shadow:0 6px 18px -4px rgba(192,57,43,.55)}
+  #swipe-icono.mermar{background:var(--red-fg);box-shadow:0 6px 18px -4px color-mix(in srgb, var(--red) 24%, transparent)}
   #swipe-icono.ancho{width:auto;min-width:104px;height:44px;border-radius:999px;
     font-size:13.5px;font-weight:800;padding:0 16px;letter-spacing:.2px}
   /* ya está en el reparto: para no agregarlo dos veces sin darse cuenta */
@@ -2250,7 +2250,7 @@
   .vencs .venc{margin-right:0;white-space:nowrap}
   /* mismo lenguaje que el botón "+": naranja relleno y sombra, para que un
      producto urgente salte a la vista dentro de la lista */
-  .pill-urg{background:var(--orange);color:#fff;box-shadow:0 3px 10px rgba(220,68,5,.45)}
+  .pill-urg{background:var(--orange);color:#fff;box-shadow:0 3px 10px color-mix(in srgb, var(--orange) 20%, transparent)}
   .row input[type=number]{width:68px;height:40px;text-align:center;border:1px solid var(--border);border-radius:10px;font-size:16px;font-weight:600}
   .saving{opacity:0.5}
   /* ---------- buttons ---------- */
@@ -2292,11 +2292,11 @@
      para que se lea como "acá se crea algo" y no como un rótulo más */
   .mas-fab{width:26px;height:26px;flex-shrink:0;border-radius:50%;background:var(--orange);color:#fff;
            font-size:21px;font-weight:600;line-height:1;display:flex;align-items:center;justify-content:center;
-           box-shadow:0 2px 8px rgba(220,68,5,.55)}
+           box-shadow:0 2px 8px color-mix(in srgb, var(--orange) 22%, transparent)}
   .sec-fija{cursor:default}
   /* ---------- reparto ---------- */
   .rep-result{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 14px;margin-bottom:6px;cursor:pointer}
-  .rep-result:hover{border-color:var(--orange);background:#FFF7F3}
+  .rep-result:hover{border-color:var(--orange);background:var(--sec-bg)}
   .rep-result .rn{font-size:14px;font-weight:600}
   .rep-result .rs{font-size:12px;color:var(--muted);margin-top:2px}
   .rep-result .add{color:var(--orange);font-weight:800;font-size:22px;line-height:1}
@@ -2533,11 +2533,11 @@
   .aj-prod .mas{flex:0 0 auto;width:34px;height:34px;border-radius:999px;border:none;
     background:var(--orange);color:#fff;font-size:21px;line-height:1;font-weight:700;
     cursor:pointer;display:flex;align-items:center;justify-content:center;
-    box-shadow:0 2px 7px rgba(220,68,5,.32);transition:transform .12s ease}
+    box-shadow:0 2px 7px color-mix(in srgb, var(--orange) 18%, transparent);transition:transform .12s ease}
   .aj-prod .mas:active{transform:scale(.9)}
   /* Los ya elegidos se ven distintos y su acción es quitarlos: aro naranja
      en vez de relleno, para que no compitan con el "+" de agregar. */
-  .aj-prod.puesto{background:#FFF3EE;box-shadow:inset 0 0 0 1.5px rgba(220,68,5,.28)}
+  .aj-prod.puesto{background:var(--sec-bg);box-shadow:inset 0 0 0 1.5px color-mix(in srgb, var(--orange) 16%, transparent)}
   .aj-prod .quitar{flex:0 0 auto;width:34px;height:34px;border-radius:999px;
     border:1.5px solid var(--border);background:#fff;color:var(--muted);font-size:16px;
     line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
@@ -2760,7 +2760,7 @@
     transition:transform .12s ease}
   .adm-btn:active{transform:scale(.97)}
   .adm-btn:disabled{opacity:.5;cursor:default;transform:none}
-  .adm-btn.peligro{background:var(--red-fg);color:#fff;box-shadow:0 2px 10px rgba(192,57,43,.35)}
+  .adm-btn.peligro{background:var(--red-fg);color:#fff;box-shadow:0 2px 10px color-mix(in srgb, var(--red) 18%, transparent)}
   .adm-btn.fantasma{background:transparent;color:var(--red-fg);border:1.5px solid var(--red-fg)}
   .adm-btn.gris{background:var(--gray-bg);color:var(--text)}
 
@@ -2840,7 +2840,7 @@
          font-size:14px;font-weight:600;text-align:center;color:var(--text)}
   .mprev.mal{background:var(--red-bg);color:var(--red-fg)}
   @media (prefers-reduced-motion: reduce){ .mot button{transition:none} .mot button:active{transform:none} }
-  .fab{position:fixed;right:18px;bottom:24px;width:58px;height:58px;border-radius:50%;background:var(--orange);color:#fff;border:none;font-size:32px;font-weight:600;line-height:1;box-shadow:0 6px 18px rgba(220,68,5,.45);cursor:pointer;z-index:30;display:flex;align-items:center;justify-content:center}
+  .fab{position:fixed;right:18px;bottom:24px;width:58px;height:58px;border-radius:50%;background:var(--orange);color:#fff;border:none;font-size:32px;font-weight:600;line-height:1;box-shadow:0 6px 18px color-mix(in srgb, var(--orange) 20%, transparent);cursor:pointer;z-index:30;display:flex;align-items:center;justify-content:center}
   .fab:active{background:var(--orange-dark)}
   .chkrow{display:flex;align-items:center;gap:10px;margin:14px 0;cursor:pointer;user-select:none}
   .chkrow input{width:20px;height:20px;accent-color:var(--orange);cursor:pointer}
@@ -2869,7 +2869,7 @@
      para que se lea como "acá se crea algo" y no como un rótulo más */
   .mas-fab{width:26px;height:26px;flex-shrink:0;border-radius:50%;background:var(--orange);color:#fff;
            font-size:21px;font-weight:600;line-height:1;display:flex;align-items:center;justify-content:center;
-           box-shadow:0 2px 8px rgba(220,68,5,.55)}
+           box-shadow:0 2px 8px color-mix(in srgb, var(--orange) 22%, transparent)}
   .sec-fija{cursor:default}
   /* ---------- reparto ---------- */
   .rep-fila{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 12px;
@@ -3125,11 +3125,12 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 3a9 9 0 0 0 0 18h2a2 2 0 0 0 2-2c0-.9-.5-1.3-.5-2.1a2 2 0 0 1 2-2H20"></path><circle cx="7.5" cy="10" r="1"></circle><circle cx="10" cy="6.8" r="1"></circle><circle cx="16" cy="7.5" r="1"></circle></svg><span class="nav-label">Apariencia</span></button>
     <div class="paleta-popover" id="paleta-popover" hidden aria-label="Elegir paleta">
       <div class="paleta-titulo">Paleta de color</div>
-      <button type="button" class="paleta-opcion" data-paleta="tierra"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i></span>Tierra cálida</button>
-      <button type="button" class="paleta-opcion" data-paleta="cacao"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i></span>Cacao sobrio</button>
-      <button type="button" class="paleta-opcion" data-paleta="olivo"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i></span>Olivo de bodega</button>
-      <button type="button" class="paleta-opcion" data-paleta="arcilla"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i></span>Arcilla nocturna</button>
-      <button type="button" class="paleta-opcion" data-paleta="petroleo"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i></span>Marfil y petróleo</button>
+      <button type="button" class="paleta-opcion" data-paleta="grafito"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>Grafito y azul eléctrico</button>
+      <button type="button" class="paleta-opcion" data-paleta="cian"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>Pizarra y cian</button>
+      <button type="button" class="paleta-opcion" data-paleta="marino"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>Azul marino ejecutivo</button>
+      <button type="button" class="paleta-opcion" data-paleta="esmeralda"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>Carbón y esmeralda</button>
+      <button type="button" class="paleta-opcion" data-paleta="violeta"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>Gris mineral y violeta</button>
+      <button type="button" class="paleta-opcion" data-paleta="arena"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>Arena fría y petróleo</button>
     </div>
   </div>
   <div class="drawer-foot">
@@ -4571,7 +4572,7 @@ function cerrarPaleta(){
   $('paleta-trigger').setAttribute('aria-expanded','false');
 }
 function marcarPaleta(){
-  const actual=document.documentElement.dataset.paleta || 'tierra';
+  const actual=document.documentElement.dataset.paleta || 'grafito';
   document.querySelectorAll('.paleta-opcion').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.paleta===actual)));
 }
 $('paleta-trigger').addEventListener('click',()=>{

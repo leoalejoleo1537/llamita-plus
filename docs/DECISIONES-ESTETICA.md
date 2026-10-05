@@ -13,10 +13,8 @@ y etiquetas. Los permisos y rutas siguen decidiendo qué acciones aparecen.
 El panel permanece también en Ajustes. El encabezado se centra en el área útil.
 Se retiraron el logo/nombre de cabecera y los rótulos redundantes del panel.
 
-**Apariencia**, al pie del panel, permite elegir Tierra cálida (terracota/crema),
-Cacao sobrio (cobre/marfil), Olivo de bodega (salvia/crema), Arcilla nocturna
-(grafito/arcilla) y Marfil y petróleo (petróleo/arena). Los colores se definen una
-sola vez en `themes.css`; el atributo `data-paleta` de `<html>` los aplica.
+**Apariencia**, al pie del panel, permite elegir una paleta personal. Los
+colores se definen en `themes.css`; el atributo `data-paleta` de `<html>` los aplica.
 La clave local `llamita_paleta` guarda únicamente esa elección por navegador;
 no se consulta ni escribe Supabase. Si el almacenamiento no está disponible,
 la selección sigue funcionando durante la sesión. La antigua preferencia
@@ -26,6 +24,20 @@ Inventario conserva sus métricas y agrupaciones. Categoría y estado se eligen
 en desplegables; la búsqueda mantiene su comportamiento de soltar los filtros.
 Esta decisión sustituye para **Llamita Plus** la paleta y la navegación históricas
 que se documentan a continuación. No se aplica a Café del Desierto.
+
+## Nueva selección de paletas — 2026-10-05
+
+Se reemplazaron las cinco opciones anteriores por seis combinaciones para un
+sistema de operación. El valor inicial es **Grafito y azul eléctrico**. Las
+otras opciones son **Pizarra y cian**, **Azul marino ejecutivo**, **Carbón y
+esmeralda**, **Gris mineral y violeta** y **Arena fría y petróleo**. El selector
+muestra fondo, sidebar, acento, éxito, advertencia y error para cada una. Los
+valores de fondo, superficie, sidebar, texto principal, bordes, acento y colores
+de estado vienen de la especificación de Jhon. Los textos de estado usan un tono
+más oscuro de la misma familia para mantener contraste de 4,5:1 sobre su fondo;
+el texto secundario de Arena fría y petróleo se oscurece de `#6B7A80` a
+`#69787E` por el mismo motivo. Las preferencias de las cinco paletas anteriores
+se ignoran y se aplica el nuevo valor inicial hasta que se elija otra opción.
 
 ## Lo que quedó
 

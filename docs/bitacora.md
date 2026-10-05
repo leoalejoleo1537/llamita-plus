@@ -8,6 +8,19 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-10-05** — **Seis paletas para Llamita Plus.** Se sustituyeron las cinco
+  anteriores por Grafito y azul eléctrico (valor inicial), Pizarra y cian, Azul
+  marino ejecutivo, Carbón y esmeralda, Gris mineral y violeta, y Arena fría y
+  petróleo. Cada opción muestra fondo, sidebar, acento y los tres estados. Los
+  colores de estado solicitados se conservan como muestras y señales; el texto
+  sobre fondos de estado usa un tono más oscuro de la misma familia para asegurar
+  al menos 4,5:1. El secundario de Arena se ajustó mínimamente por contraste.
+  Una preferencia guardada de las cinco opciones anteriores vuelve al nuevo valor
+  inicial. El cambio queda solo en CSS, selector y preferencia local; no accedió
+  a bases de datos. Chromium con fixtures: panel y paletas 55/55, estética 42/42,
+  modo demostración 36/36 y login 26/26; consola sin errores. Pantalla sana
+  también pasó. Solo se trabajó en Llamita Plus.
+
 - **2026-10-05** — **Panel fijo y paletas personales para la demo.** Por pedido
   de Jhon se retiraron fijar/soltar y el cajón temporal: un solo panel permanente,
   de 260 px en escritorio y 88 px con iconos/etiquetas en móvil. También permanece

@@ -119,6 +119,18 @@ const caso = async (n, fn) => {
 
 await montar({puedeLama:true});
 await page.click('#tabInv');
+await caso('Grafito y azul eléctrico es el valor inicial',async()=>page.evaluate(()=>{
+  const cs=getComputedStyle(document.documentElement);
+  return !document.documentElement.dataset.paleta
+    && cs.getPropertyValue('--bg').trim()==='#F8FAFC'
+    && cs.getPropertyValue('--nav-surface').trim()==='#111827';
+}));
+await page.evaluate(()=>localStorage.setItem('llamita_paleta','tierra'));
+await page.reload();await page.waitForTimeout(500);
+await page.click('.gate-btn[data-sede="plaza"]');await page.waitForTimeout(500);await page.click('#tabInv');
+await caso('una preferencia antigua usa el nuevo valor inicial',async()=>page.evaluate(()=>
+  !document.documentElement.dataset.paleta
+  && getComputedStyle(document.documentElement).getPropertyValue('--orange').trim()==='#2563EB'));
 for(const width of [1440,1080,1079,768,390,320]){
   await page.setViewportSize({width,height:900});
   await page.waitForTimeout(200);
@@ -138,6 +150,8 @@ for(const width of [1440,1080,1079,768,390,320]){
     document.querySelectorAll('.tabs #drawer').length===1
     &&!document.querySelector('#fijarMenu,#fijarRiel,#btnMenu,.riel-marca')));
   await page.click('#paleta-trigger');
+  if(process.env.CAPTURA_SIDEBAR && width===390)
+    await page.screenshot({path:`${process.env.CAPTURA_SIDEBAR}-selector-movil.png`,fullPage:true});
   await caso(`${width}px: selector visible dentro de la ventana y sobre el contenido`,async()=>page.evaluate(()=>{
     const panel=document.querySelector('#paleta-popover'),r=panel.getBoundingClientRect();
     return !panel.hidden && r.left>=0 && r.top>=0 && r.right<=innerWidth && r.bottom<=innerHeight
@@ -150,9 +164,29 @@ for(const width of [1440,1080,1079,768,390,320]){
 await page.setViewportSize({width:1440,height:900});
 await page.evaluate(()=>{window.__writes=[];window.__rpc=[];});
 const fondos=new Set();
-for(const paleta of ['tierra','cacao','olivo','arcilla','petroleo']){
+const paletas={
+  grafito:['#F8FAFC','#FFFFFF','#111827','#111827','#64748B','#E2E8F0','#2563EB','#16A34A','#D97706','#DC2626'],
+  cian:['#F6F8FA','#FFFFFF','#1F2937','#1F2937','#6B7280','#E5E7EB','#0891B2','#15803D','#CA8A04','#DC2626'],
+  marino:['#F7F8FC','#FFFFFF','#0F2742','#162C46','#66758A','#E1E7EF','#2F6FED','#1F9D68','#C98A16','#C94141'],
+  esmeralda:['#F7F9F8','#FFFFFF','#18221F','#1E293B','#667085','#E1E8E4','#16805B','#16805B','#C47C16','#C83B3B'],
+  violeta:['#F8F8FA','#FFFFFF','#25252B','#27272A','#71717A','#E4E4E7','#6D5BD0','#23835C','#BD7A13','#C43D4D'],
+  arena:['#F7F7F5','#FFFFFF','#203038','#263840','#69787E','#E2E6E3','#176B87','#26855D','#B7791F','#C44C4C']
+};
+for(const paleta of Object.keys(paletas)){
   const antes=await page.locator('#view-inv').boundingBox();
   await page.click('#paleta-trigger');
+  if(process.env.CAPTURA_SIDEBAR && paleta==='grafito')
+    await page.screenshot({path:`${process.env.CAPTURA_SIDEBAR}-selector-escritorio.png`,fullPage:true});
+  await caso(`${paleta}: seis muestras de fondo, sidebar, acento y estados`,async()=>page.evaluate(p=>{
+    const op=document.querySelector(`.paleta-opcion[data-paleta="${p}"]`);
+    const keys=['--bg','--nav-surface','--orange','--green','--amber','--red'];
+    const sample=[...op.querySelectorAll('.paleta-muestra i')];
+    return sample.length===6 && sample.every((node,i)=>{
+      const hex=getComputedStyle(op).getPropertyValue(keys[i]).trim();
+      const rgb=hex.match(/[a-f0-9]{2}/gi).map(n=>parseInt(n,16));
+      return getComputedStyle(node).backgroundColor===`rgb(${rgb.join(', ')})`;
+    });
+  },paleta));
   await page.click(`.paleta-opcion[data-paleta="${paleta}"]`);
   await caso(`${paleta}: aplica, guarda localmente y cierra sin mover el layout`,async()=>{
     const despues=await page.locator('#view-inv').boundingBox();
@@ -160,14 +194,31 @@ for(const paleta of ['tierra','cacao','olivo','arcilla','petroleo']){
       document.documentElement.dataset.paleta===p && localStorage.getItem('llamita_paleta')===p
       && document.querySelector('#paleta-popover').hidden,paleta);
   });
+  await caso(`${paleta}: colores solicitados y contraste legible`,async()=>page.evaluate(expected=>{
+    const css=getComputedStyle(document.documentElement);
+    const names=['--bg','--card','--nav-surface','--text','--muted','--border','--orange','--green','--amber','--red'];
+    if(names.some((name,i)=>css.getPropertyValue(name).trim().toUpperCase()!==expected[i]))return false;
+    const lum=h=>{
+      const rgb=h.match(/[a-f0-9]{2}/gi).map(n=>parseInt(n,16)/255);
+      const [r,g,b]=rgb.map(n=>n<=.04045?n/12.92:((n+.055)/1.055)**2.4);
+      return .2126*r+.7152*g+.0722*b;
+    };
+    const contrast=(a,b)=>{const [hi,lo]=[lum(a),lum(b)].sort((x,y)=>y-x);return (hi+.05)/(lo+.05)};
+    const v=n=>css.getPropertyValue(n).trim();
+    return contrast(v('--text'),v('--card'))>=4.5
+      &&contrast(v('--muted'),v('--card'))>=4.5
+      &&contrast(v('--nav-text'),v('--nav-surface'))>=4.5
+      &&contrast('#FFFFFF',v('--orange-dark'))>=4.5
+      &&['green','amber','red'].every(n=>contrast(v(`--${n}-fg`),v(`--${n}-bg`))>=4.5);
+  },paletas[paleta]));
   fondos.add(await page.evaluate(()=>getComputedStyle(document.body).backgroundColor));
 }
-await caso('cinco fondos distintos sin escrituras ni RPC al cambiar paleta',async()=>
-  fondos.size===5 && await page.evaluate(()=>!window.__writes.length&&!window.__rpc.length));
+await caso('seis fondos distintos sin escrituras ni RPC al cambiar paleta',async()=>
+  fondos.size===6 && await page.evaluate(()=>!window.__writes.length&&!window.__rpc.length));
 await page.reload();await page.waitForTimeout(500);
 await page.click('.gate-btn[data-sede="plaza"]');await page.waitForTimeout(500);await page.click('#tabInv');
 await caso('la preferencia de paleta sobrevive recarga; el antiguo panel suelto se ignora',async()=>page.evaluate(()=>
-  document.documentElement.dataset.paleta==='petroleo'
+  document.documentElement.dataset.paleta==='arena'
   && getComputedStyle(document.querySelector('.tabs')).position==='fixed'
   && localStorage.getItem('llamita_menu_fijo')==='no'));
 await page.click('#paleta-trigger');await page.click('#q');
