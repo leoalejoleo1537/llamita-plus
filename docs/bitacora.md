@@ -8,6 +8,21 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-10-05** — **Panel fijo y paletas personales para la demo.** Por pedido
+  de Jhon se retiraron fijar/soltar y el cajón temporal: un solo panel permanente,
+  de 260 px en escritorio y 88 px con iconos/etiquetas en móvil. También permanece
+  al entrar en Ajustes. Sin logo, nombre de marca ni encabezados redundantes;
+  sede y pantalla centradas en el área útil. Inventario conserva sus métricas y
+  acciones; búsqueda ancha, selectores de categoría/estado y Limpiar secundario.
+  Apariencia ofrece cinco paletas mediante tokens en `themes.css`, persistidas
+  solo en `localStorage`, con cierre por botón, Escape, foco o clic exterior.
+  No se añadieron dependencias ni se accedió a bases de datos. Solo Llamita Plus;
+  no se tocó Café del Desierto. Chromium con fixtures: panel/paletas/filtros 40/40,
+  estética 42/42, navegación de Ajustes 40/40, demo 36/36 y login/QR 26/26;
+  consola sin errores. `npm test` pasó en modo estático/unitario (sus casos de
+  navegador se ejecutaron por separado con `CHROME_PATH`). No hay build/lint
+  configurados para esta aplicación estática.
+
 - **2026-10-05** — **Acceso al login desde teléfono por QR.** En la pantalla
   de inicio se añadió el control secundario “Abrir en mi teléfono” con un panel
   compacto, QR local y botón para copiar con confirmación breve. Vercel verificó

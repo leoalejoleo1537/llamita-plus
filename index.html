@@ -29,51 +29,10 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="vendor/qrcode-generator/qrcode.js"></script>
 <script src="vendor/qrcode-generator/qrcode_UTF8.js"></script>
+<script>try{const p=localStorage.getItem('llamita_paleta');if(['tierra','cacao','olivo','arcilla','petroleo'].includes(p))document.documentElement.dataset.paleta=p;}catch{}</script>
 <style>
-  /* ══════════ PALETA "ACERO" (Jhon, 2026-08-20) ══════════
-     Elegida entre cinco celestes, con este argumento: es la que más contraste
-     tiene entre el fondo y las tarjetas, así que las filas se despegan más y
-     **es la que mejor se lee con sol**. En un mesón junto a una ventana eso
-     no es un detalle de gusto.
-
-     LO QUE NO CAMBIÓ, Y NO CAMBIA CON NINGUNA PALETA: el naranja de acción y
-     los tres colores de alerta. Rojo es crítico, ámbar es aviso, verde es en
-     rango. Esa es la línea entre cambiar el clima y romper la jerarquía.
-
-     EL NAVY NO DESAPARECIÓ: SE MUDÓ AL TEXTO. Antes era la superficie de la
-     barra; ahora es la tinta. En un fondo claro un azul muy oscuro se lee
-     mejor que el negro y no endurece la pantalla. */
-  :root{
-    --navy:#0F1E31; --navy2:#16283F;
-    --orange:#DC4405; --orange-dark:#B93A04;
-    --bg:#E9EEF5; --card:#FDFEFF; --border:#D6DFEB;
-    --text:#121E2C; --muted:#61707F;
-    --red-bg:#FCE9E6; --red-fg:#C0392B;
-    --green-bg:#E4F1E5; --green-fg:#2E7D32;
-    --amber-bg:#FDF0DE; --amber-fg:#9C6209;
-    --gray-bg:#E1E8F1; --gray-fg:#54677D;
-    /* AZUL · la mesa que ya pidió la cuenta. Es el tercer estado del área de
-       ventas, y hace falta uno propio: verde es "libre" y rojo es "ocupada",
-       pero "ya se imprimió la precuenta, están pagando" no es ninguna de las
-       dos. El azul sale del mismo pizarra de las secciones, aclarado. */
-    --azul-bg:#E8F0FB; --azul-fg:#2C5AA0;
-    /* la sección: cápsula clara y un filo de color. Ya no es un bloque
-       relleno — ver el comentario de .sec-head. */
-    --sec-bg:#D0DDEC; --sec-tx:#1F3A5C; --sec-line:rgba(31,58,92,.22);
-    --sec-filo:#41628C;
-    /* las sombras del aire: dos capas, una fina para despegar y otra muy
-       difusa para dar profundidad sin dibujar un borde */
-    --sombra:0 2px 4px rgba(20,40,70,.04), 0 12px 26px -18px rgba(20,40,70,.34);
-    /* LA LÍNEA TENUE (2026-09-03, pedido de Jhon para el panel de mesas).
-       "Nada de recuadros con rebordes: la línea debe ser muy tenue, casi
-       imperceptible". No reemplaza a la sombra —las filas del inventario
-       siguen separándose con sombra—: es para cuando apilar tarjetas dentro
-       de tarjetas desperdicia espacio, que es lo que pasaba en el panel de la
-       mesa. Una raya que se nota es un reborde; esta apenas se intuye. */
-    --linea:rgba(31,58,92,.085);
-    --riel:260px;   /* 236 px útiles: mismo ancho que el menú desplegado en PC */
-    --r-card:20px; --r-sec:18px;
-  }
+  /* Los colores se centralizan en themes.css; aquí quedan las medidas base. */
+  :root{--riel:260px;--r-card:20px;--r-sec:18px}
   *{box-sizing:border-box}
   html,body{touch-action:manipulation}
   /* mientras se arrastra una fila con el mouse, que no se pinte texto */
@@ -313,12 +272,7 @@
   .live.off .dot{background:#e53935}
   @keyframes sync-spin{to{transform:rotate(360deg)}}
   /* ---------- menú lateral ---------- */
-  .scrim{position:fixed;inset:0;background:rgba(10,20,35,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
-  .scrim.open{opacity:1;pointer-events:auto}
-  .drawer{position:fixed;top:0;left:0;bottom:0;width:min(82vw,320px);max-width:calc(100vw - 56px);background:#fff;z-index:61;
-          transform:translateX(-100%);transition:transform .22s cubic-bezier(.2,.7,.3,1);
-          display:flex;flex-direction:column;padding:18px 0 14px;overflow-y:auto}
-  .drawer.open{transform:translateX(0)}
+  .drawer{display:flex;flex-direction:column}
   .drawer-top{padding:0 20px 14px;border-bottom:1px solid var(--border);margin-bottom:6px}
   .drawer-sede{font-size:17px;font-weight:800;color:var(--text);margin-bottom:6px}
   .drawer-sec{font-size:12px;color:var(--muted);font-weight:700;padding:14px 20px 6px}
@@ -332,30 +286,6 @@
   .drawer-salir{width:40px;height:40px;border:none;background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
   .drawer-salir svg{width:21px;height:21px}
   .drawer .live{display:inline-flex;background:var(--gray-bg);border-radius:999px;color:var(--gray-fg);padding:5px 11px;font-size:12.5px}
-  /* Un mismo menú vive en el cajón temporal o en el riel. La posición cambia,
-     no la superficie ni su escala tipográfica. */
-  .drawer.en-riel{position:static;width:100%;max-width:236px;left:auto;top:auto;bottom:auto;
-    transform:none;z-index:auto;flex:0 0 auto}
-  body.pc-ancho .tabs{background:#fff}
-  body.pc-ancho .tabs .inner{width:236px;margin-left:0;margin-right:0}
-  body.pc-ancho .drawer.en-riel{box-shadow:none;overflow-y:visible}
-  body.es-pc:not(.menu-fijo) .drawer{width:236px;max-width:calc(100vw - 56px)}
-  /* Suelto, el "Fijar el panel" del cajón. Fijo, no tiene sentido: la
-     chincheta del riel hace lo mismo y está más cerca. */
-  .drawer.en-riel #fijarMenu{display:none}
-  /* El "Fijar el panel" del cajón: sólo en computador, y colgado de `es-pc`
-     —que mira el ancho de la pantalla— y NO de `pc-ancho`, que mira si el
-     riel está puesto. Si colgara de la segunda, soltar el panel escondería el
-     botón para volver a fijarlo. */
-  .solo-pc{display:none}
-  body.es-pc .solo-pc{display:flex}
-  /* LA CHINCHETA. Chica y apagada: es un ajuste que se toca una vez, no una
-     acción del día a día. Se enciende al pasarle el dedo por encima. */
-  .chincheta{margin-left:auto;width:26px;height:26px;border:none;background:none;
-    color:var(--muted);opacity:.45;cursor:pointer;padding:0;border-radius:7px;
-    display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .chincheta:hover{opacity:1;background:var(--card)}
-  .chincheta svg{width:15px;height:15px;display:block}
   /* ---------- aviso transitorio ---------- */
   .toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);background:var(--navy);color:#fff;
          padding:11px 18px;border-radius:999px;font-size:13.5px;font-weight:600;z-index:70;max-width:88%;
@@ -445,50 +375,10 @@
     .tab{padding:7px 11px;font-size:12.5px}
     .tab-icon{padding:7px 11px}
   }
-  /* ══════════════════════════════════════════════════════════════
-     PC · EL RIEL DE LA IZQUIERDA  (Jhon, 2026-09-05)
-     ══════════════════════════════════════════════════════════════
-     En el teléfono la barra de pestañas horizontal es lo correcto: hay una
-     sola dimensión que sobra y es el ancho. En un computador pasa lo
-     contrario — sobra ancho y falta altura—, y esa misma barra obliga a
-     DESLIZARLA para llegar a "Recetas" o "Mermas" teniendo media pantalla
-     vacía al costado. Eso era lo que molestaba.
-
-     Entonces en PC la barra se PARA: se convierte en un riel fijo a la
-     izquierda donde todas las secciones se ven a la vez, y el contenido se
-     queda con el ancho que sobraba.
-
-     ⚠️ TODO cuelga de `body.pc-ancho`, y esa clase la pone el guion (ver
-     `PC_ANCHO`). Apagado, el navegador no aplica ni una de estas reglas y la
-     app queda EXACTAMENTE como estaba — no queda un hueco (§2.2). */
-  .riel-marca{display:none}
-  .solo-riel{display:none}
-  @media (min-width:1080px){
-    body.pc-ancho{padding-left:var(--riel)}
-    /* La línea que separa el riel es una SOMBRA de un píxel, no un borde:
-       la regla de la casa es que lo que separa sea casi imperceptible. */
-    body.pc-ancho .tabs{position:fixed;top:0;left:0;bottom:0;width:var(--riel);
-      padding:16px 12px 18px;overflow-y:auto;box-shadow:1px 0 0 var(--linea)}
-    body.pc-ancho .tabs .inner{flex-direction:column;align-items:stretch;
-      max-width:none;gap:4px;overflow:visible}
-    body.pc-ancho .riel-marca{display:flex;align-items:center;gap:9px;
-      padding:2px 6px 16px;font-size:15px;font-weight:800;letter-spacing:-.01em;
-      color:var(--navy)}
-    body.pc-ancho.vista-mermas .riel-marca{display:none}
-    body.pc-ancho .riel-marca img{width:26px;height:26px;border-radius:8px;display:block}
-    body.pc-ancho .tab{text-align:left;padding:10px 15px;font-size:14px;
-      box-shadow:none;background:transparent}
-    body.pc-ancho .tab:hover{background:var(--card)}
-    body.pc-ancho .tab.active{background:transparent;color:#fff}
-    body.pc-ancho .tab-icon{justify-content:flex-start;gap:10px;padding:10px 15px}
-    body.pc-ancho .solo-riel{display:inline}
-    /* El carril viaja hacia ABAJO en vez de hacia el costado. El alto se lo
-       pone `moverCarril`, que es quien mide el botón activo. */
-    body.pc-ancho .tab-carril{width:100%}
+  /* El panel fijo se define en themes.css; aquí se conserva el ancho de contenido. */
+  @media(min-width:1080px){
     body.pc-ancho .wrap{max-width:1240px;padding-left:26px;padding-right:26px}
     body.pc-ancho #view-ajustes{padding-left:26px;padding-right:26px}
-    /* Con el panel fijo no hay nada que abrir: todo está a la vista. */
-    body.pc-ancho.menu-fijo #btnMenu{display:none}
   }
   /* DOS COLUMNAS, y recién a los 1400 px. A 1080 el contenido queda en ~840
      y dos columnas de 400 aprietan los nombres largos: se gana espacio y se
@@ -3033,6 +2923,7 @@
   footer{text-align:center;padding:20px;font-size:11px;color:var(--muted)}
   ::placeholder{color:#9aa3ad}
 </style>
+<link rel="stylesheet" href="themes.css">
 </head>
 <body>
 
@@ -3102,9 +2993,6 @@
 
 <div class="topbar">
   <div class="inner">
-    <button type="button" class="icon-btn" id="btnMenu" aria-label="Menú">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"></path></svg>
-    </button>
     <div class="top-tit">
       <!-- ARRIBA VA LA SEDE, no el nombre de la pantalla. La pestaña activa
            ya dice en qué pantalla estás; equivocarse de sede, en cambio, sí
@@ -3141,9 +3029,6 @@
 
 <div class="tabs">
   <div class="inner">
-    <div class="riel-marca"><img src="icons/icon-192.png" alt=""><span>Llamita Plus</span>
-      <button type="button" class="chincheta" id="fijarRiel" title="Soltar el panel"
-              aria-label="Soltar el panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6l-1 6 4 3v2H6v-2l4-3z"></path><path d="M12 15v5"></path></svg></button></div>
     <span class="tab-carril" id="tabCarril" aria-hidden="true"></span>
     <!-- ⌂ EL HOGAR DE LA APP ES MESAS (Jhon, 2026-09-03).
          Hasta hoy esta casita llevaba al inventario, porque el inventario era
@@ -3161,7 +3046,7 @@
          vende— la barra empieza directamente en "Inventario". No queda un
          hueco: queda lo de antes, con el inventario de primero. -->
     <button class="tab tab-icon" data-tab="lama" id="tabLama" aria-label="Mesas" title="Mesas" style="display:none">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5.5 10v9a1 1 0 0 0 1 1H10v-6h4v6h3.5a1 1 0 0 0 1-1v-9"></path></svg><span class="solo-riel">Mesas</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5.5 10v9a1 1 0 0 0 1 1H10v-6h4v6h3.5a1 1 0 0 0 1-1v-9"></path></svg><span class="nav-label">Mesas</span>
     </button>
     <!-- ARQUEO Y MOVIMIENTOS DE CAJA — pestañas propias, pedidas por Jhon el
          2026-09-22 mirando la pantalla real de Fudo: allá el arqueo tiene su
@@ -3172,27 +3057,27 @@
          vez de dos modos escondidos adentro de Reparto. Nacen ocultas con
          la misma condición que Mesas: sin `puede_lama` no hay nada que
          cuadrar. -->
-    <button class="tab" data-tab="arqueo" id="tabArqueo" style="display:none">Arqueo</button>
-    <button class="tab" data-tab="movcaja" id="tabMovCaja" style="display:none">Movimientos</button>
+    <button class="tab" data-tab="arqueo" id="tabArqueo" style="display:none"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z M7 8h10 M7 12h4 M7 16h4 M15 12h2 M15 16h2"></path></svg><span class="nav-label">Arqueo</span></button>
+    <button class="tab" data-tab="movcaja" id="tabMovCaja" style="display:none"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18H5z M8 7h8 M8 11h8 M8 15h5"></path></svg><span class="nav-label">Movimientos</span></button>
     <!-- El inventario pasa a ser una sección más, como Reparto o Recetas. -->
-    <button class="tab active" data-tab="inv" id="tabInv">Inventario</button>
-    <button class="tab" data-tab="reparto">Reparto <span class="tab-badge" id="repBadge" style="display:none"></span></button>
-    <button class="tab" data-tab="recetas">Recetas</button>
+    <button class="tab active" data-tab="inv" id="tabInv"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5v9l-9 5-9-5V8z M3 8l9 5 9-5 M12 13v9"></path></svg><span class="nav-label">Inventario</span></button>
+    <button class="tab" data-tab="reparto"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h11v12H3z M14 10h4l3 4v4h-7 M6 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4 M18 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4"></path></svg><span class="nav-label">Reparto <span class="tab-badge" id="repBadge" style="display:none"></span></span></button>
+    <button class="tab" data-tab="recetas"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h7l1 2 1-2h7v16h-7l-1 1-1-1H4z M12 6v15"></path></svg><span class="nav-label">Recetas</span></button>
     <!-- solo en Bodega, igual que la franja de crítico -->
-    <button class="tab" data-tab="mermas" id="tabMermas" style="display:none">Mermas</button>
+    <button class="tab" data-tab="mermas" id="tabMermas" style="display:none"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 5 6 6 4-4 8 10 M15 17h6v-6"></path></svg><span class="nav-label">Mermas</span></button>
     <!-- BODEGA · el reparto son DOS trabajos distintos y cada uno tiene su
          pestaña. Antes eran dos botones adentro de la pantalla y no servían:
          ocupaban el ancho entero, se movían de sitio según lo que estuviera
          abierto, y había que estar ya en Reparto para encontrarlos. Como
          pestañas están siempre a la vista, se llegue desde donde se llegue
          (Jhon, 2026-08-18). -->
-    <button class="tab" data-tab="recepcion" id="tabRecepcion" style="display:none">Recibir <span class="tab-badge" id="repBadgeC" style="display:none"></span></button>
-    <button class="tab" data-tab="envios" id="tabEnvios" style="display:none">Enviar</button>
+    <button class="tab" data-tab="recepcion" id="tabRecepcion" style="display:none"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12 m-5-5 5 5 5-5 M4 16v5h16v-5"></path></svg><span class="nav-label">Recibir <span class="tab-badge" id="repBadgeC" style="display:none"></span></span></button>
+    <button class="tab" data-tab="envios" id="tabEnvios" style="display:none"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4 m-5 5 5-5 5 5 M4 16v5h16v-5"></path></svg><span class="nav-label">Enviar</span></button>
     <!-- Solo en Angamos. Bien separada de "Reparto" —que es RECIBIR lo que
          manda bodega— porque son trabajos opuestos y confundirlos manda
          producto al revés. Por eso el nombre dice a dónde va. -->
-    <button class="tab" data-tab="aplaza" id="tabAPlaza" style="display:none">A Mall Plaza</button>
-    <button class="tab" data-tab="enlaces" id="tabEnlaces" style="display:none">Enlaces</button>
+    <button class="tab" data-tab="aplaza" id="tabAPlaza" style="display:none"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18 m-6-6 6 6-6 6"></path></svg><span class="nav-label">A Mall Plaza</span></button>
+    <button class="tab" data-tab="enlaces" id="tabEnlaces" style="display:none"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m10 13 4-4 M8 16l-1 1a4 4 0 0 1-6-6l5-5a4 4 0 0 1 6 0 M16 8l1-1a4 4 0 0 1 6 6l-5 5a4 4 0 0 1-6 0"></path></svg><span class="nav-label">Enlaces</span></button>
     <!-- LLAMITA LAMA · el área de ventas.
          ACÁ IBA SU PESTAÑA DE TEXTO, y se mudó al principio de la barra
          convertida en la casita del hogar (2026-09-03). Sigue siendo un solo
@@ -3204,6 +3089,56 @@
          seguridad (§6.1). Quien abra las herramientas del navegador ve el
          código igual. Para que el equipo no la vea ni la pida, alcanza. -->
   </div>
+<aside class="drawer en-riel" id="drawer" aria-label="Menú">
+  <div class="drawer-top" hidden>
+    <div class="drawer-sede" id="drawerSede">—</div>
+    <span class="live" id="live"><span class="dot"></span><span id="liveText">—</span></span>
+  </div>
+
+
+  <div class="drawer-sec">Atajos</div>
+  <button type="button" class="drawer-item" id="drActualizar" data-accion="actualizar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"></path><polyline points="21 3 21 9 15 9"></polyline></svg><span class="nav-label">Actualizar</span></button>
+  <!-- Historial se mudó de pestaña al menú: metía ruido arriba y casi no se
+       usa. Sigue funcionando igual, solo cambió de dónde se entra. -->
+  <button type="button" class="drawer-item" data-accion="historial">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"></path><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"></path><path d="M12 7v5l3 2"></path></svg><span class="nav-label">Historial</span></button>
+
+  <!-- UNA sola puerta a todo lo administrativo (Jhon, 2026-08-18). Antes
+       había dos entradas sueltas acá —la zona roja y Secciones— y cada
+       cosa nueva sumaba otra. Ahora esto abre Ajustes y adentro está todo,
+       cada cosa en su sección. Solo lo ven las cuentas con permiso: para
+       el resto el menú se ve exactamente igual que siempre. -->
+  <div id="bloqueAdmin" style="display:none">
+    <button type="button" class="drawer-item" data-accion="ajustes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg><span class="nav-label">Ajustes</span></button>
+  </div>
+
+  <button type="button" class="drawer-item" data-accion="cambiar-sede">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 3 8l4 4"></path><path d="M3 8h13"></path><path d="m17 20 4-4-4-4"></path><path d="M21 16H8"></path></svg><span class="nav-label">Cambiar sede</span></button>
+
+  <div class="drawer-sec">En línea</div>
+  <div class="drawer-online" id="drawerOnline">—</div>
+
+  <div class="drawer-appearance">
+    <button type="button" class="drawer-item paleta-trigger" id="paleta-trigger" aria-expanded="false" aria-controls="paleta-popover">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 3a9 9 0 0 0 0 18h2a2 2 0 0 0 2-2c0-.9-.5-1.3-.5-2.1a2 2 0 0 1 2-2H20"></path><circle cx="7.5" cy="10" r="1"></circle><circle cx="10" cy="6.8" r="1"></circle><circle cx="16" cy="7.5" r="1"></circle></svg><span class="nav-label">Apariencia</span></button>
+    <div class="paleta-popover" id="paleta-popover" hidden aria-label="Elegir paleta">
+      <div class="paleta-titulo">Paleta de color</div>
+      <button type="button" class="paleta-opcion" data-paleta="tierra"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i></span>Tierra cálida</button>
+      <button type="button" class="paleta-opcion" data-paleta="cacao"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i></span>Cacao sobrio</button>
+      <button type="button" class="paleta-opcion" data-paleta="olivo"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i></span>Olivo de bodega</button>
+      <button type="button" class="paleta-opcion" data-paleta="arcilla"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i></span>Arcilla nocturna</button>
+      <button type="button" class="paleta-opcion" data-paleta="petroleo"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i></span>Marfil y petróleo</button>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <div class="drawer-user" id="drawerUser">—</div>
+    <button type="button" class="drawer-salir" id="btnSalirMenu" aria-label="Salir">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><path d="M21 12H9"></path></svg>
+    </button>
+  </div>
+</aside>
 </div>
 
 <div class="motor-aviso" id="motorAviso">
@@ -3213,62 +3148,7 @@
 </div>
 
 <!-- ================= MENÚ LATERAL ================= -->
-<div class="scrim" id="scrim"></div>
-<aside class="drawer" id="drawer" aria-label="Menú">
-  <div class="drawer-top">
-    <div class="drawer-sede" id="drawerSede">—</div>
-    <span class="live" id="live"><span class="dot"></span><span id="liveText">—</span></span>
-  </div>
 
-  <!-- La chincheta viaja CON el menú: cuando el panel está suelto, el menú es
-       este cajón y el botón para volver a fijarlo tiene que estar acá adentro.
-       Una sola idea en un solo lugar, en vez de dos botones en dos sitios. -->
-  <button type="button" class="drawer-item solo-pc" id="fijarMenu">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6l-1 6 4 3v2H6v-2l4-3z"></path><path d="M12 15v5"></path></svg>
-    Fijar el panel
-  </button>
-
-  <div class="drawer-sec">Atajos</div>
-  <button type="button" class="drawer-item" id="drActualizar" data-accion="actualizar">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"></path><polyline points="21 3 21 9 15 9"></polyline></svg>
-    Actualizar
-  </button>
-  <!-- Historial se mudó de pestaña al menú: metía ruido arriba y casi no se
-       usa. Sigue funcionando igual, solo cambió de dónde se entra. -->
-  <button type="button" class="drawer-item" data-accion="historial">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"></path><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"></path><path d="M12 7v5l3 2"></path></svg>
-    Historial
-  </button>
-
-  <!-- UNA sola puerta a todo lo administrativo (Jhon, 2026-08-18). Antes
-       había dos entradas sueltas acá —la zona roja y Secciones— y cada
-       cosa nueva sumaba otra. Ahora esto abre Ajustes y adentro está todo,
-       cada cosa en su sección. Solo lo ven las cuentas con permiso: para
-       el resto el menú se ve exactamente igual que siempre. -->
-  <div id="bloqueAdmin" style="display:none">
-    <div class="drawer-sec">Administración</div>
-    <button type="button" class="drawer-item" data-accion="ajustes">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-      Ajustes
-    </button>
-  </div>
-
-  <div class="drawer-sec">Sede</div>
-  <button type="button" class="drawer-item" data-accion="cambiar-sede">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 3 8l4 4"></path><path d="M3 8h13"></path><path d="m17 20 4-4-4-4"></path><path d="M21 16H8"></path></svg>
-    Cambiar sede
-  </button>
-
-  <div class="drawer-sec">En línea</div>
-  <div class="drawer-online" id="drawerOnline">—</div>
-
-  <div class="drawer-foot">
-    <div class="drawer-user" id="drawerUser">—</div>
-    <button type="button" class="drawer-salir" id="btnSalirMenu" aria-label="Salir">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><path d="M21 12H9"></path></svg>
-    </button>
-  </div>
-</aside>
 
 <div class="toast" id="toast"></div>
 
@@ -3396,8 +3276,19 @@
 
 <!-- ================= INVENTARIO ================= -->
 <div class="wrap" id="view-inv">
-  <div class="controls busca" data-busca="inv">
-    <input type="text" id="q" placeholder="Buscar producto…">
+  <div class="inv-filtros">
+    <label class="inv-busca" for="q">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>
+      <input type="text" id="q" aria-label="Buscar producto" placeholder="Buscar producto…">
+    </label>
+    <div class="inv-filtros-derecha">
+      <select id="tipos" aria-label="Categoría"><option value="">Todas las categorías</option></select>
+      <select id="inv-estado" aria-label="Estado">
+        <option value="">Todos los estados</option><option value="critico">Crítico</option>
+        <option value="ok">En rango</option><option value="sobre">Sobre-stock</option><option value="sindato">Sin dato</option>
+      </select>
+      <button type="button" id="inv-limpiar" class="inv-limpiar">Limpiar</button>
+    </div>
   </div>
   <!-- solo en Bodega: cuánto le falta a cada local. Ver .csedes en el estilo -->
   <div class="csedes" id="critSedes" style="display:none"></div>
@@ -3409,7 +3300,6 @@
   <!-- La meta viva, arriba del inventario. Una competencia que hay que ir
        a buscar a Ajustes no compite con nada. -->
   <div id="metaPortada" style="display:none"></div>
-  <div class="tipos" id="tipos" style="display:none"></div>
   <div id="list"></div>
   <button class="fab" id="btnNuevo" title="Agregar producto" aria-label="Agregar producto">+</button>
 </div>
@@ -4674,14 +4564,37 @@ function refrescarMenu(){
   if(a) a.textContent = etiquetaSedeUI(SEDE);
   if(b) b.textContent = saludo();
 }
-function abrirMenu(){
-  refrescarMenu();
-  $('drawer').classList.add('open'); $('scrim').classList.add('open');
+/* La navegación permanece visible; cerrar solo descarta el selector personal. */
+function cerrarMenu(){ cerrarPaleta(); }
+function cerrarPaleta(){
+  $('paleta-popover').hidden=true;
+  $('paleta-trigger').setAttribute('aria-expanded','false');
 }
-function cerrarMenu(){ $('drawer').classList.remove('open'); $('scrim').classList.remove('open'); }
-$('btnMenu').addEventListener('click',abrirMenu);
-$('scrim').addEventListener('click',cerrarMenu);
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') cerrarMenu(); });
+function marcarPaleta(){
+  const actual=document.documentElement.dataset.paleta || 'tierra';
+  document.querySelectorAll('.paleta-opcion').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.paleta===actual)));
+}
+$('paleta-trigger').addEventListener('click',()=>{
+  const panel=$('paleta-popover'), trigger=$('paleta-trigger');
+  if(!panel.hidden){cerrarPaleta();return;}
+  marcarPaleta();panel.hidden=false;trigger.setAttribute('aria-expanded','true');
+  const rect=trigger.getBoundingClientRect();
+  panel.style.left=Math.max(8,Math.min(rect.left,innerWidth-panel.offsetWidth-8))+'px';
+  panel.style.bottom=Math.max(8,innerHeight-rect.top+8)+'px';
+  panel.querySelector('[aria-pressed="true"]').focus();
+});
+$('paleta-popover').addEventListener('click',e=>{
+  const opcion=e.target.closest('[data-paleta]');if(!opcion)return;
+  document.documentElement.dataset.paleta=opcion.dataset.paleta;
+  try{localStorage.setItem('llamita_paleta',opcion.dataset.paleta);}catch{}
+  marcarPaleta();cerrarPaleta();$('paleta-trigger').focus();
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.drawer-appearance'))cerrarPaleta();});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&!$('paleta-popover').hidden){cerrarPaleta();$('paleta-trigger').focus();}
+});
+document.addEventListener('focusin',e=>{if(!e.target.closest('.drawer-appearance'))cerrarPaleta();});
+window.addEventListener('resize',cerrarPaleta);
 $('drawer').addEventListener('click',e=>{
   const it=e.target.closest('[data-accion]'); if(!it) return;
   const a=it.dataset.accion;
@@ -4874,7 +4787,7 @@ function pickSede(s){
   $('view-inv').style.display='block'; $('view-ajustes').style.display='none'; $('view-reparto').style.display='none'; $('view-hist').style.display='none'; $('view-recetas').style.display='none'; $('view-mermas').style.display='none'; $('view-enlaces').style.display='none'; $('view-repcentral').style.display='none'; $('view-lama').style.display='none';
   vistaActual='inv';
   aplicarNavegacionDemo();
-  barraPestanas(true);   // si se cambió de sede estando en Ajustes, estaba escondida
+  document.querySelectorAll('.drawer-item.active').forEach(b=>b.classList.remove('active'));
   listEl.innerHTML='';
   $('gate').classList.add('hidden');
   $('liveText').textContent='conectando…'; $('live').classList.remove('off');
@@ -11788,32 +11701,21 @@ function pasaFiltro(p){
 }
 const tipoDe = p => (p.tipo||'').trim();
 const pasaTipo = p => !tipoSel || tipoDe(p) === tipoSel;
-/* Los tipos los define el equipo llenando la columna, no una lista escrita
-   acá: la franja muestra los que de verdad existen, con cuántos hay en cada
-   uno, del más numeroso al menos. */
+/* El selector muestra los tipos reales del catálogo y sus cantidades. */
 function renderTipos(){
-  const barra = $('tipos');
-  if(!hasTipo){ barra.style.display='none'; barra.innerHTML=''; return; }
-  const cuenta = new Map();
-  DATA.forEach(p=>{ const t=tipoDe(p); if(t) cuenta.set(t,(cuenta.get(t)||0)+1); });
-  if(!cuenta.size){ barra.style.display='none'; barra.innerHTML=''; return; }
-  const tipos = [...cuenta.entries()].sort((a,b)=> b[1]-a[1] || a[0].localeCompare(b[0],'es'));
-  barra.style.display='flex';
-  const scroll = barra.scrollLeft;      // rehacer el HTML lo manda al principio
-  barra.innerHTML = tipos.map(([t,n])=>
-    `<button type="button" class="tipo${t===tipoSel?' on':''}" data-tipo="${esc(t)}">`
-    + `${esc(t)} <span class="n">${n}</span></button>`).join('');
-  barra.scrollLeft = scroll;
-}
-/* Al elegir un tipo NO se rehace la franja: solo cambia cuál está marcada.
-   Rehacerla devolvía la franja al principio, así que tocar un tipo del final
-   lo dejaba fuera de la pantalla justo después de tocarlo. */
-function marcarTipo(){
-  $('tipos').querySelectorAll('.tipo').forEach(b=>
-    b.classList.toggle('on', b.dataset.tipo===tipoSel));
+  const barra=$('tipos'), cuenta=new Map();
+  if(hasTipo) DATA.forEach(p=>{const t=tipoDe(p);if(t)cuenta.set(t,(cuenta.get(t)||0)+1);});
+  const tipos=[...cuenta.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'es'));
+  if(tipoSel&&!cuenta.has(tipoSel))tipoSel=null;
+  barra.innerHTML='<option value="">Todas las categorías</option>'+tipos.map(([t,n])=>
+    `<option value="${esc(t)}">${esc(t)} (${n})</option>`).join('');
+  barra.disabled=!tipos.length;
+  barra.value=tipoSel||'';
 }
 const COPY_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
 function render(){
+  $('inv-estado').value=filterState||'';
+  $('inv-limpiar').disabled=!qEl.value&&!filterState&&!tipoSel;
   const q=normNombre(qEl.value);
   let rows=DATA.filter(p=>(!q||normNombre(p.producto).includes(q))&&pasaFiltro(p)&&pasaTipo(p));
   // SIEMPRE alfabético: el orden no depende de cantidades ni estados,
@@ -12309,30 +12211,13 @@ document.querySelectorAll('.mcard').forEach(c=>c.addEventListener('click',()=>{
   document.querySelectorAll('.mcard').forEach(x=>x.classList.toggle('sel',x.dataset.f===filterState));
   render();
 }));
-$('tipos').addEventListener('click', e=>{
-  const b=e.target.closest('[data-tipo]'); if(!b) return;
-  const t=b.dataset.tipo;
-  tipoSel = tipoSel===t ? null : t;
-  marcarTipo();
+$('tipos').addEventListener('change',e=>{tipoSel=e.target.value||null;render();});
+$('inv-estado').addEventListener('change',e=>{
+  filterState=e.target.value||null;
+  document.querySelectorAll('.mcard').forEach(x=>x.classList.toggle('sel',x.dataset.f===filterState));
   render();
-  brotarDesde(b);
 });
-/* La lista crece desde la píldora que se tocó, no desde el centro de la
-   pantalla: el origen de la animación se fija en la posición real del botón.
-   Es lo que hace que el gesto y el resultado se sientan la misma cosa. */
-function brotarDesde(btn){
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  // offsetLeft/offsetWidth y no getBoundingClientRect: al tocarlo el botón
-  // está encogido por :active y su rectángulo mide de menos.
-  const barra=$('tipos');
-  const centro = btn.offsetLeft + btn.offsetWidth/2 - barra.scrollLeft;
-  const dx = barra.getBoundingClientRect().left - listEl.getBoundingClientRect().left;
-  listEl.style.transformOrigin = `${Math.round(centro + dx)}px top`;
-  listEl.classList.remove('brota');
-  void listEl.offsetWidth;              // reinicia la animación si se toca rápido
-  listEl.classList.add('brota');
-}
-listEl.addEventListener('animationend', ()=>listEl.classList.remove('brota'));
+$('inv-limpiar').addEventListener('click',irAlInicio);
 
 /* ---------------- deslizar una fila para mandarla al reparto ----------------
    Adriana entra por Crítico, ve lo que falta y lo va agregando sin cambiar de
@@ -15885,7 +15770,7 @@ function demoPermiteVista(tab){
 }
 function aplicarNavegacionDemo(){
   document.body.classList.toggle('demo-activo', modoDemo());
-  $('tabInv').textContent = modoDemo() ? 'Inicio · Inventario' : 'Inventario';
+  $('tabInv').querySelector('.nav-label').textContent = modoDemo() ? 'Inicio · Inventario' : 'Inventario';
   if(SEDE && modoDemo() && !demoPermiteVista(vistaActual)) pickTab('inv');
 }
 
@@ -16670,143 +16555,23 @@ $('aj-rail').addEventListener('click', e=>{
   if(window.innerWidth < 720) window.scrollTo({top:0, behavior:'smooth'});
 });
 
-/* LA BARRA DE PESTAÑAS SE ESCONDE EN UN SOLO LUGAR, y de ahí salió un bug
-   real (Jhon, 2026-08-20): "desaparece la barra horizontal donde están las
-   opciones de reparto, recetas, etc; tengo que refrescar la página".
-
-   Ajustes esconde la barra a propósito —se entró a otra zona y dejar la
-   navegación de la anterior encima haría dudar de dónde está uno—, y la
-   devuelve al salir. El problema era la puerta de atrás: al **cambiar de
-   sede** desde adentro de Ajustes, `pickSede()` armaba la vuelta al
-   inventario a mano —escondía la vista, marcaba la pestaña activa— pero
-   nunca pasaba por acá, así que la barra se quedaba escondida. Quedabas en
-   el inventario sin ninguna forma de ir a Reparto salvo recargar.
-
-   Esconder algo y volver a mostrarlo tienen que ser la misma función
-   llamada al revés. Cuando son dos trozos de código distintos, tarde o
-   temprano aparece un camino que solo pasa por uno. */
-/* Mueve el carril debajo de la pestaña activa. Se llama después de pintar,
-   y en el siguiente cuadro: si se midiera en el mismo, `offsetLeft` daría la
-   posición vieja porque el navegador todavía no rehizo el trazado. */
-/* EL INTERRUPTOR DEL RIEL (§2.2). Apagado, la clase nunca se pone, ninguna
-   regla del riel se aplica, y la app vuelve exactamente a la barra horizontal
-   de siempre — en el teléfono y en el computador. */
-const PC_ANCHO = true;
-
-/* ══════════ LA CHINCHETA · fijar o soltar el panel ══════════
-   Pedido por Jhon el 2026-09-07, y con una razón que no es de gusto: cada
-   local tiene su pantalla. Donde el computador es chico, el riel se lleva
-   200 px que le hacen falta al inventario; donde es grande, tenerlo siempre
-   puesto ahorra un toque por cada cosa.
-
-   Se guarda POR DISPOSITIVO y no en la base, igual que el tamaño de las
-   mesas: es comodidad de quien mira, no un dato del negocio. La caja del
-   navegador puede estar cerrada —modo incógnito, permisos— así que todo va
-   entre `try`, y si falla, queda fijo, que es lo que la mayoría quiere. */
-const MENU_FIJO_LLAVE = 'llamita_menu_fijo';
-function menuFijoLeer(){
-  try { return localStorage.getItem(MENU_FIJO_LLAVE) !== 'no'; } catch { return true; }
-}
-function menuFijoGuardar(v){
-  try { localStorage.setItem(MENU_FIJO_LLAVE, v ? 'si' : 'no'); } catch { }
-}
-let MENU_FIJO = menuFijoLeer();
-
-/* ⚠️ EL CAJÓN SE MUEVE, NO SE COPIA. Es el mismo elemento cambiado de sitio:
-   así los manejadores que cuelgan de `#drawer` siguen funcionando y no hay
-   dos versiones del mismo botón que puedan desincronizarse. */
-function aplicarMenuFijo(){
-  const dr = $('drawer'), tabs = document.querySelector('.tabs');
-  if(!dr || !tabs) return;
-  const fijo = rielPuesto();
+/* Un único panel permanente: amplio en escritorio, compacto en móvil.
+   La antigua preferencia de fijado ya no interviene en el layout. */
+function aplicarNavegacionFija(){
+  document.body.classList.add('navegacion-fija','menu-fijo');
+  document.body.classList.toggle('pc-ancho',matchMedia('(min-width:1080px)').matches);
   refrescarMenu();
-  /* `es-pc` dice SOLO que la pantalla es grande, y no depende de la
-     chincheta. Hace falta separado: es lo que deja ver el "Fijar el panel"
-     dentro del cajón cuando el riel está suelto. Sin eso, soltarlo sería un
-     camino de ida — el botón para volver estaría escondido detrás de la
-     misma regla que lo apagó. */
-  document.body.classList.toggle('es-pc', pantallaGrande());
-  /* SOLTAR EL PANEL LO SACA ENTERO, no solo su contenido: eso es lo que Jhon
-     pidió — "que esté o no". Al quitar `pc-ancho` la barra vuelve a ser
-     horizontal arriba, el cajón vuelve a ser cajón y las tres rayas vuelven. */
-  document.body.classList.toggle('pc-ancho', fijo);
-  document.body.classList.toggle('menu-fijo', fijo);
-  if(fijo){
-    if(dr.parentElement !== tabs) tabs.appendChild(dr);
-    dr.classList.add('en-riel');
-    dr.classList.remove('open');
-    $('scrim').classList.remove('open');
-  } else {
-    if(dr.parentElement !== document.body) document.body.appendChild(dr);
-    dr.classList.remove('en-riel');
-  }
-  const ch = $('fijarRiel');
-  if(ch){
-    ch.title = 'Soltar el panel';
-    ch.setAttribute('aria-label', 'Soltar el panel');
-  }
 }
-function menuFijoAlternar(v){
-  MENU_FIJO = v;
-  menuFijoGuardar(v);
-  aplicarMenuFijo();
-  moverCarril();
-}
-
-/* ¿La pantalla da para riel? Se le pregunta al navegador con la MISMA medida
-   que usa el CSS, en vez de mirar `window.innerWidth` a mano: dos dueños del
-   mismo número es cómo se desincronizan. */
-const pantallaGrande = () => window.matchMedia('(min-width:1080px)').matches;
-/* Y ¿está puesto? Eso ya depende también de la chincheta. */
-const rielPuesto = () => PC_ANCHO && MENU_FIJO && pantallaGrande();
-
 function moverCarril(){
-  const c = $('tabCarril'); if(!c) return;
-  const b = document.querySelector('.tab.active');
-  if(!b || !b.offsetWidth){ c.classList.remove('listo'); return; }
-  const riel = rielPuesto();
+  const c=$('tabCarril'), b=document.querySelector('.tab.active');
+  if(!b||!b.offsetWidth){c.classList.remove('listo');return;}
   requestAnimationFrame(()=>{
-    if(riel){
-      /* En el riel el carril baja: el ancho lo pone el CSS al 100 %, y el
-         alto se mide del botón porque la casita es más alta que las demás. */
-      c.style.width = '';
-      c.style.height = b.offsetHeight + 'px';
-      c.style.transform = `translateY(${b.offsetTop}px)`;
-    } else {
-      c.style.height = '';
-      c.style.width = b.offsetWidth + 'px';
-      c.style.transform = `translateX(${b.offsetLeft}px)`;
-    }
-    c.classList.add('listo');
+    c.style.width='';c.style.height=b.offsetHeight+'px';
+    c.style.transform=`translateY(${b.offsetTop}px)`;c.classList.add('listo');
   });
 }
-/* Al cambiar el tamaño de la ventana se cruza el umbral y el carril queda
-   apuntando en la dirección equivocada. Se remide, y de paso el cajón vuelve
-   a su lugar: al angostar la ventana tiene que volver a ser un cajón. */
-window.addEventListener('resize', () => { aplicarMenuFijo(); moverCarril(); });
-aplicarMenuFijo();
-
-$('fijarRiel').addEventListener('click', () => menuFijoAlternar(false));
-$('fijarMenu').addEventListener('click', () => { cerrarMenu(); menuFijoAlternar(true); });
-
-function barraPestanas(ver){
-  /* ⚠️ CON EL PANEL FIJO SE ESCONDEN LAS PESTAÑAS, NO EL RIEL ENTERO.
-     Desde que el menú vive adentro de `.tabs`, apagar `.tabs` para entrar a
-     Ajustes hacía desaparecer **el panel completo** — el menú, el usuario y
-     la salida incluidos. Quedabas en Ajustes sin nada a la izquierda.
-
-     Es el precio de haber metido una cosa dentro de otra, y se paga acá:
-     apagar lo que hay que apagar y nada más. Lo encontró la prueba de
-     navegación, que ya vigilaba esta misma esquina desde el 2026-08-20. */
-  const tabs = document.querySelector('.tabs');
-  const fijo = document.body.classList.contains('menu-fijo');
-  tabs.style.display = (ver || fijo) ? '' : 'none';
-  const lista = tabs.querySelector('.inner');
-  if(lista) lista.style.display = ver ? '' : 'none';
-  /* Al volver de Ajustes la barra estaba escondida, así que las pestañas
-     medían 0 y el carril no se podía colocar. Se remide al reaparecer. */
-  if(ver) moverCarril();
-}
+window.addEventListener('resize',()=>{aplicarNavegacionFija();moverCarril();});
+aplicarNavegacionFija();
 
 function pickTab(tab){
   if(!SEDE)return;
@@ -16816,6 +16581,7 @@ function pickTab(tab){
      pantalla en blanco. */
   if(tab==='reparto' && SEDE==='central') tab='recepcion';
   document.body.classList.toggle('vista-mermas',tab==='mermas');
+  document.querySelectorAll('[data-accion]').forEach(b=>b.classList.toggle('active',b.dataset.accion===(tab==='hist'?'historial':tab)));
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));
   moverCarril();
   $('view-inv').style.display = tab==='inv'?'block':'none';
@@ -16852,10 +16618,6 @@ function pickTab(tab){
   vistaActual=tab;
   $('topTitle').textContent = etiquetaSedeUI(SEDE);
   $('topSede').textContent  = TITULOS[tab] || TITULOS.inv;
-  /* En Ajustes se esconden las pestañas y la franja del motor: se entró a
-     otra zona, y dejar la navegación de la anterior encima haría dudar de
-     dónde está uno. La tuerca sigue arriba para poder salir. */
-  barraPestanas(tab !== 'ajustes');
   if(tab==='mermas') loadMermas();
   /* El formulario se arma DESPUÉS de cargar, no antes (2026-08-17). Las
      secciones de Plaza y Angamos salen de SEDE_PROD, que la llena

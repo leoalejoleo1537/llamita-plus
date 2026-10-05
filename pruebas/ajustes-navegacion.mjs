@@ -129,12 +129,8 @@ await caso('la puerta de Administración aparece con permiso', async () =>
 await page.click('[data-accion="ajustes"]');
 await page.waitForTimeout(400);
 await caso('se abre la pantalla', async () => await page.isVisible('#view-ajustes') || 'no se abrió');
-/* Se mira UNA PESTAÑA y no `.tabs`, y la diferencia importa desde el
-   2026-09-07: con el panel fijo el menú vive adentro de `.tabs`, así que ese
-   contenedor tiene que seguir visible aunque las pestañas no. Preguntar por
-   el contenedor confundía "no hay pestañas" con "no hay panel". */
-await caso('las pestañas de arriba se esconden', async () =>
-  !(await page.isVisible('#tabInv')) || 'las pestañas siguen ahí');
+await caso('la navegación fija permanece disponible en Ajustes', async () =>
+  await page.isVisible('#tabInv') || 'desapareció la navegación');
 
 /* ---------- EL BUCLE ---------- */
 console.log('\nNINGUNA sección se pide dos veces (el bucle de Salud):');
@@ -314,8 +310,8 @@ await caso('y las pestañas reaparecen', async () => await page.isVisible('#tabI
 console.log('\nY también se sale por la puerta de atrás (cambiar de sede):');
 await abrirMenu(page);
 await page.click('[data-accion="ajustes"]'); await page.waitForTimeout(400);
-await caso('estando en Ajustes, la barra está escondida', async () =>
-  !(await page.isVisible('#tabInv')) || 'no se escondió');
+await caso('estando en Ajustes, la navegación permanece visible', async () =>
+  await page.isVisible('#tabInv') || 'se escondió');
 await caso('🔴 pero el panel de la izquierda NO desaparece con ella', async () => {
   /* Con el panel fijo, el menú vive adentro de la barra. Apagar la barra
      entera dejaba Ajustes sin menú, sin usuario y sin salida. */

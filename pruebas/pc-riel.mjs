@@ -1,17 +1,4 @@
-/* PC · EL RIEL DE LA IZQUIERDA.
-   node pruebas/pc-riel.mjs
-
-   Jhon, 2026-09-05: "ampliame la pantalla para el pc de todo Llamita Plus…
-   manten siempre desplegado el panel de la izquierda, mete ahi recetas y
-   mermas".
-
-   QUÉ SE PRUEBA, Y POR QUÉ EN LAS DOS DIRECCIONES. Lo que hace peligroso a un
-   cambio de disposición es que arregla una pantalla y rompe otra sin que
-   nadie mire: el teléfono es donde trabaja el equipo, y es justamente donde
-   nadie va a probar esto. Así que cada caso se comprueba ancho Y angosto.
-
-   Y se prueba el INTERRUPTOR apagado (§2.2): apagado tiene que quedar
-   exactamente la barra horizontal de siempre, no un hueco.                */
+/* Navegación fija, paletas locales y filtros: solo fixtures, sin base real. */
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { abrirNavegador } from './navegador.mjs';
@@ -46,10 +33,10 @@ await page.setViewportSize({width:390, height:900});
 
 async function montar({puedeLama}){
   await page.addInitScript(({MESAS, CUENTAS, ITEMS, CARTA, puedeLama}) => {
-    window.__rpc = [];
+    window.__rpc = []; window.__writes=[]; localStorage.setItem("llamita_menu_fijo","no");
     const SES = {user:{id:'u1', email:'jhon@cafe.cl', user_metadata:{nombre:'Jhon'}}};
     const T = {
-      productos:[{id:1, sede:'plaza', producto:'Medialuna manjar', rubro:'Vitrina', stock_actual:20, activo:'SÍ'}],
+      productos:[{id:2,sede:'plaza',producto:'Torta Matilda',rubro:'Vitrina',tipo:'Tortas',stock_actual:0,stock_min:2,activo:'SÍ'}, {id:1, sede:'plaza', producto:'Medialuna manjar', rubro:'Vitrina', stock_actual:20, stock_min:2, tipo:'Bollería', activo:'SÍ'}],
       mesas:MESAS, cuentas:CUENTAS, cuenta_items:ITEMS, comandas:[],
       fudo_productos:CARTA,
       app_permisos:[{correo:'jhon@cafe.cl', nombre:'Jhon', puede_ajustes:true,
@@ -69,12 +56,12 @@ async function montar({puedeLama}){
         is(){return api;}, not(){return api;}, or(){return api;}, ilike(){return api;},
         maybeSingle(){return Promise.resolve({data:filas[0]||null,error:null});},
         single(){return Promise.resolve({data:filas[0]||null,error:null});},
-        insert(v){ const rows=(Array.isArray(v)?v:[v]).map(r=>({id:++seq, ...r}));
+        insert(v){ window.__writes.push(n); const rows=(Array.isArray(v)?v:[v]).map(r=>({id:++seq, ...r}));
           const e={select:()=>e, single:()=>Promise.resolve({data:rows[0],error:null}),
                    then:f=>Promise.resolve({data:rows,error:null}).then(f)}; return e; },
-        update(){const e={eq:()=>e,in:()=>e,select:()=>e,then:f=>Promise.resolve({data:[],error:null}).then(f)};return e;},
-        upsert(){const e={select:()=>e,then:f=>Promise.resolve({data:[],error:null}).then(f)};return e;},
-        delete(){const e={eq:()=>e,in:()=>e,then:f=>Promise.resolve({data:[],error:null}).then(f)};return e;},
+        update(){window.__writes.push(n);const e={eq:()=>e,in:()=>e,select:()=>e,then:f=>Promise.resolve({data:[],error:null}).then(f)};return e;},
+        upsert(){window.__writes.push(n);const e={select:()=>e,then:f=>Promise.resolve({data:[],error:null}).then(f)};return e;},
+        delete(){window.__writes.push(n);const e={eq:()=>e,in:()=>e,then:f=>Promise.resolve({data:[],error:null}).then(f)};return e;},
         then(f){return Promise.resolve({data:filas,error:null,count:filas.length}).then(f);},
       };
       return api;
@@ -130,270 +117,84 @@ const caso = async (n, fn) => {
   catch(e){ mal++; console.log('  ✗ '+n+'  → '+e.message.split('\n')[0]); }
 };
 
-const medir = () => page.evaluate(() => {
-  const tabs = document.querySelector('.tabs');
-  const car  = document.getElementById('tabCarril');
-  const act  = document.querySelector('.tab.active');
-  const inv  = document.getElementById('view-inv');
-  return {
-    clase:   document.body.classList.contains('pc-ancho'),
-    pos:     getComputedStyle(tabs).position,
-    padL:    parseFloat(getComputedStyle(document.body).paddingLeft),
-    anchoTabs: tabs.getBoundingClientRect().width,
-    invW:    inv ? Math.round(inv.getBoundingClientRect().width) : 0,
-    invLeft: inv ? Math.round(inv.getBoundingClientRect().left) : 0,
-    carrilY: car.style.transform.includes('translateY'),
-    carrilAlto: car.style.height,
-    carrilTapa: (()=>{ if(!act) return false;
-      const a = act.getBoundingClientRect(), c = car.getBoundingClientRect();
-      return Math.abs(a.top - c.top) < 2 && Math.abs(a.left - c.left) < 2
-          && Math.abs(a.height - c.height) < 2; })(),
-    marca:   !!document.querySelector('.riel-marca') &&
-             getComputedStyle(document.querySelector('.riel-marca')).display !== 'none',
-    verTabs: [...document.querySelectorAll('.tab')]
-               .filter(t => t.offsetParent !== null)
-               .map(t => t.dataset.tab),
-    scrollX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
-    /* ¿Hace falta deslizar la barra para llegar a la última pestaña? Es
-       exactamente lo que molestaba. */
-    /* ¿Se ve todo sin deslizar? En el riel eso significa que ninguna
-       pestaña se sale por el costado y que no hace falta scroll vertical.
-       Antes esto miraba `inner.scrollWidth`, que en una columna no mide lo
-       que uno cree — una comprobación que no comprueba lo que dice es peor
-       que no tenerla. */
-    seVeTodo: (()=>{
-      const t = document.querySelector('.tabs');
-      const caja = t.getBoundingClientRect();
-      /* ⚠️ Mirar el rectángulo NO alcanza: en el riel las pestañas se
-         estiran al ancho de la columna, así que la CAJA nunca se sale — el
-         que se sale es el TEXTO. Se comprobó estrechando el riel a 96 px:
-         con la comprobación vieja seguía en verde. Por eso se mira
-         `scrollWidth`, que sí ve el texto que no entra. */
-      const salen = [...document.querySelectorAll('.tab')]
-        .filter(x => x.offsetParent !== null)
-        .filter(x => x.getBoundingClientRect().right > caja.right + 1
-                  || x.scrollWidth > x.clientWidth + 1);
-      return salen.length === 0 && t.scrollHeight <= t.clientHeight + 1;
-    })(),
-  };
-});
-
-/* Después de cambiar el tamaño se espera a que el carril SE DETENGA, no un
-   tiempo fijo. Con 250 ms fijos la prueba medía el carril en pleno vuelo
-   apenas la barra tuvo dos pestañas más (Arqueo y Movimientos, 2026-09-22):
-   más recorrido, mismo tiempo, y el rebote de la animación todavía no
-   terminaba. Esperar a que se quede quieto NO regala el caso: si se detiene
-   en el lugar equivocado, `carrilTapa` sigue saliendo rojo. */
-const carrilQuieto = async () => {
-  let antes = '';
-  for(let i = 0; i < 30; i++){
-    const ahora = await page.evaluate(() => {
-      const r = document.getElementById('tabCarril').getBoundingClientRect();
-      return [r.top, r.left, r.width, r.height].map(Math.round).join(',');
-    });
-    if(ahora === antes) return;
-    antes = ahora;
-    await page.waitForTimeout(60);
-  }
-};
-const ir = async (w,h) => { await page.setViewportSize({width:w, height:h});
-                            await page.waitForTimeout(250); await carrilQuieto(); };
-
 await montar({puedeLama:true});
-/* Con permiso de Lama la app aterriza en Mesas, así que el inventario está
-   escondido y mediría 0. Se entra a Inventario, que es la pantalla cuyo
-   ancho estamos probando. */
-await page.click('.tab[data-tab="inv"]');
-await page.waitForTimeout(350);
-
-console.log('\nEN EL COMPUTADOR (1440 px) · el riel:');
-await ir(1440, 900);
-let m = await medir();
-if(process.env.CAPTURA_SIDEBAR) await page.screenshot({path:`${process.env.CAPTURA_SIDEBAR}-fijado.png`,fullPage:true});
-await caso('la clase `pc-ancho` está puesta', async () => m.clase || 'no se puso');
-await caso('la barra se paró: es un riel fijo a la izquierda', async () =>
-  (m.pos === 'fixed' && m.anchoTabs > 250 && m.anchoTabs < 280) || `pos=${m.pos} ancho=${m.anchoTabs}`);
-await caso('el contenido se corre y NO queda debajo del riel', async () =>
-  (m.padL >= 240 && m.invLeft >= 240) || `padL=${m.padL} left=${m.invLeft}`);
-await caso('la cabecera visible usa nombre neutral de demo', async () =>
-  (await page.textContent('#topTitle')) === 'Local 1' || await page.textContent('#topTitle'));
-await caso('el inventario aprovecha el ancho (era 900)', async () =>
-  m.invW > 1000 || `mide ${m.invW}`);
-await caso('la marca "Llamita Plus" aparece arriba del riel', async () =>
-  m.marca || 'no se ve');
-await caso('NO hay que deslizar nada para ver todas las secciones', async () =>
-  m.seVeTodo || 'alguna pestaña se sale del riel, o el riel pide scroll');
-await caso('Recetas está a la vista', async () => m.verTabs.includes('recetas') || m.verTabs.join());
-await caso('Mesas (la casita) está a la vista', async () => m.verTabs.includes('lama') || m.verTabs.join());
-await caso('el carril viaja hacia abajo, no al costado', async () =>
-  m.carrilY || `transform vertical ausente`);
-await caso('y queda justo encima de la pestaña activa', async () => m.carrilTapa || 'descolocado');
-await caso('la página no se desborda a lo ancho', async () => !m.scrollX || 'hay scroll horizontal');
-
-console.log('\nAL CAMBIAR DE PESTAÑA · el carril sigue puesto:');
-await page.click('.tab[data-tab="recetas"]');
-await page.waitForTimeout(450);
-m = await medir();
-await caso('sigue encima de la nueva activa', async () => m.carrilTapa || 'quedó atrás');
-await page.click('.tab[data-tab="inv"]');
-await page.waitForTimeout(400);
-
-console.log('\nEN EL TELÉFONO (390 px) · TODO como antes:');
-await ir(390, 844);
-m = await medir();
-await caso('la barra vuelve a ser horizontal y pegajosa', async () =>
-  m.pos === 'sticky' || `pos=${m.pos}`);
-await caso('el contenido no se corre', async () => m.padL === 0 || `padL=${m.padL}`);
-await caso('la marca del riel NO se ve', async () => !m.marca || 'se coló en el teléfono');
-await caso('el carril vuelve a viajar al costado', async () => !m.carrilY || 'quedó vertical');
-await caso('y sigue encima de la activa', async () => m.carrilTapa || 'descolocado');
-await caso('sin scroll horizontal', async () => !m.scrollX || 'la página se desborda');
-
-console.log('\nJUSTO DEBAJO DEL UMBRAL (1079 px) · todavía es teléfono:');
-await ir(1079, 800);
-m = await medir();
-await caso('la barra sigue horizontal', async () => m.pos === 'sticky' || `pos=${m.pos}`);
-await caso('el carril sigue al costado', async () => !m.carrilY || 'se puso vertical antes de tiempo');
-
-console.log('\nJUSTO ENCIMA (1080 px) · ya es riel:');
-await ir(1080, 800);
-m = await medir();
-await caso('la barra se paró', async () => m.pos === 'fixed' || `pos=${m.pos}`);
-await caso('el carril se puso vertical', async () => m.carrilY || 'siguió horizontal');
-await caso('y encima de la activa', async () => m.carrilTapa || 'descolocado');
-
-console.log('\nDOS COLUMNAS · recién a los 1400, no antes:');
-await ir(1200, 900);
-let cols = await page.evaluate(() => getComputedStyle(document.getElementById('list')).gridTemplateColumns);
-await caso('a 1200 el inventario va en una columna', async () =>
-  !cols.includes(' ') || `son varias: ${cols}`);
-await ir(1500, 900);
-cols = await page.evaluate(() => getComputedStyle(document.getElementById('list')).gridTemplateColumns);
-await caso('a 1500 se parte en dos', async () =>
-  cols.split(' ').length === 2 || `da ${cols}`);
-
-console.log('\nEL INTERRUPTOR APAGADO · vuelve exactamente a lo de antes (§2.2):');
-/* ⚠️ EL ORDEN IMPORTA, y este caso lo aprendió a la mala. `PC_ANCHO` es una
-   constante y no se puede apagar desde acá, así que se simula sacándole la
-   clase al cuerpo. Pero desde el 2026-09-07 hay un manejador de `resize` que
-   la vuelve a poner: quitarla ANTES de cambiar el tamaño no servía de nada.
-   Primero se acomoda la ventana, y recién después se apaga. */
-await ir(1440, 900);
-await page.evaluate(() => document.body.classList.remove('pc-ancho'));
-await page.waitForTimeout(200);
-m = await medir();
-await caso('la barra vuelve a ser horizontal', async () => m.pos === 'sticky' || `pos=${m.pos}`);
-await caso('el contenido vuelve a su ancho de siempre', async () =>
-  m.invW === 900 || `mide ${m.invW}`);
-await caso('no queda un hueco a la izquierda', async () => m.padL === 0 || `padL=${m.padL}`);
-await caso('la marca del riel desaparece', async () => !m.marca || 'quedó colgada');
-
-
-console.log('\n🔴 LA CHINCHETA · fijar y soltar el panel:');
-await ir(1440, 900);
-await page.evaluate(() => { try{ localStorage.removeItem('llamita_menu_fijo'); }catch{} });
-await page.reload(); await page.waitForTimeout(600);
-await page.click('.gate-btn[data-sede="plaza"]').catch(()=>{});
-await page.waitForTimeout(700);
-
-await caso('de fábrica el panel viene fijo', async () =>
-  await page.evaluate(() => document.body.classList.contains('menu-fijo')) || 'nace suelto');
-await caso('el menú entero se mudó adentro del panel', async () =>
-  await page.evaluate(() =>
-    document.getElementById('drawer').closest('.tabs') !== null)
-  || 'el cajón sigue colgando del cuerpo de la página');
-await caso('y es el MISMO cajón, no una copia', async () =>
-  await page.evaluate(() => document.querySelectorAll('#drawer, .drawer').length) === 1
-  || 'hay dos menús: se van a desincronizar');
-await caso('con el panel fijo, las tres rayas desaparecen', async () =>
-  !(await page.isVisible('#btnMenu')) || 'ofrece abrir algo que ya está abierto');
-await caso('Actualizar, Historial y Cambiar sede están a la vista', async () => {
-  const faltan = [];
-  for(const a of ['actualizar','historial','cambiar-sede'])
-    if(!(await page.isVisible(`[data-accion="${a}"]`))) faltan.push(a);
-  return faltan.length === 0 || 'no se ven: ' + faltan.join(', ');
-});
-await caso('el nombre de la sede se lee (no quedó en "—")', async () =>
-  ((await page.textContent('#drawerSede')) || '').includes('Local 1')
-  || 'dice: ' + (await page.textContent('#drawerSede')));
-await caso('la chincheta está, chiquita y a la vista', async () =>
-  await page.isVisible('#fijarRiel') || 'no hay cómo soltarlo');
-const estiloFijo = await page.evaluate(() => {
-  const d = document.getElementById('drawer'), c = getComputedStyle(d);
-  return {width:Math.round(d.getBoundingClientRect().width), background:c.backgroundColor,
-    shadow:c.boxShadow, padding:c.padding, font:getComputedStyle(d.querySelector('.drawer-item')).fontSize,
-    header:getComputedStyle(d.querySelector('.drawer-sede')).fontSize};
-});
-await page.click('#fijarRiel'); await page.waitForTimeout(450);
-await page.click('#btnMenu'); await page.waitForTimeout(350);
-const estiloSuelto = await page.evaluate(() => {
-  const d = document.getElementById('drawer'), c = getComputedStyle(d);
-  return {width:Math.round(d.getBoundingClientRect().width), background:c.backgroundColor,
-    shadow:c.boxShadow, padding:c.padding, font:getComputedStyle(d.querySelector('.drawer-item')).fontSize,
-    header:getComputedStyle(d.querySelector('.drawer-sede')).fontSize};
-});
-if(process.env.CAPTURA_SIDEBAR) await page.screenshot({path:`${process.env.CAPTURA_SIDEBAR}-desplegado.png`,fullPage:true});
-await caso('fijado y desplegado conserva la misma piel y escala', async () =>
-  JSON.stringify(estiloFijo) === JSON.stringify(estiloSuelto)
-    || `fijo=${JSON.stringify(estiloFijo)} suelto=${JSON.stringify(estiloSuelto)}`);
-await page.click('#fijarMenu'); await page.waitForTimeout(450);
-
-console.log('\nAL SOLTARLO · el panel se va ENTERO, no se queda a medias:');
-await page.click('#fijarRiel'); await page.waitForTimeout(500);
-await caso('el riel desaparece', async () =>
-  await page.evaluate(() => getComputedStyle(document.querySelector('.tabs')).position) === 'sticky'
-  || 'el panel sigue puesto');
-await caso('las pestañas vuelven arriba, horizontales', async () =>
-  await page.isVisible('#tabInv') || 'se perdieron las pestañas');
-await caso('el contenido recupera todo el ancho', async () =>
-  await page.evaluate(() => parseFloat(getComputedStyle(document.body).paddingLeft)) === 0
-  || 'quedó un hueco a la izquierda');
-await caso('vuelven las tres rayas', async () =>
-  await page.isVisible('#btnMenu') || 'no hay forma de abrir el menú');
-await caso('el cajón vuelve a ser cajón', async () =>
-  await page.evaluate(() =>
-    document.getElementById('drawer').parentElement === document.body)
-  || 'quedó colgando adentro del riel apagado');
-
-console.log('\n🔴 Y SE PUEDE VOLVER · un camino de ida sería una trampa:');
-await page.click('#btnMenu'); await page.waitForTimeout(400);
-await caso('el "Fijar el panel" está adentro del menú', async () =>
-  await page.isVisible('#fijarMenu') || 'no hay cómo volver a fijarlo');
-await page.click('#fijarMenu'); await page.waitForTimeout(600);
-await caso('y el panel vuelve', async () =>
-  await page.evaluate(() => document.body.classList.contains('menu-fijo')) || 'no volvió');
-await caso('se cierra el cajón al fijarlo, sin dejarlo abierto encima', async () =>
-  !(await page.evaluate(() => document.getElementById('scrim').classList.contains('open')))
-  || 'quedó el fondo oscuro puesto');
-
-console.log('\nSE ACUERDA · es una preferencia de ESTE aparato:');
-await caso('lo elegido queda guardado', async () =>
-  await page.evaluate(() => { try{ return localStorage.getItem('llamita_menu_fijo'); }catch{ return null; } }) === 'si'
-  || 'no se guardó');
-await page.click('#fijarRiel'); await page.waitForTimeout(400);
-await page.reload(); await page.waitForTimeout(700);
-await page.click('.gate-btn[data-sede="plaza"]').catch(()=>{});
-await page.waitForTimeout(700);
-await caso('al recargar sigue suelto, no vuelve solo', async () =>
-  !(await page.evaluate(() => document.body.classList.contains('menu-fijo')))
-  || 'se volvió a fijar solo y perdió lo que el local eligió');
-
-console.log('\nEN EL TELÉFONO la chincheta NO existe:');
-await ir(390, 844);
-await page.click('#btnMenu'); await page.waitForTimeout(300);
-if(process.env.CAPTURA_SIDEBAR) await page.screenshot({path:`${process.env.CAPTURA_SIDEBAR}-movil.png`,fullPage:true});
-await page.keyboard.press('Escape'); await page.waitForTimeout(250);
-await caso('no se ofrece fijar nada', async () =>
-  !(await page.isVisible('#fijarMenu')) || 'ofrece algo que no se puede hacer en un teléfono');
-await caso('y el menú sigue siendo el cajón de siempre', async () =>
-  await page.isVisible('#btnMenu') || 'se quedó sin menú');
-await ir(1440, 900);
-await page.evaluate(() => { try{ localStorage.removeItem('llamita_menu_fijo'); }catch{} });
-
-console.log('\nY NINGÚN ERROR DE JAVASCRIPT EN TODA LA SESIÓN:');
-await caso('la consola quedó limpia', async () =>
-  errores.length === 0 || errores[0]);
-
+await page.click('#tabInv');
+for(const width of [1440,1080,1079,768,390,320]){
+  await page.setViewportSize({width,height:900});
+  await page.waitForTimeout(200);
+  await caso(`${width}px: panel fijo sin superponer contenido ni desbordar`,async()=>page.evaluate(()=>{
+    const rail=document.querySelector('.tabs').getBoundingClientRect();
+    const main=document.querySelector('#view-inv').getBoundingClientRect();
+    return getComputedStyle(document.querySelector('.tabs')).position==='fixed'
+      && rail.top===0 && rail.height===innerHeight && main.left>=rail.right
+      && document.documentElement.scrollWidth<=innerWidth;
+  }));
+  await caso(`${width}px: encabezado centrado en el área útil`,async()=>page.evaluate(()=>{
+    const rail=document.querySelector('.tabs').getBoundingClientRect();
+    const title=document.querySelector('.top-tit').getBoundingClientRect();
+    return Math.abs((title.left+title.right)/2-(rail.right+innerWidth)/2)<2;
+  }));
+  await caso(`${width}px: una sola navegación, sin marca ni controles de despliegue`,async()=>page.evaluate(()=>
+    document.querySelectorAll('.tabs #drawer').length===1
+    &&!document.querySelector('#fijarMenu,#fijarRiel,#btnMenu,.riel-marca')));
+  await page.click('#paleta-trigger');
+  await caso(`${width}px: selector visible dentro de la ventana y sobre el contenido`,async()=>page.evaluate(()=>{
+    const panel=document.querySelector('#paleta-popover'),r=panel.getBoundingClientRect();
+    return !panel.hidden && r.left>=0 && r.top>=0 && r.right<=innerWidth && r.bottom<=innerHeight
+      && panel.contains(document.elementFromPoint(r.left+30,r.top+30));
+  }));
+  await page.keyboard.press('Escape');
+  if(process.env.CAPTURA_SIDEBAR && [1440,390].includes(width))
+    await page.screenshot({path:`${process.env.CAPTURA_SIDEBAR}-${width}.png`,fullPage:true});
+}
+await page.setViewportSize({width:1440,height:900});
+await page.evaluate(()=>{window.__writes=[];window.__rpc=[];});
+const fondos=new Set();
+for(const paleta of ['tierra','cacao','olivo','arcilla','petroleo']){
+  const antes=await page.locator('#view-inv').boundingBox();
+  await page.click('#paleta-trigger');
+  await page.click(`.paleta-opcion[data-paleta="${paleta}"]`);
+  await caso(`${paleta}: aplica, guarda localmente y cierra sin mover el layout`,async()=>{
+    const despues=await page.locator('#view-inv').boundingBox();
+    return JSON.stringify(antes)===JSON.stringify(despues) && await page.evaluate(p=>
+      document.documentElement.dataset.paleta===p && localStorage.getItem('llamita_paleta')===p
+      && document.querySelector('#paleta-popover').hidden,paleta);
+  });
+  fondos.add(await page.evaluate(()=>getComputedStyle(document.body).backgroundColor));
+}
+await caso('cinco fondos distintos sin escrituras ni RPC al cambiar paleta',async()=>
+  fondos.size===5 && await page.evaluate(()=>!window.__writes.length&&!window.__rpc.length));
+await page.reload();await page.waitForTimeout(500);
+await page.click('.gate-btn[data-sede="plaza"]');await page.waitForTimeout(500);await page.click('#tabInv');
+await caso('la preferencia de paleta sobrevive recarga; el antiguo panel suelto se ignora',async()=>page.evaluate(()=>
+  document.documentElement.dataset.paleta==='petroleo'
+  && getComputedStyle(document.querySelector('.tabs')).position==='fixed'
+  && localStorage.getItem('llamita_menu_fijo')==='no'));
+await page.click('#paleta-trigger');await page.click('#q');
+await caso('clic fuera cierra el selector',async()=>!await page.isVisible('#paleta-popover'));
+await page.click('#paleta-trigger');await page.keyboard.press('Escape');
+await caso('Escape cierra y devuelve foco',async()=>page.evaluate(()=>
+  document.querySelector('#paleta-popover').hidden&&document.activeElement.id==='paleta-trigger'));
+await page.click('#paleta-trigger');await page.click('#paleta-trigger');
+await caso('el botón también cierra el selector',async()=>!await page.isVisible('#paleta-popover'));
+await page.selectOption('#tipos','Tortas');
+await page.selectOption('#inv-estado','critico');
+await page.click('.sec-btn');
+await caso('categoría y estado filtran las filas existentes',async()=>
+  (await page.locator('#list .row').count())===1&&(await page.textContent('#list')).includes('Torta Matilda'));
+await page.click('#inv-limpiar');
+await caso('Limpiar reinicia búsqueda, categoría, estado y métricas',async()=>page.evaluate(()=>
+  !document.querySelector('#tipos').value&&!document.querySelector('#inv-estado').value
+  &&!document.querySelector('#q').value&&!document.querySelector('.mcard.sel')));
+await page.fill('#q','medialuna');
+await caso('el buscador conserva su comportamiento',async()=>
+  (await page.locator('#list .row').count())===1&&(await page.textContent('#list')).includes('Medialuna'));
+await page.click('[data-accion="ajustes"]');
+await caso('Ajustes mantiene navegación accesible y estado activo',async()=>
+  await page.isVisible('#view-ajustes')&&await page.isVisible('#tabInv')
+  && await page.locator('[data-accion="ajustes"]').evaluate(b=>b.classList.contains('active')));
+await page.click('#tabInv');
+await caso('se vuelve a Inventario por el mismo panel',async()=>await page.isVisible('#view-inv'));
+await caso('sin errores de JavaScript ni consola',async()=>errores.length===0||errores.join('\n'));
 console.log(`\n${ok} bien · ${mal} mal\n`);
-await browser.close();
-process.exit(mal ? 1 : 0);
+await browser.close();process.exit(mal?1:0);

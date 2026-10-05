@@ -16,7 +16,7 @@ import { dirname, join } from 'node:path';
 import { abrirNavegador } from './navegador.mjs';
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
-const html = readFileSync(join(raiz, 'index.html'), 'utf8');
+const html = readFileSync(join(raiz, 'index.html'), 'utf8') + readFileSync(join(raiz, 'themes.css'), 'utf8');
 
 let ok = 0, mal = 0;
 const caso = (nombre, r) => {
@@ -216,12 +216,12 @@ console.log('\nDeslizar mueve la fila, no solo el símbolo:');
 
 /* En escritorio la navegación se aloja en el drawer y puede estar cerrada;
    medirla en ese estado no es una prueba del carril visible. En móvil sí
-   está expuesta como pestañas horizontales, que es el uso que se verifica. */
+   permanece vertical, que es el uso que se verifica. */
 await page.setViewportSize({width:390,height:844});
 await page.waitForTimeout(100);
 caso('el carril de navegación móvil se midió', await page.evaluate(() => {
   const c = document.getElementById('tabCarril');
-  return !!c && c.classList.contains('listo') && parseFloat(c.style.width) > 0;
+  return !!c && c.classList.contains('listo') && parseFloat(c.style.height) > 0;
 }) || 'el carril no se midió');
 caso('ningún error de JavaScript en toda la sesión',
   errores.length === 0 || errores.join(' | ').slice(0, 300));

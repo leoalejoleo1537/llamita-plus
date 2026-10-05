@@ -133,7 +133,7 @@ await caso('Mermas ofrece cuatro KPI, filtro y gráficos sin anillo',async()=>
     && (await page.textContent('#mermas-demo-badge')).includes('ficticios'));
 await caso('la marca del riel se oculta durante Mermas',async()=>
   await page.evaluate(()=>document.body.classList.contains('vista-mermas')
-    &&getComputedStyle(document.querySelector('.riel-marca')).display==='none'));
+    &&!document.querySelector('.riel-marca')));
 await caso('barras muestran categorías, motivos y registros de auditoría',async()=>
   (await page.textContent('#mermas-charts')).includes('Tortas')
     && (await page.textContent('#mermas-charts')).includes('Vencimiento')

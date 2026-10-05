@@ -4,6 +4,29 @@
 > apliquemos los cambios"*. Este archivo queda como registro de qué se eligió
 > y por qué, y de lo que se descartó — para que nadie lo vuelva a proponer.
 
+## Actualización de Llamita Plus — 2026-10-05
+
+Por pedido de Jhon, esta copia usa **Tierra cálida** como paleta inicial y un
+panel lateral **siempre fijo**, sin chincheta ni cajón temporal. En escritorio
+mide 260 px; en pantallas menores de 1080 px usa una columna de 88 px con iconos
+y etiquetas. Los permisos y rutas siguen decidiendo qué acciones aparecen.
+El panel permanece también en Ajustes. El encabezado se centra en el área útil.
+Se retiraron el logo/nombre de cabecera y los rótulos redundantes del panel.
+
+**Apariencia**, al pie del panel, permite elegir Tierra cálida (terracota/crema),
+Cacao sobrio (cobre/marfil), Olivo de bodega (salvia/crema), Arcilla nocturna
+(grafito/arcilla) y Marfil y petróleo (petróleo/arena). Los colores se definen una
+sola vez en `themes.css`; el atributo `data-paleta` de `<html>` los aplica.
+La clave local `llamita_paleta` guarda únicamente esa elección por navegador;
+no se consulta ni escribe Supabase. Si el almacenamiento no está disponible,
+la selección sigue funcionando durante la sesión. La antigua preferencia
+`llamita_menu_fijo` ya no interviene.
+
+Inventario conserva sus métricas y agrupaciones. Categoría y estado se eligen
+en desplegables; la búsqueda mantiene su comportamiento de soltar los filtros.
+Esta decisión sustituye para **Llamita Plus** la paleta y la navegación históricas
+que se documentan a continuación. No se aplica a Café del Desierto.
+
 ## Lo que quedó
 
 | | |
