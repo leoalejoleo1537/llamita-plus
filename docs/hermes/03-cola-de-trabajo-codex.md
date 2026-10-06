@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **A3.1 activa — cimientos, seguridad e idempotencia del puente Lama → Stock**. A3.2–A3.4 y B1 de áreas permanecen pendientes.
+Estado actual: **A3.2 activa — captura protegida del cierre Lama en modo apagado/prueba**. A3.3–A3.4 y B1 de áreas permanecen pendientes.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -92,3 +92,19 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Regla de detención: cualquier duda de identidad de repositorio/proyecto, firma existente, seguridad, colisión de nombres o migración no reversible cambia el estado a `REQUIERE DECISIÓN` sin ejecutar cambios.
 - Resultado (2026-10-06): migración `a3_1_cimientos_lama_stock` aplicada únicamente en Supabase `llamita-plus`. Se crearon los cimientos aditivos con RLS, permisos directos revocados, modo efectivo apagado y claves únicas de idempotencia. Pruebas estructurales y transaccionales correctas; ventas, recetas, productos y stock sin cambios.
 - Archivos: `sql/2026-10-a3-1-cimientos-lama-stock.sql` y rollback `sql/2026-10-a3-1-cimientos-lama-stock.rollback.sql`. No activar A3.2.
+
+### Tarea A3.2 - Captura protegida del cierre Lama
+
+- Estado: ACTIVA
+- Autorización: Alejo aprobó continuar los bloques A3 después de completar A3.1; Hermes revisó la migración aplicada y no encontró un bloqueo para captura en modo apagado/prueba.
+- Objetivo: hacer que los cierres de Lama creen eventos idempotentes y snapshots de sus líneas cuando el modo sea `prueba`, sin modificar stock y sin permitir que un fallo de inventario impida cerrar la mesa o registrar caja.
+- Documentos obligatorios: `docs/hermes/08-plan-implementacion-puente-lama-stock.md`, contrato A2, reglas operativas, documentación Lama y resultado A3.1.
+- Alcance permitido: migración aditiva; función interna de captura; integración conservando exactamente las firmas actuales de `cuenta_cobrar` y `cuenta_cerrar`; estado persistente de captura por cuenta; modo `apagado/prueba`; pruebas transaccionales y de aplicación; documentación.
+- Regla transaccional: la venta, pagos y cierre de cuenta son autoritativos. La captura de inventario debe ejecutarse en un bloque protegido; receta faltante produce `sin_receta`, y una excepción técnica deja un marcador persistente `pendiente/error` sin revertir el cierre comercial.
+- Modo apagado: ausencia de fila en `lama_stock_config` conserva exactamente el comportamiento actual y no crea eventos.
+- Modo prueba: crea un evento por línea confirmada y no anulada, congela cantidad, precio y receta, pero no crea descuentos reales ni cambia productos/lotes.
+- Idempotencia: cierre repetido, doble clic o timeout no duplican eventos. Cubrir ambos caminos reales: `cuenta_cobrar` y `cuenta_cerrar`; mesa vacía no genera eventos.
+- Fuera de alcance: escritura de `productos.stock_actual`; aplicaciones reales; modo `real`; reversas; panel; Fudo/Edge Functions; áreas; Café del Desierto.
+- Criterios de aceptación: pruebas de modo apagado, prueba, sin receta, receta existente, línea anulada, mesa vacía, cierre repetido y excepción de captura; conteos y suma de stock pre/post sin cambios; rollback documentado; RLS/grants revisados.
+- Publicación: migración y código asociado pueden aplicarse exclusivamente a Llamita Plus y publicarse a `master` si todas las pruebas pasan. No activar A3.3.
+- Regla de detención: si no puede garantizarse que una falla de captura deje cerrar y conservar caja, no modificar las funciones de cierre y marcar `REQUIERE DECISIÓN`.

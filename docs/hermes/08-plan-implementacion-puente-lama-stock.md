@@ -1,7 +1,7 @@
 # A3 — Plan de implementación del puente Llamita Lama → Llamita Stock
 
 Fecha: 2026-10-06
-Estado: **aprobado por bloques; solo A3.1 está activa**
+Estado: **aprobado por bloques; A3.1 completada y A3.2 activa**
 Proyecto autorizado: Llamita Plus (`iuryhsjucblmebdogewa`)
 
 ## Objetivo
@@ -70,7 +70,7 @@ Estado: **ACTIVA**
 
 ## A3.2 — Captura del cierre en modo apagado/prueba
 
-Estado: PENDIENTE
+Estado: **ACTIVA**
 
 - Crear una única función interna para registrar el cierre Lama por `cuenta_id`.
 - Integrarla en los dos caminos que pueden cerrar una cuenta: `cuenta_cobrar` y `cuenta_cerrar`.
@@ -83,6 +83,8 @@ Estado: PENDIENTE
 - Un cierre repetido devuelve los eventos existentes.
 - Si falta receta, cerrar la mesa y marcar el evento `sin_receta`.
 - Si falla la captura mínima del evento, registrar un diagnóstico técnico; nunca caer silenciosamente a otro camino de cobro.
+- Persistir por cuenta si la captura quedó `no_aplica`, `pendiente`, `capturada` o `error`, mediante una solución aditiva verificada por Codex. La venta y caja siguen siendo autoritativas.
+- Proteger la captura con manejo de excepción: una falla técnica del subsistema de inventario no revierte pagos, importes ni el estado cerrado de la cuenta.
 
 ## A3.3 — Motor neutral y aplicación al stock actual
 

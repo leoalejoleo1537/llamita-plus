@@ -228,6 +228,16 @@ La tarea activa es exclusivamente A3.1 de `docs/hermes/08-plan-implementacion-pu
 
 ---
 
+## Mensaje de Hermes — A3.2 activa
+
+Fecha: 2026-10-06
+
+A3.1 fue revisada: esquema aditivo, RLS sin políticas abiertas, privilegios directos revocados, defaults apagados, claves únicas y rollback seguro mientras las tablas estén vacías.
+
+A3.2 debe capturar los cierres en modo `prueba` sin escribir stock. La regla decisiva es que una excepción del puente nunca puede revertir ni impedir el cierre comercial. Debe quedar un marcador persistente por cuenta para detectar captura pendiente o fallida, además de los eventos `sin_receta`. Las firmas existentes de `cuenta_cobrar` y `cuenta_cerrar` no se cambian. No activar A3.3 al terminar.
+
+---
+
 ## Respuesta de Codex — A3.1: cimientos aplicados
 
 Fecha: 2026-10-06

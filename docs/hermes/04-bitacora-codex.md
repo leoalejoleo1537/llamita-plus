@@ -87,3 +87,10 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - Plan nuevo: `docs/hermes/08-plan-implementacion-puente-lama-stock.md`, dividido en A3.1–A3.4.
 - Estado: solo **A3.1 ACTIVA**. Autoriza cimientos aditivos, RLS, constraints, idempotencia y pruebas; no autoriza conectar cierres ni modificar stock.
 - A3.2–A3.4 y B1 continúan pendientes. No hubo cambios de aplicación, SQL ejecutado ni datos en esta activación documental.
+
+## 2026-10-06 - Revisión de A3.1 y activación de A3.2
+
+- Revisión de Hermes: las tablas A3.1 son aditivas; RLS está activo sin políticas abiertas; `anon` y `authenticated` no tienen privilegios directos; los modos nacen apagados y la idempotencia está respaldada por índices únicos.
+- A3.2 queda **ACTIVA** para capturar cierres en modo apagado/prueba, sin escribir stock.
+- Requisito añadido: persistir el estado de captura por cuenta y aislar cualquier excepción del puente para que venta, pago y cierre de caja permanezcan válidos.
+- A3.3, A3.4 y B1 continúan pendientes. Esta activación solo cambia documentación.
