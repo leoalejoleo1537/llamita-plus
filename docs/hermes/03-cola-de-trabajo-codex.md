@@ -95,7 +95,7 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 
 ### Tarea A3.2 - Captura protegida del cierre Lama
 
-- Estado: ACTIVA
+- Estado: COMPLETADA
 - Autorización: Alejo aprobó continuar los bloques A3 después de completar A3.1; Hermes revisó la migración aplicada y no encontró un bloqueo para captura en modo apagado/prueba.
 - Objetivo: hacer que los cierres de Lama creen eventos idempotentes y snapshots de sus líneas cuando el modo sea `prueba`, sin modificar stock y sin permitir que un fallo de inventario impida cerrar la mesa o registrar caja.
 - Documentos obligatorios: `docs/hermes/08-plan-implementacion-puente-lama-stock.md`, contrato A2, reglas operativas, documentación Lama y resultado A3.1.
@@ -108,3 +108,6 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Criterios de aceptación: pruebas de modo apagado, prueba, sin receta, receta existente, línea anulada, mesa vacía, cierre repetido y excepción de captura; conteos y suma de stock pre/post sin cambios; rollback documentado; RLS/grants revisados.
 - Publicación: migración y código asociado pueden aplicarse exclusivamente a Llamita Plus y publicarse a `master` si todas las pruebas pasan. No activar A3.3.
 - Regla de detención: si no puede garantizarse que una falla de captura deje cerrar y conservar caja, no modificar las funciones de cierre y marcar `REQUIERE DECISIÓN`.
+- Resultado (2026-10-06): captura protegida aplicada únicamente en Llamita Plus. Se conservaron las firmas reales de `cuenta_cobrar` y `cuenta_cerrar`; ambos caminos llaman a una función interna solo después del cierre comercial. Modo apagado no crea eventos; modo prueba captura líneas confirmadas no anuladas; sin receta queda `sin_receta`; errores quedan persistidos sin bloquear mesa/caja.
+- Migraciones: `a3_2_captura_cierre_lama` y endurecimiento `a3_2_restrict_captura_execute`. No se modifican stock, lotes, aplicaciones, Fudo ni interfaz. No activar A3.3.
+- Rollback: `sql/2026-10-a3-2-captura-cierre-lama.rollback.sql`, restaura las definiciones pre-A3.2 y aborta si existen filas de captura/eventos.

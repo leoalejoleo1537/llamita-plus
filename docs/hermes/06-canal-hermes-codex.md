@@ -279,3 +279,40 @@ Rollback preparado en `sql/2026-10-a3-1-cimientos-lama-stock.rollback.sql`. Comp
 Riesgos pendientes: todavía no existe una frontera RPC para insertar eventos; la futura política de acceso debe mantener las tablas cerradas al navegador; los campos `area_id`/`lote_id` son preparatorios y no implican stock por área; la integración con el cierre y el motor de inventario queda para A3.2/A3.3.
 
 Cambios de código, ventas, recetas, productos y datos operativos: **ninguno**. El único cambio remoto fue el DDL aditivo de A3.1 en Llamita Plus.
+
+---
+
+## Respuesta de Codex — A3.2: captura protegida del cierre Lama
+
+Fecha: 2026-10-06
+Estado: **COMPLETADA**
+
+Se implementó exclusivamente A3.2. Las definiciones reales se obtuvieron con `pg_get_functiondef` antes de modificar y se conservaron sus firmas exactas:
+
+- `cuenta_cobrar(bigint,text,text,text,numeric,jsonb,jsonb)` con sus siete parámetros efectivos y defaults instalados;
+- `cuenta_cerrar(bigint,text)`.
+
+La única extensión es una llamada protegida después de actualizar la cuenta a `cerrada`. Si la captura falla, el bloque `EXCEPTION` evita que falle el cierre comercial.
+
+### Comportamiento
+
+- Ausencia de configuración o modo `apagado`: comportamiento anterior, cero eventos y cero filas de captura.
+- Modo `prueba`: una captura por cuenta y un evento por línea `confirmado` no anulada.
+- El evento conserva cantidad, precio aplicado, producto de proveedor, cuenta/línea y snapshot JSON de receta.
+- Sin receta: `estado = sin_receta`; la mesa se cierra normalmente.
+- Mesa vacía: captura persistente con cero eventos.
+- Segundo cierre o reintento: la clave `(source, sede, source_sale_id, source_line_id)` evita duplicados.
+- Excepción técnica: captura `estado = error` y diagnóstico; cuenta, pagos, propina, descuentos y caja permanecen válidos.
+- No se crean aplicaciones y no se escribe `productos.stock_actual` ni lotes.
+
+### Seguridad y pruebas
+
+La función interna `lama_stock_capturar_cuenta(bigint)` es `SECURITY DEFINER`, usa `search_path = public, pg_temp` y no es ejecutable por `public`, `anon`, `authenticated` ni `service_role`. Solo las funciones de cierre propietarias pueden invocarla.
+
+Se aplicaron `a3_2_captura_cierre_lama` y `a3_2_restrict_captura_execute`. Las pruebas transaccionales cubrieron apagado, prueba, receta, ausencia de receta, anulación, mesa vacía, doble cierre, reintento, cobro con parcial/propina/descuento y error forzado con trigger temporal. Todas terminaron en `ROLLBACK`.
+
+Conteos pre/post: cuentas 59, líneas 88, recetas 396, ítems de receta 514, productos 1.437 y stock total 15.438. Las tablas de captura/eventos/aplicaciones quedaron vacías tras las pruebas. No se modificó ninguna cantidad de stock.
+
+Rollback: `sql/2026-10-a3-2-captura-cierre-lama.rollback.sql`; restaura las dos definiciones originales y aborta si hay filas A3.2.
+
+No se implementó A3.3, no se habilitó modo real, no se modificó Fudo, interfaz, recetas, productos ni Café del Desierto / Llamita Stock.

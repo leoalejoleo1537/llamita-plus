@@ -70,7 +70,7 @@ Estado: **ACTIVA**
 
 ## A3.2 — Captura del cierre en modo apagado/prueba
 
-Estado: **ACTIVA**
+Estado: **COMPLETADA — 2026-10-06**
 
 - Crear una única función interna para registrar el cierre Lama por `cuenta_id`.
 - Integrarla en los dos caminos que pueden cerrar una cuenta: `cuenta_cobrar` y `cuenta_cerrar`.
@@ -83,6 +83,15 @@ Estado: **ACTIVA**
 - Un cierre repetido devuelve los eventos existentes.
 - Si falta receta, cerrar la mesa y marcar el evento `sin_receta`.
 - Si falla la captura mínima del evento, registrar un diagnóstico técnico; nunca caer silenciosamente a otro camino de cobro.
+
+### Resultado A3.2
+
+- Migraciones aplicadas: `a3_2_captura_cierre_lama` y `a3_2_restrict_captura_execute` en Supabase `llamita-plus`.
+- Se creó `lama_stock_capturas` y la función interna `lama_stock_capturar_cuenta(bigint)`. Las funciones instaladas de `cuenta_cobrar` y `cuenta_cerrar` fueron leídas con `pg_get_functiondef`; se conservaron firmas y comportamiento, agregando únicamente la llamada protegida posterior al cierre.
+- La captura es apagada por ausencia de configuración, de prueba en modo `prueba`, no genera aplicaciones, no escribe stock y no conecta Fudo.
+- Rollback: `sql/2026-10-a3-2-captura-cierre-lama.rollback.sql`; restaura las funciones originales y elimina estructura A3.2 solo si no contiene filas.
+- Pruebas ejecutadas y revertidas: apagado, receta, sin receta, anulación, mesa vacía, doble cierre, reintento, cobro con parcial/propina/descuento y error técnico forzado. Todas pasaron.
+- No activar A3.3 hasta revisar los marcadores `error`/`sin_receta` y aprobar el motor de aplicación.
 - Persistir por cuenta si la captura quedó `no_aplica`, `pendiente`, `capturada` o `error`, mediante una solución aditiva verificada por Codex. La venta y caja siguen siendo autoritativas.
 - Proteger la captura con manejo de excepción: una falla técnica del subsistema de inventario no revierte pagos, importes ni el estado cerrado de la cuenta.
 
