@@ -166,7 +166,7 @@ La auditoría A1 confirma que Fudo ya resuelve catálogo, receta, idempotencia y
 
 Decisiones de Alejo que deben tratarse como restricciones:
 
-1. Pago, propina, cobro parcial y cierre de caja no son el disparador de inventario. Debe existir una tabla/modelo de precios propio que alimente los cierres y cada línea vendida debe preservar el precio aplicado.
+1. El descuento de inventario de Lama se emite al **cerrar la mesa**, descontando todo su contenido confirmado. Pago, propina, cobro parcial, medio de pago y cierre de caja no son disparadores independientes: pueden acompañar el cierre, pero no determinan el consumo. Debe existir una tabla/modelo de precios propio que alimente los cierres y cada línea vendida debe preservar el precio aplicado.
 2. Llamita necesita identidad propia de producto. Fudo y Toteat son lenguajes externos que se enlazan a esa identidad, no el núcleo.
 3. La receta histórica debe sobrevivir a cambios posteriores de receta.
 4. En una sede habrá un solo POS de origen activo: Fudo, Lama o Toteat. No se diseña para que una misma venta llegue desde Fudo y Lama a la vez. Se conserva idempotencia para reintentos y sincronizaciones repetidas del mismo origen.
@@ -174,7 +174,7 @@ Decisiones de Alejo que deben tratarse como restricciones:
 
 Codex debe producir `docs/hermes/07-contrato-comun-inventario.md`, incluyendo:
 
-- propuesta de estados operativos de Lama y en cuál se emite el consumo;
+- propuesta de estados operativos de Lama, con el consumo emitido al cierre de mesa;
 - alternativa recomendada y alternativas descartadas, con consecuencias de anulaciones y comandas;
 - modelo canónico de producto, precio, receta y evento de inventario;
 - estrategia para snapshot/versionado de recetas y precio;
