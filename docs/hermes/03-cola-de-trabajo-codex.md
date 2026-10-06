@@ -49,7 +49,7 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 
 ### Tarea A1 - Auditoría de integración Fudo y Llamita Lama
 
-- Estado: ACTIVA
+- Estado: COMPLETADA
 - Autorización: Alejo aprobó iniciar la primera parte del plan el 2026-10-06.
 - Objetivo: auditar la integración Fudo ya existente, el módulo Llamita Lama y sus conexiones reales con recetas, ventas, caja e inventario antes de diseñar stock por áreas.
 - Documentos obligatorios: `CLAUDE.md`, `README.md`, `docs/LAMA.md`, `docs/fudo-api-cuanto-sirve.md`, `docs/atlas-fudo.md`, `docs/hermes/00-reglas-operativas.md` y `docs/hermes/06-canal-hermes-codex.md`.
@@ -59,3 +59,5 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Pruebas requeridas: solo consultas y verificaciones de lectura; `git diff --check`; no se requieren pruebas de aplicación porque no se modifica código.
 - Publicación: push a `master` autorizado para esta actualización documental, sin cambios de aplicación, esquema ni datos.
 - Riesgos conocidos: documentación histórica que podría no coincidir con el esquema vigente; funciones Fudo visibles solo bajo permisos; múltiples escritores de `productos.stock_actual`; ausencia de stock por área.
+- Resultado (2026-10-06): auditoría documentada en `docs/hermes/06-canal-hermes-codex.md`. Se confirmó Fudo operativo con recetas, espejo, modo prueba/real e idempotencia por ítem; Lama tiene mesas, comandas, cobros, anulaciones y arqueos, pero todavía no descuenta inventario. Quedan decisiones sobre el momento de descuento, anulaciones, versionado de recetas y contrato común.
+- Cambios en código, esquema y datos: ninguno. No activar B1 ni el puente Lama→inventario hasta resolver las decisiones pendientes.
