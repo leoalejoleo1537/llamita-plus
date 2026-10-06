@@ -225,3 +225,47 @@ Fecha: 2026-10-06
 Alejo aprobó comenzar la implementación por bloques y fijó esta regla: la mesa debe cerrarse y su venta debe alimentar el cierre de caja aunque la receta falte o el motor de inventario falle. El stock es el único subsistema que puede quedar pendiente; nunca debe bloquear el cierre comercial.
 
 La tarea activa es exclusivamente A3.1 de `docs/hermes/08-plan-implementacion-puente-lama-stock.md`: crear cimientos aditivos, seguros e idempotentes, sin conectar aún el cierre ni escribir stock. No activar A3.2 al terminar.
+
+---
+
+## Respuesta de Codex — A3.1: cimientos aplicados
+
+Fecha: 2026-10-06
+Estado: **COMPLETADA**
+
+### Identidad y preflight
+
+- Repositorio confirmado: `leoalejoleo1537/llamita-plus`; rama `work`; remoto `origin` correcto; fast-forward a `origin/master` realizado.
+- Supabase confirmado: `llamita-plus`, ref `iuryhsjucblmebdogewa`, estado `ACTIVE_HEALTHY`, PostgreSQL 17.6.
+- No había colisión con `lama_stock_*` antes de la migración.
+- Firmas comprobadas: `cuenta_cobrar(bigint,text,text,text,numeric,jsonb,jsonb)` y `cuenta_cerrar(bigint,text)`, ambas `SECURITY DEFINER`. Ninguna fue reemplazada ni modificada.
+- Se consultó la documentación vigente de Supabase sobre RLS y el changelog público; `gen_random_uuid()` estaba disponible.
+
+### Migración aplicada
+
+`sql/2026-10-a3-1-cimientos-lama-stock.sql`, aplicada como migración `a3_1_cimientos_lama_stock` únicamente en Llamita Plus.
+
+Creó:
+
+- `lama_stock_config`: configuración futura; sin filas, por lo que el modo efectivo permanece `apagado`.
+- `lama_stock_eventos`: evento por línea, snapshots de precio/receta, estados, referencias de cuenta, errores y clave única por origen/sede/venta/línea.
+- `lama_stock_aplicaciones`: aplicaciones por ingrediente, estado, reversa vinculada y `clave_idempotencia` única.
+
+Las tres tablas tienen RLS activo, no tienen políticas abiertas y no otorgan privilegios directos a `anon` ni `authenticated`. No se crearon funciones ni triggers y no existe ningún camino desde Lama hacia estas tablas todavía.
+
+### Pruebas y límites
+
+- `supabase_list_tables` confirmó columnas, constraints, FKs e identidad de las tablas nuevas.
+- Consultas de estructura confirmaron RLS, índices únicos, ausencia de políticas y ausencia de triggers.
+- `has_table_privilege` devolvió `false` para lectura/escritura de `anon` y `authenticated`.
+- Transacción sintética con `BEGIN … ROLLBACK`: duplicar el mismo evento fue rechazado por `lama_stock_eventos_origen_linea_uq`; duplicar una aplicación fue rechazado por `lama_stock_aplicaciones_clave_idempotencia_key`.
+- Conteos de integridad pre/post: cuentas 59, líneas 88, recetas 396, ítems de receta 514, productos 1.437, stock total 15.438. Tablas nuevas: cero filas.
+- No se conectaron `cuenta_cobrar` ni `cuenta_cerrar`; no se escribió stock; no se modificaron ventas, recetas, productos, lotes ni Fudo; no se habilitó prueba/real; A3.2 no fue activada.
+
+### Rollback y riesgos
+
+Rollback preparado en `sql/2026-10-a3-1-cimientos-lama-stock.rollback.sql`. Comprueba que las tres tablas estén vacías y, solo entonces, elimina aplicaciones, eventos y configuración. No se ejecutó.
+
+Riesgos pendientes: todavía no existe una frontera RPC para insertar eventos; la futura política de acceso debe mantener las tablas cerradas al navegador; los campos `area_id`/`lote_id` son preparatorios y no implican stock por área; la integración con el cierre y el motor de inventario queda para A3.2/A3.3.
+
+Cambios de código, ventas, recetas, productos y datos operativos: **ninguno**. El único cambio remoto fue el DDL aditivo de A3.1 en Llamita Plus.

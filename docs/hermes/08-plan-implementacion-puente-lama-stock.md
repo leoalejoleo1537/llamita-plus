@@ -126,3 +126,18 @@ Estado: PENDIENTE
 6. `productos.stock_actual` sigue siendo la única cantidad vigente durante A3.
 7. No se toca Café del Desierto / Llamita Stock.
 
+### Resultado A3.1 — 2026-10-06
+
+- Estado: **COMPLETADA**. Se aplicó exclusivamente la migración `a3_1_cimientos_lama_stock` en Supabase `llamita-plus` (`iuryhsjucblmebdogewa`).
+- Archivo versionado: `sql/2026-10-a3-1-cimientos-lama-stock.sql`.
+- Tablas creadas: `lama_stock_config`, `lama_stock_eventos`, `lama_stock_aplicaciones`.
+- La configuración no tiene filas; la ausencia de configuración equivale a `apagado`. No se habilitó `prueba` ni `real`.
+- RLS está activo en las tres tablas, sin políticas ni privilegios directos para `anon` o `authenticated`. La escritura futura deberá pasar por una frontera RPC controlada.
+- Se verificaron constraints de estados, cantidades, reversas, origen Lama e índices únicos de evento y clave de idempotencia.
+- Prueba idempotente ejecutada dentro de `BEGIN … ROLLBACK`: un duplicado de evento y un duplicado de aplicación fueron rechazados; no quedaron filas de prueba.
+- Conteos pre/post sin cambios: cuentas 59, líneas 88, recetas 396, ítems de receta 514, productos 1.437, suma de `stock_actual` 15.438. Las tablas nuevas quedaron con cero filas.
+- No se modificaron `cuenta_cobrar`, `cuenta_cerrar`, `item_anular`, ventas, recetas, productos, lotes, Fudo ni stock. No se activó A3.2.
+
+#### Rollback
+
+El rollback está preparado en `sql/2026-10-a3-1-cimientos-lama-stock.rollback.sql`. Solo permite eliminar las tablas si las tres están vacías; aborta si ya contienen eventos o aplicaciones. Debe ejecutarse en orden aplicaciones → eventos → configuración y únicamente antes de A3.2. No se ejecutó.

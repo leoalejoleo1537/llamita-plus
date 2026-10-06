@@ -81,7 +81,7 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 
 ### Tarea A3.1 - Cimientos del puente Lama → Stock
 
-- Estado: ACTIVA
+- Estado: COMPLETADA
 - Autorización: Alejo aprobó iniciar los bloques A3 el 2026-10-06 y confirmó que la mesa/caja deben cerrar aunque falle inventario.
 - Objetivo: crear únicamente la base aditiva, segura e idempotente para eventos y aplicaciones de inventario, sin conectarla todavía al cierre de mesas ni escribir stock.
 - Documento obligatorio: `docs/hermes/08-plan-implementacion-puente-lama-stock.md` completo, además de las reglas, contrato A2 y documentación Lama/Fudo relevante.
@@ -90,3 +90,5 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Criterios de aceptación: esquema aditivo y reversible; modo efectivo apagado; sin mutación de ventas/stock; RLS y grants revisados; idempotencia probada; rollback documentado; pruebas y limitaciones registradas.
 - Publicación: commit y push a `master` autorizados si las verificaciones pasan. No activar A3.2.
 - Regla de detención: cualquier duda de identidad de repositorio/proyecto, firma existente, seguridad, colisión de nombres o migración no reversible cambia el estado a `REQUIERE DECISIÓN` sin ejecutar cambios.
+- Resultado (2026-10-06): migración `a3_1_cimientos_lama_stock` aplicada únicamente en Supabase `llamita-plus`. Se crearon los cimientos aditivos con RLS, permisos directos revocados, modo efectivo apagado y claves únicas de idempotencia. Pruebas estructurales y transaccionales correctas; ventas, recetas, productos y stock sin cambios.
+- Archivos: `sql/2026-10-a3-1-cimientos-lama-stock.sql` y rollback `sql/2026-10-a3-1-cimientos-lama-stock.rollback.sql`. No activar A3.2.
