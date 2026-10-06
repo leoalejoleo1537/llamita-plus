@@ -1,6 +1,6 @@
 # Plan de implementación: inventario por áreas operativas en Llamita Plus
 
-**Estado:** borrador para revisión de Alejo. No publicar ni activar en la cola de Codex hasta aprobarlo.
+**Estado:** aprobado por Alejo para iniciar el Bloque 1. Los Bloques 2 y 3 requieren revisión del resultado del bloque anterior.
 
 **Repositorio objetivo:** `leoalejoleo1537/llamita-plus`, rama `master`.
 
