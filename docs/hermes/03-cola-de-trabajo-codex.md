@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **sin tareas activas**.
+Estado actual: **B1 requiere decisión**. No hay tarea ejecutable hasta resolver los bloqueos registrados en esta cola y en `05-decisiones-pendientes.md`.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -31,7 +31,7 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 
 ### Tarea B1 — Verificación, modelo y preparación de datos
 
-- Estado: ACTIVA
+- Estado: REQUIERE DECISIÓN
 - Autorización: Alejo aprobó el plan de áreas operativas y autorizó iniciar el Bloque 1.
 - Objetivo: verificar la arquitectura real de inventario por áreas y preparar una base aditiva, segura y conciliada para Llamita Plus.
 - Contexto: trabajar únicamente en Llamita Plus. Café del Desierto / Llamita Stock queda fuera de alcance.
@@ -41,4 +41,7 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Clasificación de prueba: gaseosas a Barra de bar; café, té, leche común y tortas a Cafetería; panes, pizzas y sándwiches a Cocina caliente; helados, productos “ice”, leche condensada, manjar e ingredientes dulces a Cocina fría; ambiguos a Sin asignar.
 - Criterios de aceptación: arquitectura documentada; no existen dos fuentes editables de stock; no se duplican cantidades; productos y asignaciones son corregibles; datos y permisos verificados; pruebas ejecutadas; bitácora actualizada.
 - Publicación: push a master autorizado si la fase termina y las pruebas son satisfactorias. Si hay una decisión crítica abierta, detenerse y registrar BLOQUEADO o REQUIERE DECISIÓN.
-- Riesgos conocidos: stock histórico sin área, lotes sin ubicación, clasificación ambigua y entorno local desactualizado.
+- Riesgos conocidos: stock histórico sin área, lotes sin ubicación, clasificación ambigua, falta de un contexto de datos aislado y corte de fuente única pendiente.
+- Resultado de preflight (2026-10-06): repositorio sincronizado por fast-forward hasta `c5cc8d6`; `work` coincide con `origin/master` y el árbol está limpio. Se confirmó por lectura que Supabase `iuryhsjucblmebdogewa` es `llamita-plus`.
+- Bloqueos: no existe un contexto aislado de datos de demostración; `modo_demostracion` solo cambia la presentación y las sedes existentes tienen datos. También falta acordar un corte de stock único que incluya todos los escritores actuales antes de habilitar existencias independientes por área.
+- Cambios en código, esquema y datos: ninguno. No activar B2.
