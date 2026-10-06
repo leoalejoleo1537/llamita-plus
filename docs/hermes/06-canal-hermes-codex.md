@@ -155,6 +155,37 @@ Mantener A1 cerrada y **no iniciar B1/B2 de áreas ni el puente de ventas** toda
 
 No se ejecutó `execute_sql`, ni migraciones, RPC o Edge Function; no se insertó, actualizó ni borró ningún dato.
 
+---
+
+## Mensaje de Hermes — A2: contrato común de inventario
+
+Fecha: 2026-10-06
+Estado: **A2 activa, solo diseño y lectura**
+
+La auditoría A1 confirma que Fudo ya resuelve catálogo, receta, idempotencia y descuento; Lama resuelve operación comercial y caja pero aún no consume inventario. La tarea A2 no es programar el puente: es diseñarlo con precisión.
+
+Decisiones de Alejo que deben tratarse como restricciones:
+
+1. Pago, propina, cobro parcial y cierre de caja no son el disparador de inventario. Debe existir una tabla/modelo de precios propio que alimente los cierres y cada línea vendida debe preservar el precio aplicado.
+2. Llamita necesita identidad propia de producto. Fudo y Toteat son lenguajes externos que se enlazan a esa identidad, no el núcleo.
+3. La receta histórica debe sobrevivir a cambios posteriores de receta.
+4. En una sede habrá un solo POS de origen activo: Fudo, Lama o Toteat. No se diseña para que una misma venta llegue desde Fudo y Lama a la vez. Se conserva idempotencia para reintentos y sincronizaciones repetidas del mismo origen.
+5. Las áreas de inventario siguen siendo el objetivo posterior y no pueden generar dos saldos editables.
+
+Codex debe producir `docs/hermes/07-contrato-comun-inventario.md`, incluyendo:
+
+- propuesta de estados operativos de Lama y en cuál se emite el consumo;
+- alternativa recomendada y alternativas descartadas, con consecuencias de anulaciones y comandas;
+- modelo canónico de producto, precio, receta y evento de inventario;
+- estrategia para snapshot/versionado de recetas y precio;
+- regla de reversa sin borrar historial;
+- deduplicación dentro de cada proveedor;
+- encaje exacto de Fudo existente y interfaz esperada de Toteat;
+- transición en fases hacia stock producto-área como fuente única;
+- pruebas de aceptación y decisiones que Alejo aún debe confirmar.
+
+No crear tablas, SQL, productos, recetas ni datos. No modificar interfaz, Edge Functions ni ajustes. No tocar Café del Desierto / Llamita Stock.
+
 ### Cambios de código/SQL/datos
 
 **Ninguno.** Solo se actualizaron documentos de Hermes para dejar la auditoría y su bitácora.

@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **A1 activa — auditoría de Fudo y Lama, solo lectura**. La antigua B1 de áreas queda pausada hasta conocer el contrato real entre ventas e inventario.
+Estado actual: **A2 activa — diseño del contrato común de inventario, solo lectura**. B1 de áreas continúa pausada hasta aprobar el contrato y la transición de fuente única de stock.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -61,3 +61,18 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Riesgos conocidos: documentación histórica que podría no coincidir con el esquema vigente; funciones Fudo visibles solo bajo permisos; múltiples escritores de `productos.stock_actual`; ausencia de stock por área.
 - Resultado (2026-10-06): auditoría documentada en `docs/hermes/06-canal-hermes-codex.md`. Se confirmó Fudo operativo con recetas, espejo, modo prueba/real e idempotencia por ítem; Lama tiene mesas, comandas, cobros, anulaciones y arqueos, pero todavía no descuenta inventario. Quedan decisiones sobre el momento de descuento, anulaciones, versionado de recetas y contrato común.
 - Cambios en código, esquema y datos: ninguno. No activar B1 ni el puente Lama→inventario hasta resolver las decisiones pendientes.
+
+### Tarea A2 - Contrato común: venta, receta e inventario
+
+- Estado: ACTIVA
+- Autorización: Alejo aprobó iniciar A2 el 2026-10-06, después de revisar la auditoría A1.
+- Objetivo: producir una especificación implementable para que Fudo existente, Llamita Lama y un futuro Toteat puedan entregar eventos al mismo motor de inventario, sin mezclar pagos/caja con consumo físico.
+- Documentos obligatorios: `CLAUDE.md`, `docs/LAMA.md`, `docs/fudo-api-cuanto-sirve.md`, `docs/hermes/00-reglas-operativas.md`, `docs/hermes/05-decisiones-pendientes.md` y `docs/hermes/06-canal-hermes-codex.md`.
+- Decisiones ya tomadas: los pagos y cierres de Lama no disparan descuento de inventario; la venta local debe tener identidad propia de Llamita; la receta histórica debe poder reconstruirse; por operación solo habrá un origen POS activo por sede (Fudo, Lama o Toteat), sin perjuicio de la deduplicación de reintentos dentro de cada origen; los precios deben tener su propio modelo y la línea vendida debe conservar el precio aplicado.
+- Pregunta principal pendiente: definir el momento operativo de consumo en Lama y el tratamiento exacto de confirmaciones, comandas, anulaciones, consumo interno y cierre.
+- Alcance permitido: inspección de lectura adicional estrictamente necesaria; matriz de decisiones; modelo de eventos y estados; diseño de identidad de productos; diseño de receta versionada o instantánea; estrategia de deduplicación; plan de migración de `stock_actual` a stock por área; especificación de precios/instantánea de precio; actualización documental.
+- Fuera de alcance: código de aplicación, SQL/migraciones, inserciones/actualizaciones/borrados, activación de conectores, cambio de modo demostración, creación de áreas, cambios en Café del Desierto.
+- Entregables: `docs/hermes/07-contrato-comun-inventario.md` nuevo; respuesta/resumen en `06-canal-hermes-codex.md`; bitácora actualizada; propuesta de fases de implementación y criterios de prueba.
+- Criterios de aceptación: separar hechos de decisiones; no plantear doble fuente de stock; definir comportamiento de reversa sin borrado histórico; explicar compatibilidad con Fudo existente y Toteat futuro; dejar las decisiones que sigan abiertas listas para que Alejo elija.
+- Pruebas requeridas: verificaciones de lectura y `git diff --check`; no se requieren pruebas de aplicación.
+- Publicación: push a `master` autorizado solo para documentación de A2. Sin cambios de aplicación, esquema ni datos.

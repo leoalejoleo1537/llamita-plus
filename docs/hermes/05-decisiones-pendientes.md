@@ -2,6 +2,25 @@
 
 Este registro reúne decisiones que deben resolverse antes de activar fases de implementación.
 
+## Decisiones registradas para A2 — 2026-10-06
+
+Estas decisiones orientan el diseño; no autorizan aún una migración ni cambios de código.
+
+- **Caja no es inventario:** pagos, propinas, cobros parciales y cierre de caja de Lama no disparan descuentos. El consumo debe originarse en un evento operativo de la venta.
+- **Origen POS único por sede:** una sede opera con Fudo, Lama o Toteat a la vez. Aun así, cada origen necesita deduplicar sus propios reintentos, sincronizaciones repetidas y anulaciones.
+- **Identidad canónica propia:** Llamita necesita una identidad propia para cada producto vendible. Los identificadores Fudo/Toteat serán enlaces de adaptador, no la identidad permanente del núcleo.
+- **Receta histórica:** cada consumo aplicado debe conservar la versión o instantánea de la receta que se utilizó, para que editar una receta mañana no reescriba una venta pasada.
+- **Precio separado del stock:** el precio pertenece al catálogo/venta y cada línea debe guardar la instantánea del precio cobrado. No se debe inferir desde el stock ni desde una receta.
+
+### Decisiones que A2 debe dejar preparadas para aprobación
+
+1. Momento de consumo Lama: confirmar comanda, envío a preparación, entrega u otro estado operativo.
+2. Regla de reversa para una anulación antes y después de la preparación/consumo.
+3. Tratamiento de consumos internos, cortesías y mermas operativas.
+4. Forma concreta de identidad canónica y enlaces Fudo/Toteat sin romper recetas existentes.
+5. Estrategia de receta histórica: versión numerada, instantánea JSON o combinación.
+6. Secuencia de transición desde `productos.stock_actual` hacia stock por producto-área sin dos saldos editables.
+
 ## Resueltos para B1
 
 - El plan de áreas está aprobado para iniciar el Bloque 1; la cola lo autoriza.
