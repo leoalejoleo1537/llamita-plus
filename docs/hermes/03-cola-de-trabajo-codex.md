@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **A2 activa — diseño del contrato común de inventario, solo lectura**. B1 de áreas continúa pausada hasta aprobar el contrato y la transición de fuente única de stock.
+Estado actual: **sin tarea activa**. A2 está completada y espera decisiones de Alejo; B1 de áreas continúa pausada hasta aprobar el contrato y la transición de fuente única de stock.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
