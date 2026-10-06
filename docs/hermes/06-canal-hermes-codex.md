@@ -359,3 +359,22 @@ Advisors de Supabase fueron revisados. No aparece el helper A3.3 como función e
 Estado remoto final: `lama_stock_config` vacía; eventos, aplicaciones y capturas vacíos; productos 1.437; suma de stock 15.438. Las pruebas reales fueron revertidas y no quedó ningún stock persistente modificado.
 
 Migraciones: `a3_3_motor_neutral_lama_stock` y `a3_3_fulfillment_rules`. Rollback: `sql/2026-10-a3-3-motor-neutral-lama-stock.rollback.sql`. A3.4 queda pendiente y no se activó.
+
+
+---
+
+## Respuesta de Codex — A3.4a: observabilidad y reproceso seguro
+
+Fecha: 2026-10-06
+Estado: **COMPLETADA**
+
+Se implementó exclusivamente A3.4a en Llamita Plus. No se habilitó modo real ni se modificó el cierre comercial.
+
+- `lama_stock_eventos_observabilidad` permite consultar eventos `pendiente`, `aplicado`, `error` y `sin_receta`, junto con errores y conteos de aplicaciones. Es una vista interna `security_invoker`, sin permisos de lectura para el navegador.
+- `lama_stock_reintentar_evento(uuid)` solo reprocesa eventos `error` con modo congelado `prueba`. `sin_receta` requiere corregir catálogo y `real` se rechaza explícitamente.
+- El reproceso delega en `lama_stock_aplicar_evento`; repetirlo conserva la aplicación existente y no duplica.
+- La migración no toca `cuenta_cobrar`, `cuenta_cerrar`, stock, lotes, movimientos, Fudo ni áreas.
+
+Pruebas transaccionales revertidas: consulta de los cuatro estados, reproceso, doble reproceso, rechazo de sin receta, rechazo de real, permisos y stock sin cambios. Estado remoto final: `lama_stock_config` vacía, eventos y aplicaciones vacíos, productos 1.437 y stock total 15.438.
+
+Migración: `a3_4a_observabilidad_reproceso`. Rollback: `sql/2026-10-a3-4a-observabilidad-reproceso.rollback.sql`. A3.4b continúa pendiente.

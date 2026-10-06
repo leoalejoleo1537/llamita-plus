@@ -121,14 +121,37 @@ Estado: **COMPLETADA — 2026-10-06**
 - Estado final verificado: configuración, eventos, aplicaciones y capturas en cero; productos 1.437; stock total 15.438. No se activó ninguna sede ni A3.4.
 - Rollback: `sql/2026-10-a3-3-motor-neutral-lama-stock.rollback.sql`. Limitación conocida: `lama_stock_aplicaciones.lote_id` conserva el primer lote FIFO elegido cuando una aplicación atraviesa varios lotes; el saldo real sigue gobernado por el FIFO instalado.
 
-## A3.4 — Reversas, diagnóstico y activación real
+## A3.4 — Observabilidad, reproceso y reversas
 
-Estado: PENDIENTE
+Estado: **A3.4a COMPLETADA — A3.4b pendiente**
+
+### A3.4a — Observabilidad y reproceso seguro en modo prueba
+
+Estado: **COMPLETADA — 2026-10-06**
+
+- Crear una consulta interna de eventos por estado: `pendiente`, `aplicado`, `error` y `sin_receta`.
+- Mostrar conteo de aplicaciones por evento y diagnóstico, sin exponer las tablas al navegador.
+- Crear un helper interno para reintentar únicamente eventos `error` cuyo `modo_efectivo` sea `prueba`.
+- El reintento usa `event_id`, conserva la clave idempotente y delega en el motor A3.3.
+- No habilitar sedes, modo real ni modificar stock persistente.
+- Probar reintento, doble reintento, sin receta, evento aplicado y permisos.
+
+#### Resultado A3.4a
+
+- Migración aplicada: `a3_4a_observabilidad_reproceso`.
+- Vista interna: `lama_stock_eventos_observabilidad`, con estados, errores y conteo de aplicaciones. Usa `security_invoker` y no tiene SELECT para `public`, `anon`, `authenticated` ni `service_role`.
+- Helper interno: `lama_stock_reintentar_evento(uuid)`, limitado a eventos `error` en modo `prueba`; eventos `sin_receta` y `real` se rechazan.
+- Pruebas revertidas: consulta de estados, reproceso, doble reproceso, rechazo de `sin_receta`, rechazo de `real`, permisos y no modificación de stock.
+- Estado final: configuración, eventos y aplicaciones en cero; productos 1.437; stock total 15.438.
+- Rollback: `sql/2026-10-a3-4a-observabilidad-reproceso.rollback.sql`.
+
+### A3.4b — Reversas y activación real
+
+Estado: **PENDIENTE**
 
 - Crear operación administrativa de reversa posterior al cierre.
 - Generar aplicaciones compensatorias; no borrar eventos ni movimientos.
 - Añadir panel en Ajustes para modo `apagado/prueba/real`, eventos pendientes, sin receta, errores y reproceso.
-- Probar doble clic, timeout, cierre repetido, falta de receta, receta modificada, lotes FIFO, anulación previa y reversa posterior.
 - Activar primero una sede/contexto de prueba en Llamita Plus.
 - Conciliar stock esperado y real antes de cualquier activación adicional.
 

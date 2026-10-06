@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **A3.3 completada — motor neutral y aplicación transaccional verificados en Llamita Plus**. A3.4 y B1 de áreas permanecen pendientes.
+Estado actual: **A3.4a completada — observabilidad y reproceso seguro verificados en modo prueba**. A3.4b y B1 de áreas permanecen pendientes.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -135,3 +135,21 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Migraciones: `a3_3_motor_neutral_lama_stock` y `a3_3_fulfillment_rules`. Captura corregida a `cuentas.cerrada_at`; `cuenta_items.agregado_at` queda en metadata.
 - Pruebas: prueba sin stock; real con cierre, sin lotes y FIFO; reintento; timeout equivalente por repetición; error intermedio atómico; insuficiencia según funciones reales; sin receta; snapshot inmutable; reglas de fulfillment. Todas fueron transaccionales y revertidas.
 - Estado final: `lama_stock_config` vacía, ningún stock persistente cambiado y A3.4 no activada. Rollback: `sql/2026-10-a3-3-motor-neutral-lama-stock.rollback.sql`.
+
+### Tarea A3.4a - Observabilidad y reproceso seguro en modo prueba
+
+- Estado: COMPLETADA
+- Autorización: Alejo solicitó activar únicamente A3.4a después de completar A3.3.
+- Objetivo: consultar eventos Lama por estado y reintentar eventos fallidos de forma idempotente sin habilitar modo real ni modificar el cierre comercial.
+- Alcance permitido: vista interna de observabilidad; helper interno de reproceso restringido a eventos `error` en modo `prueba`; migración reversible; pruebas transaccionales.
+- Fuera de alcance: modo real, stock persistente, reversas administrativas, áreas, Fudo, interfaz, cambios en `cuenta_cobrar`/`cuenta_cerrar`, A3.4b y Café del Desierto.
+- Criterios de aceptación: consultar `pendiente`, `aplicado`, `error` y `sin_receta`; reintento idempotente; sin EXECUTE público; RLS y grants revisados; `lama_stock_config` vacía y stock sin cambios persistentes.
+- Publicación: migración, rollback y documentación pueden publicarse a `master` si las pruebas pasan.
+- Resultado (2026-10-06): vista interna `lama_stock_eventos_observabilidad` y helper `lama_stock_reintentar_evento(uuid)` aplicados en Llamita Plus. El reproceso solo acepta eventos `error` en modo `prueba`; no expone permisos a roles públicos y no altera stock.
+- Pruebas transaccionales: estados consultables, reproceso, doble reproceso, `sin_receta`, rechazo de modo `real`, permisos y stock sin cambios. `lama_stock_config` quedó vacía.
+- Rollback: `sql/2026-10-a3-4a-observabilidad-reproceso.rollback.sql`.
+
+### Tarea A3.4b - Reversas y activación real
+
+- Estado: PENDIENTE
+- No activar automáticamente desde A3.4a.
