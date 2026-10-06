@@ -1,7 +1,7 @@
 # A3 — Plan de implementación del puente Llamita Lama → Llamita Stock
 
 Fecha: 2026-10-06
-Estado: **aprobado por bloques; A3.1–A3.2 completadas y A3.3 activa**
+Estado: **aprobado por bloques; A3.1–A3.3 completadas y A3.4 pendiente**
 Proyecto autorizado: Llamita Plus (`iuryhsjucblmebdogewa`)
 
 ## Objetivo
@@ -97,7 +97,7 @@ Estado: **COMPLETADA — 2026-10-06**
 
 ## A3.3 — Motor neutral y aplicación al stock actual
 
-Estado: **ACTIVA**
+Estado: **COMPLETADA — 2026-10-06**
 
 - Crear un motor independiente del POS que reciba `event_id`.
 - Resolver ingredientes desde el snapshot congelado.
@@ -109,6 +109,17 @@ Estado: **ACTIVA**
 - El cierre de mesa y sus importes permanecen válidos aunque inventario falle.
 - Corregir antes de aplicar: `ocurrido_at` representa el cierre de mesa (`cerrada_at`), mientras `agregado_at` queda como metadata de la línea.
 - Implementar y probar modo real solo dentro de transacciones revertidas; ninguna sede queda activada persistentemente en A3.3.
+
+### Resultado A3.3
+
+- Migraciones aplicadas: `a3_3_motor_neutral_lama_stock` y `a3_3_fulfillment_rules`.
+- `lama_stock_aplicar_evento(uuid)` es interno, usa `snapshot_receta` congelado, crea una aplicación por ingrediente con clave idempotente y conserva error por componente.
+- En `prueba` genera deltas negativos esperados sin escribir stock. En `real` delega a `descontar_lotes` cuando hay lotes y a `descontar_con_reposicion` cuando no los hay; no hace un segundo `UPDATE` de `productos.stock_actual`.
+- Una mesa Lama se captura como `fulfillment = serve`; se aplican `siempre` y `servir`. `llevar` se aplica únicamente a eventos `takeaway`.
+- `ocurrido_at` usa `cuentas.cerrada_at`; `agregado_at` queda en metadata.
+- Pruebas revertidas: receta simple/múltiple, prueba, real, sin lotes, FIFO, retry/timeout equivalente, error intermedio, insuficiencia, sin receta, receta cambiada después de capturar y reglas de fulfillment.
+- Estado final verificado: configuración, eventos, aplicaciones y capturas en cero; productos 1.437; stock total 15.438. No se activó ninguna sede ni A3.4.
+- Rollback: `sql/2026-10-a3-3-motor-neutral-lama-stock.rollback.sql`. Limitación conocida: `lama_stock_aplicaciones.lote_id` conserva el primer lote FIFO elegido cuando una aplicación atraviesa varios lotes; el saldo real sigue gobernado por el FIFO instalado.
 
 ## A3.4 — Reversas, diagnóstico y activación real
 

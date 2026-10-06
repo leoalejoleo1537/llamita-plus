@@ -326,3 +326,36 @@ Conteos pre/post: cuentas 59, líneas 88, recetas 396, ítems de receta 514, pro
 Rollback: `sql/2026-10-a3-2-captura-cierre-lama.rollback.sql`; restaura las dos definiciones originales y aborta si hay filas A3.2.
 
 No se implementó A3.3, no se habilitó modo real, no se modificó Fudo, interfaz, recetas, productos ni Café del Desierto / Llamita Stock.
+
+
+---
+
+## Respuesta de Codex — A3.3: motor neutral y aplicación al stock actual
+
+Fecha: 2026-10-06
+Estado: **COMPLETADA**
+
+Se implementó únicamente A3.3 en `llamita-plus` (`iuryhsjucblmebdogewa`). Las firmas de cierre y de los caminos de stock se obtuvieron con `pg_get_functiondef`; no se copiaron firmas históricas.
+
+### Diseño aplicado
+
+- `lama_stock_aplicar_evento(uuid)` recibe solo `event_id` y lee exclusivamente `snapshot_receta`.
+- Cada ingrediente elegible genera una fila en `lama_stock_aplicaciones` con producto, delta negativo, unidad, lote FIFO elegido cuando corresponde, estado, clave idempotente y error.
+- `prueba` crea aplicaciones esperadas sin escribir productos, lotes ni movimientos reales.
+- `real` delega en `descontar_lotes` si hay lotes y en `descontar_con_reposicion` si no hay lotes. El trigger instalado `trg_sync_stock_lotes` es quien recalcula `productos.stock_actual` después de cambios en lotes; no existe un segundo descuento manual.
+- La mesa Lama se traduce a `fulfillment = serve`: se incluyen `siempre` y `servir`; `llevar` solo entra para `takeaway`.
+- La captura usa `cuentas.cerrada_at` como `ocurrido_at` y conserva `cuenta_items.agregado_at` en metadata.
+
+### Atomicidad e idempotencia
+
+La aplicación real de una línea ocurre dentro de un bloque atómico. Un error en un ingrediente revierte los descuentos previos, marca el evento `error` y deja marcadores de error por ingrediente. Repetir un evento aplicado devuelve las aplicaciones existentes. Esto cubre el reintento posterior a un timeout después del commit.
+
+### Verificaciones
+
+Se probaron en transacciones revertidas: receta simple y múltiple, modo prueba, modo real con cierre de cuenta, producto sin lotes, FIFO, reintento, error intermedio, insuficiencia según el comportamiento instalado, producto sin receta, snapshot frente a cambio posterior de receta y reglas `siempre/servir/llevar`.
+
+Advisors de Supabase fueron revisados. No aparece el helper A3.3 como función ejecutable por roles públicos. Los avisos restantes corresponden a funciones/views heredadas, índices/foreign keys existentes y el diseño intencional de tablas internas con RLS sin políticas y sin grants directos.
+
+Estado remoto final: `lama_stock_config` vacía; eventos, aplicaciones y capturas vacíos; productos 1.437; suma de stock 15.438. Las pruebas reales fueron revertidas y no quedó ningún stock persistente modificado.
+
+Migraciones: `a3_3_motor_neutral_lama_stock` y `a3_3_fulfillment_rules`. Rollback: `sql/2026-10-a3-3-motor-neutral-lama-stock.rollback.sql`. A3.4 queda pendiente y no se activó.

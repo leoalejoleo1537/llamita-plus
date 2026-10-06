@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **A3.3 activa — motor neutral en prueba y aplicación transaccional al stock actual**. A3.4 y B1 de áreas permanecen pendientes.
+Estado actual: **A3.3 completada — motor neutral y aplicación transaccional verificados en Llamita Plus**. A3.4 y B1 de áreas permanecen pendientes.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -114,7 +114,7 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 
 ### Tarea A3.3 - Motor neutral y aplicación al stock actual
 
-- Estado: ACTIVA
+- Estado: COMPLETADA
 - Autorización: Alejo aprobó continuar los bloques A3; Hermes revisó las migraciones A3.2 y confirmó que caja/cierre quedan aislados del puente.
 - Objetivo: implementar un motor idempotente por `event_id` que use el snapshot de receta, produzca aplicaciones por ingrediente y pueda operar en `prueba` o `real`, manteniendo `productos.stock_actual` como única cantidad vigente.
 - Corrección previa obligatoria: en eventos Lama, `ocurrido_at` debe ser la hora de cierre `cuentas.cerrada_at`; `cuenta_items.agregado_at` puede conservarse en metadata. No existen eventos persistentes que migrar.
@@ -130,3 +130,8 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Criterios de aceptación: pruebas transaccionales de receta simple/múltiple, modo prueba, modo real, doble ejecución, timeout simulado, insuficiencia/error intermedio, producto con/sin lotes, receta cambiada después de captura y `sin_receta`; conteos y stock pre/post idénticos tras rollback; advisors/seguridad revisados; rollback documentado.
 - Publicación: migraciones y código pueden aplicarse exclusivamente a Llamita Plus y publicarse a `master` si pasan las pruebas. No activar A3.4.
 - Regla de detención: si no puede garantizarse atomicidad por línea o evitar doble escritura lote/stock, detenerse en `REQUIERE DECISIÓN` sin activar modo real.
+
+- Resultado (2026-10-06): motor `lama_stock_aplicar_evento(uuid)` aplicado exclusivamente en Llamita Plus. Usa solo `snapshot_receta`, respeta `siempre/servir/llevar`, crea una aplicación por ingrediente y delega el descuento al FIFO instalado o al camino sin lotes.
+- Migraciones: `a3_3_motor_neutral_lama_stock` y `a3_3_fulfillment_rules`. Captura corregida a `cuentas.cerrada_at`; `cuenta_items.agregado_at` queda en metadata.
+- Pruebas: prueba sin stock; real con cierre, sin lotes y FIFO; reintento; timeout equivalente por repetición; error intermedio atómico; insuficiencia según funciones reales; sin receta; snapshot inmutable; reglas de fulfillment. Todas fueron transaccionales y revertidas.
+- Estado final: `lama_stock_config` vacía, ningún stock persistente cambiado y A3.4 no activada. Rollback: `sql/2026-10-a3-3-motor-neutral-lama-stock.rollback.sql`.
