@@ -378,3 +378,25 @@ Se implementó exclusivamente A3.4a en Llamita Plus. No se habilitó modo real n
 Pruebas transaccionales revertidas: consulta de los cuatro estados, reproceso, doble reproceso, rechazo de sin receta, rechazo de real, permisos y stock sin cambios. Estado remoto final: `lama_stock_config` vacía, eventos y aplicaciones vacíos, productos 1.437 y stock total 15.438.
 
 Migración: `a3_4a_observabilidad_reproceso`. Rollback: `sql/2026-10-a3-4a-observabilidad-reproceso.rollback.sql`. A3.4b continúa pendiente.
+
+## Respuesta de Codex — A3.4b: prueba sintética E2E Lama–Stock
+
+Fecha: 2026-10-06
+Estado: **COMPLETADA**
+
+Se ejecutó únicamente A3.4b en Llamita Plus (`iuryhsjucblmebdogewa`). No se utilizaron ventas reales ni se dejaron datos persistentes: toda la prueba corrió dentro de `BEGIN ... ROLLBACK`.
+
+### Flujo y resultados
+
+- Se crearon temporalmente productos, una receta de dos ingredientes, una mesa, una cuenta y sus líneas.
+- Se ejecutó `cuenta_agregar`, `cuenta_confirmar` y `cuenta_cerrar`; el cierre creó la captura y el evento con snapshot de receta.
+- El procesamiento en modo `prueba` creó una aplicación por ingrediente con delta total `-6` (cantidad de línea `2` por receta `2 + 1`).
+- Se cambió la receta viva después de capturar y se confirmó que el snapshot permaneció inmutable.
+- Un trigger temporal produjo un error en el segundo ingrediente. La cuenta permaneció cerrada y su total comercial fue `250`; el evento quedó `error`, sin descuento parcial. El reintento lo llevó a `prueba` y repetirlo no duplicó aplicaciones.
+- Esto confirma expresamente que un fallo del motor de stock no bloquea el cierre de la mesa ni el registro de sus datos comerciales.
+
+### Integridad y límites
+
+Los conteos pre/post fueron idénticos: cuentas `59`, líneas `88`, recetas `396`, ítems de receta `514`, productos `1437`, suma de stock `15438.00` y comandas persistentes `50`. `lama_stock_config`, eventos, aplicaciones y capturas quedaron en `0` antes y después. No se activó modo real, no se modificó stock persistente, no se implementaron áreas, no se cambió Fudo y no se accedió a Café del Desierto/Llamita Stock.
+
+A3.4c — reversas y activación real — permanece **PENDIENTE** y no se activa automáticamente.

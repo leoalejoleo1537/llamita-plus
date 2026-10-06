@@ -1,7 +1,7 @@
 # A3 — Plan de implementación del puente Llamita Lama → Llamita Stock
 
 Fecha: 2026-10-06
-Estado: **aprobado por bloques; A3.1–A3.3 completadas y A3.4 pendiente**
+Estado: **aprobado por bloques; A3.1–A3.4b completadas y A3.4c pendiente**
 Proyecto autorizado: Llamita Plus (`iuryhsjucblmebdogewa`)
 
 ## Objetivo
@@ -121,9 +121,9 @@ Estado: **COMPLETADA — 2026-10-06**
 - Estado final verificado: configuración, eventos, aplicaciones y capturas en cero; productos 1.437; stock total 15.438. No se activó ninguna sede ni A3.4.
 - Rollback: `sql/2026-10-a3-3-motor-neutral-lama-stock.rollback.sql`. Limitación conocida: `lama_stock_aplicaciones.lote_id` conserva el primer lote FIFO elegido cuando una aplicación atraviesa varios lotes; el saldo real sigue gobernado por el FIFO instalado.
 
-## A3.4 — Observabilidad, reproceso y reversas
+## A3.4 — Observabilidad, pruebas E2E y reversas
 
-Estado: **A3.4a COMPLETADA — A3.4b pendiente**
+Estado: **A3.4a COMPLETADA — A3.4b COMPLETADA — A3.4c pendiente**
 
 ### A3.4a — Observabilidad y reproceso seguro en modo prueba
 
@@ -145,7 +145,19 @@ Estado: **COMPLETADA — 2026-10-06**
 - Estado final: configuración, eventos y aplicaciones en cero; productos 1.437; stock total 15.438.
 - Rollback: `sql/2026-10-a3-4a-observabilidad-reproceso.rollback.sql`.
 
-### A3.4b — Reversas y activación real
+### A3.4b — Prueba sintética E2E del flujo Lama–Stock
+
+Estado: **COMPLETADA — 2026-10-06**
+
+- Se ejecutó en Llamita Plus una única transacción `BEGIN ... ROLLBACK` con productos, receta, líneas, cuenta y mesa temporales.
+- Se cubrió el flujo completo: agregado, confirmación, cierre, captura, snapshot, modo `prueba`, aplicaciones por ingrediente, idempotencia, reintento y error intermedio.
+- La receta temporal de dos ingredientes generó dos aplicaciones esperadas con delta total `-6`. Un cambio posterior de la receta viva no modificó el snapshot.
+- Un trigger temporal produjo un fallo en el ingrediente intermedio. La cuenta permaneció cerrada y su total comercial fue `250`; el evento quedó en `error`, sin aplicaciones parcialmente aplicadas. El reintento pasó a `prueba` y un segundo reintento no duplicó aplicaciones.
+- Todos los artefactos sintéticos, incluidos trigger y función de fallo, fueron revertidos. No se activó modo real ni se modificó stock persistente.
+- Conteos pre/post: cuentas `59`, líneas `88`, recetas `396`, ítems de receta `514`, productos `1437`, stock total `15438.00`, comandas `50`; configuración, eventos, aplicaciones y capturas `0` en ambos cortes.
+- Evidencia: `docs/hermes/11-pruebas-a3-4b.md`.
+
+### A3.4c — Reversas y activación real
 
 Estado: **PENDIENTE**
 
@@ -154,6 +166,7 @@ Estado: **PENDIENTE**
 - Añadir panel en Ajustes para modo `apagado/prueba/real`, eventos pendientes, sin receta, errores y reproceso.
 - Activar primero una sede/contexto de prueba en Llamita Plus.
 - Conciliar stock esperado y real antes de cualquier activación adicional.
+- No iniciar automáticamente desde A3.4b.
 
 ## Identidad y compatibilidad durante A3
 

@@ -143,3 +143,15 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - Pruebas revertidas: estados consultables, reproceso exitoso, doble reproceso idempotente, `sin_receta`, rechazo de modo real, permisos y suma de stock sin cambios.
 - Integridad final: `lama_stock_config`, eventos y aplicaciones: 0; productos: 1.437; suma `stock_actual`: 15.438. No se modificaron cierres, ventas, Fudo, áreas ni Café del Desierto/Llamita Stock.
 - Rollback: `sql/2026-10-a3-4a-observabilidad-reproceso.rollback.sql`.
+
+## 2026-10-06 — A3.4b: prueba sintética E2E Lama–Stock completada
+
+- Estado: **COMPLETADA**; A3.4c queda pendiente y no fue activada.
+- Repositorio confirmado: `leoalejoleo1537/llamita-plus`, proyecto Supabase `llamita-plus` (`iuryhsjucblmebdogewa`).
+- No se modificó código de aplicación ni se aplicó una migración. La prueba se ejecutó exclusivamente dentro de `BEGIN ... ROLLBACK` usando productos, receta, cuenta, líneas, mesa, trigger y función temporales.
+- Flujo verificado: `cuenta_agregar`, `cuenta_confirmar`, `cuenta_cerrar`, captura protegida, snapshot de receta, procesamiento `prueba`, aplicaciones por ingrediente, idempotencia, reintento y error intermedio.
+- La receta temporal de dos ingredientes produjo dos aplicaciones esperadas con delta total `-6` para una línea de cantidad `2`. Cambiar la receta viva después de capturar no cambió el snapshot.
+- Se forzó un error en el segundo ingrediente. La cuenta quedó `cerrada` y conservó total comercial `250`; el evento quedó `error` y no dejó aplicaciones parcialmente aplicadas. El reintento pasó a `prueba`; un segundo reintento no duplicó aplicaciones. Un fallo del motor de stock no impidió cerrar la mesa ni registrar sus datos comerciales.
+- Conteos antes y después: cuentas `59`, líneas `88`, recetas `396`, ítems de receta `514`, productos `1437`, suma `productos.stock_actual` `15438.00`, comandas persistentes `50`; `lama_stock_config`, eventos, aplicaciones y capturas `0` en ambos cortes.
+- Todos los artefactos sintéticos se revirtieron. No se activó modo real, no cambió stock persistente y no se accedió a Café del Desierto/Llamita Stock.
+- Evidencia: `docs/hermes/11-pruebas-a3-4b.md`.

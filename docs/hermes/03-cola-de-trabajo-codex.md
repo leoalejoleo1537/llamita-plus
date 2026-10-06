@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **A3.4a completada — observabilidad y reproceso seguro verificados en modo prueba**. A3.4b y B1 de áreas permanecen pendientes.
+Estado actual: **A3.4b completada — prueba sintética E2E Lama–Stock verificada**. A3.4c y B1 de áreas permanecen pendientes.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -149,7 +149,20 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Pruebas transaccionales: estados consultables, reproceso, doble reproceso, `sin_receta`, rechazo de modo `real`, permisos y stock sin cambios. `lama_stock_config` quedó vacía.
 - Rollback: `sql/2026-10-a3-4a-observabilidad-reproceso.rollback.sql`.
 
-### Tarea A3.4b - Reversas y activación real
+### Tarea A3.4b - Prueba sintética E2E del flujo Lama–Stock
 
-- Estado: PENDIENTE
-- No activar automáticamente desde A3.4a.
+- Estado: **COMPLETADA** — 2026-10-06.
+- Se ejecutó exclusivamente una prueba sintética dentro de una transacción `BEGIN ... ROLLBACK`, usando cuentas, líneas, productos y receta temporales. No se usaron ventas reales ni quedaron filas persistentes.
+- Flujo cubierto: `cuenta_agregar` → `cuenta_confirmar` → `cuenta_cerrar` → captura del evento → snapshot de receta → procesamiento en modo `prueba` → aplicaciones por ingrediente → idempotencia → reintento y error intermedio.
+- La receta temporal tuvo dos ingredientes. Se verificó que el evento conserva el snapshot aunque la receta viva cambie después; las dos aplicaciones esperadas sumaron delta `-6` para una línea de cantidad `2`.
+- Se forzó un error en el segundo ingrediente. La cuenta quedó `cerrada`, con total comercial `250`, mientras el evento quedó `error` y las aplicaciones quedaron marcadas con error. El reintento pasó a `prueba`; repetirlo no duplicó aplicaciones. Esto confirma que un fallo del motor de stock no impide cerrar la mesa ni registrar sus datos comerciales.
+- Se verificó que el modo real no se activó, que no hubo escritura persistente de stock y que `lama_stock_config` quedó vacía.
+- Conteos pre/post: cuentas `59`, líneas `88`, recetas `396`, ítems de receta `514`, productos `1437`, suma `productos.stock_actual` `15438.00`, comandas persistentes `50`; tablas de configuración, eventos, aplicaciones y capturas `0` antes y después.
+- Evidencia detallada: `docs/hermes/11-pruebas-a3-4b.md`.
+- No activar automáticamente A3.4c.
+
+### Tarea A3.4c - Reversas y activación real
+
+- Estado: **PENDIENTE**.
+- Alcance futuro: reversas administrativas compensatorias, panel de operación y activación gradual; requiere decisión y pruebas separadas.
+- No activar automáticamente desde A3.4b.
