@@ -13,6 +13,17 @@
 
 Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resultado y riesgos pendientes.
 
+## 2026-10-06 - Canal de comunicación Hermes/Codex y activación de A1
+
+- Estado: **A1 ACTIVA**, auditoría documental y técnica de solo lectura.
+- Se creó `docs/hermes/06-canal-hermes-codex.md` como canal compartido de contexto, decisiones, preguntas y respuesta arquitectónica.
+- Se actualizó `03-cola-de-trabajo-codex.md` para que Codex lea el canal antes de trabajar y responda allí el resultado.
+- Se actualizó `docs/hermes/README.md` para incluir el canal.
+- Cambios de aplicación: ninguno.
+- Cambios de esquema y datos: ninguno.
+- Publicación de esta actualización documental: autorizada a `master`.
+- Siguiente paso: ejecutar la auditoría A1 y completar el canal con hechos comprobados sobre Fudo, Lama, Ajustes y los escritores de stock.
+
 ## 2026-10-06 — B1: verificación, detenida por decisiones pendientes
 
 - Estado: **REQUIERE DECISIÓN**. Solo se hizo inspección de lectura; no se ejecutó migración ni se insertaron o actualizaron datos.

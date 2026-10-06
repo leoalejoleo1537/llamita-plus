@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **B1 requiere decisión**. No hay tarea ejecutable hasta resolver los bloqueos registrados en esta cola y en `05-decisiones-pendientes.md`.
+Estado actual: **A1 activa — auditoría de Fudo y Lama, solo lectura**. La antigua B1 de áreas queda pausada hasta conocer el contrato real entre ventas e inventario.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -12,6 +12,7 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Al finalizar, actualizar `04-bitacora-codex.md` y cambiar la tarea a `COMPLETADA`, `BLOQUEADA` o `REQUIERE DECISIÓN`.
 - No activar por cuenta propia la tarea siguiente.
 - No ejecutar SQL ni migraciones salvo que la tarea lo autorice explícitamente.
+- Leer `docs/hermes/06-canal-hermes-codex.md` antes de comenzar y responder allí el resultado arquitectónico.
 
 ## Plantilla de tarea
 
@@ -45,3 +46,16 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Resultado de preflight (2026-10-06): repositorio sincronizado por fast-forward hasta `c5cc8d6`; `work` coincide con `origin/master` y el árbol está limpio. Se confirmó por lectura que Supabase `iuryhsjucblmebdogewa` es `llamita-plus`.
 - Bloqueos: no existe un contexto aislado de datos de demostración; `modo_demostracion` solo cambia la presentación y las sedes existentes tienen datos. También falta acordar un corte de stock único que incluya todos los escritores actuales antes de habilitar existencias independientes por área.
 - Cambios en código, esquema y datos: ninguno. No activar B2.
+
+### Tarea A1 - Auditoría de integración Fudo y Llamita Lama
+
+- Estado: ACTIVA
+- Autorización: Alejo aprobó iniciar la primera parte del plan el 2026-10-06.
+- Objetivo: auditar la integración Fudo ya existente, el módulo Llamita Lama y sus conexiones reales con recetas, ventas, caja e inventario antes de diseñar stock por áreas.
+- Documentos obligatorios: `CLAUDE.md`, `README.md`, `docs/LAMA.md`, `docs/fudo-api-cuanto-sirve.md`, `docs/atlas-fudo.md`, `docs/hermes/00-reglas-operativas.md` y `docs/hermes/06-canal-hermes-codex.md`.
+- Alcance permitido: lectura del repositorio; lectura del esquema autorizado de Llamita Plus; mapa de componentes, funciones, tablas, permisos, sincronizaciones y puntos de lectura/escritura; propuesta de contrato común.
+- Fuera de alcance: cambios de código; SQL o migraciones; inserciones/actualizaciones/borrados; cambios de UI; activación de áreas; cambios en modo demostración; cualquier acceso a Café del Desierto.
+- Criterios de aceptación: respuesta en `06-canal-hermes-codex.md`; bitácora actualizada; hechos e inferencias separados; Fudo existente distinguido de Lama futuro; función de pagos/caja separada de evento de inventario; riesgos y decisiones pendientes explícitos.
+- Pruebas requeridas: solo consultas y verificaciones de lectura; `git diff --check`; no se requieren pruebas de aplicación porque no se modifica código.
+- Publicación: push a `master` autorizado para esta actualización documental, sin cambios de aplicación, esquema ni datos.
+- Riesgos conocidos: documentación histórica que podría no coincidir con el esquema vigente; funciones Fudo visibles solo bajo permisos; múltiples escritores de `productos.stock_actual`; ausencia de stock por área.
