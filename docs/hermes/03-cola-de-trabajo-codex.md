@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **A3.4b completada — prueba sintética E2E Lama–Stock verificada**. A3.4c y B1 de áreas permanecen pendientes.
+Estado actual: **A3.4c completada — prueba controlada Lama en modo prueba verificada**. A3.4d y B1 de áreas permanecen pendientes.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -161,8 +161,19 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Evidencia detallada: `docs/hermes/11-pruebas-a3-4b.md`.
 - No activar automáticamente A3.4c.
 
-### Tarea A3.4c - Reversas y activación real
+### Tarea A3.4c - Prueba controlada de interfaz Lama en modo prueba
+
+- Estado: **COMPLETADA** — 2026-10-06.
+- Autorización: Alejo solicitó activar únicamente A3.4c en modo `prueba` con datos sintéticos controlados.
+- Objetivo: recorrer el camino que usa la interfaz de Lama (`cuenta_agregar` → `cuenta_confirmar` → `cuenta_cerrar`) y verificar captura, aplicación de evento e idempotencia sin modificar stock persistente.
+- Alcance permitido: una sede temporalmente configurada en `prueba`, cuenta/mesa/productos/receta sintéticos, comprobación de IDs, reintento idempotente, `BEGIN ... ROLLBACK`, bitácora y procedimiento manual.
+- Fuera de alcance: modo `real`, ventas reales, stock persistente, Fudo, áreas, Café del Desierto/Llamita Stock, reversas administrativas y cambios de cierre comercial.
+- Criterios de aceptación: evento en modo `prueba`; aplicaciones por ingrediente; segundo procesamiento sin duplicados; stock y conteos pre/post idénticos; configuración vacía al finalizar.
+- Publicación: documentación a `master` si la prueba pasa. No activar una tarea posterior.
+- Resultado: transacción sintética aprobada; IDs y procedimiento quedaron documentados en `docs/hermes/12-prueba-manual-a3-4c.md`.
+
+### Tarea A3.4d - Reversas y activación real
 
 - Estado: **PENDIENTE**.
 - Alcance futuro: reversas administrativas compensatorias, panel de operación y activación gradual; requiere decisión y pruebas separadas.
-- No activar automáticamente desde A3.4b.
+- No activar automáticamente desde A3.4c.

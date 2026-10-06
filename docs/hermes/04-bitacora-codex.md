@@ -155,3 +155,15 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - Conteos antes y después: cuentas `59`, líneas `88`, recetas `396`, ítems de receta `514`, productos `1437`, suma `productos.stock_actual` `15438.00`, comandas persistentes `50`; `lama_stock_config`, eventos, aplicaciones y capturas `0` en ambos cortes.
 - Todos los artefactos sintéticos se revirtieron. No se activó modo real, no cambió stock persistente y no se accedió a Café del Desierto/Llamita Stock.
 - Evidencia: `docs/hermes/11-pruebas-a3-4b.md`.
+
+## 2026-10-06 — A3.4c: prueba controlada Lama en modo prueba completada
+
+- Estado: **COMPLETADA**; A3.4d queda pendiente y no fue activada.
+- Proyecto verificado: Supabase `llamita-plus` (`iuryhsjucblmebdogewa`). Repositorio: `leoalejoleo1537/llamita-plus`.
+- Se ejecutó una única transacción `BEGIN ... ROLLBACK` con sede, mesa, cuenta, productos y receta sintéticos. Se reprodujo el camino que usa Lama mediante `cuenta_agregar`, `cuenta_confirmar` y `cuenta_cerrar`.
+- IDs observados dentro de la transacción: cuenta `990301`; evento `646d4cb3-5124-4410-ab40-4dbd89a68b6c`; aplicaciones `2a419ca9-56bf-49b8-8bea-71645f3f10dd` y `a9bea2ef-19c9-4f25-82c8-07f4b49fa33d`.
+- El evento quedó en modo/estado `prueba`; hubo dos aplicaciones por ingrediente. Dos ejecuciones posteriores de `lama_stock_aplicar_evento` devolvieron las mismas dos aplicaciones y no generaron duplicados.
+- La cuenta quedó `cerrada`, el stock sintético permaneció en `10` por producto y el modo real nunca se habilitó.
+- Conteos pre/post: cuentas 59, líneas 88, productos 1437, recetas 396, ítems de receta 514, comandas 50, suma de stock 15438; configuración, eventos, aplicaciones y capturas 0 tras el rollback.
+- Los IDs son efímeros y fueron revertidos. No se usaron ventas reales, no se tocó Fudo, no se implementaron áreas y no se accedió a Café del Desierto/Llamita Stock.
+- Procedimiento manual: `docs/hermes/12-prueba-manual-a3-4c.md`.

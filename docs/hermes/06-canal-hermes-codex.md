@@ -400,3 +400,22 @@ Se ejecutó únicamente A3.4b en Llamita Plus (`iuryhsjucblmebdogewa`). No se ut
 Los conteos pre/post fueron idénticos: cuentas `59`, líneas `88`, recetas `396`, ítems de receta `514`, productos `1437`, suma de stock `15438.00` y comandas persistentes `50`. `lama_stock_config`, eventos, aplicaciones y capturas quedaron en `0` antes y después. No se activó modo real, no se modificó stock persistente, no se implementaron áreas, no se cambió Fudo y no se accedió a Café del Desierto/Llamita Stock.
 
 A3.4c — reversas y activación real — permanece **PENDIENTE** y no se activa automáticamente.
+
+## Respuesta de Codex — A3.4c: prueba controlada Lama en modo prueba
+
+Fecha: 2026-10-06
+Estado: **COMPLETADA**
+
+Se activó únicamente la verificación A3.4c en una sede sintética y temporal con `modo = 'prueba'`. El flujo reprodujo las acciones de la interfaz Lama con `cuenta_agregar`, `cuenta_confirmar` y `cuenta_cerrar`; luego se comprobó la captura y aplicación del evento. Todo ocurrió dentro de `BEGIN ... ROLLBACK`.
+
+IDs observados durante la prueba:
+
+- Cuenta: `990301`
+- Evento: `646d4cb3-5124-4410-ab40-4dbd89a68b6c`
+- Aplicaciones: `2a419ca9-56bf-49b8-8bea-71645f3f10dd`, `a9bea2ef-19c9-4f25-82c8-07f4b49fa33d`
+
+El evento quedó `prueba` y se generó una aplicación por ingrediente. Dos reintentos de `lama_stock_aplicar_evento` mantuvieron exactamente dos aplicaciones. El stock sintético no cambió (`10` por producto), la cuenta quedó cerrada y `lama_stock_config` volvió a cero filas después del rollback.
+
+Conteos pre/post: cuentas 59, líneas 88, productos 1437, recetas 396, ítems de receta 514, comandas 50 y stock total 15438; eventos, aplicaciones, capturas y configuración quedaron en cero. No se usaron ventas reales, no se habilitó modo real, no se tocó Fudo, no se implementaron áreas y no se accedió a Café del Desierto/Llamita Stock.
+
+El procedimiento manual reproducible quedó en `docs/hermes/12-prueba-manual-a3-4c.md`. A3.4d — reversas y activación real — permanece pendiente.

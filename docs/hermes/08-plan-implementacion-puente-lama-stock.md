@@ -1,7 +1,7 @@
 # A3 — Plan de implementación del puente Llamita Lama → Llamita Stock
 
 Fecha: 2026-10-06
-Estado: **aprobado por bloques; A3.1–A3.4b completadas y A3.4c pendiente**
+Estado: **aprobado por bloques; A3.1–A3.4c completadas y A3.4d pendiente**
 Proyecto autorizado: Llamita Plus (`iuryhsjucblmebdogewa`)
 
 ## Objetivo
@@ -35,7 +35,7 @@ La captura del evento debe ocurrir en la misma transacción del cierre. La aplic
 
 ## A3.1 — Cimientos, seguridad e idempotencia
 
-Estado: **ACTIVA**
+Estado: **COMPLETADA — 2026-10-06**
 
 ### Alcance
 
@@ -123,7 +123,7 @@ Estado: **COMPLETADA — 2026-10-06**
 
 ## A3.4 — Observabilidad, pruebas E2E y reversas
 
-Estado: **A3.4a COMPLETADA — A3.4b COMPLETADA — A3.4c pendiente**
+Estado: **A3.4a COMPLETADA — A3.4b COMPLETADA — A3.4c COMPLETADA — A3.4d pendiente**
 
 ### A3.4a — Observabilidad y reproceso seguro en modo prueba
 
@@ -157,7 +157,18 @@ Estado: **COMPLETADA — 2026-10-06**
 - Conteos pre/post: cuentas `59`, líneas `88`, recetas `396`, ítems de receta `514`, productos `1437`, stock total `15438.00`, comandas `50`; configuración, eventos, aplicaciones y capturas `0` en ambos cortes.
 - Evidencia: `docs/hermes/11-pruebas-a3-4b.md`.
 
-### A3.4c — Reversas y activación real
+### A3.4c — Prueba controlada de interfaz Lama en modo prueba
+
+Estado: **COMPLETADA — 2026-10-06**
+
+- Recorrer el flujo de la interfaz Lama mediante las funciones comerciales instaladas: agregar, confirmar y cerrar.
+- Configurar temporalmente una sede sintética en `prueba`, capturar y aplicar el evento con snapshot de receta.
+- Registrar IDs de cuenta, evento y aplicaciones; repetir la aplicación y comprobar idempotencia.
+- Ejecutar todo dentro de `BEGIN ... ROLLBACK`; no habilitar `real`, no cambiar stock y dejar `lama_stock_config` vacía.
+- Procedimiento manual documentado en `docs/hermes/12-prueba-manual-a3-4c.md`.
+- Resultado: cuenta `990301`; evento `646d4cb3-5124-4410-ab40-4dbd89a68b6c`; aplicaciones `2a419ca9-56bf-49b8-8bea-71645f3f10dd` y `a9bea2ef-19c9-4f25-82c8-07f4b49fa33d`.
+
+### A3.4d — Reversas y activación real
 
 Estado: **PENDIENTE**
 
@@ -166,7 +177,7 @@ Estado: **PENDIENTE**
 - Añadir panel en Ajustes para modo `apagado/prueba/real`, eventos pendientes, sin receta, errores y reproceso.
 - Activar primero una sede/contexto de prueba en Llamita Plus.
 - Conciliar stock esperado y real antes de cualquier activación adicional.
-- No iniciar automáticamente desde A3.4b.
+- No iniciar automáticamente desde A3.4c.
 
 ## Identidad y compatibilidad durante A3
 
