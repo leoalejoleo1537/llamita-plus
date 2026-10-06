@@ -64,7 +64,7 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 
 ### Tarea A2 - Contrato común: venta, receta e inventario
 
-- Estado: ACTIVA
+- Estado: COMPLETADA
 - Autorización: Alejo aprobó iniciar A2 el 2026-10-06, después de revisar la auditoría A1.
 - Objetivo: producir una especificación implementable para que Fudo existente, Llamita Lama y un futuro Toteat puedan entregar eventos al mismo motor de inventario, sin mezclar pagos/caja con consumo físico.
 - Documentos obligatorios: `CLAUDE.md`, `docs/LAMA.md`, `docs/fudo-api-cuanto-sirve.md`, `docs/hermes/00-reglas-operativas.md`, `docs/hermes/05-decisiones-pendientes.md` y `docs/hermes/06-canal-hermes-codex.md`.
@@ -76,3 +76,5 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Criterios de aceptación: separar hechos de decisiones; no plantear doble fuente de stock; definir comportamiento de reversa sin borrado histórico; explicar compatibilidad con Fudo existente y Toteat futuro; dejar las decisiones que sigan abiertas listas para que Alejo elija.
 - Pruebas requeridas: verificaciones de lectura y `git diff --check`; no se requieren pruebas de aplicación.
 - Publicación: push a `master` autorizado solo para documentación de A2. Sin cambios de aplicación, esquema ni datos.
+- Resultado (2026-10-06): contrato documentado en `docs/hermes/07-contrato-comun-inventario.md`; canal y bitácora actualizados. Se fija cierre de mesa de Lama como disparador único, idempotencia por origen, receta/precio históricos y transición a ledger producto-área sin doble saldo.
+- Pendientes: identidad canónica, permisos de reversa, consumos internos, snapshot de receta, errores parciales, unidades/redondeo y ventana de corte por sede. No activar B1 ni implementar el puente hasta aprobación.

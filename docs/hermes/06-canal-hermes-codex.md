@@ -190,3 +190,28 @@ No crear tablas, SQL, productos, recetas ni datos. No modificar interfaz, Edge F
 
 **Ninguno.** Solo se actualizaron documentos de Hermes para dejar la auditoría y su bitácora.
 
+---
+
+## Respuesta de Codex — A2: contrato común de inventario
+
+Fecha: 2026-10-06
+Estado: **COMPLETADA como diseño documental; implementación bloqueada hasta decisiones pendientes**
+
+Se creó `docs/hermes/07-contrato-comun-inventario.md`. El contrato separa POS, recetas y motor de inventario, y fija el cierre de mesa de Lama como único disparador de consumo. Define:
+
+- identidad canónica de producto de Llamita y enlaces por proveedor;
+- precios separados del stock, con instantánea por línea vendida;
+- recetas versionadas más snapshot histórico;
+- `SaleEvent` común para Fudo, Lama y Toteat;
+- libro de aplicaciones inmutable, lotes, áreas e idempotencia;
+- estados de Lama y compensación de anulaciones posteriores al cierre;
+- compatibilidad gradual con `fudo_procesar_item` y `fudo_movimientos`;
+- interfaz esperada para Toteat;
+- transición por fases a producto-área sin dos saldos editables;
+- pruebas de aceptación y decisiones que Alejo debe confirmar.
+
+Decisión aplicada: una mesa cerrada descuenta todas sus líneas confirmadas, incluidas cortesías/consumos internos cuando se modelen como líneas. Pago parcial, propina, medio de pago y arqueo no generan descuentos independientes. Una anulación posterior produce compensación vinculada y nunca borra el movimiento original.
+
+Estado recomendado: no implementar todavía el puente Lama→inventario ni stock por área. Quedan abiertas identidad canónica, permisos de reversa, snapshot de receta, errores parciales, unidades/redondeo y ventana de corte por sede. No se modificó `05-decisiones-pendientes.md` porque A2 deja las preguntas preparadas para aprobación y la autorización limita esta ejecución a los entregables indicados.
+
+Cambios de código, SQL y datos: **ninguno**.
