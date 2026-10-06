@@ -1,7 +1,7 @@
 # A3 — Plan de implementación del puente Llamita Lama → Llamita Stock
 
 Fecha: 2026-10-06
-Estado: **aprobado por bloques; A3.1 completada y A3.2 activa**
+Estado: **aprobado por bloques; A3.1–A3.2 completadas y A3.3 activa**
 Proyecto autorizado: Llamita Plus (`iuryhsjucblmebdogewa`)
 
 ## Objetivo
@@ -97,7 +97,7 @@ Estado: **COMPLETADA — 2026-10-06**
 
 ## A3.3 — Motor neutral y aplicación al stock actual
 
-Estado: PENDIENTE
+Estado: **ACTIVA**
 
 - Crear un motor independiente del POS que reciba `event_id`.
 - Resolver ingredientes desde el snapshot congelado.
@@ -107,6 +107,8 @@ Estado: PENDIENTE
 - En modo `real`, aplicar una sola vez a `productos.stock_actual` y lotes.
 - Si una receta no puede aplicarse completa, revertir el intento de esa línea, conservar el evento y marcar `error`; no dejar ingredientes descontados a medias.
 - El cierre de mesa y sus importes permanecen válidos aunque inventario falle.
+- Corregir antes de aplicar: `ocurrido_at` representa el cierre de mesa (`cerrada_at`), mientras `agregado_at` queda como metadata de la línea.
+- Implementar y probar modo real solo dentro de transacciones revertidas; ninguna sede queda activada persistentemente en A3.3.
 
 ## A3.4 — Reversas, diagnóstico y activación real
 

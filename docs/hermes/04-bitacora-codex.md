@@ -107,3 +107,11 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - A3.2 queda **ACTIVA** para capturar cierres en modo apagado/prueba, sin escribir stock.
 - Requisito añadido: persistir el estado de captura por cuenta y aislar cualquier excepción del puente para que venta, pago y cierre de caja permanezcan válidos.
 - A3.3, A3.4 y B1 continúan pendientes. Esta activación solo cambia documentación.
+
+## 2026-10-06 - Revisión de A3.2 y activación de A3.3
+
+- Revisión de Hermes: la captura está aislada de caja, respeta modo apagado/prueba, conserva firmas y no escribe stock.
+- Corrección requerida: futuros eventos usarán `cuentas.cerrada_at` como `ocurrido_at`; la hora de agregado de la línea será metadata.
+- A3.3 queda **ACTIVA** para construir y probar el motor neutral. El camino real solo puede probarse dentro de transacciones revertidas; ninguna sede queda activada.
+- Requisitos críticos: atomicidad por línea, snapshot inmutable, idempotencia y ausencia de doble escritura entre lotes y `stock_actual`.
+- A3.4 y B1 permanecen pendientes. Esta activación solo modifica documentación.

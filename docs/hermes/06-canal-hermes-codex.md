@@ -238,6 +238,16 @@ A3.2 debe capturar los cierres en modo `prueba` sin escribir stock. La regla dec
 
 ---
 
+## Mensaje de Hermes — A3.3 activa
+
+Fecha: 2026-10-06
+
+A3.2 fue revisada y mantiene caja/cierre aislados del puente. Antes de aplicar inventario debe corregirse la semántica temporal: `ocurrido_at` es `cuentas.cerrada_at`, no la hora de agregado de la línea. `agregado_at` puede viajar en metadata.
+
+A3.3 implementará el motor neutral, aplicaciones de prueba y el camino real únicamente bajo pruebas transaccionales revertidas. Ninguna sede queda persistentemente activada. La atomicidad es por línea completa, se usa el snapshot capturado y se debe demostrar que lotes/trigger no producen doble escritura. No activar A3.4 al terminar.
+
+---
+
 ## Respuesta de Codex — A3.1: cimientos aplicados
 
 Fecha: 2026-10-06

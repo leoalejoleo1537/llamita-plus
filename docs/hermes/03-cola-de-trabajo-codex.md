@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **A3.2 activa — captura protegida del cierre Lama en modo apagado/prueba**. A3.3–A3.4 y B1 de áreas permanecen pendientes.
+Estado actual: **A3.3 activa — motor neutral en prueba y aplicación transaccional al stock actual**. A3.4 y B1 de áreas permanecen pendientes.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -111,3 +111,22 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Resultado (2026-10-06): captura protegida aplicada únicamente en Llamita Plus. Se conservaron las firmas reales de `cuenta_cobrar` y `cuenta_cerrar`; ambos caminos llaman a una función interna solo después del cierre comercial. Modo apagado no crea eventos; modo prueba captura líneas confirmadas no anuladas; sin receta queda `sin_receta`; errores quedan persistidos sin bloquear mesa/caja.
 - Migraciones: `a3_2_captura_cierre_lama` y endurecimiento `a3_2_restrict_captura_execute`. No se modifican stock, lotes, aplicaciones, Fudo ni interfaz. No activar A3.3.
 - Rollback: `sql/2026-10-a3-2-captura-cierre-lama.rollback.sql`, restaura las definiciones pre-A3.2 y aborta si existen filas de captura/eventos.
+
+### Tarea A3.3 - Motor neutral y aplicación al stock actual
+
+- Estado: ACTIVA
+- Autorización: Alejo aprobó continuar los bloques A3; Hermes revisó las migraciones A3.2 y confirmó que caja/cierre quedan aislados del puente.
+- Objetivo: implementar un motor idempotente por `event_id` que use el snapshot de receta, produzca aplicaciones por ingrediente y pueda operar en `prueba` o `real`, manteniendo `productos.stock_actual` como única cantidad vigente.
+- Corrección previa obligatoria: en eventos Lama, `ocurrido_at` debe ser la hora de cierre `cuentas.cerrada_at`; `cuenta_items.agregado_at` puede conservarse en metadata. No existen eventos persistentes que migrar.
+- Alcance permitido: migración aditiva/reversible; motor interno; ajuste compatible de captura para modo `real`; aplicaciones de prueba; escritura real al stock actual y lotes solo durante pruebas transaccionales revertidas; pruebas de atomicidad, idempotencia, FIFO, reglas `aplica` y error; documentación.
+- Configuración: ninguna sede puede quedar persistentemente en `prueba` o `real` al terminar. La ausencia de configuración sigue equivalendo a `apagado`.
+- Modo prueba: crear aplicaciones `prueba` con los deltas esperados, sin escribir productos, lotes ni movimientos reales.
+- Modo real: capturar evento y aplicar una vez. Debe soportarse y probarse solo dentro de transacciones revertidas en A3.3; la activación persistente pertenece a A3.4.
+- Atomicidad por línea: todos los ingredientes de una línea se aplican o ninguno. Un fallo revierte el intento de esa línea, marca el evento `error` y nunca revierte la mesa, venta, pagos o caja.
+- Recetas: consumir exclusivamente el snapshot del evento; cambios posteriores en `recetas` no alteran el evento. Respetar `aplica` según fulfillment; documentar el valor utilizado para ventas Lama de mesa.
+- Lotes: inspeccionar las funciones reales instaladas y reutilizar FIFO sin copiar firmas históricas. Evitar dos escrituras sobre `stock_actual` cuando el trigger de lotes ya lo recalcula.
+- Seguridad: helpers internos sin `EXECUTE` para `PUBLIC`, `anon`, `authenticated` ni `service_role`; no exponer mutaciones directas de las tablas A3.
+- Fuera de alcance: activar persistentemente el puente; panel/reproceso público; reversa administrativa; adaptar Fudo; áreas; catálogo canónico completo; Café del Desierto.
+- Criterios de aceptación: pruebas transaccionales de receta simple/múltiple, modo prueba, modo real, doble ejecución, timeout simulado, insuficiencia/error intermedio, producto con/sin lotes, receta cambiada después de captura y `sin_receta`; conteos y stock pre/post idénticos tras rollback; advisors/seguridad revisados; rollback documentado.
+- Publicación: migraciones y código pueden aplicarse exclusivamente a Llamita Plus y publicarse a `master` si pasan las pruebas. No activar A3.4.
+- Regla de detención: si no puede garantizarse atomicidad por línea o evitar doble escritura lote/stock, detenerse en `REQUIERE DECISIÓN` sin activar modo real.
