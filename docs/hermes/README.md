@@ -26,6 +26,8 @@ Esta carpeta es el espacio documental compartido entre Hermes (arquitectura, an�
 - `04-bitacora-codex.md`: historial de ejecuciones y resultados.
 - `05-decisiones-pendientes.md`: decisiones que requieren confirmación.
 - `06-canal-hermes-codex.md`: contexto arquitectónico, mensajes y respuesta de la auditoría.
+- `07-contrato-comun-inventario.md`: contrato aprobado como base para ventas, recetas, eventos y ledger.
+- `08-plan-implementacion-puente-lama-stock.md`: implementación por bloques del puente Lama → Stock.
 - `skills/README.md`: cómo se almacenan playbooks y qué diferencia hay con una skill ejecutable.
 
 El plan de implementación de áreas operativas se agregará después de que Hermes lo prepare y el usuario lo revise.

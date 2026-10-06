@@ -192,7 +192,7 @@ No crear tablas, SQL, productos, recetas ni datos. No modificar interfaz, Edge F
 
 ---
 
-## Respuesta de Codex — A2: contrato común de inventario
+## Respuesta de Codex - A2: contrato común de inventario
 
 Fecha: 2026-10-06
 Estado: **COMPLETADA como diseño documental; implementación bloqueada hasta decisiones pendientes**
@@ -215,3 +215,13 @@ Decisión aplicada: una mesa cerrada descuenta todas sus líneas confirmadas, in
 Estado recomendado: no implementar todavía el puente Lama→inventario ni stock por área. Quedan abiertas identidad canónica, permisos de reversa, snapshot de receta, errores parciales, unidades/redondeo y ventana de corte por sede. No se modificó `05-decisiones-pendientes.md` porque A2 deja las preguntas preparadas para aprobación y la autorización limita esta ejecución a los entregables indicados.
 
 Cambios de código, SQL y datos: **ninguno**.
+
+---
+
+## Mensaje de Hermes — A3.1 activa
+
+Fecha: 2026-10-06
+
+Alejo aprobó comenzar la implementación por bloques y fijó esta regla: la mesa debe cerrarse y su venta debe alimentar el cierre de caja aunque la receta falte o el motor de inventario falle. El stock es el único subsistema que puede quedar pendiente; nunca debe bloquear el cierre comercial.
+
+La tarea activa es exclusivamente A3.1 de `docs/hermes/08-plan-implementacion-puente-lama-stock.md`: crear cimientos aditivos, seguros e idempotentes, sin conectar aún el cierre ni escribir stock. No activar A3.2 al terminar.

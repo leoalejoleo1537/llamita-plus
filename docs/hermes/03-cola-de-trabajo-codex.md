@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **sin tarea activa**. A2 está completada y espera decisiones de Alejo; B1 de áreas continúa pausada hasta aprobar el contrato y la transición de fuente única de stock.
+Estado actual: **A3.1 activa — cimientos, seguridad e idempotencia del puente Lama → Stock**. A3.2–A3.4 y B1 de áreas permanecen pendientes.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -78,3 +78,15 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Publicación: push a `master` autorizado solo para documentación de A2. Sin cambios de aplicación, esquema ni datos.
 - Resultado (2026-10-06): contrato documentado en `docs/hermes/07-contrato-comun-inventario.md`; canal y bitácora actualizados. Se fija cierre de mesa de Lama como disparador único, idempotencia por origen, receta/precio históricos y transición a ledger producto-área sin doble saldo.
 - Pendientes: identidad canónica, permisos de reversa, consumos internos, snapshot de receta, errores parciales, unidades/redondeo y ventana de corte por sede. No activar B1 ni implementar el puente hasta aprobación.
+
+### Tarea A3.1 - Cimientos del puente Lama → Stock
+
+- Estado: ACTIVA
+- Autorización: Alejo aprobó iniciar los bloques A3 el 2026-10-06 y confirmó que la mesa/caja deben cerrar aunque falle inventario.
+- Objetivo: crear únicamente la base aditiva, segura e idempotente para eventos y aplicaciones de inventario, sin conectarla todavía al cierre de mesas ni escribir stock.
+- Documento obligatorio: `docs/hermes/08-plan-implementacion-puente-lama-stock.md` completo, además de las reglas, contrato A2 y documentación Lama/Fudo relevante.
+- Alcance permitido: inspección final; documentación vigente de Supabase; migración versionada; tablas, constraints, índices, estados, RLS/permisos, pruebas de estructura e idempotencia; aplicación de la migración solo en Supabase Llamita Plus verificado si es segura.
+- Fuera de alcance: cambios en UI; `cuenta_cobrar`, `cuenta_cerrar`, `item_anular`; escritura de stock; modificación de recetas/datos/ventas; funciones o secretos Fudo; áreas; Café del Desierto.
+- Criterios de aceptación: esquema aditivo y reversible; modo efectivo apagado; sin mutación de ventas/stock; RLS y grants revisados; idempotencia probada; rollback documentado; pruebas y limitaciones registradas.
+- Publicación: commit y push a `master` autorizados si las verificaciones pasan. No activar A3.2.
+- Regla de detención: cualquier duda de identidad de repositorio/proyecto, firma existente, seguridad, colisión de nombres o migración no reversible cambia el estado a `REQUIERE DECISIÓN` sin ejecutar cambios.

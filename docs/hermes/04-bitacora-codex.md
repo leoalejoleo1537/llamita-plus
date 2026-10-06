@@ -53,7 +53,7 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - Aclaración: pago, propina, medio de pago y cierre de caja no son disparadores separados de inventario. El evento de consumo es el cierre de mesa.
 - Consecuencia para A2: el contrato debe modelar cierre idempotente y una compensación explícita si una línea cerrada se anula posteriormente. No se modificó código, esquema ni datos.
 
-## 2026-10-06 — A2: contrato común de venta, receta e inventario
+## 2026-10-06 - A2: contrato común de venta, receta e inventario
 
 - Estado: **COMPLETADA como diseño documental**; la implementación queda pendiente de decisiones explícitas.
 - Repositorio: `leoalejoleo1537/llamita-plus`, rama `work`, sincronizada por fast-forward con `origin/master` antes de comenzar. No se consultó ni modificó Café del Desierto / Llamita Stock.
@@ -66,3 +66,10 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - Verificaciones: `git fetch origin master`, `git merge --ff-only origin/master`, lectura de cola/bitácora/canal/decisiones y `git diff --check`. No se ejecutó SQL, RPC, migración, Edge Function ni mutación de datos.
 - Cambios de código, esquema y datos: **ninguno**.
 - Siguiente paso: obtener las decisiones de Alejo listadas en el contrato antes de activar cualquier implementación o B1.
+
+## 2026-10-06 - Activación de A3.1
+
+- Decisión de negocio: una mesa y su importe cierran y alimentan caja aunque inventario falle; el evento de stock queda pendiente, sin receta o con error y se reprocesa después.
+- Plan nuevo: `docs/hermes/08-plan-implementacion-puente-lama-stock.md`, dividido en A3.1–A3.4.
+- Estado: solo **A3.1 ACTIVA**. Autoriza cimientos aditivos, RLS, constraints, idempotencia y pruebas; no autoriza conectar cierres ni modificar stock.
+- A3.2–A3.4 y B1 continúan pendientes. No hubo cambios de aplicación, SQL ejecutado ni datos en esta activación documental.

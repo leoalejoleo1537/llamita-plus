@@ -11,6 +11,7 @@ Estas decisiones orientan el diseño; no autorizan aún una migración ni cambio
 - **Identidad canónica propia:** Llamita necesita una identidad propia para cada producto vendible. Los identificadores Fudo/Toteat serán enlaces de adaptador, no la identidad permanente del núcleo.
 - **Receta histórica:** cada consumo aplicado debe conservar la versión o instantánea de la receta que se utilizó, para que editar una receta mañana no reescriba una venta pasada.
 - **Precio separado del stock:** el precio pertenece al catálogo/venta y cada línea debe guardar la instantánea del precio cobrado. No se debe inferir desde el stock ni desde una receta.
+- **Disponibilidad de ventas primero:** una mesa y su importe deben cerrar y alimentar caja aunque inventario falle. Solo el evento de stock queda `sin_receta`, `pendiente` o `error`; puede corregirse y reprocesarse después.
 
 ### Decisiones que A2 debe dejar preparadas para aprobación
 
