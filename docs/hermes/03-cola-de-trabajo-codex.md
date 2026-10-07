@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **B3.1 COMPLETADA (2026-10-07)**. **B3.2a REQUIERE DECISIÓN** por bloqueo de seguridad; **B3.2b PENDIENTE**, no activa. B1, B2.1, B2.2 decisión resuelta, B2.3, B2.3.1 y B2.4 permanecen cerrados; A3.4d conserva su estado previo.
+Estado actual: **S0 REQUIERE DECISIÓN (2026-10-07)** tras auditoría integral de seguridad; **B3.2a REQUIERE DECISIÓN** y **B3.2b PENDIENTE**, no activa. B1, B2.1, B2.2 decisión resuelta, B2.3, B2.3.1, B2.4 y B3.1 permanecen cerrados; A3.4d conserva su estado previo.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -29,6 +29,18 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Pruebas requeridas:
 - Publicación: [sin push | push a master autorizado]
 - Riesgos conocidos:
+
+### Tarea S0 — Auditoría integral de seguridad y permisos
+
+- Estado: **REQUIERE DECISIÓN (2026-10-07)**. Auditoría de solo lectura completada; no se activa S1.
+- Autorización: Alejo activó S0 y ordenó no implementar correcciones todavía.
+- Resultado: `docs/hermes/24-auditoria-integral-seguridad-permisos.md`.
+- Identidad: dos usuarios Auth confirmados coinciden por correo con filas administrativas, pero `app_permisos` no tiene `auth.uid()`, clave foránea ni propietario. No existe metadata segura que permita identificar cuál es Alejo; se requiere designación privada de `propietario_raiz`.
+- Hallazgos críticos: `app_permisos` es legible por anon y autoeditable; 36 tablas operativas tienen políticas `ALL true` para anon/auth; 40 funciones `SECURITY DEFINER` son ejecutables por anon, 36 con rutas de escritura y sin validación de sesión; Lama/caja y configuración quedan protegidos solo por UI.
+- Contención existente: ledger `stock_internal`, áreas/asignaciones y puente Lama–Stock permanecen cerrados; triggers B2.3 bloquean escritores legacy en `central/plaza`; origen POS sigue `ninguno`, Fudo en prueba/cron apagado y Lama real apagado.
+- Cambios ejecutados: exclusivamente documentación. No hubo SQL de escritura, migraciones, RPC/Edge operativos, cambios de código, datos, RLS, grants, usuarios o configuración.
+- Decisión requerida: identificar por canal privado el `auth.uid()` de Alejo y aprobar recuperación de emergencia; después podrá diseñarse S1 sin migración automática por correo.
+- Publicación: documentación a `master` autorizada. S1, B3.2a y B3.2b no quedan activadas.
 
 ### Bloque 0 — Auditoría de inventario por áreas, sedes y Bodega
 

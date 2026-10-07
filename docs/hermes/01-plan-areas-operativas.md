@@ -1,6 +1,6 @@
 # Plan de implementación: inventario por áreas operativas en Llamita Plus
 
-**Estado:** B1, B2.1, B2.3, B2.3.1, B2.4 y B3.1 completados. B3.1 implementó lectura y navegación por áreas para `plaza` el 2026-10-07. B3.2a —gestión de áreas y asignación preferida— está **REQUIERE DECISIÓN** por la autorización no confiable en `app_permisos`; B3.2b —transferencias visuales— sigue **PENDIENTE**, no activa. No activar fases posteriores automáticamente. Evidencia: `docs/hermes/23-b3-2a-bloqueo-autorizacion.md`.
+**Estado:** B1, B2.1, B2.3, B2.3.1, B2.4 y B3.1 completados. B3.1 implementó lectura y navegación por áreas para `plaza` el 2026-10-07. B3.2a —gestión de áreas y asignación preferida— está **REQUIERE DECISIÓN** por la autorización no confiable en `app_permisos`; B3.2b —transferencias visuales— sigue **PENDIENTE**, no activa. S0 auditó el sistema completo y también quedó **REQUIERE DECISIÓN**: falta designar de forma verificable el `propietario_raiz`. No activar fases posteriores automáticamente. Evidencia: `docs/hermes/23-b3-2a-bloqueo-autorizacion.md` y `docs/hermes/24-auditoria-integral-seguridad-permisos.md`.
 
 **Repositorio objetivo:** `leoalejoleo1537/llamita-plus`, rama `master`.
 
@@ -207,6 +207,8 @@ RLS y grants mantienen cerradas las tablas internas; la RPC requiere sesión aut
 
 **Estado: dividido en subfases. B3.2a REQUIERE DECISIÓN; B3.2b PENDIENTE, no activa.** El intento de B3.2a se detuvo antes de cualquier cambio porque las políticas actuales de `public.app_permisos` permiten que clientes sin autorización modifiquen `puede_ajustes`. El permiso no puede usarse como puerta de backend hasta endurecer y probar su fuente de verdad. Ver informe 23.
 
+La auditoría S0 amplió la evidencia: 36 tablas operativas tienen políticas abiertas `ALL`, y 40 funciones `SECURITY DEFINER` son ejecutables por anon. S1 debe resolver primero identidad, gobierno de permisos y las rutas críticas por fases. No debe mezclarse ese corte transversal con la UI de áreas. Informe: `docs/hermes/24-auditoria-integral-seguridad-permisos.md`.
+
 ##### B3.2a — Gestión de áreas y asignación preferida de productos
 
 **Estado: REQUIERE DECISIÓN (2026-10-07).** El alcance funcional permanece aprobado, pero su requisito de autorización no se puede satisfacer de forma segura con la política instalada. Debe acordarse una fuente confiable de administración y su bootstrap antes de añadir CRUD de áreas, asignaciones o altas de productos que las escriban. El informe 23 contiene la evidencia y propuesta. No se hicieron cambios de aplicación, esquema o datos.
@@ -283,6 +285,12 @@ La fuente única, ubicaciones iniciales, tratamiento del stock histórico, trans
 Quedan para fases posteriores: adaptar entradas, ajustes, mermas, repartos y consumo de recetas al libro; definir mínimos/máximos por ubicación; y habilitar escrituras visuales por área en B3.2. `angamos` y la clave histórica `bodega` no se migraron. B3.2 requiere activación separada.
 
 Estas verificaciones no son permiso para abrir alcance hacia Café del Desierto, ejecutar operaciones destructivas o automatizar el descuento de recetas.
+
+### Precondición de seguridad S0/S1
+
+S0 confirmó que las capacidades heredadas se relacionan con Auth solo por correo y pueden ser modificadas por clientes. Hay dos cuentas Auth confirmadas con filas administrativas, sin marca de propiedad. Antes de S1, Alejo debe identificar por un canal privado cuál `auth.uid()` será el único `propietario_raiz` y aprobar un mecanismo de recuperación fuera de la aplicación. S1 no está activa y no existe todavía migración ejecutable.
+
+La transición deberá conservar los triggers y el ledger protegidos, cerrar primero permisos/Ajustes, separar gobierno de operación y después migrar Lama, RPC privilegiados, productos, logística y reportes. B3.2a solo se reanuda cuando la fuente de autorización sea confiable.
 
 
 ## 11. Resultado de B1 — administración segura de sedes

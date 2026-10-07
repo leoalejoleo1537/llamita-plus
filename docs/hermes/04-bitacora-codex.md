@@ -13,6 +13,20 @@
 
 Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resultado y riesgos pendientes.
 
+## 2026-10-07 — S0: auditoría integral de seguridad y permisos
+
+- Estado: **REQUIERE DECISIÓN**. El mapa técnico está completo para diseñar S1, pero no existe una identidad verificable de propietario raíz.
+- Entorno: repositorio `leoalejoleo1537/llamita-plus`, rama `work`, sincronizado con `origin/master`; Supabase `llamita-plus` ref `iuryhsjucblmebdogewa`, `ACTIVE_HEALTHY`, PostgreSQL 17.6.1.166.
+- Identidad anonimizada: 2 usuarios Auth confirmados, 0 anónimos; 9 filas de `app_permisos`, 2 coincidentes por correo y 7 sin usuario Auth actual. Ambas cuentas reales tienen capacidades administrativas. No hay UID/FK/propietario ni rol seguro en app metadata.
+- Hallazgos: lectura anónima y autoedición de `app_permisos`; 36 tablas `public` con políticas abiertas `ALL`; 40 funciones `SECURITY DEFINER` ejecutables por anon, 36 con escritura y ninguna de esas 40 con chequeo de sesión; Lama, caja, Ajustes, recetas y logística dependen principalmente de controles del cliente.
+- Controles que sí existen: `stock_internal` cerrado; áreas/asignaciones cerradas; puente Lama–Stock sin acceso de navegador; triggers de corte protegen stock/lotes/escritores legacy para `central/plaza`; POS en `ninguno`, Fudo prueba/cron apagado y Lama real apagado.
+- Edge: se leyeron metadatos y fuentes de las seis funciones desplegadas sin invocarlas. Todas tienen JWT y guard de origen POS; varias no exigen capacidad de usuario confiable y usan service role únicamente en servidor.
+- Advisors: 40 funciones definer anónimas, 3 vistas definer, 10 funciones con search path mutable, 8 tablas RLS sin política y protección de contraseñas filtradas desactivada.
+- Trabajo ejecutado: consultas SELECT/catálogos, advisors, lectura de código y documentación. Sin migraciones, DML, RPC operativos, Edge invocadas, cambios de código funcional, RLS, grants, usuarios, datos o configuración.
+- Informe: `docs/hermes/24-auditoria-integral-seguridad-permisos.md`. S1 no activa; B3.2a continúa requiere decisión y B3.2b pendiente.
+- Decisión: Alejo debe designar privadamente cuál cuenta Auth es el `propietario_raiz` y aprobar el procedimiento de recuperación.
+- No se accedió a Café del Desierto / Llamita Stock.
+
 ## 2026-10-07 — B3.2a: bloqueo de autorización documentado
 
 - Estado: **REQUIERE DECISIÓN**. Alejo activó B3.2a; la ejecución se detuvo antes de modificar código o base de datos al comprobar que `app_permisos.puede_ajustes` no es una fuente confiable con las políticas instaladas.

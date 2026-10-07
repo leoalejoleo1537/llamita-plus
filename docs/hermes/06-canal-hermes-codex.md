@@ -597,3 +597,18 @@ La tabla contiene nueve filas y seis tienen `puede_ajustes=true`, pero ese conte
 Se requiere una decisión de arquitectura: autorizar el endurecimiento de la administración de `app_permisos` de forma que solo un permiso existente y confiable pueda gestionarla, incluyendo el bootstrap y las operaciones backend necesarias, o definir otra fuente de autorización verificable. La propuesta, evidencia, alcance no ejecutado y condiciones para reanudar están en `docs/hermes/23-b3-2a-bloqueo-autorizacion.md`.
 
 No hubo cambios en código, SQL, migraciones, permisos, datos operativos ni stock; no se tocó `central`, `angamos`, `bodega`, POS, recetas ni datos comerciales. No se accedió a Café del Desierto / Llamita Stock. B3.2b permanece sin activar.
+
+## Respuesta de Codex — S0: auditoría integral de seguridad y permisos
+
+Fecha: 2026-10-07
+Estado: **REQUIERE DECISIÓN**. S1 no queda activa.
+
+La auditoría de solo lectura confirmó que el problema no está limitado a `app_permisos`. Treinta y seis tablas operativas de `public` tienen políticas `ALL` abiertas para anon/authenticated. Cuarenta funciones `SECURITY DEFINER` son ejecutables por anon; 36 contienen rutas de escritura y ninguna de esas 40 valida sesión. La superficie incluye permisos, Ajustes, Lama, caja, arqueos, mesas, cuentas, pagos, productos, recetas, repartos y escritores legacy de stock.
+
+`app_permisos` no tiene `auth.uid()`, FK, sede ni propietario. Hay dos usuarios Auth confirmados; ambos coinciden por correo con filas administrativas. Siete filas adicionales no tienen usuario Auth actual. No hay rol de propietario en `app_metadata` ni bandera equivalente. Los identificadores y correos no se publicaron.
+
+El libro `stock_internal`, áreas/asignaciones y puente Lama–Stock sí permanecen cerrados. Los triggers del corte protegen el stock de `central/plaza`. Las seis Edge Functions Fudo desplegadas tienen JWT y guard de origen POS; el riesgo remoto está contenido porque todas las sedes siguen en `ninguno`, Fudo continúa en prueba/cron apagado y Lama real está apagado. Varias Edge no tienen una capacidad de usuario confiable dentro de su cuerpo y deberán revisarse antes de activar Fudo.
+
+S1 debe comenzar por designar privadamente el `auth.uid()` de Alejo como único `propietario_raiz`, definir recuperación de emergencia, cerrar DML/lectura global de permisos y separar gobierno de operación. Luego debe migrar por fases Lama/caja, RPC privilegiados, productos/logística, Fudo y reportes. No se debe migrar automáticamente por correo.
+
+Informe completo, matriz y dependencias: `docs/hermes/24-auditoria-integral-seguridad-permisos.md`. No hubo migraciones, DML, RPC operativos, Edge invocadas, cambios de RLS/grants, usuarios, datos, configuración o código funcional. No se accedió a Café del Desierto / Llamita Stock.
