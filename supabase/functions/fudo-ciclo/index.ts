@@ -71,13 +71,31 @@
 // puedan decir cosas distintas.
 // ================================================================
 
-const VERSION = "2026-08-18";
+const VERSION = "2026-10-07-b2.3.1";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-sistema-token",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+
+async function verificarOrigenFudo(sede: string): Promise<{ ok: boolean; status: number; error?: string }> {
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) return { ok: false, status: 503, error: "No se pudo verificar el POS activo; el ciclo queda cerrado." };
+  try {
+    const response = await fetch(`${url}/rest/v1/rpc/stock_pos_origen_permitido`, {
+      method: "POST",
+      headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_sede: sede, p_origen: "fudo" }),
+    });
+    if (!response.ok) return { ok: false, status: 503, error: "No se pudo verificar el POS activo; el ciclo queda cerrado." };
+    if (await response.json() === true) return { ok: true, status: 200 };
+    return { ok: false, status: 409, error: `Fudo no es el POS activo para inventario de ${sede}.` };
+  } catch {
+    return { ok: false, status: 503, error: "No se pudo verificar el POS activo; el ciclo queda cerrado." };
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
@@ -92,6 +110,8 @@ Deno.serve(async (req) => {
     const url = new URL(req.url);
     const sede = String(url.searchParams.get("sede") ?? body?.sede ?? "plaza").toLowerCase();
     const origen = String(url.searchParams.get("origen") ?? body?.origen ?? "ciclo").toLowerCase();
+    const guardiaOrigen = await verificarOrigenFudo(sede);
+    if (!guardiaOrigen.ok) return json({ version: VERSION, ok: false, sede, error: guardiaOrigen.error }, guardiaOrigen.status);
 
     // QUIÉN FIRMA EL EMPUJE, y por qué se decide acá:
     //

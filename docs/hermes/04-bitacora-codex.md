@@ -258,3 +258,15 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - Seguridad/rendimiento: advisor ya no marca `stock_internal` como RLS sin política; se agregaron índices de FK faltantes. Permanecen avisos previos de vistas/tablas ajenas y avisos de índices nuevos aún no usados.
 - Rollback técnico `sql/2026-10-b2-3-libro-existencias.rollback.sql`: aborta si hay operaciones posteriores; luego solo compensación auditada, sin borrar movimientos.
 - Resultado detallado: `docs/hermes/19-b2-3-corte-libro-ubicaciones.md`. No se tocó Café del Desierto / Llamita Stock; no se cambió ningún stock persistente previo ni datos comerciales. B2.4 no se activó.
+
+## 2026-10-07 — B2.3.1: blindaje de origen POS por sede
+
+- Estado: **COMPLETADA**. B2.4 continúa **PENDIENTE**, no activa. Entorno confirmado: repositorio oficial `leoalejoleo1537/llamita-plus`, proyecto Supabase `llamita-plus` (`iuryhsjucblmebdogewa`).
+- Configuración previa verificada: `fudo_sync` solo tenía modo/cursor, `lama_stock_config` modo Lama y `ajustes` flags booleanos. Se creó `stock_internal.origen_pos`, una fila por sede con origen restringido. `plaza`, `central`, `angamos` y `bodega` quedaron `ninguno`.
+- Migración aplicada `20261007162948 b2_3_1_pos_origin_guard`; fuente local `supabase/migrations/20261007162700_b2_3_1_pos_origin_guard.sql`.
+- Backend: `public.stock_pos_origen_permitido` solo ejecutable por `service_role`; tabla interna sin grants; `fudo_procesar_item` cerrado a roles de navegador y protegido por origen; triggers bloquean DML de Fudo y real de Lama cuando el proveedor no coincide. La definición instalada del motor Lama exige origen Lama antes de aplicación real, además del bloqueo de modo actual.
+- Edge desplegadas `ACTIVE`, v1, `verify_jwt=true`, marker `2026-10-07-b2.3.1`: ciclo, sync ventas, empujar stock, deshacer, sumar y probar escritura. Se recuperaron las seis fuentes desplegadas y se confirmó guard + marker. Invocación sin JWT devuelve 401.
+- Pruebas transaccionales: estado `ninguno/prueba`, segundo POS duplicado, central/archivadas/histórica, RPC/Fudo DML, Lama real, ACL/RLS y helper bajo `SET LOCAL ROLE service_role`. Sin escrituras persistentes.
+- Estado post: orígenes ninguno (4 filas); `plaza fudo_sync` prueba/cron false; Lama config 0; productos 1.437/stock 15.438; movimientos 431; fudo_movimientos 15.357. Fudo remoto no fue consultado ni modificado.
+- `npm test`, esbuild, `git diff --check` y advisors ejecutados. Sin nuevos findings asociados a la configuración; avisos previos ajenos persisten. `docs/hermes/20-b2-3-1-blindaje-origen-pos.md` describe despliegues, permisos, pruebas y riesgos.
+- No hay selector de Ajustes. Futuro endpoint debe verificar `app_permisos.puede_ajustes`; no se otorgó escritura a navegador/`service_role`. No se activó Fudo/Lama real, Toteat ni B2.4. No se accedió a Café del Desierto / Llamita Stock.

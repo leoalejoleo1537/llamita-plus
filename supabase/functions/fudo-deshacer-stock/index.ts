@@ -27,6 +27,26 @@ const CORS = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const VERSION = "2026-10-07-b2.3.1";
+
+async function verificarOrigenFudo(sede: string): Promise<{ ok: boolean; status: number; error?: string }> {
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) return { ok: false, status: 503, error: "No se pudo verificar el POS activo; la reversa queda cerrada." };
+  try {
+    const response = await fetch(`${url}/rest/v1/rpc/stock_pos_origen_permitido`, {
+      method: "POST",
+      headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_sede: sede, p_origen: "fudo" }),
+    });
+    if (!response.ok) return { ok: false, status: 503, error: "No se pudo verificar el POS activo; la reversa queda cerrada." };
+    if (await response.json() === true) return { ok: true, status: 200 };
+    return { ok: false, status: 409, error: `Fudo no es el POS activo para inventario de ${sede}.` };
+  } catch {
+    return { ok: false, status: 503, error: "No se pudo verificar el POS activo; la reversa queda cerrada." };
+  }
+}
+
 type Fila = {
   lote: string; cuando: string; quien: string | null;
   fudo_product_id: string; producto_fudo: string;
@@ -65,9 +85,8 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const sede = String(body?.sede ?? "plaza").toLowerCase();
-    if (sede === "central" || sede === "plaza") {
-      return json({ error: "Stock por ubicación: no se pueden deshacer empujes antiguos a Fudo para Bodega o Local 1." }, 409);
-    }
+    const guardiaOrigen = await verificarOrigenFudo(sede);
+    if (!guardiaOrigen.ok) return json({ version: VERSION, error: guardiaOrigen.error }, guardiaOrigen.status);
     const modo = body?.modo === "aplicar" ? "aplicar" : "simular";
 
     // ---------- Qué habría que devolver ----------

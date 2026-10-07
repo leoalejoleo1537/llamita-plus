@@ -19,7 +19,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
    así que el .ts del repo no prueba qué está corriendo en producción. Con esto
    se puede preguntar sin entrar al panel: si la respuesta trae una versión
    vieja, es que el pegado nunca se hizo. Subirla al cambiar el archivo. */
-const VERSION = "2026-07-31";
+const VERSION = "2026-10-07-b2.3.1";
 
 const AUTH_URL = "https://auth.fu.do/api";
 const API_BASE = "https://api.fu.do/v1alpha1";
@@ -40,6 +40,24 @@ const CORS = {
   "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
 };
 
+async function verificarOrigenFudo(sede: string): Promise<{ ok: boolean; status: number; error?: string }> {
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) return { ok: false, status: 503, error: "No se pudo verificar el POS activo; la sincronización queda cerrada." };
+  try {
+    const response = await fetch(`${url}/rest/v1/rpc/stock_pos_origen_permitido`, {
+      method: "POST",
+      headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_sede: sede, p_origen: "fudo" }),
+    });
+    if (!response.ok) return { ok: false, status: 503, error: "No se pudo verificar el POS activo; la sincronización queda cerrada." };
+    if (await response.json() === true) return { ok: true, status: 200 };
+    return { ok: false, status: 409, error: `Fudo no es el POS activo para inventario de ${sede}. No se procesaron ventas.` };
+  } catch {
+    return { ok: false, status: 503, error: "No se pudo verificar el POS activo; la sincronización queda cerrada." };
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   try {
@@ -53,6 +71,8 @@ Deno.serve(async (req) => {
       bodyOrigen = b?.origen ?? null;
     }
     const sede = (qsSede ?? bodySede ?? "plaza").toLowerCase();
+    const guardiaOrigen = await verificarOrigenFudo(sede);
+    if (!guardiaOrigen.ok) return json({ version: VERSION, error: guardiaOrigen.error }, guardiaOrigen.status);
     // Quién disparó esta corrida. El cron manda ?origen=cron; el botón de la
     // app manda "boton". Sirve para saber si la sync automática sigue viva.
     const origen = (url.searchParams.get("origen") ?? bodyOrigen ?? "boton").toLowerCase();

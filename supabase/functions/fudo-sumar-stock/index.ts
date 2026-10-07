@@ -55,7 +55,7 @@
 // Quién puede: CUALQUIERA. Ver la nota larga adentro (2026-08-21).
 // ================================================================
 
-const VERSION = "2026-08-21";
+const VERSION = "2026-10-07-b2.3.1";
 const AUTH_URL = "https://auth.fu.do/api";
 const API_BASE = "https://api.fu.do/v1alpha1";
 
@@ -64,6 +64,24 @@ const CORS = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+
+async function verificarOrigenFudo(sede: string): Promise<{ ok: boolean; status: number; error?: string }> {
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) return { ok: false, status: 503, error: "No se pudo verificar el POS activo; la suma queda cerrada." };
+  try {
+    const response = await fetch(`${url}/rest/v1/rpc/stock_pos_origen_permitido`, {
+      method: "POST",
+      headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_sede: sede, p_origen: "fudo" }),
+    });
+    if (!response.ok) return { ok: false, status: 503, error: "No se pudo verificar el POS activo; la suma queda cerrada." };
+    if (await response.json() === true) return { ok: true, status: 200 };
+    return { ok: false, status: 409, error: `Fudo no es el POS activo para inventario de ${sede}.` };
+  } catch {
+    return { ok: false, status: 503, error: "No se pudo verificar el POS activo; la suma queda cerrada." };
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
@@ -113,9 +131,8 @@ Deno.serve(async (req) => {
     // ---------- qué se pidió ----------
     const body = await req.json().catch(() => ({}));
     const sede = String(body?.sede ?? "plaza").toLowerCase();
-    if (sede === "central" || sede === "plaza") {
-      return json({ error: "Stock por ubicación: Fudo no puede recibir sumas desde repartos antiguos de Bodega o Local 1." }, 409);
-    }
+    const guardiaOrigen = await verificarOrigenFudo(sede);
+    if (!guardiaOrigen.ok) return json({ version: VERSION, error: guardiaOrigen.error }, guardiaOrigen.status);
     const productoId = Number(body?.producto_id);
     const cantidad = Number(body?.cantidad);
     const itemId = body?.reparto_item_id != null ? Number(body.reparto_item_id) : null;

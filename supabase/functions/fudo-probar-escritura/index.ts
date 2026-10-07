@@ -41,6 +41,26 @@ const CORS = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const VERSION = "2026-10-07-b2.3.1";
+
+async function verificarOrigenFudo(sede: string): Promise<{ ok: boolean; status: number; error?: string }> {
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) return { ok: false, status: 503, error: "No se pudo verificar el POS activo; la prueba queda cerrada." };
+  try {
+    const response = await fetch(`${url}/rest/v1/rpc/stock_pos_origen_permitido`, {
+      method: "POST",
+      headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_sede: sede, p_origen: "fudo" }),
+    });
+    if (!response.ok) return { ok: false, status: 503, error: "No se pudo verificar el POS activo; la prueba queda cerrada." };
+    if (await response.json() === true) return { ok: true, status: 200 };
+    return { ok: false, status: 409, error: `Fudo no es el POS activo para inventario de ${sede}.` };
+  } catch {
+    return { ok: false, status: 503, error: "No se pudo verificar el POS activo; la prueba queda cerrada." };
+  }
+}
+
 /* Las formas en que un API puede esperar el cambio. Se prueban en
    orden y se para en la primera que funcione: cada intento escribe,
    así que no se sigue probando después de un éxito. */
@@ -123,9 +143,8 @@ Deno.serve(async (req) => {
     // ---------- 2) Qué producto vamos a tocar ----------
     const body = await req.json().catch(() => ({}));
     const sede = String(body?.sede ?? "plaza").toLowerCase();
-    if (sede === "central" || sede === "plaza") {
-      return json({ error: "Prueba detenida: no se escribe en el inventario remoto de Fudo para Bodega o Local 1." }, 409);
-    }
+    const guardiaOrigen = await verificarOrigenFudo(sede);
+    if (!guardiaOrigen.ok) return json({ version: VERSION, error: guardiaOrigen.error }, guardiaOrigen.status);
     const productId = body?.fudo_product_id ? String(body.fudo_product_id) : null;
     if (!productId) return json({ error: "Falta fudo_product_id: hay que decir sobre qué producto probar." }, 400);
 

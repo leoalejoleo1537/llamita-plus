@@ -1,6 +1,6 @@
 # Plan de implementación: inventario por áreas operativas en Llamita Plus
 
-**Estado:** B1 y B2.1 completados. La decisión arquitectónica B2.2 fue aprobada y documentada en `docs/hermes/17-decision-libro-existencias-ubicacion.md`. B2.3 —libro por ubicación y corte coordinado— quedó **COMPLETADO (2026-10-07)** para `central` y `plaza`; B2.4 —existencias por áreas operativas— queda **PENDIENTE**, no activa. No activar fases posteriores automáticamente.
+**Estado:** B1, B2.1, B2.3 y B2.3.1 completados. La decisión arquitectónica B2.2 está documentada en `docs/hermes/17-decision-libro-existencias-ubicacion.md`. B2.3.1 —blindaje de origen POS— quedó **COMPLETADO (2026-10-07)** para todas las sedes registradas; B2.4 —existencias por áreas operativas— queda **PENDIENTE**, no activa. No activar fases posteriores automáticamente.
 
 **Repositorio objetivo:** `leoalejoleo1537/llamita-plus`, rama `master`.
 
@@ -165,6 +165,20 @@ Se implementó un libro privado por producto/sede/ubicación/lote, con catálogo
 
 Las migraciones aplicadas en Llamita Plus fueron `20261007152558 b2_3_libro_existencias_corte` y `20261007152805 b2_3_indices_permisos_libro`. Pruebas de RLS/permisos, conciliación, bloqueos, transferencia Bodega -12/Cafetería +12 con producto lógico/lote/referencia compartidos e idempotencia pasaron dentro de una transacción revertida. El rollback técnico aborta si existen movimientos posteriores; en ese caso requiere reversión compensatoria auditada.
 
+### Subfase B2.3.1 — Blindaje de conectores POS y origen activo
+
+**Estado: COMPLETADO (2026-10-07); ningún POS quedó activo.** La configuración previa se encontraba separada: `public.fudo_sync` guardaba modo/cursor de Fudo, `public.lama_stock_config` guardaba modo de Lama y `public.ajustes` almacenaba flags booleanos. Ninguna de ellas era una fuente única por sede.
+
+La migración `20261007162948 b2_3_1_pos_origin_guard` creó `stock_internal.origen_pos`, con una fila por sede y una sola columna de origen. El estado persistente inicial es `ninguno` para `plaza`, `central`, `angamos` y `bodega`. Solo `plaza` admite en el modelo `fudo`, `lama`, `toteat`, `ninguno` o `prueba`; `central`, `angamos` y `bodega` solo admiten `ninguno`. `prueba` nunca autoriza escrituras. RLS y ACL dejan la tabla inaccesible directamente a `anon`, `authenticated` y `service_role`; el navegador no puede elegir o cambiar el origen.
+
+Fudo requiere que el helper `public.stock_pos_origen_permitido` confirme el origen antes de procesar venta o tocar inventario local/remoto. El helper solo tiene `EXECUTE` para `service_role`. El RPC `fudo_procesar_item` conserva la definición instalada con una guarda añadida y queda invocable solo por backend; trigger adicional bloquea eventos Fudo directos cuando Fudo no sea origen activo. Lama requiere origen `lama` al intentar habilitar modo real y antes de aplicar una aplicación de evento real; se conserva además el bloqueo real previo de B2.3. Toteat es solo un valor reservado.
+
+Se desplegaron seis funciones Edge activas con JWT requerido y release marker `2026-10-07-b2.3.1`: `fudo-ciclo`, `fudo-sync-ventas`, `fudo-empujar-stock`, `fudo-deshacer-stock`, `fudo-sumar-stock` y `fudo-probar-escritura`. Sus versiones de Supabase quedaron en `1`; se recuperó el contenido desplegado y se verificó el guard/marker en cada una. Ningún endpoint llamó a Fudo durante esta fase.
+
+No existe un selector de Ajustes. Para implementarlo, una operación de backend deberá verificar `app_permisos.puede_ajustes` y cambiar la fila por sede de forma atómica/auditable; si Alejo quiere delegar ese cambio a un grupo más pequeño, hace falta una capacidad administrativa específica. Reporte, pruebas y riesgos: `docs/hermes/20-b2-3-1-blindaje-origen-pos.md`.
+
+Fudo sigue en modo prueba con cron apagado en `plaza`; Lama permanece sin configuración real; la autoridad por ubicación sigue bloqueando operaciones de stock legacy. B2.4 permanece pendiente.
+
 ### Bloque B2.4 — Existencias por áreas operativas
 
 **Estado: PENDIENTE; no activar automáticamente.** Solo después de completar B2.3 podrán trasladarse cantidades desde Sin asignar hacia Cocina fría, Cocina caliente, Barra o Cafetería mediante movimientos explícitos y conciliados. La clasificación por nombre seguirá siendo sugerencia, nunca asignación histórica automática. La interfaz y formularios de áreas permanecen para una fase posterior de UX.
@@ -237,7 +251,7 @@ Las migraciones aplicadas en Llamita Plus fueron `20261007152558 b2_3_libro_exis
 
 ## 10. Decisiones y precondiciones vigentes
 
-La fuente única, ubicaciones iniciales, tratamiento del stock histórico, transferencia atómica y proyección aprobados están en `docs/hermes/17-decision-libro-existencias-ubicacion.md`. B2.3 implementó el libro y el corte para `central`/`plaza`; el resultado y sus límites están en `docs/hermes/19-b2-3-corte-libro-ubicaciones.md`. El documento 18 conserva el bloqueo del intento previo como antecedente.
+La fuente única, ubicaciones iniciales, tratamiento del stock histórico, transferencia atómica y proyección aprobados están en `docs/hermes/17-decision-libro-existencias-ubicacion.md`. B2.3 implementó el libro y el corte para `central`/`plaza`; B2.3.1 añadió el origen POS único y el blindaje de Fudo/Lama. Resultados: `docs/hermes/19-b2-3-corte-libro-ubicaciones.md` y `docs/hermes/20-b2-3-1-blindaje-origen-pos.md`. El documento 18 conserva el bloqueo del intento previo como antecedente.
 
 Quedan para fases posteriores: adaptar las operaciones cotidianas al libro; gestionar lotes desde sus ubicaciones; definir mínimos/máximos por ubicación; y construir las vistas e interfaces de áreas. `angamos` y la clave histórica `bodega` no se migraron. B2.4 sigue pendiente y requiere autorización separada.
 

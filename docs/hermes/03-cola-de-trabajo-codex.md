@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **B2.3 — corte coordinado COMPLETADO (2026-10-07)**. B2.2 está cerrado como decisión resuelta; B2.4 queda PENDIENTE y no activa; A3.4d conserva su estado previo.
+Estado actual: **B2.3.1 — blindaje POS COMPLETADO (2026-10-07)**. B2.3 permanece completado; B2.4 queda PENDIENTE y no activa; A3.4d conserva su estado previo.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -50,7 +50,7 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 
 ### Bloque B2 — Modelo de áreas y stock por área
 
-- Estado general: EN CURSO POR SUBFASES. **B2.1 COMPLETADO**; **B2.2 REQUIERE DECISIÓN RESUELTA** (arquitectura aprobada); **B2.3 COMPLETADO**; **B2.4 PENDIENTE**, no activa.
+- Estado general: EN CURSO POR SUBFASES. **B2.1 COMPLETADO**; **B2.2 REQUIERE DECISIÓN RESUELTA**; **B2.3 COMPLETADO**; **B2.3.1 COMPLETADO**; **B2.4 PENDIENTE**, no activa.
 - El libro por ubicación y el corte coordinado están implementados para `central` y `plaza`; controles de acceso por área y operaciones de stock por área quedan para fases futuras. Local 1 no es aislamiento técnico.
 - Objetivo restante: habilitar existencias por área sin duplicar `productos.stock_actual`, respetando lotes, transferencias, mermas, Fudo y Lama.
 - B2.1 creó solo el catálogo aditivo de áreas de `plaza` y una relación preparatoria vacía. No asignó productos ni stock. Evidencia: `docs/hermes/15-b2-1-cimientos-areas.md`.
@@ -78,6 +78,18 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Validación: 1.437 productos y stock agregado 15.438,00 sin cambios; 408 aperturas en el libro, total 9.316,70; cuatro áreas físicas con saldo 0. Conteos de lotes, movimientos, repartos, recetas y permisos iguales antes/después. Pruebas de conciliación, RLS/grants, bloqueos, transferencia sintética e idempotencia pasaron en transacciones revertidas.
 - Fudo: guardas añadidas en las fuentes Edge, no desplegadas; ningún cambio remoto de stock. Fudo plaza sigue en prueba/cron apagado. Lama real apagado y `lama_stock_config` vacía. No se consultó ni tocó Café del Desierto / Llamita Stock.
 - B2.4 — existencias en áreas físicas — queda **PENDIENTE**, no activar automáticamente.
+
+### Tarea B2.3.1 — Blindaje de conectores POS y origen activo por sede
+
+- Estado: **COMPLETADA (2026-10-07)**. B2.4 continúa **PENDIENTE**, no activa.
+- Autorización: Alejo activó únicamente B2.3.1; no activar Fudo/Lama real ni abrir selector de Ajustes.
+- Configuración comprobada: `fudo_sync` contiene modo/cursor de Fudo, `lama_stock_config` contiene modo de Lama y `ajustes` contiene flags booleanos; ninguna define un origen POS único. Se creó `stock_internal.origen_pos` en esquema privado. `plaza`, `central`, `angamos` y `bodega` quedan en `ninguno`.
+- Migración aplicada: `20261007162948 b2_3_1_pos_origin_guard`; archivo fuente `supabase/migrations/20261007162700_b2_3_1_pos_origin_guard.sql`.
+- Protecciones: helper verificador ejecutable solo por `service_role`; tabla sin grants directos y con RLS; `fudo_procesar_item` ya no es ejecutable desde navegador; triggers de eventos Fudo, config/aplicaciones Lama, y guardas del motor Lama. Modo `real` de Lama exige origen `lama` además de las condiciones previas.
+- Edge Functions desplegadas activas, release marker `2026-10-07-b2.3.1`, `verify_jwt=true`: `fudo-ciclo`, `fudo-sync-ventas`, `fudo-empujar-stock`, `fudo-deshacer-stock`, `fudo-sumar-stock`, `fudo-probar-escritura`. La fuente desplegada fue consultada y contiene el verificador.
+- Pruebas: `sql/2026-10-b2-3-1-pruebas-origen-pos.sql` con `BEGIN ... ROLLBACK`; RPC simulado como `service_role` devuelve false para Fudo/Lama en `plaza`; prueba endpoint sin JWT responde 401. Datos finales: origen `ninguno` en las cuatro sedes; `fudo_sync` de `plaza` sigue `prueba`/cron apagado; `lama_stock_config` 0; productos 1.437, stock 15.438,00, movimientos 431 y registros Fudo 15.357, sin cambios.
+- Sin usuario administrador para cambiar la tabla ni permisos API directos. Un futuro selector debe usar una operación backend que valide `app_permisos.puede_ajustes`; si se requiere delegación más acotada, debe aprobarse una capacidad específica. Informe: `docs/hermes/20-b2-3-1-blindaje-origen-pos.md`.
+- No hubo llamadas a Fudo, cambios de Fudo remoto, modo real, ventas, stock, recetas ni datos comerciales. Toteat solo quedó reservado. No activar B2.4 automáticamente.
 
 ### Tarea B2.1 — Cimientos del modelo de áreas operativas
 

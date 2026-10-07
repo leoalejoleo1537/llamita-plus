@@ -42,7 +42,7 @@
 
 // Se devuelve en cada respuesta para poder saber qué versión está
 // desplegada sin entrar al panel (§8, prevención).
-const VERSION = "2026-08-21d";
+const VERSION = "2026-10-07-b2.3.1";
 const AUTH_URL = "https://auth.fu.do/api";
 const API_BASE = "https://api.fu.do/v1alpha1";
 
@@ -82,6 +82,24 @@ const CORS = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-sistema-token",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+
+async function verificarOrigenFudo(sede: string): Promise<{ ok: boolean; status: number; error?: string }> {
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) return { ok: false, status: 503, error: "No se pudo verificar el POS activo; el empuje queda cerrado." };
+  try {
+    const response = await fetch(`${url}/rest/v1/rpc/stock_pos_origen_permitido`, {
+      method: "POST",
+      headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ p_sede: sede, p_origen: "fudo" }),
+    });
+    if (!response.ok) return { ok: false, status: 503, error: "No se pudo verificar el POS activo; el empuje queda cerrado." };
+    if (await response.json() === true) return { ok: true, status: 200 };
+    return { ok: false, status: 409, error: `Fudo no es el POS activo para inventario de ${sede}.` };
+  } catch {
+    return { ok: false, status: 503, error: "No se pudo verificar el POS activo; el empuje queda cerrado." };
+  }
+}
 
 type Fila = {
   fudo_product_id: string; producto_fudo: string;
@@ -147,9 +165,8 @@ Deno.serve(async (req) => {
     // ---------- Qué se pidió ----------
     const body = await req.json().catch(() => ({}));
     const sede = String(body?.sede ?? "plaza").toLowerCase();
-    if (sede === "central" || sede === "plaza") {
-      return json({ error: "Stock por ubicación: el envío de stock antiguo a Fudo está pausado para Bodega y Local 1." }, 409);
-    }
+    const guardiaOrigen = await verificarOrigenFudo(sede);
+    if (!guardiaOrigen.ok) return json({ version: VERSION, error: guardiaOrigen.error }, guardiaOrigen.status);
     /* `probar` (2026-08-21) no empuja nada: le toma el pulso a Fudo. Nació
        del turno en que el botón devolvía 504 y no había forma de saber si
        el problema era Fudo o nuestro. Es la pregunta más barata que existe

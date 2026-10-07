@@ -534,3 +534,18 @@ Conteos pre/post sin cambios: productos 1.437; agregado 15.438,00; central 349/4
 La prueba transaccional verificó permisos/RLS, conciliación, transferencia Bodega -12/Cafetería +12 con producto lógico, lote y referencia compartidos, idempotencia y rollback completo. `npm test`, análisis de sintaxis Edge y `git diff --check` pasaron; browser tests se omitieron porque no hay navegador instalado. El rollback técnico aborta si existen movimientos posteriores; una vez haya actividad solo se permite compensación auditada.
 
 Informe: `docs/hermes/19-b2-3-corte-libro-ubicaciones.md`. No se accedió a Café del Desierto / Llamita Stock. No se alteró stock agregado previo ni filas comerciales. No activar B2.4 automáticamente.
+
+## Respuesta de Codex — B2.3.1: blindaje de origen POS por sede
+
+Fecha: 2026-10-07
+Estado: **COMPLETADA**. B2.4 permanece **PENDIENTE**, no activa.
+
+La configuración previa de Fudo (`fudo_sync`), Lama (`lama_stock_config`) y flags (`ajustes`) no representaba un origen POS único. Se creó `stock_internal.origen_pos`, privada y con una fila por sede. El origen inicial quedó `ninguno` en `plaza`, `central`, `angamos` y `bodega`; para `central` y sedes históricas el constraint solo admite `ninguno`. `prueba` no habilita escrituras. No hay mutación directa desde navegador ni service role.
+
+El helper server-side `public.stock_pos_origen_permitido` solo concede `EXECUTE` a `service_role`. Se protegieron el RPC instalado `fudo_procesar_item`, movimientos Fudo directos, configuración/aplicaciones reales de Lama y el motor `lama_stock_aplicar_evento`. Fudo solo puede empezar ventas/empujes/reversiones si el helper confirma `fudo`; Lama real requiere `lama` además del modo real de Lama. El bloqueo de inventario legacy de B2.3 sigue vigente.
+
+Se desplegaron seis Edge Functions como `ACTIVE`, v1, JWT requerido y release marker `2026-10-07-b2.3.1`: `fudo-ciclo`, `fudo-sync-ventas`, `fudo-empujar-stock`, `fudo-deshacer-stock`, `fudo-sumar-stock`, `fudo-probar-escritura`. Consulté la fuente de cada despliegue y confirmé helper y marker. Una petición sin JWT a `fudo-sync-ventas` recibió 401; no se llamó a Fudo.
+
+Pruebas `BEGIN ... ROLLBACK`: `plaza` en ninguno/prueba deniega Fudo y Lama; unicidad impide dos proveedores; central, angamos y bodega no aceptan origen activo; RPC/DML Fudo bloqueados; Lama real falla sin origen Lama; ACL/RLS y helper bajo rol `service_role`. Conteos persistentes: stock 15.438,00; productos 1.437; movimientos 431; registros Fudo 15.357; Lama config vacía. `fudo_sync` plaza continúa prueba/cron apagado. Sin cambios en Fudo remoto ni datos comerciales.
+
+No existe aún selector de Ajustes. Una futura ruta administrativa deberá verificar `app_permisos.puede_ajustes` desde backend y dejar auditoría del cambio. No se activa Fudo/Lama real, Toteat ni B2.4. Informe: `docs/hermes/20-b2-3-1-blindaje-origen-pos.md`. No se accedió a Café del Desierto / Llamita Stock.
