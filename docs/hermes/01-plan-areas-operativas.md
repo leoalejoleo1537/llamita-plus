@@ -1,6 +1,6 @@
 # Plan de implementación: inventario por áreas operativas en Llamita Plus
 
-**Estado:** B1, B2.1, B2.3, B2.3.1, B2.4 y B3.1 completados. B3.1 implementó lectura y navegación por áreas para `plaza` el 2026-10-07. B3.2a —gestión de áreas y asignación preferida— está **REQUIERE DECISIÓN** por la autorización no confiable en `app_permisos`; B3.2b —transferencias visuales— sigue **PENDIENTE**, no activa. S0 auditó el sistema completo y también quedó **REQUIERE DECISIÓN**: falta designar de forma verificable el `propietario_raiz`. No activar fases posteriores automáticamente. Evidencia: `docs/hermes/23-b3-2a-bloqueo-autorizacion.md` y `docs/hermes/24-auditoria-integral-seguridad-permisos.md`.
+**Estado:** B1, B2.1, B2.3, B2.3.1, B2.4, B3.1 y S1 completados. S1 resolvió la fuente confiable de autorización por UUID y separó propietario raíz de administración operativa. B3.2a queda **PENDIENTE tras resolver su bloqueo**, no activa; B3.2b sigue **PENDIENTE**, no activa. Las fases generales de seguridad posteriores a S1 requieren autorización separada. Evidencia: documentos 23, 24 y `docs/hermes/25-s1-identidad-raiz-gobierno-permisos.md`.
 
 **Repositorio objetivo:** `leoalejoleo1537/llamita-plus`, rama `master`.
 
@@ -205,13 +205,13 @@ RLS y grants mantienen cerradas las tablas internas; la RPC requiere sesión aut
 
 #### B3.2 — Escrituras visuales por área
 
-**Estado: dividido en subfases. B3.2a REQUIERE DECISIÓN; B3.2b PENDIENTE, no activa.** El intento de B3.2a se detuvo antes de cualquier cambio porque las políticas actuales de `public.app_permisos` permiten que clientes sin autorización modifiquen `puede_ajustes`. El permiso no puede usarse como puerta de backend hasta endurecer y probar su fuente de verdad. Ver informe 23.
+**Estado: dividido en subfases. B3.2a PENDIENTE tras resolver el bloqueo de autorización; B3.2b PENDIENTE, no activa.** S1 cerró el DML directo de `public.app_permisos`, vinculó capacidades a `auth.uid()` y reservó su gobierno al propietario raíz. Esto satisface la precondición de seguridad, pero no activa ni implementa B3.2a. Ver informes 23 y 25.
 
 La auditoría S0 amplió la evidencia: 36 tablas operativas tienen políticas abiertas `ALL`, y 40 funciones `SECURITY DEFINER` son ejecutables por anon. S1 debe resolver primero identidad, gobierno de permisos y las rutas críticas por fases. No debe mezclarse ese corte transversal con la UI de áreas. Informe: `docs/hermes/24-auditoria-integral-seguridad-permisos.md`.
 
 ##### B3.2a — Gestión de áreas y asignación preferida de productos
 
-**Estado: REQUIERE DECISIÓN (2026-10-07).** El alcance funcional permanece aprobado, pero su requisito de autorización no se puede satisfacer de forma segura con la política instalada. Debe acordarse una fuente confiable de administración y su bootstrap antes de añadir CRUD de áreas, asignaciones o altas de productos que las escriban. El informe 23 contiene la evidencia y propuesta. No se hicieron cambios de aplicación, esquema o datos.
+**Estado: PENDIENTE, bloqueo resuelto por S1 (2026-10-07), no activa.** El alcance funcional conserva su aprobación previa y ya dispone de una fuente confiable de administración. Requiere una activación explícita nueva antes de añadir CRUD de áreas, asignaciones o altas de productos.
 
 ##### B3.2b — Transferencias visuales
 
@@ -288,9 +288,9 @@ Estas verificaciones no son permiso para abrir alcance hacia Café del Desierto,
 
 ### Precondición de seguridad S0/S1
 
-S0 confirmó que las capacidades heredadas se relacionan con Auth solo por correo y pueden ser modificadas por clientes. Hay dos cuentas Auth confirmadas con filas administrativas, sin marca de propiedad. Antes de S1, Alejo debe identificar por un canal privado cuál `auth.uid()` será el único `propietario_raiz` y aprobar un mecanismo de recuperación fuera de la aplicación. S1 no está activa y no existe todavía migración ejecutable.
+S0 confirmó que las capacidades heredadas se relacionaban con Auth solo por correo y podían ser modificadas por clientes. S1 quedó completada: existe un único `propietario_raiz` privado por `auth.uid()`, `app_permisos` está vinculada por UUID, el DML directo está revocado y la gestión usa RPC auditada. La recuperación de raíz queda fuera de la aplicación mediante acceso de proyecto con MFA.
 
-La transición deberá conservar los triggers y el ledger protegidos, cerrar primero permisos/Ajustes, separar gobierno de operación y después migrar Lama, RPC privilegiados, productos, logística y reportes. B3.2a solo se reanuda cuando la fuente de autorización sea confiable.
+La transición conservó triggers y ledger protegidos. Las fases siguientes deben migrar por separado Lama/caja, RPC privilegiados, productos, logística, Fudo y reportes; S1 no autorizó esos cortes. B3.2a puede planificarse sobre la fuente confiable, pero sigue pendiente de activación.
 
 
 ## 11. Resultado de B1 — administración segura de sedes

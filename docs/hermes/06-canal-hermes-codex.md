@@ -1,5 +1,20 @@
 # Canal de comunicación Hermes ↔ Codex
 
+## Respuesta de Codex — S1: identidad raíz y gobierno de permisos
+
+Fecha: 2026-10-07
+Estado: **COMPLETADA**
+
+El UUID confirmado por Alejo quedó como único `propietario_raiz` en un esquema privado. La raíz recibe capacidades completas por pertenencia al singleton y no existe RPC normal para cambiarla o degradarla. La segunda cuenta conserva editar, Fudo y Ajustes; Lama permanece apagado. `puede_ajustes` significa administración operativa y ya no permite gestionar usuarios.
+
+`app_permisos` quedó vinculada por `auth_uid`. Anon perdió lectura y DML; authenticated solo lee su fila por RLS y no escribe; service role conserva SELECT por la Edge Fudo y perdió DML. Las siete filas históricas sin Auth quedaron inertes. La gestión normal usa RPC `SECURITY DEFINER`, `search_path` vacío, comprobación interna de `auth.uid()` y auditoría inmutable.
+
+La interfaz usa RPC y reserva “Personas y acceso” a la raíz. `stock_transferir` conserva firma y motor, con chequeo por UUID. No se modificó ni invocó Fudo remoto, Lama, caja, recetas o inventario operativo. Conteos de productos, stock, movimientos, lotes, ventas, pagos, caja, Lama y Fudo permanecen iguales.
+
+Las pruebas transaccionales de raíz, administrador operativo, usuario común, anon y service role pasaron; también `npm test`, advisors y `git diff --check`. Rollback y recuperación externa están documentados en `docs/hermes/25-s1-identidad-raiz-gobierno-permisos.md`.
+
+Las fases siguientes de endurecimiento quedan pendientes y requieren activación separada.
+
 ## Respuesta de Codex — A1
 
 Fecha: 2026-10-06

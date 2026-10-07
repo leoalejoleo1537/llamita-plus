@@ -8,6 +8,15 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-10-07** — **Propietario raíz y permisos protegidos.** Llamita Plus ya
+  no permite que el navegador escriba directamente `app_permisos`. Una sola
+  cuenta Auth, identificada por UUID y guardada en un esquema privado, gobierna
+  los permisos; `puede_ajustes` queda como administración operativa. La segunda
+  cuenta conserva editar, Fudo y Ajustes, pero no puede dar permisos. Anon no
+  lee la tabla, cada sesión solo lee su fila y las Edge conservan la lectura
+  server-side necesaria. Los cambios pasan por RPC auditada; el propietario no
+  puede degradarse desde la app. No cambió stock, ventas, Lama, caja ni Fudo.
+
 - **2026-10-05** — **Logo oficial en login y selector de sede.** Se reutilizó
   `icons/icon-512.png`, versión cuadrada transparente de mayor resolución que
   trae el repositorio. Login: dos columnas a partir de 900 px, formulario a la

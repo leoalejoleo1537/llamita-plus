@@ -13,6 +13,19 @@
 
 Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resultado y riesgos pendientes.
 
+## 2026-10-07 — S1: identidad raíz y gobierno seguro de permisos
+
+- Estado: **COMPLETADA**. Alejo confirmó el UUID raíz exacto; Supabase verificó que existe, está confirmado y no es anónimo.
+- Migraciones aplicadas solo en `llamita-plus` (`iuryhsjucblmebdogewa`): identidad/gobierno de permisos e índices FK de auditoría.
+- `authz_internal` contiene singleton raíz, auditoría inmutable y foto privada pre-S1. `app_permisos` queda vinculada por `auth_uid`; dos cuentas vinculadas y siete filas históricas inertes.
+- Segunda cuenta: editar/Fudo/Ajustes habilitados, Lama apagado y cero bloqueos Fudo; conserva administración operativa, sin gobierno de permisos.
+- Seguridad: anon sin lectura; authenticated solo su fila por RLS; service role conserva SELECT; los tres carecen de DML. RPC raíz con `SECURITY DEFINER`, `search_path=''`, `auth.uid()` y ACL explícita.
+- Interfaz: carga propia por RPC; panel de personas y permisos individuales Fudo exclusivo del propietario raíz. No se crean usuarios Auth desde la app.
+- Compatibilidad: `stock_transferir` conserva firmas y motor; consulta capacidad efectiva por UUID. La Edge que lee permisos conserva SELECT. Sin despliegue ni invocación Fudo.
+- Pruebas transaccionales por cinco roles, degradación raíz, auditoría, Data API, transferencia y Edge-read pasaron. `npm test` pasó; navegador omitido por falta de Chromium.
+- Conteos operativos pre/post idénticos: productos 1.437, stock 15.438,00, movimientos 431, lotes 42, cuentas 59, pagos 30, caja 2, Lama–Stock 0 y Fudo movimientos 15.357.
+- Informe: `docs/hermes/25-s1-identidad-raiz-gobierno-permisos.md`. Fases posteriores de seguridad quedan pendientes y no activadas.
+
 ## 2026-10-07 — S0: auditoría integral de seguridad y permisos
 
 - Estado: **REQUIERE DECISIÓN**. El mapa técnico está completo para diseñar S1, pero no existe una identidad verificable de propietario raíz.

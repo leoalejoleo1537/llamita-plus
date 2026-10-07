@@ -3401,8 +3401,8 @@
       <button type="button" class="adm-x" id="fperm-x" aria-label="Cerrar">✕</button>
     </div>
     <div id="fperm-cuerpo"></div>
-    <p class="aj-nota" style="margin-top:12px">Apagar algo acá no impide que
-      alguien lo haga por otro lado. Es un seguro contra el resbalón.</p>
+    <p class="aj-nota" style="margin-top:12px">Los cambios quedan asociados
+      al usuario Auth y registrados en la auditoría de permisos.</p>
   </div>
 </div>
 
@@ -4401,10 +4401,12 @@ function puedeEnFudo(clave){
 }
 
 function permisosDeLaSede(fila, sede){
-  if(!fila) return { puede_fudo:false, puede_editar:false, puede_ajustes:false, puede_lama:false, sede:null, fudo_bloqueos:[] };
+  if(!fila) return { puede_fudo:false, puede_editar:false, puede_ajustes:false, puede_lama:false, sede:null, auth_uid:null, es_propietario_raiz:false, fudo_bloqueos:[] };
   const suya = fila.sede || null;
   const aqui = !suya || suya === sede;
   return {
+    auth_uid: fila.auth_uid || null,
+    es_propietario_raiz: !!fila.es_propietario_raiz,
     sede: suya,
     puede_fudo:   !!fila.puede_fudo   && aqui,
     puede_editar: !!fila.puede_editar && aqui,
@@ -4430,7 +4432,7 @@ function permisosDeLaSede(fila, sede){
   };
 }
 
-let PERMISOS = { puede_fudo:false, puede_editar:false, puede_ajustes:false, puede_lama:false, correo:null, sede:null, fudo_bloqueos:[] };
+let PERMISOS = { puede_fudo:false, puede_editar:false, puede_ajustes:false, puede_lama:false, correo:null, sede:null, auth_uid:null, es_propietario_raiz:false, fudo_bloqueos:[] };
 /* UNA LECTURA QUE FALLA NO PUEDE QUITARLE EL PERMISO A NADIE.
 
    Este era el bug que reportó Jhon: "habilito el Modo edición para otra
@@ -4450,16 +4452,16 @@ async function cargarPermisos(){
     const {data:{session}} = await sb.auth.getSession();
     const correo = session?.user?.email?.toLowerCase() || null;
     if(!correo){
-      PERMISOS = { puede_fudo:false, puede_editar:false, puede_ajustes:false, puede_lama:false, correo:null, sede:null, fudo_bloqueos:[] };
+      PERMISOS = { puede_fudo:false, puede_editar:false, puede_ajustes:false, puede_lama:false, correo:null, sede:null, auth_uid:null, es_propietario_raiz:false, fudo_bloqueos:[] };
     } else {
-      const {data,error} = await sb.from('app_permisos').select('*').eq('correo',correo).maybeSingle();
+      const {data,error} = await sb.rpc('permisos_mios').maybeSingle();
       if(error){
         // la lectura no llegó: se deja lo de antes si es la misma persona
         PERMISOS = (antes.correo === correo) ? antes
-          : { puede_fudo:false, puede_editar:false, puede_ajustes:false, correo, sede:null, fudo_bloqueos:[] };
+          : { puede_fudo:false, puede_editar:false, puede_ajustes:false, puede_lama:false, correo, sede:null, auth_uid:null, es_propietario_raiz:false, fudo_bloqueos:[] };
         console.warn('No se pudieron releer los permisos; se conservan los anteriores.', error);
       } else {
-        PERMISOS = { puede_fudo:false, puede_editar:false, puede_ajustes:false, correo, sede:null, fudo_bloqueos:[] };
+        PERMISOS = { puede_fudo:false, puede_editar:false, puede_ajustes:false, puede_lama:false, correo, sede:null, auth_uid:null, es_propietario_raiz:false, fudo_bloqueos:[] };
         if(data) Object.assign(PERMISOS, permisosDeLaSede(data, SEDE));
       }
     }
@@ -14068,24 +14070,24 @@ const AJUSTES = [
     } },
 
   { id:'personas', ico:'personas', tit:'Personas y acceso',
-    sub:'Quién entra acá. Es un solo permiso: se entra a Ajustes o no se entra.',
+    sub:'Gobierno de accesos reservado al propietario raíz.',
+    ver:()=>!!PERMISOS.es_propietario_raiz,
     render:()=>ajPersonasHTML(),
     montar:()=>{
       if(!PERSONAS || !PERSONAS.length) ajUnaVez('personas', cargarPersonas);
-      const ok = $('aj-nuevo-ok');
-      if(ok) ok.addEventListener('click', ajAgregarPersona);
     } },
 
   { id:'fudo', ico:'fudo', tit:'Fudo',
     sub:'El puente con el sistema de ventas.',
-    render:()=>ajFudoSedesHTML() + ajFudoPermisosHTML()
+    render:()=>ajFudoSedesHTML() + (PERMISOS.es_propietario_raiz ? ajFudoPermisosHTML() : '')
              + '<div id="aj-slot-fudo"></div><div id="aj-slot-hist"></div>',
     montar:()=>{
       ajMontar('aj-slot-fudo','adm-sec-fudo');
       ajMontar('aj-slot-hist','adm-sec-hist');
       ajUnaVez('histfudo', cargarHistorialFudo);
       if(AJ_SYNC === null) ajUnaVez('sync', ajCargarSync);
-      if(!PERSONAS || !PERSONAS.length) ajUnaVez('personas', cargarPersonas);
+      if(PERMISOS.es_propietario_raiz && (!PERSONAS || !PERSONAS.length))
+        ajUnaVez('personas', cargarPersonas);
     } },
 
   { id:'respaldos', ico:'respaldos', tit:'Respaldos',
@@ -14341,11 +14343,9 @@ async function ajCargarSync(){
    algo, cuenta por cuenta. Una lista vacía —que es como nace cada cuenta—
    quiere decir "puede todo".
 
-   Y se dice en pantalla que esto no es seguridad, porque no lo es: es un
-   seguro contra el resbalón, del mismo tipo que el Modo edición. Quien
-   quiera saltárselo puede. Es la doctrina de §6.1 y no se disfraza de otra
-   cosa — un candado que promete más de lo que cumple es peor que ninguno. */
-let AJ_PERM_ABIERTA = null;   // el correo cuya ventana está abierta
+   Desde S1 estos cambios pasan por una RPC auditada y reservada al único
+   propietario raíz. `puede_ajustes` ya no abre esta administración. */
+let AJ_PERM_ABIERTA = null;   // el auth.uid cuya ventana está abierta
 
 function ajFudoPermisosHTML(){
   if(PERSONAS === null) return `<div class="aj-caja"><h3>Permisos de actualización a Fudo</h3>
@@ -14357,7 +14357,12 @@ function ajFudoPermisosHTML(){
     const bl = Array.isArray(p.fudo_bloqueos) ? p.fudo_bloqueos : [];
     const n  = FUDO_ACCIONES.filter(a=>!bl.includes(a.clave)).length;
     const todo = n === FUDO_ACCIONES.length;
-    return `<div class="aj-fila" data-fperm="${esc(p.correo)}" style="cursor:pointer">
+    if(p.es_propietario_raiz) return `<div class="aj-fila">
+      <div class="nm"><b>${esc(p.nombre || p.correo)}</b>
+        <span>propietario raíz · acceso completo protegido</span></div>
+      <span class="aj-cuenta">${n}/${FUDO_ACCIONES.length}</span>
+    </div>`;
+    return `<div class="aj-fila" data-fperm="${esc(p.auth_uid)}" style="cursor:pointer">
       <div class="nm"><b>${esc(p.nombre || p.correo)}</b>
         <span>${todo ? 'puede actualizar Fudo de todas las formas'
                      : n + ' de ' + FUDO_ACCIONES.length + ' formas · ' + (FUDO_ACCIONES.length - n) + ' apagada' + (FUDO_ACCIONES.length - n === 1 ? '' : 's')}</span></div>
@@ -14367,8 +14372,8 @@ function ajFudoPermisosHTML(){
 
   return `<div class="aj-caja">
       <h3>Permisos de actualización a Fudo</h3>
-      <p class="aj-nota">Todos pueden todo. Acá se apaga algo puntual, a una
-        cuenta puntual. Es un seguro contra el resbalón, no una cerradura.</p>
+      <p class="aj-nota">El propietario raíz puede apagar una acción puntual
+        para una cuenta, sin cambiar sus demás capacidades.</p>
       <div style="margin-top:11px">${filas || '<div class="aj-vacio">No hay nadie en la lista.</div>'}</div>
     </div>`;
 }
@@ -14377,15 +14382,15 @@ function ajFudoPermisosHTML(){
    lista: son ocho interruptores agrupados, y meterlos en la fila haría
    ilegible lo único que ahí importa, que es de un vistazo quién tiene algo
    apagado. */
-function ajAbrirPermisosFudo(correo){
-  const p = (PERSONAS||[]).find(x=>x.correo === correo); if(!p) return;
-  AJ_PERM_ABIERTA = correo;
+function ajAbrirPermisosFudo(authUid){
+  const p = (PERSONAS||[]).find(x=>x.auth_uid === authUid); if(!p || p.es_propietario_raiz) return;
+  AJ_PERM_ABIERTA = authUid;
   ajPintarPermisosFudo();
   $('overlay-fperm').classList.add('open');
 }
 
 function ajPintarPermisosFudo(){
-  const p = (PERSONAS||[]).find(x=>x.correo === AJ_PERM_ABIERTA); if(!p) return;
+  const p = (PERSONAS||[]).find(x=>x.auth_uid === AJ_PERM_ABIERTA); if(!p) return;
   const bl = Array.isArray(p.fudo_bloqueos) ? p.fudo_bloqueos : [];
   $('fperm-titulo').textContent = p.nombre || p.correo;
   $('fperm-correo').textContent = p.correo;
@@ -14405,7 +14410,7 @@ function ajPintarPermisosFudo(){
 }
 
 async function ajTogglePermisoFudo(clave){
-  const p = (PERSONAS||[]).find(x=>x.correo === AJ_PERM_ABIERTA); if(!p) return;
+  const p = (PERSONAS||[]).find(x=>x.auth_uid === AJ_PERM_ABIERTA); if(!p || p.es_propietario_raiz) return;
   const accion = FUDO_ACCIONES.find(a=>a.clave === clave); if(!accion) return;
   const bl = Array.isArray(p.fudo_bloqueos) ? p.fudo_bloqueos.slice() : [];
   const estaba = !bl.includes(clave);
@@ -14417,20 +14422,12 @@ async function ajTogglePermisoFudo(clave){
       accion.apagado + '\n\nSe puede volver a encender cuando quieras.', 'Apagar')) return;
 
   const nuevos = estaba ? [...bl, clave] : bl.filter(x=>x !== clave);
-  const {data, error} = await sb.from('app_permisos')
-    .update({fudo_bloqueos: nuevos}).eq('correo', p.correo).select();
-  /* Sin fila de vuelta no se escribió, aunque no haya error. Es el caso
-     que ya nos mordió con los permisos de Adriana: la base contesta que
-     todo bien y no cambia nada. */
-  if(error || !data || !data.length){
+  const actualizado = await ajGuardarPermisos(p,{fudo_bloqueos:nuevos});
+  if(!actualizado){
     avisar('No se pudo guardar\n\n'
-      + (error?.message || 'La base no dejó escribir. ¿Corriste "2026-08-permisos-de-fudo.sql"?'));
+      + 'Solo el propietario raíz puede cambiar permisos.');
     return;
   }
-  p.fudo_bloqueos = nuevos;
-  /* Si me lo cambié a mí mismo, se aplica en el momento y no al día
-     siguiente: si no, uno apaga algo, prueba, y parece que no funcionó. */
-  if(PERMISOS.correo === p.correo) PERMISOS.fudo_bloqueos = nuevos;
   aplicarPermisos();
   ajPintarPermisosFudo();
   pintarAjustes();
@@ -15120,23 +15117,15 @@ async function ajMoverProducto(id, destino){
 
 /* ---------------- Personas y acceso ----------------
 
-   La sección que desata a Jhon de Supabase: hasta hoy dar un permiso era
-   escribirle un `update` y pegarlo en el panel. Acá es un interruptor.
-
-   DOS CANDADOS, y los dos son contra el accidente, no contra nadie:
-
-   · NADIE PUEDE QUITARSE EL ACCESO A SÍ MISMO. Si el único que entra se
-     apaga por error, no queda forma de volver a entrar desde la app y hay
-     que ir a Supabase — o sea, exactamente el problema que esta pantalla
-     viene a resolver. Su propio interruptor está apagado y dice "tú".
-
-   · NO SE PUEDE DEJAR LA LISTA EN CERO. Un sistema sin nadie que entre a
-     administración no es un sistema seguro: es uno que hay que reparar
-     por fuera.                                                          */
+   S1 separa Ajustes de gobierno de permisos. Esta sección solo existe para
+   el propietario raíz; lista cuentas Auth confirmadas y escribe mediante
+   la RPC auditada. El propietario aparece bloqueado porque su identidad se
+   recupera fuera de la aplicación, nunca desde un interruptor normal. */
 let PERSONAS = [];
 
 async function cargarPersonas(){
-  const {data,error} = await sb.from('app_permisos').select('*').order('correo');
+  if(!PERMISOS.es_propietario_raiz){ PERSONAS = []; return; }
+  const {data,error} = await sb.rpc('permisos_listar');
   if(error){ console.error('personas', error); PERSONAS = null; }
   else PERSONAS = data || [];
   /* También en Fudo: desde el 2026-08-21 esa pantalla lista a las personas
@@ -15146,108 +15135,64 @@ async function cargarPersonas(){
 }
 
 function ajPersonasHTML(){
+  if(!PERMISOS.es_propietario_raiz)
+    return '<div class="aj-caja"><p>Solo el propietario raíz administra accesos.</p></div>';
   if(PERSONAS === null){
     return '<div class="aj-caja"><p>No se pudo leer la lista. Revisa la señal y vuelve a entrar.</p></div>';
   }
   if(!PERSONAS.length){
     return '<div class="aj-caja"><p>Cargando…</p></div>';
   }
-  const yo = (PERMISOS.correo||'').toLowerCase();
-  const conAcceso = PERSONAS.filter(p=>p.puede_ajustes).length;
   const filas = PERSONAS.map(p=>{
     const on = !!p.puede_ajustes;
-    const esYo = String(p.correo||'').toLowerCase() === yo;
-    /* Si queda uno solo con acceso, su interruptor tampoco se puede
-       apagar — aunque sea otra persona la que esté mirando. */
-    const ultimo = on && conAcceso <= 1;
+    const esYo = p.auth_uid === PERMISOS.auth_uid;
     return `<div class="aj-fila">
       <div class="nm"><b>${esc(p.nombre || p.correo)}</b><span>${esc(p.correo)}</span></div>
-      ${esYo ? '<span class="aj-yo">tú</span>' : ''}
-      <button type="button" class="aj-sw${on?' on':''}" data-persona="${esc(p.correo)}"
-        ${esYo || ultimo ? 'disabled' : ''}
+      ${p.es_propietario_raiz ? '<span class="aj-yo">propietario raíz</span>' : (esYo ? '<span class="aj-yo">tú</span>' : '')}
+      <button type="button" class="aj-sw${on?' on':''}" data-persona="${esc(p.auth_uid)}"
+        ${p.es_propietario_raiz ? 'disabled' : ''}
         aria-label="${on?'Quitar':'Dar'} acceso a Ajustes"></button>
     </div>`;
   }).join('');
   return `<div class="aj-caja">
       <h3>Quién entra a Ajustes</h3>
-      <p>Quien entra acá tiene todo lo administrativo, incluido escribirle a Fudo.</p>
+      <p>Ajustes es administración operativa. Solo el propietario raíz puede cambiar esta lista.</p>
       <div style="margin-top:12px">${filas}</div>
     </div>
     <div class="aj-caja">
-      <h3>Agregar a alguien</h3>
-      <p>Tiene que ser el correo con el que esa persona entra a la app.</p>
-      <div class="aj-alta">
-        <input type="email" id="aj-nuevo-correo" placeholder="correo@ejemplo.cl" autocomplete="off">
-        <button type="button" class="adm-btn fantasma" id="aj-nuevo-ok">Agregar</button>
-      </div>
+      <h3>Cuentas disponibles</h3>
+      <p>La lista incluye únicamente usuarios Auth confirmados. Crear una cuenta sigue siendo una operación separada en Supabase.</p>
     </div>`;
 }
 
-/* SE COMPRUEBA QUE LA ESCRITURA HAYA OCURRIDO, y esto es el arreglo del
-   fallo que reportó Jhon: "he habilitado a Adriana y a Massiel pero cada
-   tanto se desactivan".
-
-   No se desactivaban: NUNCA SE ACTIVARON. `app_permisos` tiene la puerta
-   cerrada para escribir —solo se le dio permiso de LEER cuando se creó en
-   julio, porque entonces los permisos se daban a mano desde Supabase—. Un
-   update contra una fila que la puerta no deja tocar **no da error**:
-   simplemente no cambia ninguna fila y contesta que todo bien. La app
-   ponía el interruptor en verde, decía "✓ Ahora entra a Ajustes"… y al
-   volver a leer la lista, la base seguía diciendo false.
-
-   Es la falla callada de siempre, y la más cara de todas en este proyecto:
-   la pantalla afirmando algo que no pasó. La regla que sale de acá vale
-   para cualquier escritura futura: **pedir de vuelta lo que se escribió**.
-   Un `.select()` al final del update devuelve las filas que de verdad
-   cambiaron; si vienen cero, se escribió nada y hay que decirlo.
-
-   El permiso de escritura se abre con `sql/2026-08-permisos-desde-la-app.sql`
-   y es solo para cuentas con sesión iniciada. */
-async function ajTogglePersona(correo){
-  const p = PERSONAS.find(x=>x.correo === correo); if(!p) return;
-  const valor = !p.puede_ajustes;
-  if(!valor && !await preguntar('Quitarle el acceso a Ajustes',
-      (p.nombre||correo)+' va a dejar de ver esta zona.','Quitar acceso')) return;
-  const {data:filas, error} = await sb.from('app_permisos')
-    .update({puede_ajustes: valor}).eq('correo', correo).select();
-  if(error){ avisar('No se pudo cambiar el permiso.\n\n' + (error.message||'')); return; }
-  if(!filas || !filas.length){
-    avisar('El permiso NO se guardó\n\n'
-      + 'La base no dejó escribir en la lista de personas, y no avisa: contesta que '
-      + 'todo bien sin cambiar nada. Hay que correr una vez '
-      + '"2026-08-permisos-desde-la-app.sql" en Supabase.');
-    return;
-  }
-  p.puede_ajustes = valor;
-  aviso(valor ? '✓ Ahora entra a Ajustes' : 'Acceso quitado');
-  pintarAjustes();
+/* La RPC devuelve el estado persistido. Un error no se refleja de forma
+   optimista: la pantalla conserva el valor anterior y avisa. */
+async function ajGuardarPermisos(p, cambios={}){
+  if(!PERMISOS.es_propietario_raiz || !p || p.es_propietario_raiz) return null;
+  const siguiente = {...p,...cambios};
+  const {data,error} = await sb.rpc('permisos_actualizar',{
+    p_objetivo:p.auth_uid,
+    p_puede_editar:!!siguiente.puede_editar,
+    p_puede_fudo:!!siguiente.puede_fudo,
+    p_puede_ajustes:!!siguiente.puede_ajustes,
+    p_puede_lama:!!siguiente.puede_lama,
+    p_fudo_bloqueos:Array.isArray(siguiente.fudo_bloqueos) ? siguiente.fudo_bloqueos : []
+  });
+  if(error){ console.error('permisos_actualizar',error); return null; }
+  Object.assign(p,data||siguiente);
+  return p;
 }
 
-async function ajAgregarPersona(){
-  const inp = $('aj-nuevo-correo');
-  const correo = (inp.value||'').trim().toLowerCase();
-  if(!correo || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo)){
-    avisar('Escribe un correo válido.'); return;
+async function ajTogglePersona(authUid){
+  const p = PERSONAS.find(x=>x.auth_uid === authUid); if(!p || p.es_propietario_raiz) return;
+  const valor = !p.puede_ajustes;
+  if(!valor && !await preguntar('Quitarle el acceso a Ajustes',
+      (p.nombre||p.correo)+' va a dejar de ver esta zona.','Quitar acceso')) return;
+  if(!await ajGuardarPermisos(p,{puede_ajustes:valor})){
+    avisar('No se pudo cambiar el permiso. Solo el propietario raíz puede hacerlo.'); return;
   }
-  if(PERSONAS.some(p=>String(p.correo).toLowerCase()===correo)){
-    avisar('Esa cuenta ya está en la lista.'); return;
-  }
-  /* Se agrega SIN acceso. Darlo es un segundo gesto, a propósito: escribir
-     un correo y que quede dentro de la zona de administración de una vez
-     es demasiado fácil de hacer sin querer. */
-  const {data:filas, error} = await sb.from('app_permisos')
-    .insert({correo, puede_ajustes:false, puede_fudo:false, puede_editar:true}).select();
-  if(error){ avisar('No se pudo agregar.\n\n' + (error.message||'')); return; }
-  // misma comprobación que el interruptor: sin fila de vuelta, no se escribió
-  if(!filas || !filas.length){
-    avisar('No se agregó\n\n'
-      + 'La base no deja escribir en la lista de personas. Hay que correr una vez '
-      + '"2026-08-permisos-desde-la-app.sql" en Supabase.');
-    return;
-  }
-  inp.value = '';
-  await cargarPersonas();
-  aviso('✓ Agregada · enciéndele el acceso cuando quieras');
+  aviso(valor ? '✓ Ahora entra a Ajustes' : 'Acceso quitado');
+  pintarAjustes();
 }
 
 

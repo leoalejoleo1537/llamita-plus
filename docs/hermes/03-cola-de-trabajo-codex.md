@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **S0 REQUIERE DECISIÓN (2026-10-07)** tras auditoría integral de seguridad; **B3.2a REQUIERE DECISIÓN** y **B3.2b PENDIENTE**, no activa. B1, B2.1, B2.2 decisión resuelta, B2.3, B2.3.1, B2.4 y B3.1 permanecen cerrados; A3.4d conserva su estado previo.
+Estado actual: **S1 COMPLETADA (2026-10-07)**; la identidad raíz y el gobierno de `app_permisos` ya son confiables. **B3.2a queda PENDIENTE tras resolverse su bloqueo de autorización**, no activa; **B3.2b PENDIENTE**, no activa. Las fases posteriores de endurecimiento general permanecen pendientes y requieren activación separada.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -32,15 +32,27 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 
 ### Tarea S0 — Auditoría integral de seguridad y permisos
 
-- Estado: **REQUIERE DECISIÓN (2026-10-07)**. Auditoría de solo lectura completada; no se activa S1.
+- Estado: **COMPLETADA (2026-10-07)**. La decisión de identidad quedó resuelta y S1 se ejecutó por autorización posterior.
 - Autorización: Alejo activó S0 y ordenó no implementar correcciones todavía.
 - Resultado: `docs/hermes/24-auditoria-integral-seguridad-permisos.md`.
 - Identidad: dos usuarios Auth confirmados coinciden por correo con filas administrativas, pero `app_permisos` no tiene `auth.uid()`, clave foránea ni propietario. No existe metadata segura que permita identificar cuál es Alejo; se requiere designación privada de `propietario_raiz`.
 - Hallazgos críticos: `app_permisos` es legible por anon y autoeditable; 36 tablas operativas tienen políticas `ALL true` para anon/auth; 40 funciones `SECURITY DEFINER` son ejecutables por anon, 36 con rutas de escritura y sin validación de sesión; Lama/caja y configuración quedan protegidos solo por UI.
 - Contención existente: ledger `stock_internal`, áreas/asignaciones y puente Lama–Stock permanecen cerrados; triggers B2.3 bloquean escritores legacy en `central/plaza`; origen POS sigue `ninguno`, Fudo en prueba/cron apagado y Lama real apagado.
 - Cambios ejecutados: exclusivamente documentación. No hubo SQL de escritura, migraciones, RPC/Edge operativos, cambios de código, datos, RLS, grants, usuarios o configuración.
-- Decisión requerida: identificar por canal privado el `auth.uid()` de Alejo y aprobar recuperación de emergencia; después podrá diseñarse S1 sin migración automática por correo.
-- Publicación: documentación a `master` autorizada. S1, B3.2a y B3.2b no quedan activadas.
+- Decisión resuelta: Alejo identificó el UUID raíz exacto y aprobó recuperación externa mediante acceso de proyecto con MFA.
+- Publicación: auditoría publicada; cierre técnico en el informe S1.
+
+### Tarea S1 — Identidad raíz y gobierno seguro de permisos
+
+- Estado: **COMPLETADA (2026-10-07)**.
+- Autorización: Alejo confirmó el UUID del único propietario raíz y aprobó el diseño corregido tras el preflight final.
+- Resultado: `docs/hermes/25-s1-identidad-raiz-gobierno-permisos.md`.
+- Cambios: esquema privado `authz_internal`, singleton raíz, auditoría inmutable, `app_permisos.auth_uid`, DML directo revocado, lectura propia por RLS, lectura `service_role` conservada y tres RPC protegidas.
+- Separación: `puede_ajustes` conserva administración operativa; solo pertenecer a `propietario_raiz` permite gobernar permisos. La segunda cuenta mantiene editar/Fudo/Ajustes, Lama apagado y cero bloqueos Fudo, sin administración de usuarios.
+- Compatibilidad: `stock_transferir` conserva firmas y motor, pero consulta permisos efectivos por UUID. La Edge desplegada `fudo-deshacer-stock` mantiene su lectura mediante `service_role`; ninguna Edge se redesplegó ni se llamó a Fudo.
+- Seguridad: raíz no degradable por RPC; anon sin lectura; authenticated solo su fila; `anon`, `authenticated` y `service_role` sin DML directo. Siete filas históricas sin Auth quedan inertes.
+- Pruebas: roles raíz/administrador/común/anon/service role, auditoría, Data API, transferencia, conteos, advisors, `npm test` y `git diff --check`.
+- Fases siguientes: las 36 tablas abiertas, RPC Lama/caja, Fudo operativo, recetas, logística y reportes siguen fuera de S1. No activar automáticamente.
 
 ### Bloque 0 — Auditoría de inventario por áreas, sedes y Bodega
 
