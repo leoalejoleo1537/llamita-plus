@@ -195,3 +195,18 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - Riesgo pendiente: las guardas impiden entrar accidentalmente por la interfaz, pero no aíslan ni bloquean escrituras API/RPC directas sobre filas históricas de `angamos`; las políticas operativas heredadas siguen siendo permisivas. `app_permisos` no tiene permisos por sede.
 - Archivos: `index.html`, `pruebas/sedes-seguras.mjs`, `sql/2026-10-b1-registro-sedes.sql`, `sql/2026-10-b1-registro-sedes.rollback.sql`, `docs/hermes/01-plan-areas-operativas.md`, `docs/hermes/03-cola-de-trabajo-codex.md`, `docs/hermes/06-canal-hermes-codex.md` y `docs/hermes/14-b1-registro-sedes-resultados.md`.
 - Publicación: commit `36d71a3` enviado a `master` con `git push origin HEAD:master`; push verificado contra `origin/master`.
+
+## 2026-10-07 — B2.1: cimientos del modelo de áreas operativas
+
+- Estado: **COMPLETADA**. B2.2 permanece pendiente y no se activó.
+- Repositorio confirmado: `leoalejoleo1537/llamita-plus`, remoto `origin`; rama `work` al día con `origin/master`. Supabase confirmado por metadatos: `llamita-plus`, ref `iuryhsjucblmebdogewa`, `ACTIVE_HEALTHY`.
+- Migraciones aplicadas: `b2_1_cimientos_areas_operativas`, `b2_1_indices_fk_producto_area` (cobertura de FK nuevas) y `b2_1_comentario_relacion_area` (descripción alineada con la unicidad por producto/sede).
+- Tablas: `areas_operativas` con sede/código estable/nombre/estado/orden/fechas; `producto_area_asignacion` con sede/producto/área/estado/origen/regla/fechas, sin columna de cantidad. RLS activo, sin políticas ni permisos de tabla abiertos. No se otorgó acceso directo a `anon`, `authenticated` ni `service_role`.
+- Áreas creadas solo en `plaza`: Cocina fría, Cocina caliente, Barra y Cafetería. Asignaciones persistidas: 0.
+- Conciliación SELECT-only: 329 productos únicos de `plaza`; Barra 18/108,00; Cafetería 42/536,50; Cocina caliente 19/204,00; Cocina fría 17/17,50; Sin asignar 233/3.700,20. Cada producto aparece una vez y el total hipotético 4.566,20 reconcilia con stock actual de `plaza`. No se guardaron estas asignaciones.
+- Conteos pre/post idénticos: productos 1.437; stock total 15.438,00; productos plaza 329; stock plaza 4.566,20; movimientos 431; repartos 361; líneas 2.040; lotes 42; recetas 396; ítems de receta 514; permisos 9; `lama_areas` 5. Las tablas nuevas no contienen saldos.
+- Pruebas: `sql/2026-10-b2-1-pruebas-estructura.sql`, ejecutado transaccionalmente y revertido; validó áreas/sede, restricciones, trigger, unicidad, RLS, ausencia de grants/políticas y columnas de saldo. Advisor: sin FK desindexadas nuevas después de la corrección; quedan avisos intencionales de RLS sin políticas e índices aún no usados en una tabla vacía. `git diff --check` y revisión del diff al cierre.
+- Archivos SQL: migración y rollback `sql/2026-10-b2-1-cimientos-areas-operativas[.rollback].sql`; conciliación `sql/2026-10-b2-1-simulacion-clasificacion.sql`; prueba `sql/2026-10-b2-1-pruebas-estructura.sql`. Resultado completo: `docs/hermes/15-b2-1-cimientos-areas.md`.
+- Sin cambios en productos, stock, movimientos, repartos, lotes, recetas, permisos, `lama_areas`, `central`, `angamos` o `bodega`. No se accedió a Café del Desierto / Llamita Stock.
+- Riesgo: clasificación por heurísticas descriptivas requiere revisión humana; la relación actual no modela distribución cuantitativa y no debe sumarse como stock. B2.2 debe decidir el destino de un producto repartido entre áreas, el corte de escritores y el control por sede.
+- Rollback preparado, no ejecutado; aborta si hay asignaciones o catálogo distinto al estado inicial.

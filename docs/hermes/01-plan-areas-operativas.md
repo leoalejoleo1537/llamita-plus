@@ -1,6 +1,6 @@
 # Plan de implementación: inventario por áreas operativas en Llamita Plus
 
-**Estado:** B1 de administración de sedes completado (2026-10-06). B2 —modelo de áreas y stock por área— permanece PENDIENTE y no activo hasta resolver la fuente única de stock, el corte coordinado de escritores y controles de acceso. No activar fases posteriores automáticamente.
+**Estado:** B1 de administración de sedes y B2.1 —cimientos del modelo de áreas— completados (2026-10-07). B2.2 —modelo de existencias por área— permanece PENDIENTE y no activo hasta resolver fuente única de stock, corte coordinado de escritores y controles de acceso. No activar fases posteriores automáticamente.
 
 **Repositorio objetivo:** `leoalejoleo1537/llamita-plus`, rama `master`.
 
@@ -10,7 +10,7 @@
 
 Convertir el inventario de Llamita Plus en una vista por áreas operativas configurables dentro de cada sede. Cada área debe funcionar como un espacio de inventario propio: sus productos asignados, existencias, mínimos, movimientos y mermas deben poder consultarse dentro de esa área. La persona también debe poder consultar todas las áreas desde una vista general.
 
-La primera configuración de prueba usará cuatro áreas: **Cocina fría, Cocina caliente, Barra de bar y Cafetería**. Se clasificarán productos existentes de Llamita Plus con reglas hipotéticas para probar la experiencia. La clasificación no representa una decisión operativa definitiva de Brunetti.
+La configuración inicial de `plaza` contiene cuatro áreas: **Cocina fría, Cocina caliente, Barra y Cafetería**. Una consulta de simulación propone categorías para productos de Llamita Plus; no persiste asignaciones ni representa una decisión operativa definitiva de Brunetti.
 
 La arquitectura debe permitir que un mismo producto maestro exista en varias áreas con cantidades distintas. Por ejemplo, la búsqueda general de “leche” puede mostrar 5 unidades en Cocina, 12 en Cafetería, 1 en Barra y 3 en Cocina fría; dentro de Cafetería, el buscador debe mostrar solo el inventario de Cafetería.
 
@@ -38,10 +38,10 @@ La simulación usa el nombre y los campos descriptivos existentes para proponer 
 | Preparaciones saladas | Cocina caliente | Panes, pizzas y sándwiches. |
 | Helados y productos identificados como “ice” | Cocina fría | Aplicar solo cuando el nombre realmente identifique helado/producto frío; coincidencias ambiguas se revisan. |
 | Ingredientes dulces | Cocina fría | Leche condensada, manjar/dulce de leche y otros ingredientes dulces identificables. |
-| Bebidas gaseosas | Barra de bar | Coca-Cola, Sprite y otras bebidas gaseosas claramente identificables. |
+| Bebidas gaseosas | Barra | Coca-Cola, Sprite y otras bebidas gaseosas claramente identificables. |
 | Otros productos | Sin asignar | Revisión manual; no inferir destino por una categoría incompleta. |
 
-**Prioridad cuando hay conflicto:** aplicar la regla más específica. Por ejemplo, torta va a Cafetería aunque sea un producto frío; leche condensada/manjar va a Cocina fría, mientras la leche común destinada al flujo de cafetería va a Cafetería; café y té van a Cafetería, mientras una gaseosa va a Barra de bar. Si el nombre no resuelve el conflicto, dejar Sin asignar.
+**Prioridad cuando hay conflicto:** aplicar la regla más específica. Por ejemplo, torta va a Cafetería aunque sea un producto frío; leche condensada/manjar va a Cocina fría, mientras la leche común destinada al flujo de cafetería va a Cafetería; café y té van a Cafetería, mientras una gaseosa va a Barra. Si el nombre no resuelve el conflicto, dejar Sin asignar.
 
 La clasificación inicial debe ser reproducible y auditable: guardar origen de asignación (por ejemplo, regla de simulación o asignación manual), permitir editarla y poder contar productos por área y pendientes. No modificar el nombre, stock, sede, `tipo` ni `rubro` como efecto secundario de asignar un área.
 
@@ -84,7 +84,7 @@ Codex debe confirmar si área equivale a ubicación de stock, si lotes y vencimi
 
 ### Portada de Inventario
 
-- Mostrar tarjetas navegables de Cocina fría, Cocina caliente, Barra de bar y Cafetería para la sede de prueba.
+- Mostrar tarjetas navegables de Cocina fría, Cocina caliente, Barra y Cafetería para la sede de prueba.
 - Cada tarjeta presenta al menos cantidad de productos asignados y cantidad de productos críticos, calculados desde datos reales del modelo. La definición de “crítico” debe reutilizar la regla actual de mínimos si existe y Codex debe verificarla.
 - Incluir entrada a “Todas las áreas” y a la lista de productos Sin asignar.
 - Incluir una opción clara para administrar/agregar áreas por sede. Antes de crear Ajustes nuevos, inspeccionar si ya hay una sección de configuración adecuada.
@@ -118,20 +118,32 @@ Decisiones de negocio registradas: Local 1 (`plaza`) será el ensayo operativo, 
 
 La cola tendrá una sola fase activa. Las tres ventanas sugeridas son **12:00, 14:00 y 17:00 hora de Santiago**, cada una para un bloque independiente. Si el bloque previo no terminó o dejó una decisión pendiente, el siguiente no empieza y registra el bloqueo. Codex no activa por su cuenta la fase siguiente.
 
-### Bloque B2 — Modelo de áreas y stock por área
+### Bloque B2.1 — Cimientos del modelo de áreas operativas
 
-**Objetivo:** comprobar la arquitectura real y dejar lista la base segura para las áreas.
+**Estado: COMPLETADO (2026-10-07).** Se creó el catálogo `public.areas_operativas` con código estable, sede, nombre visible, estado y orden. Solo se sembraron las cuatro áreas para `plaza`. `Sin asignar` es un estado de la relación preparatoria, no un área física adicional.
+
+También se creó `public.producto_area_asignacion`, vacía y sin campo de cantidad. Tiene una única fila permitida por producto/sede, para que el stock total no se atribuya accidentalmente a varias áreas. Si en el futuro un producto se distribuye físicamente entre áreas, el reparto requerirá cantidades explícitas en el modelo de saldos de B2.2; no se debe sumar esta relación como stock.
+
+Ambas tablas tienen RLS habilitado, sin políticas ni privilegios directos para `PUBLIC`, `anon`, `authenticated` o `service_role`. No se modificó `lama_areas`, que sigue representando el plano de mesas. La consulta reproducible está en `sql/2026-10-b2-1-simulacion-clasificacion.sql`; aplica una regla mutuamente exclusiva por producto, expone motivo/stock proyectado y deja ambiguos en `Sin asignar`. No persiste la clasificación.
+
+Resultado detallado, pruebas, conteos y rollback: `docs/hermes/15-b2-1-cimientos-areas.md`.
+
+### Bloque B2.2 — Modelo de existencias por área
+
+**Estado: PENDIENTE; requiere activación explícita.** B2.1 no autoriza saldos por área ni migración de stock.
+
+**Objetivo:** resolver el modelo de cantidades por área y transición desde la fuente vigente `productos.stock_actual` sin duplicar stock.
 
 1. Leer `CLAUDE.md`, las reglas de `docs/hermes/` y documentación relevante.
 2. Trazar el inventario actual: producto, stock por sede, secciones/rubros, movimientos, mermas, lotes, reparto, permisos, búsqueda y rutas.
 3. Verificar contra el esquema activo de Llamita Plus las tablas y columnas necesarias. No conectarse ni escribir en Café del Desierto.
 4. Entregar un mapa de dependencias y decidir la fuente única del stock por área, la migración de stock histórico, el tratamiento de Sin asignar y la relación de lotes/repartos.
-5. Si el mapa confirma el diseño sin decisiones pendientes, implementar la migración aditiva y la gestión básica de áreas por sede. Si una cuestión de datos no se puede resolver de manera segura, detenerse antes de aplicar migración y documentar la decisión requerida.
-6. Crear las cuatro áreas solo en el contexto de prueba acordado de Llamita Plus. No crear áreas en todas las sedes sin confirmación de los datos y del alcance.
-7. Preparar una vista previa de clasificación con las reglas de la sección 3; asignar coincidencias claras y dejar ambiguas en Sin asignar. Guardar procedencia de la regla.
-8. Conciliar conteos y cantidades antes/después por sede y producto. No duplicar stock ni alterar movimientos históricos.
+5. Definir si el saldo aún no contado físicamente por área permanece general/Sin asignar o requiere una toma de inventario aprobada.
+6. Inspeccionar y planificar todos los escritores de stock, además de lotes, vencimientos, repartos, mermas, recetas, Fudo y Lama.
+7. Definir permisos por sede/área y el tratamiento futuro de productos que ocupan más de un área. La relación B2.1 solo admite una asignación y no resuelve cantidades partidas.
+8. Conciliar cantidades antes/después por sede, producto y destino antes de cualquier corte. No duplicar stock ni alterar movimientos históricos.
 
-**Criterios de salida:** arquitectura documentada; migración aplicada o SQL listo según autorización y capacidad; datos conciliados; CRUD/configuración de áreas funcional; clasificación visible y corregible; pruebas del modelo y permisos; resumen antes de pasar al Bloque 2.
+**Criterios de salida:** arquitectura y corte aprobados; modelo de saldos aditivo; prueba de conciliación; escritores coordinados; permisos revisados; stock total conservado; sin doble fuente editable. La interfaz de tarjetas pertenece a B3 y no forma parte de B2.1/B2.2.
 
 ### Bloque B3 — Portada, páginas de área, productos y búsquedas
 
@@ -169,7 +181,7 @@ La cola tendrá una sola fase activa. Las tres ventanas sugeridas son **12:00, 1
 2. Una misma leche puede tener existencias independientes en Cocina fría, Cafetería y otras áreas.
 3. Dentro de Cafetería, buscar “leche” no muestra las existencias de las otras áreas.
 4. En “Todas las áreas”, “leche” muestra una sola identidad de producto con cantidades separadas por área y sede.
-5. Coca-Cola y Sprite se proponen para Barra de bar; café, té, leche común y tortas para Cafetería; panes, pizzas y sándwiches para Cocina caliente; leche condensada/manjar e ingredientes dulces identificables para Cocina fría.
+5. Coca-Cola y Sprite se proponen para Barra; café, té, leche común y tortas para Cafetería; panes, pizzas y sándwiches para Cocina caliente; leche condensada/manjar e ingredientes dulces identificables para Cocina fría.
 6. Los nombres ambiguos permanecen Sin asignar y se pueden corregir manualmente.
 7. La asignación no altera `rubro`, `tipo`, nombres, sedes, ventas o movimientos anteriores.
 8. Una merma registrada dentro de Cocina fría reduce únicamente el inventario de ese producto allí y queda identificada con su área.

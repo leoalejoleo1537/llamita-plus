@@ -463,3 +463,18 @@ Estado: **COMPLETADO; solo lectura**. B1 queda **PENDIENTE**, no activa.
 - Decisiones pendientes para B1: autoridad/corte de todos los escritores; límites RLS/API; stock sin asignar y conciliación física; reparto transaccional con lotes; estrategia de proyección y su retiro.
 
 Informe completo y consultas de solo lectura: `docs/hermes/13-auditoria-areas-sedes-bodega.md`. No hubo invocación de RPC, SQL de escritura, migración ni mutación de datos. No se consultó Café del Desierto / Llamita Stock. No se activó B1 ni bloques posteriores.
+
+## Respuesta de Codex — B2.1: cimientos del modelo de áreas
+
+Fecha: 2026-10-07
+Estado: **COMPLETADA**. B2.2 queda **PENDIENTE**, no activada.
+
+- Repositorio confirmado: `leoalejoleo1537/llamita-plus`, remoto oficial; rama local `work`. Supabase confirmado: Llamita Plus `iuryhsjucblmebdogewa`.
+- Se aplicaron `b2_1_cimientos_areas_operativas`, `b2_1_indices_fk_producto_area` y `b2_1_comentario_relacion_area`: `public.areas_operativas` y relación preparatoria vacía `public.producto_area_asignacion`, con índices para sus FK. Áreas físicas exclusivamente en `plaza`: Cocina fría, Cocina caliente, Barra y Cafetería. `Sin asignar` es un estado, no una quinta área.
+- No existe fuente paralela de stock: la relación no tiene cantidad y se mantiene vacía. Un índice único limita a una asignación por producto/sede; para distribución física simultánea, B2.2 debe diseñar cantidades por área antes de abrir esa posibilidad.
+- RLS está habilitado en ambas tablas, sin políticas ni permisos directos para `PUBLIC`, `anon`, `authenticated` o `service_role`. Helpers de trigger sin EXECUTE para roles de aplicación.
+- Conciliación reproducible `sql/2026-10-b2-1-simulacion-clasificacion.sql`: 329 productos, uno por destino como máximo; Barra 18 y 108,00; Cafetería 42 y 536,50; Cocina caliente 19 y 204,00; Cocina fría 17 y 17,50; Sin asignar 233 y 3.700,20. Total 4.566,20 = stock actual de `plaza`. Es simulación heurística, no dato histórico ni asignación persistida.
+- Conteos pre/post: 1.437 productos y 15.438,00 global; plaza 329 productos y 4.566,20. Sin cambios en movimientos 431, repartos 361/2.040 líneas, lotes 42, recetas 396/514 ítems, permisos 9 o `lama_areas` 5. Las nuevas tablas no almacenan saldos y la relación tiene 0 filas.
+- Pruebas estructurales y de restricciones dentro de `BEGIN ... ROLLBACK`: áreas exactas/sede, sede cruzada, unicidad, coherencia estado/área, código reservado, clave estable, RLS/grants/policies y ausencia de columnas de saldo. Conteos post iguales. Advisor final sin FK desindexadas nuevas; RLS sin políticas es intencional y los índices de relación aún no se han usado porque está vacía. Rollback preparado y no ejecutado.
+- Evidencia detallada: `docs/hermes/15-b2-1-cimientos-areas.md`. No se tocó `central`, `angamos`, `bodega`, Lama, Fudo ni Café del Desierto/Llamita Stock. No se creó interfaz.
+- Riesgo abierto: los nombres/categorías actuales dejan productos en revisión; la regla de simulación requiere validación operativa. Fuente de stock, corte de escritores, cantidades por área y seguridad por sede quedan para B2.2.

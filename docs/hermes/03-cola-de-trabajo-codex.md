@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **B1 de administración de sedes COMPLETADO (2026-10-06)**. B2 de áreas y stock por área permanece PENDIENTE; A3.4d conserva su estado previo.
+Estado actual: **B2.1 — cimientos del modelo de áreas COMPLETADO (2026-10-07)**. B2.2 — modelo de existencias por área permanece PENDIENTE y no activo; A3.4d conserva su estado previo.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -50,10 +50,24 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 
 ### Bloque B2 — Modelo de áreas y stock por área
 
-- Estado: PENDIENTE; no activar automáticamente.
-- Precondiciones: definir fuente única de stock, corte coordinado de escritores, tratamiento del saldo sin asignar y controles de acceso por sede/área. Local 1 no es aislamiento técnico.
-- Objetivo futuro: diseñar áreas y cantidades por área sin duplicar `productos.stock_actual`, revisando lotes, repartos, mermas, Fudo y Lama antes de cualquier escritura.
-- Fuera de B1: crear áreas, migrar stock, crear existencias producto-área, cambiar lotes, vencimientos o datos de reparto.
+- Estado general: EN CURSO POR SUBFASES. **B2.1 COMPLETADO**; **B2.2 PENDIENTE**, no activa.
+- Precondiciones para B2.2: definir fuente única de stock, corte coordinado de escritores, tratamiento del saldo sin asignar y controles de acceso por sede/área. Local 1 no es aislamiento técnico.
+- Objetivo restante: diseñar e implementar existencias por área sin duplicar `productos.stock_actual`, revisando lotes, repartos, mermas, Fudo y Lama antes de cualquier escritura.
+- B2.1 creó solo el catálogo aditivo de áreas de `plaza` y una relación preparatoria vacía. No asignó productos ni stock. Evidencia: `docs/hermes/15-b2-1-cimientos-areas.md`.
+- B2.2 deberá decidir/implementar el modelo de saldos, conciliación física, escritura única, corte de consumidores y permisos. Requiere nueva activación explícita.
+- Fuera de B2.1: migrar stock, crear saldos por área, cambiar lotes, vencimientos o datos de reparto.
+
+### Tarea B2.1 — Cimientos del modelo de áreas operativas
+
+- Estado: COMPLETADA (2026-10-07).
+- Autorización: Alejo activó únicamente B2.1 en esta ejecución.
+- Alcance ejecutado: crear `areas_operativas`; sembrar Cocina fría, Cocina caliente, Barra y Cafetería solo en `plaza`; crear relación preparatoria `producto_area_asignacion` sin cantidades; habilitar RLS y revocar privilegios directos de `PUBLIC`, `anon`, `authenticated` y `service_role`.
+- Conciliación: consulta SELECT-only `sql/2026-10-b2-1-simulacion-clasificacion.sql`; cada producto recibe un destino propuesto como máximo y no se persiste clasificación.
+- Pruebas: estructura, áreas exactas, integridad de sede, unicidad producto-sede, estado/área, clave estable, RLS, ausencia de grants/políticas y ausencia de columnas de saldo; prueba transaccional revertida.
+- Migraciones: `b2_1_cimientos_areas_operativas`, `b2_1_indices_fk_producto_area` y `b2_1_comentario_relacion_area`.
+- Resultado: 1.437 productos y stock global 15.438,00 sin cambios; `plaza` 329 productos y 4.566,20; asignaciones persistidas 0; no se tocó `lama_areas`.
+- Rollback preparado: `sql/2026-10-b2-1-cimientos-areas-operativas.rollback.sql`; aborta si la relación dejó de estar vacía o el catálogo cambió.
+- Publicación: commit y push a `master` autorizados si las verificaciones pasan. No activar B2.2.
 
 ### Tarea A1 - Auditoría de integración Fudo y Llamita Lama
 
