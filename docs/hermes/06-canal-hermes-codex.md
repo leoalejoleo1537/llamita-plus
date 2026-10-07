@@ -564,3 +564,18 @@ Los lotes mantienen su identidad mediante el ID canónico y una relación de con
 Post rollback: 1.437 productos, stock global 15.438,00, 42 lotes, libro neto 9.316,70; cero transferencias, continuidad, clasificación o movimientos de transferencia persistentes; `fudo_movimientos` 15.357, movimientos legacy 431 y Lama real 0. Fudo remoto no fue consultado ni modificado.
 
 El rollback técnico aborta si encuentra actividad B2.4; después de transferencias persistidas corresponde reversa compensatoria auditada. El campo `reversa_de` está preparado, sin operación de reversa expuesta. El informe y scripts son `docs/hermes/21-b2-4-motor-transferencias-ubicaciones.md`, `sql/2026-10-b2-4-pruebas-transferencias.sql` y `sql/2026-10-b2-4-transferencias-ubicaciones.rollback.sql`. No se construyó UI, no se activó Lama/Fudo y no se activó B3. No se accedió a Café del Desierto / Llamita Stock.
+
+## Respuesta de Codex — B3.1: lectura y navegación de inventario por áreas
+
+Fecha: 2026-10-07
+Estado: **COMPLETADA**. B3.2 queda **PENDIENTE**, no activada.
+
+La portada de Inventario de `plaza` muestra Cocina fría, Cocina caliente, Barra, Cafetería, Sin asignar y Todas las áreas. Las tarjetas no simulan críticos sin mínimos. Sin asignar describe el saldo inicial pendiente de distribución. Las páginas de área filtran consulta y tipo y muestran solo productos con saldo en esa ubicación; la vista global conserva una cantidad separada por área para cada producto. Bodega (`central`) mantiene la pantalla existente.
+
+El cliente consulta solo `public.stock_leer_areas()`. La función invoker, disponible a `authenticated`, delega en un helper privado que exige sesión y calcula los saldos desde `stock_internal.existencias`, sin leer `productos.stock_actual`. La función no devuelve Bodega ni otras sedes. No hay escritura ni llamada a `stock_transferir` en esta experiencia.
+
+Conciliación autenticada: las cuatro áreas físicas tienen 0 productos con saldo y 0,00 unidades; Sin asignar tiene 255 productos y 4.566,20 unidades, igual al libro de `plaza`. Conteos SELECT al cierre: 1.437 productos, libro plaza 4.566,20, central 4.750,50, 408 movimientos del libro, cero transferencias, 42 lotes y 514 líneas de receta. La interfaz no alteró productos ni datos.
+
+Supabase confirmó permisos: anon y service_role no ejecutan las funciones; authenticated sí; roles de aplicación sin INSERT en movimientos ni UPDATE de ubicaciones. La llamada sin sesión fue rechazada. Advisors muestran hallazgos globales previos en otros objetos del proyecto, documentados en el informe para su gestión separada.
+
+Las pruebas estáticas, `npm test`, consulta de permisos y conciliación pasaron. El entorno carece de Chromium; la comprobación DOM del navegador quedó omitida y el informe 22 contiene una secuencia manual para desktop/móvil y consola. Migraciones aplicadas solo a Llamita Plus: `20261007174518` y `20261007174626`. Informe: `docs/hermes/22-b3-1-lectura-areas.md`. No se accedió a Café del Desierto / Llamita Stock.

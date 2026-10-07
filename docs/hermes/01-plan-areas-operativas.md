@@ -1,6 +1,6 @@
 # Plan de implementación: inventario por áreas operativas en Llamita Plus
 
-**Estado:** B1, B2.1, B2.3, B2.3.1 y B2.4 completados. B2.4 implementó y verificó el motor protegido de transferencias por ubicación en Llamita Plus el 2026-10-07. B3 —interfaz de áreas— queda **PENDIENTE**, no activa. No activar fases posteriores automáticamente.
+**Estado:** B1, B2.1, B2.3, B2.3.1, B2.4 y B3.1 completados. B3.1 implementó lectura y navegación por áreas para `plaza` el 2026-10-07. B3.2 —operaciones de asignación/transferencia desde interfaz— queda **PENDIENTE**, no activa. No activar fases posteriores automáticamente.
 
 **Repositorio objetivo:** `leoalejoleo1537/llamita-plus`, rama `master`.
 
@@ -195,17 +195,26 @@ Migraciones y pruebas: `docs/hermes/21-b2-4-motor-transferencias-ubicaciones.md`
 
 ### Bloque B3 — Portada, páginas de área, productos y búsquedas
 
-**Objetivo:** hacer que la navegación refleje áreas sin perder inventario global.
+#### B3.1 — Lectura y navegación por áreas
 
-1. Construir la portada de Inventario con tarjetas por área, conteos y críticos.
-2. Construir la página completa de cada área y conservar navegación de ida y vuelta.
-3. Acotar búsqueda, conteos, rubros/filtros y listados al área abierta.
-4. Implementar “Todas las áreas” con agrupación por producto y cantidades por área.
-5. Agregar la asignación de un producto existente a una o más áreas y el alta de productos con asignación inicial a área. No duplicar la identidad maestra.
-6. Mantener Sin asignar visible y corregible. La lista general no puede desaparecer ni quedar inaccesible desde un enlace antiguo.
-7. Validar sede activa, roles y acceso directo a rutas de áreas.
+**Estado: COMPLETADO (2026-10-07).** Para `plaza`, la entrada actual de Inventario es una portada con Cocina fría, Cocina caliente, Barra, Cafetería, Sin asignar y Todas las áreas. Cada tarjeta informa productos con saldo y unidades; el estado de críticos dice “sin mínimos configurados”, sin mostrar ceros falsos. Sin asignar explica que contiene stock pendiente de distribución.
 
-**Criterios de salida:** búsquedas aisladas y globales correctas; un producto puede tener cantidades independientes en varias áreas; no se filtra información de otra sede; tarjetas reflejan datos; pruebas de navegación, permisos y datos vacíos.
+Las páginas de área reutilizan la vista de Inventario, filtran búsqueda y tipo por ubicación y presentan solo productos con saldo positivo en esa ubicación. La vista global agrupa una identidad de producto y separa cantidades por ubicación, con accesos al producto dentro de cada área. Bodega `central` conserva su renderer existente. La lectura proviene de `stock_internal.existencias` mediante `public.stock_leer_areas`; no usa `productos.stock_actual` como saldo, no incluye Bodega y no habilita operaciones. Las cuatro áreas físicas de Local 1 continúan en cero; Sin asignar conserva 4.566,20 unidades en 255 productos con saldo.
+
+RLS y grants mantienen cerradas las tablas internas; la RPC requiere sesión autenticada y solo tiene `EXECUTE` para `authenticated`. Las vistas de área no permiten editar stock ni llamar `stock_transferir`. Sin mínimos por área no se calculan críticos. Evidencia: `docs/hermes/22-b3-1-lectura-areas.md`.
+
+#### B3.2 — Escrituras visuales por área
+
+**Estado: PENDIENTE, no activa.** Debe diseñar por separado la asignación inicial y el uso del motor `stock_transferir`, con permisos, auditoría e idempotencia adecuados. No debe habilitar ediciones directas de saldos ni ampliar los escritores legacy bloqueados.
+
+**Objetivo:** hacer que la navegación refleje áreas sin perder inventario global. Lo implementado en B3.1 cubre únicamente lectura y navegación; los siguientes puntos continúan pendientes:
+
+1. Agregar la asignación de un producto existente a una o más áreas y el alta de productos con asignación inicial a área. No duplicar la identidad maestra.
+2. Diseñar el flujo visual de transferencias invocando únicamente `stock_transferir`; validar permisos, referencias idempotentes, lotes y errores.
+3. Mantener Sin asignar visible y corregible. La lista general no puede desaparecer ni quedar inaccesible desde un enlace antiguo.
+4. Validar sede activa, roles y acceso directo a rutas de áreas.
+
+**Criterios de salida:** las escrituras se ejecutan mediante funciones atómicas protegidas; un producto puede tener cantidades independientes en varias áreas; no se filtra información de otra sede; pruebas de navegación, permisos, concurrencia, idempotencia, lotes y reversión compensatoria.
 
 ### Bloque B4 — Operaciones, mermas, repartos, recetas y cierre
 
@@ -263,7 +272,7 @@ Migraciones y pruebas: `docs/hermes/21-b2-4-motor-transferencias-ubicaciones.md`
 
 La fuente única, ubicaciones iniciales, tratamiento del stock histórico, transferencia atómica y proyección aprobados están en `docs/hermes/17-decision-libro-existencias-ubicacion.md`. B2.3 implementó el libro y el corte para `central`/`plaza`; B2.3.1 añadió el origen POS único y el blindaje de Fudo/Lama. Resultados: `docs/hermes/19-b2-3-corte-libro-ubicaciones.md` y `docs/hermes/20-b2-3-1-blindaje-origen-pos.md`. El documento 18 conserva el bloqueo del intento previo como antecedente.
 
-Quedan para fases posteriores: adaptar entradas, ajustes, mermas, repartos y consumo de recetas al libro; definir mínimos/máximos por ubicación; e implementar las vistas e interfaces de áreas. `angamos` y la clave histórica `bodega` no se migraron. B3 continúa pendiente y requiere activación separada.
+Quedan para fases posteriores: adaptar entradas, ajustes, mermas, repartos y consumo de recetas al libro; definir mínimos/máximos por ubicación; y habilitar escrituras visuales por área en B3.2. `angamos` y la clave histórica `bodega` no se migraron. B3.2 requiere activación separada.
 
 Estas verificaciones no son permiso para abrir alcance hacia Café del Desierto, ejecutar operaciones destructivas o automatizar el descuento de recetas.
 

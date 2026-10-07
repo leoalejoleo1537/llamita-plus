@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **B2.4 — motor seguro de transferencias COMPLETADO (2026-10-07)**. B1, B2.1, B2.2 decisión resuelta, B2.3 y B2.3.1 permanecen cerrados; B3 —interfaz por áreas— queda PENDIENTE y no activa. A3.4d conserva su estado previo.
+Estado actual: **B3.1 COMPLETADA (2026-10-07)**. B3.2 queda **PENDIENTE**, no activa. B1, B2.1, B2.2 decisión resuelta, B2.3, B2.3.1 y B2.4 permanecen cerrados; A3.4d conserva su estado previo.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -50,13 +50,13 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 
 ### Bloque B2 — Modelo de áreas y stock por área
 
-- Estado general: **B2.1 COMPLETADO**; **B2.2 REQUIERE DECISIÓN RESUELTA**; **B2.3 COMPLETADO**; **B2.3.1 COMPLETADO**; **B2.4 COMPLETADO**. El siguiente bloque visual B3 queda **PENDIENTE**, no activo.
+- Estado general: **B2.1 COMPLETADO**; **B2.2 REQUIERE DECISIÓN RESUELTA**; **B2.3 COMPLETADO**; **B2.3.1 COMPLETADO**; **B2.4 COMPLETADO**. **B3.1 COMPLETADA**; **B3.2 PENDIENTE**, no activa.
 - El libro por ubicación y el corte coordinado están implementados para `central` y `plaza`; controles de acceso por área y operaciones de stock por área quedan para fases futuras. Local 1 no es aislamiento técnico.
 - Objetivo restante: habilitar existencias por área sin duplicar `productos.stock_actual`, respetando lotes, transferencias, mermas, Fudo y Lama.
 - B2.1 creó solo el catálogo aditivo de áreas de `plaza` y una relación preparatoria vacía. No asignó productos ni stock. Evidencia: `docs/hermes/15-b2-1-cimientos-areas.md`.
 - Decisión aprobada: el libro de existencias por ubicación será la autoridad futura; Bodega central recibe stock; `plaza` inicia en Sin asignar; se prohíbe clasificación histórica automática; `productos.stock_actual` será proyección no editable. Detalle: `docs/hermes/17-decision-libro-existencias-ubicacion.md`.
 - La ejecución inicial de B2.3 se detuvo ante los bloqueos descritos en el documento 18. La autorización posterior habilitó un corte coordinado que quedó completado; ver `docs/hermes/19-b2-3-corte-libro-ubicaciones.md`.
-- B2.3 no creó saldos en áreas físicas. B2.4 sigue pendiente y no está activada.
+- B2.3 no creó saldos en áreas físicas. B2.4 posteriormente completó el motor de transferencias; la interfaz por áreas se ejecuta ahora en B3.1.
 
 ### Tarea B2.2 — Decisión arquitectónica del libro por ubicación
 
@@ -104,6 +104,25 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Estado posterior: 1.437 productos; `stock_actual` global 15.438,00; 42 lotes; libro 9.316,70; 0 transferencias persistentes, 0 relaciones de continuidad nuevas, 0 clasificaciones persistentes; 15.357 `fudo_movimientos`; 431 movimientos legacy; Lama real 0.
 - Fudo remoto no fue contactado ni modificado. No se activó Lama, no se implementó interfaz ni se distribuyeron productos persistentes. Informe y rollback: `docs/hermes/21-b2-4-motor-transferencias-ubicaciones.md`, `sql/2026-10-b2-4-transferencias-ubicaciones.rollback.sql`.
 - No activar B3 automáticamente.
+
+### Bloque B3 — Interfaz de inventario por áreas
+
+- Estado: EN CURSO POR SUBFASES. **B3.1 COMPLETADA**; **B3.2 PENDIENTE**, no activar automáticamente.
+- El bloque B2.4 habilitó el motor, pero B3.1 es solo lectura y navegación: no llama a `stock_transferir`.
+
+### Tarea B3.1 — Interfaz de lectura y navegación por áreas
+
+- Estado: **COMPLETADA (2026-10-07)** por solicitud explícita de Alejo.
+- Objetivo: convertir Inventario de `plaza` en portada de áreas, reutilizar la lista actual filtrada por área, mostrar Sin asignar y una vista global agrupada; mantener la interfaz de Bodega.
+- Fuente autorizada: libro `stock_internal.existencias`; no usar `productos.stock_actual` para cifras de áreas. Sin mínimos por área, no calcular críticos.
+- Lectura permitida: agregar RPC/view segura de solo lectura si hace falta; RLS y permisos mínimos; ningún DML directo ni acciones de transferencia.
+- Fuera de alcance: botón de transferencias, asignaciones persistentes, mínimos/máximos, edición/alta de producto por área, mermas por área, Fudo/Lama reales, sedes históricas y Café del Desierto.
+- Pruebas: portada 4 áreas+Sin asignar+Todas; áreas físicas inicialmente cero; stock inicial de plaza en Sin asignar; Bodega intacta; búsqueda aislada, global desglosada, sin escrituras, sintaxis/permisos/consulta y `git diff --check`.
+- Resultado: `public.stock_leer_areas()` expone únicamente lectura autenticada de la vista de existencias del libro en `plaza`; portada, páginas filtradas y agrupación global implementadas. Las áreas físicas siguen en cero y Sin asignar presenta 4.566,20 unidades en 255 productos con saldo.
+- Pruebas: función autenticada consultada dentro de transacción revertida; conciliación RPC/libro sin diferencias; ACL/RLS comprobados; `npm test`, validaciones estáticas y `git diff --check`. Sin navegador Chromium, por lo que la verificación visual queda con procedimiento manual en `docs/hermes/22-b3-1-lectura-areas.md`.
+- Informe: `docs/hermes/22-b3-1-lectura-areas.md`. Migraciones: `20261007174518 b3_1_lectura_inventario_areas`, `20261007174626 b3_1_include_inactive_stock_products`.
+- Sin escrituras a productos/stock, lotes, movimientos, transferencias, recetas, POS ni datos comerciales; no se habilitó `stock_transferir` desde UI. Bodega mantiene su interfaz. No se accedió a Café del Desierto / Llamita Stock.
+- Publicación: commit y push a `master` para este bloque ya autorizado. B3.2 queda PENDIENTE; no activarla automáticamente.
 
 ### Tarea B2.1 — Cimientos del modelo de áreas operativas
 

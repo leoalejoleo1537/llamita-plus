@@ -401,6 +401,46 @@
   .mcard .n{font-size:22px;font-weight:700}
   .mcard .l{font-size:11px;color:var(--muted);margin-top:2px}
 
+  /* Inventario por áreas: lectura del libro, sin controles de saldo. */
+  .area-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}
+  .area-back{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:10px;
+    min-height:38px;padding:7px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+  .area-back:active,.area-card:active,.area-global-link:active{transform:scale(.985)}
+  .area-context{font-size:12px;color:var(--muted);text-align:right}
+  .area-note{margin:0 0 12px;padding:10px 12px;background:var(--gray-bg);color:var(--gray-fg);
+    border-radius:11px;font-size:12px;line-height:1.45}
+  .area-cover{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .area-card{display:flex;flex-direction:column;align-items:stretch;gap:7px;text-align:left;min-width:0;
+    padding:15px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:15px;
+    box-shadow:var(--sombra);font:inherit;cursor:pointer;transition:transform .12s ease,box-shadow .15s ease}
+  .area-card:hover{box-shadow:0 8px 22px rgba(25,35,50,.08)}
+  .area-card-title{font-size:15px;font-weight:750;line-height:1.25}
+  .area-card-count{font-size:12px;color:var(--muted)}
+  .area-card-units{font-size:22px;font-weight:800;letter-spacing:-.02em}
+  .area-card-state{font-size:11px;color:var(--muted);padding-top:7px;border-top:1px solid var(--border)}
+  .area-card-extra{font-size:11px;color:var(--muted);line-height:1.4}
+  .area-aggregate{background:var(--gray-bg)}
+  .area-list-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:2px 0 10px}
+  .area-list-total{font-size:12px;color:var(--muted)}
+  .area-read-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 10px;
+    background:var(--card);border-bottom:1px solid var(--border);min-height:58px}
+  .area-read-row:first-child{border-radius:12px 12px 0 0}
+  .area-read-row:last-child{border-radius:0 0 12px 12px;border-bottom:0}
+  .area-read-name{font-size:14px;font-weight:700;min-width:0;overflow-wrap:anywhere}
+  .area-read-sub{font-size:11px;color:var(--muted);margin-top:3px}
+  .area-read-qty{font-size:15px;font-weight:800;white-space:nowrap}
+  .area-global-product{background:var(--card);border:1px solid var(--border);border-radius:13px;
+    padding:11px 12px;margin:0 0 8px;box-shadow:var(--sombra)}
+  .area-global-balances{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:8px}
+  .area-global-link{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0;
+    border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:9px;padding:8px;
+    font:inherit;font-size:11px;cursor:pointer}
+  .area-global-link span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .area-global-link strong{white-space:nowrap}
+  .area-loading{padding:22px;text-align:center;color:var(--muted);font-size:13px}
+  @media(max-width:700px){.area-cover{grid-template-columns:repeat(2,minmax(0,1fr))}.area-card{padding:12px}}
+  @media(max-width:420px){.area-cover{gap:7px}.area-global-balances{grid-template-columns:1fr}.area-card-title{font-size:13px}}
+
   /* ---- las tres sedes, vistas desde Bodega ----
      Adriana no cuenta en bodega para saber cómo está bodega: cuenta para
      saber QUÉ MANDAR. Por eso lo primero de la pantalla es cuánto le falta a
@@ -3276,7 +3316,9 @@
 
 <!-- ================= INVENTARIO ================= -->
 <div class="wrap" id="view-inv">
-  <div class="inv-filtros">
+  <div class="area-nav" id="areaNav" style="display:none"></div>
+  <div class="area-note" id="areaNote" style="display:none"></div>
+  <div class="inv-filtros" id="invFiltros">
     <label class="inv-busca" for="q">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>
       <input type="text" id="q" aria-label="Buscar producto" placeholder="Buscar producto…">
@@ -4025,6 +4067,14 @@ let channel = null;
 let LAMA_ATERRIZAR = false;
 
 let DATA = [];
+/* Solo lectura para B3.1. Estas filas vienen de public.stock_leer_areas(),
+   que las agrega desde el libro por ubicación y nunca desde stock_actual. */
+let AREA_ROWS = [];
+let AREA_ERROR = null;
+let AREA_LOADING = false;
+let areaActual = null;              // null=portada; '__todas__'=vista global; otro=ubicación plaza
+const AREA_TODAS = '__todas__';
+const AREA_ORDEN_UI = ['cocina_fria','cocina_caliente','barra','cafeteria','sin_asignar'];
 let filterState = null;
 let hasVenc = false;      // true cuando exista la columna vencimiento en la tabla
 let hasPerec = false;     // true cuando exista la columna perecedero
@@ -4056,6 +4106,110 @@ const entraEnCritico = p => estado(p)==='critico' || urgenteDe(p);
 const $ = id => document.getElementById(id);
 const qEl=$('q'), listEl=$('list');
 let openSecs=new Set();   // secciones desplegadas
+
+function areaLabel(codigo){
+  return AREA_ROWS.find(x=>x.area_codigo===codigo)?.area_nombre || ({
+    cocina_fria:'Cocina fría', cocina_caliente:'Cocina caliente', barra:'Barra',
+    cafeteria:'Cafetería', sin_asignar:'Sin asignar'
+  }[codigo]||codigo);
+}
+function tituloInventarioArea(){
+  if(SEDE!=='plaza' || vistaActual!=='inv') return;
+  const subtitulo = areaActual===null ? 'Inventario · Áreas'
+    : areaActual===AREA_TODAS ? 'Inventario · Todas las áreas'
+    : 'Inventario · '+areaLabel(areaActual);
+  $('topSede').textContent=subtitulo;
+}
+function cambiarArea(codigo, producto=''){
+  if(SEDE!=='plaza') return;
+  if(codigo!==null && codigo!==AREA_TODAS && !AREA_ROWS.some(r=>r.area_codigo===codigo)) return;
+  areaActual=codigo;
+  qEl.value=producto;
+  filterState=null; tipoSel=null; openSecs.clear();
+  document.querySelectorAll('.mcard').forEach(x=>x.classList.remove('sel'));
+  renderTipos(); render(); tituloInventarioArea();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function areaStats(codigo){
+  const rows=AREA_ROWS.filter(r=>r.area_codigo===codigo), conSaldo=rows.filter(r=>Number(r.cantidad)>0);
+  return {productos:new Set(conSaldo.map(r=>r.producto_id)).size,
+          unidades:rows.reduce((s,r)=>s+(Number(r.cantidad)||0),0)};
+}
+function htmlTarjetaArea(codigo){
+  const s=areaStats(codigo);
+  const extra=codigo==='sin_asignar'
+    ? '<span class="area-card-extra">Stock pendiente de distribución a las áreas.</span>' : '';
+  return `<button type="button" class="area-card" data-area-open="${esc(codigo)}">
+    <span class="area-card-title">${esc(areaLabel(codigo))}</span>
+    <span class="area-card-count">${s.productos} productos con saldo</span>
+    <span class="area-card-units">${fmt(s.unidades)} <small>unidades</small></span>
+    <span class="area-card-state">Críticos · sin mínimos configurados</span>${extra}
+  </button>`;
+}
+function renderAreaPortada(){
+  $('areaNav').style.display='none'; $('areaNote').style.display='none';
+  $('invFiltros').style.display='none'; $('metrics').style.display='none';
+  $('critSedes').style.display='none'; $('metaPortada').style.display='none';
+  $('btnNuevo').style.display='none'; $('inv-estado').style.display='none';
+  if(AREA_LOADING){ listEl.innerHTML='<div class="area-loading">Cargando existencias por ubicación…</div>'; return; }
+  if(AREA_ERROR){ listEl.innerHTML='<div class="empty">No se pudo leer el libro de existencias de Local 1. Vuelve a cargar para intentarlo otra vez.</div>'; return; }
+  const total=AREA_ORDEN_UI.reduce((s,c)=>s+areaStats(c).unidades,0);
+  const productos=new Set(AREA_ROWS.filter(r=>Number(r.cantidad)>0).map(r=>r.producto_id)).size;
+  listEl.innerHTML=`<div class="area-cover" aria-label="Áreas de inventario">
+    ${AREA_ORDEN_UI.map(htmlTarjetaArea).join('')}
+    <button type="button" class="area-card area-aggregate" data-area-open="${AREA_TODAS}">
+      <span class="area-card-title">Todas las áreas</span>
+      <span class="area-card-count">${productos} productos con saldo</span>
+      <span class="area-card-units">${fmt(total)} <small>unidades</small></span>
+      <span class="area-card-state">Críticos · sin mínimos configurados</span>
+      <span class="area-card-extra">Vista agrupada con cantidades separadas por ubicación.</span>
+    </button>
+  </div>`;
+}
+function renderAreaLista(){
+  const global=areaActual===AREA_TODAS;
+  $('areaNav').style.display='flex'; $('areaNav').innerHTML=`<button type="button" class="area-back" data-area-home>← Todas las áreas</button><span class="area-context">Solo lectura · Local 1</span>`;
+  $('invFiltros').style.display=''; $('metrics').style.display='none';
+  $('critSedes').style.display='none'; $('metaPortada').style.display='none';
+  $('btnNuevo').style.display='none'; $('inv-estado').style.display='none';
+  $('areaNote').style.display='block';
+  $('areaNote').textContent=global
+    ? 'Cada producto muestra su saldo separado por ubicación. Los totales incluyen únicamente Local 1; Bodega permanece aparte. Sin mínimos configurados por área, no se calculan críticos.'
+    : areaActual==='sin_asignar'
+      ? 'Sin asignar contiene el stock inicial de Local 1 que aún está pendiente de distribución. Esta pantalla solo consulta existencias.'
+      : `${areaLabel(areaActual)} · Saldos leídos del libro de existencias. Sin mínimos configurados por área, no se calculan críticos.`;
+  if(AREA_LOADING){ listEl.innerHTML='<div class="area-loading">Cargando existencias por ubicación…</div>'; return; }
+  if(AREA_ERROR){ listEl.innerHTML='<div class="empty">No se pudo leer el libro de existencias de Local 1. Vuelve a cargar para intentarlo otra vez.</div>'; return; }
+  const q=normNombre(qEl.value), tipo=tipoSel;
+  const idsConSaldoGlobal=global
+    ? new Set(AREA_ROWS.filter(r=>Number(r.cantidad)>0).map(r=>r.producto_id))
+    : null;
+  const porProducto=new Map();
+  AREA_ROWS.forEach(r=>{
+    if(global&&!idsConSaldoGlobal.has(r.producto_id)) return;
+    if(q&&!normNombre(r.producto).includes(q)) return;
+    if(tipo&&(r.tipo||'').trim()!==tipo) return;
+    if(!porProducto.has(r.producto_id)) porProducto.set(r.producto_id,{producto:r.producto,rubro:r.rubro||'Sin sección',tipo:r.tipo||'',rows:[]});
+    porProducto.get(r.producto_id).rows.push(r);
+  });
+  const productos=[...porProducto.values()].sort((a,b)=>a.producto.localeCompare(b.producto,'es',{sensitivity:'base'}));
+  if(global){
+    const salida=productos.map(p=>{
+      p.rows.sort((a,b)=>AREA_ORDEN_UI.indexOf(a.area_codigo)-AREA_ORDEN_UI.indexOf(b.area_codigo));
+      return `<article class="area-global-product"><div class="area-read-name">${esc(p.producto)}</div><div class="area-read-sub">${esc(p.rubro)}${p.tipo?' · '+esc(p.tipo):''}</div>
+        <div class="area-global-balances">${p.rows.map(r=>`<button type="button" class="area-global-link" data-area-open="${esc(r.area_codigo)}" data-area-product="${esc(p.producto)}" aria-label="Ver ${esc(p.producto)} en ${esc(r.area_nombre)}"><span>${esc(r.area_nombre)}</span><strong>${fmt(Number(r.cantidad)||0)}</strong></button>`).join('')}</div></article>`;
+    }).join('');
+    listEl.innerHTML=`<div class="area-list-head"><span class="area-list-total">${productos.length} productos · ${AREA_ORDEN_UI.length} ubicaciones</span></div>${salida||'<div class="empty">No hay productos que coincidan.</div>'}`;
+    return;
+  }
+  const rows=AREA_ROWS.filter(r=>r.area_codigo===areaActual && Number(r.cantidad)>0
+    &&(!q||normNombre(r.producto).includes(q))
+    &&(!tipo||(r.tipo||'').trim()===tipo))
+    .sort((a,b)=>a.producto.localeCompare(b.producto,'es',{sensitivity:'base'}));
+  const stats=areaStats(areaActual);
+  const salida=rows.map(r=>`<div class="area-read-row"><div><div class="area-read-name">${esc(r.producto)}</div><div class="area-read-sub">${esc(r.rubro||'Sin sección')}${r.tipo?' · '+esc(r.tipo):''}</div></div><div class="area-read-qty">${fmt(Number(r.cantidad)||0)}${r.unidad?' '+esc(r.unidad):''}</div></div>`).join('');
+  listEl.innerHTML=`<div class="area-list-head"><span class="area-list-total">${stats.productos} productos con saldo · ${fmt(stats.unidades)} unidades</span></div>${salida||'<div class="empty">No hay productos que coincidan.</div>'}`;
+}
 
 /* Normaliza texto para buscar y comparar: sin tildes, sin mayúsculas y sin
    espacios de más. Así "azucar" encuentra "Azúcar" y al revés. */
@@ -4772,6 +4926,7 @@ function pickSede(s){
     return;
   }
   SEDE = s;
+  AREA_ROWS=[]; AREA_ERROR=null; AREA_LOADING=s==='plaza'; areaActual=null;
   /* Con el panel fijo el cajón nunca se abre, así que su nombre de sede hay
      que refrescarlo acá: es el momento en que deja de ser "—". */
   setTimeout(refrescarMenu, 0);
@@ -11768,7 +11923,12 @@ const pasaTipo = p => !tipoSel || tipoDe(p) === tipoSel;
 /* El selector muestra los tipos reales del catálogo y sus cantidades. */
 function renderTipos(){
   const barra=$('tipos'), cuenta=new Map();
-  if(hasTipo) DATA.forEach(p=>{const t=tipoDe(p);if(t)cuenta.set(t,(cuenta.get(t)||0)+1);});
+  if(hasTipo){
+    if(SEDE==='plaza' && areaActual!==null){
+      const filas=AREA_ROWS.filter(r=>(areaActual===AREA_TODAS||r.area_codigo===areaActual)&&Number(r.cantidad)>0);
+      filas.forEach(r=>{const t=(r.tipo||'').trim();if(t)cuenta.set(t,(cuenta.get(t)||0)+1);});
+    }else DATA.forEach(p=>{const t=tipoDe(p);if(t)cuenta.set(t,(cuenta.get(t)||0)+1);});
+  }
   const tipos=[...cuenta.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'es'));
   if(tipoSel&&!cuenta.has(tipoSel))tipoSel=null;
   barra.innerHTML='<option value="">Todas las categorías</option>'+tipos.map(([t,n])=>
@@ -11778,6 +11938,13 @@ function renderTipos(){
 }
 const COPY_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
 function render(){
+  if(SEDE==='plaza'){
+    tituloInventarioArea();
+    if(areaActual===null) renderAreaPortada(); else renderAreaLista();
+    return;
+  }
+  $('areaNav').style.display='none'; $('areaNote').style.display='none';
+  $('invFiltros').style.display=''; $('inv-estado').style.display=''; $('metrics').style.display='';
   $('inv-estado').value=filterState||'';
   $('inv-limpiar').disabled=!qEl.value&&!filterState&&!tipoSel;
   const q=normNombre(qEl.value);
@@ -11833,8 +12000,14 @@ function render(){
   listEl.innerHTML = cuerpo || '<div class="empty">No hay productos que coincidan.</div>';
 }
 async function loadData(){
+  const sedeCarga=SEDE;
   const {data,error}=await sb.from('productos').select('*').eq('sede',SEDE).eq('activo','SÍ').order('producto');
-  if(error){$('liveText').textContent='error de conexión';$('live').classList.add('off');console.error(error);return;}
+  if(SEDE!==sedeCarga) return;
+  if(error){
+    $('liveText').textContent='error de conexión';$('live').classList.add('off');console.error(error);
+    if(sedeCarga==='plaza'){ AREA_LOADING=false; AREA_ERROR=error; AREA_ROWS=[]; render(); }
+    return;
+  }
   DATA=data;
   hasVenc = DATA.length>0 && ('vencimiento' in DATA[0]);
   hasPerec = DATA.length>0 && ('perecedero' in DATA[0]);
@@ -11846,6 +12019,17 @@ async function loadData(){
   hasTipo = DATA.length>0 && ('tipo' in DATA[0]);
   if(!hasTipo) tipoSel=null;
   else if(tipoSel && !DATA.some(p=>tipoDe(p)===tipoSel)) tipoSel=null;  // se quedó sin productos
+  if(sedeCarga==='plaza'){
+    AREA_LOADING=true; AREA_ERROR=null;
+    render();
+    const {data:areaData,error:areaError}=await sb.rpc('stock_leer_areas');
+    if(SEDE!==sedeCarga) return;
+    AREA_LOADING=false;
+    AREA_ERROR=areaError||null;
+    AREA_ROWS=areaError?[]:(areaData||[]);
+  }else{
+    AREA_LOADING=false; AREA_ERROR=null; AREA_ROWS=[];
+  }
   $('m-fudo').style.display = puedeEnFudo('ficha') ? '' : 'none';
   $('m-tipo-row').style.display = hasTipo ? '' : 'none';
   await loadLotes();
@@ -11853,7 +12037,8 @@ async function loadData(){
   /* sin await: las otras dos sedes son dos lecturas más y no tienen por qué
      retrasar el pintado de esta. Las tarjetas se llenan solas al llegar. */
   cargarCriticos();
-  $('liveText').textContent='en vivo'; $('live').classList.remove('off');
+  if(sedeCarga==='plaza' && AREA_ERROR){ $('liveText').textContent='error leyendo áreas'; $('live').classList.add('off'); }
+  else { $('liveText').textContent='en vivo'; $('live').classList.remove('off'); }
 }
 /* trae los lotes de vencimiento de los productos de la sede.
    Si la tabla todavía no existe en la base, la app sigue funcionando igual. */
@@ -12237,6 +12422,8 @@ async function copiarTexto(txt){
 
 /* abrir/cerrar sección, o abrir ficha de producto */
 listEl.addEventListener('click',e=>{
+  const area=e.target.closest('[data-area-open]');
+  if(area){ cambiarArea(area.dataset.areaOpen,area.dataset.areaProduct||''); return; }
   const cop=e.target.closest('[data-copiar]');
   if(cop){
     const sec=cop.dataset.copiar;
@@ -12257,6 +12444,9 @@ listEl.addEventListener('click',e=>{
   }
   const info=e.target.closest('[data-open]'); if(!info)return;
   openModal(+info.dataset.open);
+});
+$('areaNav').addEventListener('click',e=>{
+  if(e.target.closest('[data-area-home]')) cambiarArea(null);
 });
 /* El buscador SIEMPRE busca en todo el inventario. Al tocarlo se sueltan los
    filtros de crítico / sobre-stock / sin dato: si alguien busca "torta de
@@ -16764,7 +16954,10 @@ function pickTab(tab){
   }
   // Inicio devuelve la pantalla a como se abre: sin búsqueda, sin filtros y
   // con las secciones cerradas. Es la forma de "empezar de nuevo" sin pensar.
-  if(tab==='inv'){ irAlInicio(); ajustarMetaPortada(); }
+  if(tab==='inv'){
+    if(SEDE==='plaza') areaActual=null;
+    irAlInicio(); ajustarMetaPortada(); tituloInventarioArea();
+  }
   if(tab==='hist') loadHistorial();
   if(repLocal || esRecepcion){
     if(esRecepcion){
