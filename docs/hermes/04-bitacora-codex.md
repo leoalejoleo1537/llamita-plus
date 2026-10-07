@@ -221,3 +221,13 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - Decisión: no poblar saldos por área mientras continúen los escritores y la interfaz sobre `stock_actual`; eso crearía doble fuente editable. Recomendar ledger por ubicación como autoridad de `plaza` con agregado global de compatibilidad solo de lectura tras corte coordinado. Hace falta resolver adaptación de escritores/permisos, lotes por área y confirmación de la simulación como ubicación física.
 - No hubo migración ni rollback SQL, RPC de escritura, cambios de código, SQL mutacional o cambios de datos. No se tocó `central`, `angamos`, `bodega` histórica ni áreas operativas. No se accedió a Café del Desierto / Llamita Stock.
 - Informe: `docs/hermes/16-b2-2-auditoria-fuente-unica-stock.md`. `git diff --check` debe pasar antes de publicar documentación. B2.3 sigue pendiente.
+
+## 2026-10-07 — Decisión aprobada: libro de existencias por ubicación
+
+- Alejo aprobó la arquitectura del inventario por ubicación documentada en `docs/hermes/17-decision-libro-existencias-ubicacion.md`.
+- B2.2 queda **REQUIERE DECISIÓN RESUELTA** como fase de decisión; no queda implementada la fuente de stock. No se activó B2.3.
+- Fuente futura única: libro por producto, sede, ubicación y lote cuando aplique. `productos.stock_actual` será una proyección de compatibilidad no editable.
+- La migración inicial futura llevará todo `central` a Bodega central; todo `plaza` y sus lotes a Sin asignar; no migrará `angamos` ni la clave histórica `bodega`. No habrá clasificación histórica automática.
+- Operación aprobada: nuevos productos físicos entran primero a Bodega; el reparto elige área y mueve stock atómicamente conservando producto, cantidad, usuario, fecha y lote; la merma global indica área; búsqueda, críticos y reportes calculan por área. Recetas y Lama–Stock real permanecen desactivados hasta que el modelo esté funcionando.
+- Alcance de esta ejecución: actualizar documentación Hermes únicamente. Sin SQL, tablas, migraciones, código, operaciones ni cambios de datos. Café del Desierto / Llamita Stock no fue tocado.
+- B2.3 (interfaz/formularios sobre el modelo implementado) queda **PENDIENTE**, no activado. El plan y el documento 17 describen sus precondiciones y criterios.

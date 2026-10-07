@@ -458,6 +458,20 @@ La recomendación es una transición coordinada: autoridad única por ubicación
 
 No se ejecutaron migraciones, RPC de escritura, ni SQL de mutación; no se modificó código ni dato. Conteos al cierre iguales a los del inicio. El informe con matriz de escritores, evidencia SQL, riesgos y decisiones es `docs/hermes/16-b2-2-auditoria-fuente-unica-stock.md`. No se preparó rollback SQL porque no hubo mutación. B2.3 permanece pendiente y no activa.
 
+## Decisión de Alejo — libro de existencias por ubicación
+
+Fecha: 2026-10-07
+Estado: **APROBADA como decisión arquitectónica**. B2.2 se cierra como `REQUIERE DECISIÓN RESUELTA`, sin implementación; B2.3 sigue `PENDIENTE`, no activa.
+
+- La fuente futura única será un libro de existencias por producto, sede, ubicación y lote cuando corresponda. `productos.stock_actual` será una proyección de compatibilidad no editable; nunca un segundo saldo.
+- Ubicaciones iniciales: Bodega central; Sin asignar de Local 1; Cocina fría, Cocina caliente, Barra y Cafetería de Local 1.
+- Recepción, conteo normal y origen de repartos permanecen en Bodega central. Todo producto físico nuevo entra primero allí. El reparto requiere destino de área y se registra como transferencia atómica, preservando producto, cantidad, usuario, fecha y lote.
+- Una habilitación de producto en un área no crea saldo. Las cantidades solo se distribuyen mediante movimiento explícito. Mermas se registran en un único módulo global con área obligatoria; búsqueda, reportes y críticos se calculan por área.
+- Migración futura: `central` completo a Bodega central; `plaza` completo a Sin asignar; lotes actuales de `plaza` a Sin asignar; ninguna migración de `angamos` ni de la clave histórica `bodega`; ninguna clasificación histórica automática. Las sugerencias por nombre no escriben asignaciones. Distribuciones posteriores desde Sin asignar se registran explícitamente con procedencia inicial `simulacion`.
+- Recetas y Lama–Stock real siguen sin activar hasta que el modelo por ubicación funcione.
+
+La decisión y el plan no ejecutan la migración. Esta actualización fue solo documental: sin SQL, tablas, código ni cambios de datos. Alcance, precondiciones y criterios previstos para B2.3 están en `docs/hermes/17-decision-libro-existencias-ubicacion.md` y `docs/hermes/01-plan-areas-operativas.md`.
+
 
 ---
 

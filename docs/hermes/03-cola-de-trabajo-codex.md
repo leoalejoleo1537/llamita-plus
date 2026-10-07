@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **B2.2 — modelo de existencias por área REQUIERE DECISIÓN (2026-10-07)**. B2.1 está COMPLETADO; B2.3 (interfaz/formularios) permanece PENDIENTE y no activa; A3.4d conserva su estado previo.
+Estado actual: **B2.2 — decisión arquitectónica RESUELTA (2026-10-07), fase cerrada sin implementación**. B2.1 está COMPLETADO; **B2.3 permanece PENDIENTE y no activa**; A3.4d conserva su estado previo.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -50,24 +50,23 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 
 ### Bloque B2 — Modelo de áreas y stock por área
 
-- Estado general: EN CURSO POR SUBFASES. **B2.1 COMPLETADO**; **B2.2 REQUIERE DECISIÓN**; **B2.3 (interfaz/formularios) PENDIENTE**, no activa.
-- Precondiciones para B2.2: definir fuente única de stock, corte coordinado de escritores, tratamiento del saldo sin asignar y controles de acceso por sede/área. Local 1 no es aislamiento técnico.
+- Estado general: EN CURSO POR SUBFASES. **B2.1 COMPLETADO**; **B2.2 REQUIERE DECISIÓN RESUELTA** (arquitectura aprobada, sin implementación); **B2.3 PENDIENTE**, no activa.
+- Decisión arquitectónica aprobada; precondiciones técnicas pendientes para la implementación: corte coordinado de escritores/lectores, adaptación de lotes, controles de acceso por sede/área y conciliación. Local 1 no es aislamiento técnico.
 - Objetivo restante: diseñar e implementar existencias por área sin duplicar `productos.stock_actual`, revisando lotes, repartos, mermas, Fudo y Lama antes de cualquier escritura.
 - B2.1 creó solo el catálogo aditivo de áreas de `plaza` y una relación preparatoria vacía. No asignó productos ni stock. Evidencia: `docs/hermes/15-b2-1-cimientos-areas.md`.
-- B2.2 deberá decidir/implementar el modelo de saldos, conciliación física, escritura única, corte de consumidores y permisos. Requiere nueva activación explícita.
+- Decisión aprobada: el libro de existencias por ubicación será la autoridad futura; Bodega central recibe stock; `plaza` inicia en Sin asignar; se prohíbe clasificación histórica automática; `productos.stock_actual` será proyección no editable. Detalle: `docs/hermes/17-decision-libro-existencias-ubicacion.md`.
+- La decisión no implementa tablas ni adapta escritores. Cualquier trabajo técnico requiere activación explícita de un bloque y debe asegurar la fuente única, transferencia atómica y conciliación definidos en el documento 17.
 - Fuera de B2.1: migrar stock, crear saldos por área, cambiar lotes, vencimientos o datos de reparto.
 
 ### Tarea B2.2 — Existencias por producto y área, fuente única
 
-- Estado: **REQUIERE DECISIÓN (2026-10-07)**. No se ejecutó migración de stock ni se creó tabla de saldos.
-- Autorización: Alejo activó únicamente B2.2 en esta ejecución.
-- Auditoría: `docs/hermes/16-b2-2-auditoria-fuente-unica-stock.md`.
-- Hallazgo determinante: la app y RPCs vigentes siguen escribiendo `productos.stock_actual`; lotes lo recalculan mediante trigger. La app actualiza `productos` y reemplaza filas de lotes directamente; Fudo, mermas, entradas/deshacer, repartos, restauraciones, fusiones, franquicia y Lama tienen funciones instaladas que escriben o delegan el saldo. No es seguro copiar ahora el saldo a otra tabla editable y conservar esos caminos.
-- Motivos: la relación B2.1 no tiene cantidad y admite una sola fila por producto/sede; lotes carecen de área; mínimos/máximos siguen en producto; las políticas RLS de productos/lotes/movimientos permiten escrituras amplias a roles de aplicación. La interfaz todavía consulta y modifica el saldo global.
-- Decisión solicitada antes de retomar: aprobar una transición coordinada donde una sola tabla/ledger sea autoridad para `plaza`, `productos.stock_actual` sea solo lectura/proyección compatible, y todos los escritores/lectores (incluida API/RLS, lotes y repartos) se adapten antes del corte; definir ubicación de lotes y asignación física inicial/stock sin asignar. Ver detalle en informe 16.
-- Límites ejecutados: consultas SELECT-only; sin migración, INSERT/UPDATE/DELETE, RPC de escritura ni cambio de código de aplicación. Datos y schema operativos permanecen como estaban.
-- Publicación: solo documentación de auditoría y bloqueo a `master`; no publicar cambios de código, esquema o datos.
-- Siguiente bloque: B2.3 (interfaz y formularios) se mantiene PENDIENTE y no se activa.
+- Estado: **REQUIERE DECISIÓN RESUELTA (2026-10-07)**; cerrada solo como decisión arquitectónica, no como implementación.
+- Autorización: Alejo aprobó las reglas documentadas aquí. No activó ningún bloque de implementación.
+- Decisión: fuente futura única = libro de existencias por producto/sede/ubicación/lote; Bodega `central` es el punto de entrada y origen logístico; saldos actuales de `central` migrarán a Bodega central y los de `plaza` a Sin asignar; lotes actuales de `plaza` también a Sin asignar; `angamos` y la clave histórica `bodega` no se migran; no habrá clasificación histórica automática; `productos.stock_actual` será solo proyección de compatibilidad y de solo lectura.
+- Operación aprobada: reparto con destino de área explícito y atomicidad salida/entrada; mermas en un módulo global con área de ocurrencia; críticos, reportes y búsqueda calculados por área; recetas y Lama–Stock real siguen apagados hasta que el modelo funcione.
+- Auditoría precedente: `docs/hermes/16-b2-2-auditoria-fuente-unica-stock.md`; decisión normativa: `docs/hermes/17-decision-libro-existencias-ubicacion.md`.
+- Sin implementación: no se ejecutó SQL, migración, cambio de código ni modificación de datos. No se activan repartos por área, interfaz ni formularios.
+- Próximo bloque: B2.3 — interfaz y formularios sobre el libro por ubicación — **PENDIENTE**, no activa. Criterios en documentos 01 y 17.
 
 ### Tarea B2.1 — Cimientos del modelo de áreas operativas
 
