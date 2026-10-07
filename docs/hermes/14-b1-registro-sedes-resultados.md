@@ -79,4 +79,4 @@ Los conteos se repitieron después de aplicar la migración. Todos coinciden exa
 
 ## Publicación
 
-Publicación a `master` autorizada por el usuario; se ejecuta después de la revisión del diff final. B2 permanece PENDIENTE y no se activa automáticamente.
+Publicado en `master` con el commit `36d71a3` (`feat: add safe site registry and archive Local 2`). Push verificado; la rama `master` remota apunta al mismo SHA. B2 permanece PENDIENTE y no se activa automáticamente.
