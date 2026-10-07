@@ -1,6 +1,6 @@
 # Plan de implementación: inventario por áreas operativas en Llamita Plus
 
-**Estado:** Bloque 0 completado como auditoría de solo lectura (2026-10-07). B1 permanece pendiente y no activa hasta resolver la fuente única de stock, el corte coordinado de escritores y los controles de acceso. Los Bloques 2 y 3 siguen inactivos.
+**Estado:** B1 de administración de sedes completado (2026-10-06). B2 —modelo de áreas y stock por área— permanece PENDIENTE y no activo hasta resolver la fuente única de stock, el corte coordinado de escritores y controles de acceso. No activar fases posteriores automáticamente.
 
 **Repositorio objetivo:** `leoalejoleo1537/llamita-plus`, rama `master`.
 
@@ -118,7 +118,7 @@ Decisiones de negocio registradas: Local 1 (`plaza`) será el ensayo operativo, 
 
 La cola tendrá una sola fase activa. Las tres ventanas sugeridas son **12:00, 14:00 y 17:00 hora de Santiago**, cada una para un bloque independiente. Si el bloque previo no terminó o dejó una decisión pendiente, el siguiente no empieza y registra el bloqueo. Codex no activa por su cuenta la fase siguiente.
 
-### Bloque 1 — Verificación, modelo y preparación de datos
+### Bloque B2 — Modelo de áreas y stock por área
 
 **Objetivo:** comprobar la arquitectura real y dejar lista la base segura para las áreas.
 
@@ -133,7 +133,7 @@ La cola tendrá una sola fase activa. Las tres ventanas sugeridas son **12:00, 1
 
 **Criterios de salida:** arquitectura documentada; migración aplicada o SQL listo según autorización y capacidad; datos conciliados; CRUD/configuración de áreas funcional; clasificación visible y corregible; pruebas del modelo y permisos; resumen antes de pasar al Bloque 2.
 
-### Bloque 2 — Portada, páginas de área, productos y búsquedas
+### Bloque B3 — Portada, páginas de área, productos y búsquedas
 
 **Objetivo:** hacer que la navegación refleje áreas sin perder inventario global.
 
@@ -147,7 +147,7 @@ La cola tendrá una sola fase activa. Las tres ventanas sugeridas son **12:00, 1
 
 **Criterios de salida:** búsquedas aisladas y globales correctas; un producto puede tener cantidades independientes en varias áreas; no se filtra información de otra sede; tarjetas reflejan datos; pruebas de navegación, permisos y datos vacíos.
 
-### Bloque 3 — Operaciones, mermas, repartos, recetas y cierre
+### Bloque B4 — Operaciones, mermas, repartos, recetas y cierre
 
 **Objetivo:** conectar las operaciones de inventario con el área correcta y dejar la receta lista como metadato.
 
@@ -212,3 +212,14 @@ La cola tendrá una sola fase activa. Las tres ventanas sugeridas son **12:00, 1
 Los hechos actuales y la recomendación están en `docs/hermes/13-auditoria-areas-sedes-bodega.md`. Estas preguntas no autorizan cambios de aplicación, SQL, migración ni datos.
 
 Estas verificaciones no son permiso para abrir alcance hacia Café del Desierto, ejecutar operaciones destructivas o automatizar el descuento de recetas.
+
+
+## 11. Resultado de B1 — administración segura de sedes
+
+**Estado: COMPLETADO (2026-10-06).** Se creó el catálogo aditivo `public.sede_registro`: código interno estable, nombre visible, tipo y estado. `plaza` (Local 1) y `central` (Bodega logística) quedan activas; `angamos` (Local 2) queda archivada; `bodega` permanece como clave histórica separada y archivada.
+
+El cliente solo puede leer el catálogo. La UI oculta Local 2, rechaza su selección directa y no ofrece nuevos repartos a ese destino; no se añadió un editor en Ajustes porque `app_permisos` no ofrece autorización confiable por sede. El esquema permite gestionar nombre y estado mediante cambios de base controlados, conserva la clave interna inmutable y no da privilegios de escritura al navegador.
+
+El archivo es lógico: no se borraron ni actualizaron datos operativos de Local 2. Bodega `central` mantiene sus rutas de recepción, conteo y envío a Local 1. Las guardas de interfaz evitan entradas accidentales, pero no crean aislamiento de API; el RLS permisivo legado queda como riesgo documentado en `docs/hermes/14-b1-registro-sedes-resultados.md`.
+
+**B2 sigue pendiente y no activado.** Esta fase no crea áreas ni existencias por área y no cambia stock, productos, lotes, vencimientos o registros de reparto. La clonación de sedes queda para una subfase futura; no se copian datos.

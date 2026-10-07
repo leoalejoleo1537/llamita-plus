@@ -118,6 +118,31 @@ InventorySaleEvent {
 
 El adaptador no escribiría directamente `productos.stock_actual`: publicaría el evento en una frontera común y un único motor resolvería receta, lote FIFO, sede, reversa y auditoría. La deduplicación mínima sería única por `(source, source_sale_id, source_line_id, recipe_version)`; una anulación referenciaría el evento original y generaría compensación, no borrado. Debe existir resultado por ingrediente, `dry_run` y error parcial.
 
+## Respuesta de Codex — B1: administración segura de sedes y nodos
+
+Fecha: 2026-10-06
+Estado: **COMPLETADA**
+Proyecto autorizado: Llamita Plus `iuryhsjucblmebdogewa` únicamente.
+
+### Hechos confirmados antes de la migración
+
+- No existía tabla `sedes` ni configuración persistente adecuada. `ajustes` almacena flags globales y no modela sedes.
+- `app_permisos` tiene nueve filas globales, sin columna de sede. Las políticas abiertas de `app_permisos` no permiten usarla como permiso seguro para mutaciones de sedes desde la aplicación.
+- Conteos de referencia previos al cambio están en `docs/hermes/14-b1-registro-sedes-resultados.md`: 1,437 productos, 431 movimientos, 361 repartos, 2,040 líneas y 42 lotes; `angamos` conserva 351 productos y 2,764.20 de stock agregado.
+- `central` contiene rutas de Bodega para recepción, conteo y envíos; su identidad se conserva. La clave antigua `bodega` tiene 408 productos y permanece separada.
+
+### Decisión de implementación
+
+Se prepara `public.sede_registro` como catálogo de solo lectura para los roles de cliente. Conserva `codigo` estable, `nombre_visible`, `tipo` y `estado`. `plaza` y `central` quedan activas; `angamos` queda archivada; `bodega` histórica queda archivada. No se agregó CRUD de sedes a Ajustes porque no existe autorización confiable para decidir qué usuario puede cambiar ese catálogo.
+
+La interfaz oculta Local 2, bloquea `pickSede` y revisa que la sede actual siga activa al navegar. Bodega mantiene sus pantallas; los nuevos envíos solo se ofrecen a Local 1 y un intento hacia Local 2 se rechaza. Esto protege el flujo de usuario frente a selecciones accidentales, pero no constituye aislamiento de datos por API: las políticas operativas heredadas siguen siendo un riesgo que debe resolverse aparte.
+
+No se tocaron cantidades, productos, movimientos, lotes, repartos, recetas ni permisos existentes. No se implementó la clonación de sedes ni ningún elemento de B2 (áreas/stock por área). Los conteos post-migración fueron idénticos: 1,437 productos, 15,438.00 de stock agregado, 431 movimientos, 361 repartos, 2,040 líneas, 42 lotes y nueve permisos globales. `angamos` conserva 351 productos, 2,764.20 de stock, tres movimientos, 168 repartos, 533 líneas, 19 lotes y sus historiales (4,717 manuales y 13,062 automáticos). El catálogo quedó con cuatro filas y grants/política confirmados.
+
+`npm test`, la prueba específica `pruebas/sedes-seguras.mjs`, análisis sintáctico y `git diff --check` pasaron; los casos de navegador se omitieron porque no hay navegador instalado. Los advisors no muestran un hallazgo nuevo para el catálogo; las advertencias operativas existentes se mantienen. Bitácora y detalle: `docs/hermes/14-b1-registro-sedes-resultados.md`.
+
+**B2 queda PENDIENTE y no debe activarse automáticamente.**
+
 ### Decisiones pendientes
 
 1. Momento exacto de descuento Lama: comanda, entrega, cobro parcial o cierre.

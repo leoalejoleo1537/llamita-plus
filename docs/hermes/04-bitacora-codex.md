@@ -181,3 +181,17 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - Cambios de aplicación, esquema y datos: **ninguno**. Sin SQL de escritura, migración o inserción/actualización/borrado. No se accedió a Café del Desierto / Llamita Stock.
 - Riesgos/decisiones pendientes: fuente única y corte coordinado de escritores; seguridad por sede/área; ubicación temporal sin asignar; transferencia Bodega→área atómica con lote; compatibilidad de proyección.
 - Publicación autorizada: exclusivamente documentación de Bloque 0 a `master`, después de revisión de diff y `git diff --check`.
+
+## 2026-10-06 — B1: administración segura de sedes y nodos
+
+- Estado: **COMPLETADA**. Se ejecutó solo B1; B2 (áreas y stock por área) permanece pendiente y no activa.
+- Repositorio confirmado: `leoalejoleo1537/llamita-plus`, remoto oficial `origin`; la rama local es `work`, el destino solicitado es `master`.
+- Proyecto Supabase confirmado antes de escribir: `llamita-plus`, ref `iuryhsjucblmebdogewa`, `ACTIVE_HEALTHY`. No se accedió a Café del Desierto / Llamita Stock.
+- Migración aplicada: `b1_sede_registro` (`sql/2026-10-b1-registro-sedes.sql`). Se creó `public.sede_registro`, con clave estable, nombre visible, tipo y estado. RLS activado; clientes `anon` y `authenticated` solo tienen SELECT. INSERT/UPDATE/DELETE directos y EXECUTE del trigger interno se comprobaron revocados.
+- Resultado: `plaza` Local 1 activa; `angamos` Local 2 archivada; `central` Bodega activa/logística; `bodega` histórica separada y archivada. La app oculta y rechaza Local 2; Bodega conserva sus rutas y destinos nuevos a Local 1. No se creó CRUD en Ajustes porque los permisos globales existentes no son una autorización segura para ese cambio.
+- Conteos antes/después idénticos: productos 1,437; stock agregado 15,438.00; movimientos 431; repartos 361; líneas 2,040; lotes 42; permisos globales 9. `angamos`: 351 productos, 2,764.20 stock, 3 movimientos, 168 repartos, 533 líneas, 19 lotes (suma de lotes 134), historial 4,717, historial automático 13,062. `central`: 349 productos, 4,750.50 stock. Clave histórica `bodega`: 408 productos, 3,357.10 stock. No cambió ningún dato operativo.
+- Pruebas: `npm test` pasó; `node pruebas/sedes-seguras.mjs` pasó; sintaxis JavaScript embebido válida; `git diff --check` pasó. Casos visuales de navegador se omitieron porque no hay navegador instalado.
+- Advisors: no hay nuevo aviso para `sede_registro`; siguen seis tablas preexistentes RLS sin política, tres vistas SECURITY DEFINER, diez funciones con search_path mutable y avisos sobre funciones SECURITY DEFINER heredadas. Alertas de rendimiento existentes no apuntan a la tabla nueva.
+- Riesgo pendiente: las guardas impiden entrar accidentalmente por la interfaz, pero no aíslan ni bloquean escrituras API/RPC directas sobre filas históricas de `angamos`; las políticas operativas heredadas siguen siendo permisivas. `app_permisos` no tiene permisos por sede.
+- Archivos: `index.html`, `pruebas/sedes-seguras.mjs`, `sql/2026-10-b1-registro-sedes.sql`, `sql/2026-10-b1-registro-sedes.rollback.sql`, `docs/hermes/01-plan-areas-operativas.md`, `docs/hermes/03-cola-de-trabajo-codex.md`, `docs/hermes/06-canal-hermes-codex.md` y `docs/hermes/14-b1-registro-sedes-resultados.md`.
+- Publicación: autorizada a `master` después de revisar el diff final y verificar `git diff --check`; el commit publicado se comunica en la entrega.

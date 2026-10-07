@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **Bloque 0 de inventario por áreas completado (2026-10-07)**. A3.4d y B1 permanecen pendientes; no hay fase de áreas activa.
+Estado actual: **B1 de administración de sedes COMPLETADO (2026-10-06)**. B2 de áreas y stock por área permanece PENDIENTE; A3.4d conserva su estado previo.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -38,22 +38,22 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Supabase verificado: Llamita Plus `iuryhsjucblmebdogewa`. Solo lecturas. Sin código, SQL de escritura, migraciones o datos modificados.
 - Cierre: arquitectura actual, sedes, bodegas, lotes, escritores, reparto, mermas, Fudo, Lama, permisos y riesgos documentados. No activar B1 automáticamente.
 
-### Tarea B1 — Verificación, modelo y preparación de datos
+### Bloque B1 — Administración segura de sedes y nodos
 
-- Estado: PENDIENTE (no activa; requiere resolver decisiones de fuente única, corte de escritores y seguridad por sede/área).
-- Autorización: el usuario autorizó Bloque 0 y definió Local 1 como ensayo operativo, Local 2 para archivo posterior, Bodega como nodo logístico, mermas globales con área opcional y clasificación editable. B1 no queda activada.
-- Objetivo: verificar la arquitectura real de inventario por áreas y preparar una base aditiva, segura y conciliada para Llamita Plus.
-- Contexto: trabajar únicamente en Llamita Plus. Café del Desierto / Llamita Stock queda fuera de alcance.
-- Documentos obligatorios: CLAUDE.md, README.md, docs/hermes/00-reglas-operativas.md, docs/hermes/01-plan-areas-operativas.md y la documentación relevante de docs/.
-- Alcance permitido: inspección de código y esquema; mapa de dependencias; definición de fuente única de stock; migración aditiva solo si es segura; áreas de prueba en contexto seguro; clasificación simulada; conciliaciones; pruebas; actualización de bitácora.
-- Fuera de alcance: Bloques 2 y 3; rediseño de UI; automatización de descuentos desde recetas/Fudo; cualquier cambio en Café del Desierto.
-- Clasificación de prueba: gaseosas a Barra de bar; café, té, leche común y tortas a Cafetería; panes, pizzas y sándwiches a Cocina caliente; helados, productos “ice”, leche condensada, manjar e ingredientes dulces a Cocina fría; ambiguos a Sin asignar.
-- Criterios de aceptación: arquitectura documentada; no existen dos fuentes editables de stock; no se duplican cantidades; productos y asignaciones son corregibles; datos y permisos verificados; pruebas ejecutadas; bitácora actualizada.
-- Publicación: push a master autorizado si la fase termina y las pruebas son satisfactorias. Si hay una decisión crítica abierta, detenerse y registrar BLOQUEADO o REQUIERE DECISIÓN.
-- Riesgos conocidos: stock histórico sin área, lotes sin ubicación, clasificación ambigua, falta de un contexto de datos aislado y corte de fuente única pendiente.
-- Resultado de Bloque 0 (2026-10-07): auditoría de solo lectura en `docs/hermes/13-auditoria-areas-sedes-bodega.md`. Se confirmó que `plaza` es Local 1, `angamos` Local 2, `central` Bodega y `bodega` una clave histórica separada. Local 1 elegido como ensayo no equivale a aislamiento técnico: las políticas RLS son permisivas y la app comparte el proyecto.
-- Bloqueos vigentes: definir una única fuente de stock, corte coordinado de todos los escritores y controles de acceso por sede/área. Tampoco se debe distribuir el saldo de Local 1 en áreas sin conteo o transferencia trazable.
-- Cambios de aplicación, esquema y datos: ninguno. B1 está PENDIENTE y no activa; no activar Bloque 2 ni 3.
+- Estado: COMPLETADO (2026-10-06; catálogo aditivo, archivo lógico de `angamos`, guardas de interfaz y verificaciones).
+- Autorización: el usuario activó únicamente B1 y confirmó que `plaza` es Local 1 activa, `angamos` se archiva, `central` es Bodega activa y `bodega` histórica no se reutiliza.
+- Resultado: `docs/hermes/14-b1-registro-sedes-resultados.md` y migración `b1_sede_registro` aplicada solo a Llamita Plus (`iuryhsjucblmebdogewa`).
+- Cambios: registro `sede_registro` con clave estable, etiqueta, tipo y estado; Local 2 no se ofrece ni abre por rutas de la app; Local 1 y Bodega permanecen disponibles. El catálogo es de solo lectura para clientes.
+- Límites: `app_permisos` no es un permiso por sede ni un control administrativo confiable. No se agregó editor de sedes a Ajustes; el esquema permite cambios controlados, pero el cliente no recibe privilegios de mutación. Las guardas protegen navegación accidental, no aíslan los datos en la API.
+- Datos operativos: no se modificaron productos, stock, movimientos, repartos, lotes, vencimientos ni permisos existentes. Se conservaron los registros históricos de `angamos` y la clave `bodega`.
+- B2 queda PENDIENTE. No crear áreas, existencias por área ni migrar stock en este bloque.
+
+### Bloque B2 — Modelo de áreas y stock por área
+
+- Estado: PENDIENTE; no activar automáticamente.
+- Precondiciones: definir fuente única de stock, corte coordinado de escritores, tratamiento del saldo sin asignar y controles de acceso por sede/área. Local 1 no es aislamiento técnico.
+- Objetivo futuro: diseñar áreas y cantidades por área sin duplicar `productos.stock_actual`, revisando lotes, repartos, mermas, Fudo y Lama antes de cualquier escritura.
+- Fuera de B1: crear áreas, migrar stock, crear existencias producto-área, cambiar lotes, vencimientos o datos de reparto.
 
 ### Tarea A1 - Auditoría de integración Fudo y Llamita Lama
 

@@ -45,6 +45,7 @@
   .gate-marca{display:block;width:104px;height:104px;object-fit:contain;margin:0 auto 14px}
   .gate-sub{font-size:14.5px;color:var(--muted);margin:0 0 26px}
   .gate-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:17px 20px;margin-bottom:12px;border-radius:10px;border:1.5px solid var(--border);background:#fff;font-size:16.5px;font-weight:700;color:var(--text);cursor:pointer;transition:.15s;text-align:left}
+  .gate-btn[hidden]{display:none}
   .gate-btn:hover,.gate-btn:active{border-color:var(--orange);background:var(--sec-bg)}
   .gate-btn::after{content:"›";color:var(--orange);font-size:22px;font-weight:800;line-height:1}
   .gate-btn:last-of-type{margin-bottom:0}
@@ -2982,7 +2983,7 @@
     <img class="gate-marca selector-marca" src="icons/icon-512.png" width="512" height="512" alt="Llamita Plus">
     <p class="gate-sub">Elige tu local para comenzar</p>
     <button class="gate-btn" data-sede="plaza">Local 1</button>
-    <button class="gate-btn" data-sede="angamos">Local 2</button>
+    <button class="gate-btn" data-sede="angamos" hidden>Local 2</button>
     <button class="gate-btn" data-sede="central">Bodega</button>
     <div class="gate-foot" id="gateUser">Sincronizado en tiempo real</div>
     <button class="gate-link" id="btnSalir">Cerrar sesión</button>
@@ -3949,23 +3950,68 @@ const SUPABASE_KEY = 'sb_publishable_NxrNACdDllRjfRYeMmsGJw_sqWO0DrC';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ---------------- sedes ---------------- */
-/* ⚠️ La bodega es `central`, NO `bodega`. La clave `bodega` quedó ocupada
-   para siempre por la bodega vieja —la que en julio había sido `angamos`— y
-   reciclarla otra vez sería repetir la causa del incidente del 9 de agosto
-   (§0.6): una misma palabra significando dos cosas según la fecha.
-   La vieja sigue en la base con todo su historial, pero ya no se ofrece acá,
-   y como SEDE solo se fija al tocar un botón, nadie puede entrar a ella. */
+/* ⚠️ La Bodega operativa es `central`, nunca `bodega`. La clave histórica
+   `bodega` conserva su identidad separada. `angamos` conserva sus datos, pero
+   el registro de sedes la archiva y el cliente no la ofrece ni abre rutas allí. */
 /* `corto` es para las tarjetas de crítico, donde no cabe el nombre entero.
    Es el mismo nombre, no uno nuevo: el largo sigue mandando en todas partes. */
 const SEDES = {
-  plaza:   { label:'Café Mall Plaza',  corto:'Mall Plaza', excel:'plaza'   },
-  angamos: { label:'Parque Angamos',   corto:'Angamos',    excel:'angamos' },
-  central: { label:'Bodega',           corto:'Bodega',     excel:'bodega'  },
+  plaza:   { label:'Local 1',          corto:'Local 1',    excel:'plaza'   },
+  angamos: { label:'Local 2',          corto:'Local 2',    excel:'angamos' },
+  central: { label:'Bodega',           corto:'Bodega',     excel:'central' },
+  bodega:  { label:'Bodega histórica', corto:'Histórica',  excel:'bodega'  },
 };
-/* En los lugares más visibles de la interfaz se usan nombres neutrales para
-   que la demo no quede asociada a un cliente o local real. Las etiquetas
-   operativas e históricas de cada sede siguen usando SEDES.label. */
-const etiquetaSedeUI = s => s === 'plaza' ? 'Local 1' : s === 'angamos' ? 'Local 2' : (SEDES[s]?.label || s || '—');
+/* El registro remoto define qué sedes se ofrecen. El valor inicial es
+   deliberadamente cerrado: si la lectura falla, Local 2 no reaparece. */
+let SEDES_ACTIVAS = new Set(['plaza','central']);
+let SEDES_CATALOGO_CARGANDO = null;
+function sedeActiva(s){ return !!s && Object.hasOwn(SEDES,s) && SEDES_ACTIVAS.has(s) && s!=='bodega'; }
+function pintarSelectorSedes(){
+  document.querySelectorAll('.gate-btn[data-sede]').forEach(b=>{
+    const s=b.dataset.sede;
+    b.hidden=!sedeActiva(s);
+    if(SEDES[s]) b.textContent=SEDES[s].label;
+  });
+}
+async function cargarRegistroSedes(){
+  if(SEDES_CATALOGO_CARGANDO) return SEDES_CATALOGO_CARGANDO;
+  /* Una lectura nueva invalida cualquier estado anterior. Si red/RLS falla,
+     el catálogo queda en la lista mínima segura y nunca revive Local 2. */
+  SEDES_ACTIVAS=new Set(['plaza','central']);
+  pintarSelectorSedes();
+  SEDES_CATALOGO_CARGANDO=(async()=>{
+    const {data,error}=await sb.from('sede_registro')
+      .select('codigo,nombre_visible,tipo,estado');
+    if(error){
+      console.warn('No se pudo leer el registro de sedes; se conserva el acceso seguro predeterminado.',error);
+      pintarSelectorSedes();
+      return false;
+    }
+    const filas=(data||[]).filter(r=>Object.hasOwn(SEDES,r.codigo));
+    const activas=new Set(filas.filter(r=>r.estado==='activa' && r.tipo!=='historica')
+      .map(r=>r.codigo).filter(s=>s!=='bodega'));
+    /* Si falta una de las sedes protegidas, la lectura no es coherente: se
+       conserva el fallback y no se interpreta un resultado parcial. */
+    if(!filas.length || !activas.has('plaza') || !activas.has('central')){
+      console.error('El registro de sedes no contiene Local 1 y Bodega activas; se usa el selector seguro predeterminado.');
+      pintarSelectorSedes();
+      return false;
+    }
+    filas.forEach(r=>{
+      const nombre=String(r.nombre_visible||'').trim();
+      if(nombre) SEDES[r.codigo].label=nombre;
+      SEDES[r.codigo].tipo=r.tipo;
+      SEDES[r.codigo].estado=r.estado;
+      SEDES[r.codigo].corto=nombre||SEDES[r.codigo].corto;
+    });
+    SEDES_ACTIVAS=activas;
+    pintarSelectorSedes();
+    return true;
+  })();
+  try{ return await SEDES_CATALOGO_CARGANDO; }
+  finally{ SEDES_CATALOGO_CARGANDO=null; }
+}
+const etiquetaSedeUI = s => SEDES[s]?.label || s || '—';
 /* el título de la barra dice en qué estás, como en Fudo */
 const TITULOS = {inv:'Inventario', reparto:'Reparto', recepcion:'Lo que llega a bodega', envios:'Enviar a los locales', aplaza:'Enviar a Mall Plaza', hist:'Historial', recetas:'Recetas', mermas:'Mermas', enlaces:'Enlaces', lama:'Mesas', arqueo:'Arqueo de caja', movcaja:'Movimientos de caja', ajustes:'Ajustes'};
 let SEDE = null;
@@ -4719,6 +4765,11 @@ let vistaActual = 'inv';
 
 /* ---------------- selección de sede ---------------- */
 function pickSede(s){
+  if(!sedeActiva(s)){
+    console.warn('Acceso a sede archivada o desconocida bloqueado:',s);
+    if(SEDE) showGate();
+    return;
+  }
   SEDE = s;
   /* Con el panel fijo el cajón nunca se abre, así que su nombre de sede hay
      que refrescarlo acá: es el momento en que deja de ser "—". */
@@ -4736,8 +4787,7 @@ function pickSede(s){
   qEl.value=''; openSecs=new Set();
   $('rq').value=''; $('reparto-results').innerHTML=''; $('carrito-box').style.display='none';
   /* Bodega no vende, así que no tiene recetas: la pestaña ni se ofrece.
-     Es solo esconder el botón — no se toca ni una receta de nadie, y en Plaza
-     y Angamos la barra queda igual que siempre. */
+     Es solo esconder el botón — no se toca ninguna receta. */
   document.querySelector('.tab[data-tab="recetas"]').style.display = s==='central' ? 'none' : '';
   // y al revés con Mermas: por ahora vive solo en Bodega
   /* La pestaña Mermas va en TODAS las sedes (Jhon, 2026-08-17): "que se
@@ -4748,7 +4798,7 @@ function pickSede(s){
   $('tabEnlaces').style.display = s==='central' ? '' : 'none';
   /* En Bodega el reparto se parte en dos pestañas —recibir lo que llega y
      mandar a los locales—, así que la de "Reparto" no va: sería un tercer
-     nombre para los mismos dos trabajos. En Plaza y Angamos, al revés. */
+     nombre para los mismos dos trabajos. En Local 1, al revés. */
   $('tabRecepcion').style.display = s==='central' ? '' : 'none';
   /* Bodega no está conectada a Fudo: no tiene cuenta, no tiene ventas y no
      tiene nada que sincronizar. El botón Actualizar ahí no fallaba, pero
@@ -4759,9 +4809,8 @@ function pickSede(s){
   $('drActualizar').style.display   = s==='central' ? 'none' : '';
 
   $('tabEnvios').style.display    = s==='central' ? '' : 'none';
-  /* Solo Angamos manda a Plaza. Al revés no: Plaza no tiene excedente que
-     mover, y ofrecerlo en las dos sedes invita a mandar producto de vuelta
-     sin motivo. Si algún día hace falta, es agregar una sede acá. */
+  /* La vista histórica entre sedes se conserva solo para la sede archivada;
+     pickSede impide abrirla como operación activa. */
   $('tabAPlaza').style.display    = s==='angamos' ? '' : 'none';
   /* Lama nace escondida en CADA cambio de sede. La vuelve a encender
      aplicarPermisos(), que corre al final de este mismo pickSede. Así, si el
@@ -4810,6 +4859,7 @@ function showGate(){
   SEDE=null;
   $('gate').classList.remove('hidden');
   $('liveText').textContent='—';
+  cargarRegistroSedes();
 }
 document.querySelectorAll('.gate-btn').forEach(b=>b.addEventListener('click',()=>pickSede(b.dataset.sede)));
 
@@ -4885,6 +4935,7 @@ function onLogin(user){
   $('login-gate').classList.add('hidden');
   $('login-pass').value='';
   $('gateUser').textContent='Conectado como '+NOMBRE;
+  cargarRegistroSedes();
   joinPresence();
 }
 $('login-btn').addEventListener('click',doLogin);
@@ -5071,7 +5122,7 @@ function metrics(){
    alcanza; en vivo obligaría a escuchar las tres sedes desde las tres. */
 /* Solo los dos LOCALES. Bodega no lleva tarjeta propia: su crítico ya está
    dos centímetros más abajo, en la tarjeta "Crítico" de siempre. */
-const SEDES_TARJETA = ['angamos','plaza'];
+const SEDES_TARJETA = ['plaza'];
 let CRITICOS = {};          // sede -> [lo que entra en crítico]  ·  null = no se pudo leer
 let CRIT_TOPE = {};         // sede -> true si la lectura chocó con el tope de 1000
 /* La lista COMPLETA de cada local, no solo sus críticos. La usa Enlaces para
@@ -5694,14 +5745,14 @@ $('mermas-pagination').addEventListener('click',e=>{
    'plaza' | 'angamos' | 'fr:<nombre>'. Empieza en Plaza porque es la sede de
    más flujo y la que Adriana arma primero casi todos los días. */
 let repcDest = 'plaza';
-const repcEsLocal = () => repcDest === 'plaza' || repcDest === 'angamos';
+const repcEsLocal = () => SEDES_ENLACE.includes(repcDest) && sedeActiva(repcDest);
 
 function repcPintarDest(){
   const bot = (val, txt, franq) =>
     `<button type="button" class="${franq?'franq ':''}${repcDest===val?'on':''}"
       data-repcdest="${esc(val)}">${esc(txt)}</button>`;
   $('repc-dest').innerHTML =
-    SEDES_ENLACE.map(s=>bot(s, SEDES[s].label)).join('')
+    SEDES_ENLACE.filter(sedeActiva).map(s=>bot(s, SEDES[s].label)).join('')
     + '<span class="repc-dsep"></span>'
     /* El nombre corto de la franquicia es lo que va entre paréntesis: "Urbano
        Café" y no "Mall EU Antofagasta (Urbano Café)". El largo no cabe en una
@@ -6731,7 +6782,7 @@ $('ent-guardar').addEventListener('click', async ()=>{
 /* Plaza primero en toda esta pantalla, como en la maqueta aprobada. Aparte de
    SEDES_TARJETA a propósito: aquella ordena las tarjetas de crítico, que Jhon
    ya revisó al revés, y cambiarla sería mover algo que él ya dio por bueno. */
-const SEDES_ENLACE = ['plaza','angamos'];
+const SEDES_ENLACE = ['plaza'];
 let ENLACES = [];          // filas de producto_enlace
 /* Los productos de BODEGA que esos enlaces señalan, para cuando se está
    parado en un local y `DATA` solo tiene los de esa sede. */
@@ -11391,7 +11442,7 @@ function candidatosBodega(prodSede, sede){
 /* ---- producto nuevo: se crea en bodega y en las sedes que se elijan ---- */
 const secDe = lista => [...new Set((lista||[]).map(p=>p.rubro).filter(Boolean))]
                         .sort((a,b)=>a.localeCompare(b,'es'));
-let enlDest = {plaza:false, angamos:false};
+let enlDest = {plaza:false};
 
 function prepararNuevo(){
   $('enl-n-nombre').value=''; $('enl-n-min').value=''; $('enl-n-max').value='';
@@ -11406,7 +11457,7 @@ function prepararNuevo(){
      habría sido meter un duplicado justo en la sede que estamos tratando de
      mantener limpia. La regla no era falsa —casi siempre nace en bodega—; el
      error fue convertir "casi siempre" en "siempre". */
-  enlDest = {central:true, plaza:false, angamos:false};
+  enlDest = {central:true, plaza:false};
   /* La sección arranca SIN elegir. Si se dejara la primera de la lista, una
      torta terminaría creada en "Aseo" por no tocar el desplegable — y un
      producto en la sección equivocada no lo encuentra nadie. */
@@ -12254,7 +12305,8 @@ function swipeFin(pasa){
      repetidas del día y llegar por la ficha son tres toques.
 
      EN BODEGA NO SE TOCA: allá los lados ya significaban algo desde antes
-     —derecha Mall Plaza, izquierda Angamos— y ese gesto está en uso. */
+     —una dirección a Local 1 y la otra a Local 2— y ese gesto está en uso.
+     El destino archivado queda bloqueado en mandarAlReparto(). */
   if(SEDE === 'central'){ mandarAlReparto(id, dx > 0 ? 'plaza' : 'angamos'); return; }
   if(dx > 0){
     const p = DATA.find(d=>d.id===id);
@@ -12263,7 +12315,8 @@ function swipeFin(pasa){
     mandarAlReparto(id, 'angamos');
   }
 }
-/* En BODEGA el lado decide el destino: derecha Mall Plaza, izquierda Angamos.
+/* En BODEGA el lado decide el destino: un gesto apunta a Local 1 y el otro a
+   Local 2 (archivado y bloqueado para envíos nuevos).
    En un LOCAL, la izquierda manda al reparto y la derecha abre la merma. En
    los dos casos el símbolo dice a dónde va mientras se arrastra — sin eso, el
    gesto sería una apuesta. */
@@ -12272,6 +12325,10 @@ function mandarAlReparto(id, lado){
 
   if(SEDE==='central'){
     const sede = lado==='plaza' ? 'plaza' : 'angamos';
+    if(!sedeActiva(sede)){
+      aviso('Local 2 está archivada. Los envíos nuevos están disponibles para las sedes activas.');
+      return;
+    }
     const e = ENLACES.find(x=>x.producto_bodega_id===id && x.sede===sede);
     if(!e){ aviso(p.producto+' no está enlazado a '+SEDES[sede].corto); return; }
     if(!repcAgregar(sede, e.producto_sede_id)){
@@ -14141,7 +14198,7 @@ function ajFudoSedesHTML(){
   if(AJ_SYNC === null) return '<div class="aj-caja"><p>Cargando…</p></div>';
   if(AJ_SYNC.error) return '<div class="aj-caja"><p>No se pudo leer el estado de Fudo. Revisa la señal.</p></div>';
 
-  const filas = ['plaza','angamos'].map(sd=>{
+  const filas = ['plaza','angamos'].filter(sedeActiva).map(sd=>{
     const f = (AJ_SYNC||[]).find(x=>x.sede===sd);
     if(!f) return `<div class="aj-caja"><h3>${esc(SEDES[sd].label)}</h3>
       <p class="aj-nota">Esta sede todavía no tiene fila de sincronización.</p></div>`;
@@ -14198,6 +14255,7 @@ function ajFudoSedesHTML(){
    desde una cuenta con sesión el cambio no ocurría y no avisaba. Es el
    mismo caso de los permisos de Adriana. */
 async function ajGuardarSync(sede, cambios, textoOk){
+  if(!sedeActiva(sede)){ aviso('Esta sede está archivada; no se puede cambiar su sincronización operativa.'); return; }
   const {data,error} = await sb.from('fudo_sync').update(cambios).eq('sede',sede).select();
   if(error || !data || !data.length){
     avisar('No se pudo cambiar\n\n'
@@ -14212,6 +14270,7 @@ async function ajGuardarSync(sede, cambios, textoOk){
 }
 
 async function ajModoSede(sede){
+  if(!sedeActiva(sede)){ aviso('Esta sede está archivada; no se puede cambiar su sincronización operativa.'); return; }
   const f = (AJ_SYNC||[]).find(x=>x.sede===sede); if(!f) return;
   const aReal = f.modo !== 'real';
   /* Bajar a prueba es lo único de acá que apaga algo que está funcionando,
@@ -14227,6 +14286,7 @@ async function ajModoSede(sede){
 }
 
 async function ajCronSede(sede){
+  if(!sedeActiva(sede)){ aviso('Esta sede está archivada; no se puede cambiar su sincronización operativa.'); return; }
   const f = (AJ_SYNC||[]).find(x=>x.sede===sede); if(!f) return;
   ajGuardarSync(sede, {cron_activo: !f.cron_activo},
     f.cron_activo ? 'Ya no se vigila el reloj' : '✓ Se vigila el reloj');
@@ -14973,7 +15033,7 @@ let AJ_DIA   = null;     // el día elegido
 let AJ_PREVIA = null;    // qué cambiaría, calculado contra el estado de hoy
 let AJ_REST  = [];       // restauraciones hechas
 
-const AJ_SEDES = ['plaza','angamos','central'];
+const AJ_SEDES = ['plaza','central'];
 
 /* LA LISTA DE DÍAS LA ARMA LA BASE, y ese es el arreglo de un bug que
    estaba vivo y no se veía.
@@ -15321,7 +15381,7 @@ function ajRelacionesHTML(){
         <b>suma</b> para saber cuánto se puede vender, y a Fudo le manda el total de los dos.
         Esa relación la deduce del <b>nombre</b>: le quita “Vitrina” o “Congelador” del final,
         y si lo que queda coincide, suman.</p>
-      <div class="aj-sedes">${['plaza','angamos'].map(x=>`
+      <div class="aj-sedes">${['plaza','angamos'].filter(sedeActiva).map(x=>`
         <button type="button" class="aj-sede${x===AJ_PSEDE?' on':''}" data-ajpsede="${x}">${esc(SEDES[x].label)}</button>`).join('')}
       </div>
     </div>`;
@@ -15527,7 +15587,7 @@ function ajProductosHTML(){
         entero al encenderlo. En Fudo solo se apaga lo que ya no se podría hacer:
         si el producto tiene su gemelo en otro mueble y ese sigue activo, el mesón
         lo puede seguir vendiendo.</p>
-      <div class="aj-sedes">${['plaza','angamos','central'].map(x=>`
+      <div class="aj-sedes">${['plaza','angamos','central'].filter(sedeActiva).map(x=>`
         <button type="button" class="aj-sede${x===AJ_PRSEDE?' on':''}" data-ajprsede="${x}">${esc(SEDES[x].label)}</button>`).join('')}
       </div>
     </div>`;
@@ -15822,7 +15882,7 @@ function ajInterruptoresHTML(){
   return INTERRUPTORES.filter(i=>!modoDemo() || i.clave==='modo_demostracion').map(i=>`<div class="aj-caja">
       <h3>${esc(i.tit)}</h3>
       <p class="aj-nota">${esc(i.sub)}</p>
-      <div style="margin-top:10px">${i.porSede.map(sd=>{
+      <div style="margin-top:10px">${i.porSede.filter(sd=>!sd || sedeActiva(sd)).map(sd=>{
         const on = ajVal(i.clave, sd, i.defecto);
         return `<div class="aj-fila">
           <div class="nm"><b>${sd ? esc(SEDES[sd].label) : 'En toda la app'}</b>
@@ -15842,6 +15902,7 @@ function ajInterruptoresHTML(){
 }
 
 async function ajToggleInterruptor(clave, sede){
+  if(sede && !sedeActiva(sede)){ aviso('Esta sede está archivada; no se puede cambiar su configuración operativa.'); return; }
   const def = (INTERRUPTORES.find(i=>i.clave===clave)||{}).defecto;
   const nuevo = !ajVal(clave, sede, def);
   const {error} = await sb.from('ajustes')
@@ -16574,6 +16635,8 @@ aplicarNavegacionFija();
 
 function pickTab(tab){
   if(!SEDE)return;
+  if(!sedeActiva(SEDE)){ showGate(); return; }
+  if(tab==='aplaza' && !sedeActiva('angamos')) tab='inv';
   if(modoDemo() && !demoPermiteVista(tab)) tab='inv';
   /* En Bodega "Reparto" ya no existe como pestaña: son dos. Si algo llama
      con el nombre viejo, se manda a la de recibir en vez de dejar la
