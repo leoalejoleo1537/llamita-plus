@@ -122,7 +122,7 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Pruebas: función autenticada consultada dentro de transacción revertida; conciliación RPC/libro sin diferencias; ACL/RLS comprobados; `npm test`, validaciones estáticas y `git diff --check`. Sin navegador Chromium, por lo que la verificación visual queda con procedimiento manual en `docs/hermes/22-b3-1-lectura-areas.md`.
 - Informe: `docs/hermes/22-b3-1-lectura-areas.md`. Migraciones: `20261007174518 b3_1_lectura_inventario_areas`, `20261007174626 b3_1_include_inactive_stock_products`.
 - Sin escrituras a productos/stock, lotes, movimientos, transferencias, recetas, POS ni datos comerciales; no se habilitó `stock_transferir` desde UI. Bodega mantiene su interfaz. No se accedió a Café del Desierto / Llamita Stock.
-- Publicación: commit y push a `master` para este bloque ya autorizado. B3.2 queda PENDIENTE; no activarla automáticamente.
+- Publicación: implementación publicada en `master`, commit `2a9c8c2`. B3.2 queda PENDIENTE; no activarla automáticamente.
 
 ### Tarea B2.1 — Cimientos del modelo de áreas operativas
 

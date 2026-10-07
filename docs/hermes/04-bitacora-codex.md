@@ -296,3 +296,4 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - Verificación: SQL autenticado dentro de `BEGIN ... ROLLBACK`, conciliación, privilegios, `node pruebas/pantalla-sana.mjs`, `node --check pruebas/inventario-areas.mjs`, `npm test`, `git diff --check`. Chromium no está instalado: los checks visuales automatizados se omiten; el informe 22 contiene pasos manuales desktop/móvil y revisión de consola.
 - Rollback: `sql/2026-10-b3-1-lectura-areas.rollback.sql` elimina solo ambas funciones de lectura. Sin filas/saldos nuevos que revertir.
 - Informe: `docs/hermes/22-b3-1-lectura-areas.md`. B3.2 sigue sin activar. No se accedió a Café del Desierto / Llamita Stock.
+- Publicación de aplicación y migraciones: commit `2a9c8c2` enviado a `origin/master`.

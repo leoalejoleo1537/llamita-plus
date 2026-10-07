@@ -90,3 +90,5 @@ Rollback preparado en `sql/2026-10-b3-1-lectura-areas.rollback.sql`: elimina ún
 - B3.2 permanece pendiente: no se activa ni se introduce edición, asignación o transferencia visual en este bloque.
 
 No hubo acceso a Café del Desierto / Llamita Stock. No se cambiaron saldos, productos, movimientos, lotes, transferencias, recetas, permisos ni ventas.
+
+Commit de implementación y migraciones publicado en `master`: `2a9c8c2` (`feat: add read-only inventory area navigation`).
