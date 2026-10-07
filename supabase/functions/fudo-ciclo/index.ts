@@ -171,6 +171,23 @@ Deno.serve(async (req) => {
       }, 502);
     }
 
+    // Desde B2.3 Fudo conserva consulta/historial de ventas en modo prueba,
+    // pero no recibe una proyección basada en productos.stock_actual.
+    if (sede === "central" || sede === "plaza") {
+      return json({
+        version: VERSION, ok: true, sede, origen,
+        segundos: Math.round((Date.now() - t0) / 1000),
+        ventas: {
+          leidas: ventas?.ventas_leidas ?? null,
+          descuentos: ventas?.movimientos_generados ?? null,
+          errores: ventas?.errores ?? null,
+          modo: ventas?.modo ?? null,
+        },
+        stock_fudo: "pausado",
+        motivo: "La sede usa el libro de existencias por ubicación. Fudo no escribe ni recibe stock antiguo.",
+      });
+    }
+
     // ---------- PASO 2 · empujar el inventario entero ----------
     let empuje: any = null, errorEmpuje: string | null = null, statusEmpuje = 0;
     try {

@@ -3865,6 +3865,7 @@
         <input type="number" step="0.5" min="0" id="m-stock">
         <button type="button" id="m-mas">+</button>
       </div>
+      <small id="m-stock-corte" style="display:none;color:var(--muted);margin-top:6px">Saldo de solo lectura: Bodega y Local 1 usan existencias por ubicación.</small>
     </div>
     <div style="display:flex;gap:10px">
       <div class="field" style="flex:1"><label>Stock mínimo</label><input type="number" step="0.5" min="0" id="m-min"></div>
@@ -3931,7 +3932,7 @@
       <span>Producto perecedero<small>Tendrá campo de fecha de vencimiento</small></span>
     </label>
     <div style="display:flex;gap:10px">
-      <div class="field" style="flex:1"><label>Stock actual</label><input type="number" step="0.5" min="0" id="n-stock" placeholder="0"></div>
+      <div class="field" style="flex:1"><label>Stock actual</label><input type="number" step="0.5" min="0" id="n-stock" placeholder="0"><small style="display:block;color:var(--muted)">En Bodega y Local 1 el alta inicia en cero.</small></div>
       <div class="field" style="flex:1"><label>Mínimo</label><input type="number" step="0.5" min="0" id="n-min" placeholder="—"></div>
       <div class="field" style="flex:1"><label>Máximo</label><input type="number" step="0.5" min="0" id="n-max" placeholder="—"></div>
     </div>
@@ -5325,6 +5326,10 @@ function textoPrevio(disponible, aMermar){
 }
 
 function abrirMerma(prod){
+  if(SEDE==='central'||SEDE==='plaza'){
+    avisar('Mermas temporalmente pausadas en Bodega y Local 1 durante el cambio al libro por ubicación.');
+    return;
+  }
   const lotes = lotesDe(prod.id);          // si tiene fechas, se merma por fecha
   const disponible = disponibleDe(prod);
   let motivo = null, nota = '', cant = 0;
@@ -6182,6 +6187,10 @@ function repcAgregar(sede, sedeId, cant){
 }
 
 async function repcEnviar(sede){
+  if(SEDE==='central'||SEDE==='plaza'||sede==='central'||sede==='plaza'){
+    avisar('Repartos temporalmente pausados en Bodega y Local 1 durante el cambio al libro por ubicación.');
+    return;
+  }
   const items = repcCarritos[sede].filter(c=>c.cantidad>0);
   if(!items.length) return;
   /* "De proveedor" es una DECISIÓN y no se pregunta; "sin enlace" es un
@@ -6754,6 +6763,10 @@ $('repc-entrada').addEventListener('input', e=>{
 });
 
 $('ent-guardar').addEventListener('click', async ()=>{
+  if(SEDE==='central'||SEDE==='plaza'){
+    avisar('Entradas temporalmente pausadas en Bodega durante el cambio al libro por ubicación.');
+    return;
+  }
   const btn=$('ent-guardar');
   const items = entCarrito.map(c=>c.perec
     ? {producto_id:c.id, lotes:c.lotes.filter(l=>l.vencimiento && (+l.cantidad||0)>0)}
@@ -11707,6 +11720,7 @@ function rowHTML(p, conSeccion){
       + `</div>`
     : '';
   const conLotes = lotesDe(p.id).length>0;   // el stock sale de la suma de fechas
+  const corteStock = p.sede==='central' || p.sede==='plaza';
   const urg = esUrgente(p) ? '<span class="pill pill-urg">Urgente</span>' : '';
   // si ya lo mandó al reparto, que se vea: evita agregarlo dos veces
   const enRep = carrito.some(c=>c.id===p.id) ? '<span class="pill-rep">En reparto</span>' : '';
@@ -11721,7 +11735,7 @@ function rowHTML(p, conSeccion){
     </div>
     <div class="right">
       <span class="pill" style="background:${cf.bg};color:${cf.fg}">${cf.t}</span>
-      <input type="number" step="0.5" min="0" value="${p.stock_actual==null?'':p.stock_actual}" data-id="${p.id}" aria-label="Stock de ${esc(p.producto)}"${conLotes?' readonly title="Se calcula sumando las fechas"':''}>
+      <input type="number" step="0.5" min="0" value="${p.stock_actual==null?'':p.stock_actual}" data-id="${p.id}" aria-label="Stock de ${esc(p.producto)}"${corteStock?' disabled title="Saldo de solo lectura: existencias por ubicación"':conLotes?' readonly title="Se calcula sumando las fechas"':''}>
     </div>
   </div>`;
 }
@@ -11915,6 +11929,10 @@ async function conReintento(fn,intentos=3){
   return res;
 }
 async function saveFields(id,fields){
+  if((SEDE==='central'||SEDE==='plaza') && Object.prototype.hasOwnProperty.call(fields,'stock_actual')){
+    avisar('Saldo de solo lectura: Bodega y Local 1 usan existencias por ubicación.');
+    return;
+  }
   const row=document.querySelector(`.row[data-row="${id}"]`);
   if(row)row.classList.add('saving');
   const {error}=await conReintento(()=>sb.from('productos').update({...fields,updated_at:new Date().toISOString()}).eq('id',id));
@@ -11928,6 +11946,10 @@ async function saveFields(id,fields){
 /* edición rápida (input de la fila) */
 listEl.addEventListener('change',e=>{
   const inp=e.target.closest('input[data-id]'); if(!inp)return;
+  if(SEDE==='central'||SEDE==='plaza'){
+    avisar('Saldo de solo lectura: Bodega y Local 1 usan existencias por ubicación.');
+    return;
+  }
   const id=+inp.dataset.id, val=inp.value===''?null:Math.max(0,+inp.value);
   const p=DATA.find(d=>d.id===id); p.stock_actual=val;
   metrics(); render(); saveFields(id,{stock_actual:val});
@@ -12035,6 +12057,10 @@ function preverDescuentoBodega(r){
 }
 
 async function descontarDeBodega(repartoId){
+  if(SEDE==='central'||SEDE==='plaza'){
+    avisar('Descuentos de repartos temporalmente pausados: Bodega y Local 1 usan existencias por ubicación.');
+    return;
+  }
   const r = REPARTOS.find(x => x.id === repartoId);
   if(!r) return;
   const {van, sinEnlace, grupos} = preverDescuentoBodega(r);
@@ -12482,6 +12508,10 @@ function listo(){ $('overlay-cargando').classList.remove('open'); }
    murió (pasa con la cuenta compartida), lo dice con esas palabras en vez
    de un error críptico. */
 async function llamarFudo(fn, body){
+  const funcionesStock=new Set(['fudo-empujar-stock','fudo-sumar-stock','fudo-deshacer-stock','fudo-probar-escritura']);
+  if(funcionesStock.has(fn) && ['central','plaza'].includes(String(body?.sede||SEDE).toLowerCase())){
+    return {error:'Stock por ubicación: Fudo no recibe ni envía stock antiguo para Bodega o Local 1.'};
+  }
   const {data:{session}} = await sb.auth.getSession();
   if(!session) return {error:'Tu sesión se cerró. Sal y vuelve a entrar a la app.'};
   const r = await sb.functions.invoke(fn, {
@@ -12750,6 +12780,12 @@ function openModal(id){
   const secs=[...new Set([...seccionesDeLaSede(), modalProd.rubro].filter(Boolean))];
   $('m-seccion').innerHTML=secs.map(s=>`<option${s===modalProd.rubro?' selected':''}>${esc(s)}</option>`).join('');
   $('m-stock').value=modalProd.stock_actual??'';
+  const stockCortado=SEDE==='central'||SEDE==='plaza';
+  $('m-stock').disabled=stockCortado;
+  $('m-stock').title=stockCortado?'Saldo de solo lectura: existencias por ubicación':'';
+  $('m-menos').disabled=stockCortado; $('m-mas').disabled=stockCortado;
+  $('m-stock-corte').style.display=stockCortado?'block':'none';
+  $('m-perec').disabled=stockCortado; $('m-venc-single').disabled=stockCortado;
   $('m-min').value=modalProd.stock_min??'';
   $('m-max').value=modalProd.stock_max??'';
   $('m-tipo-row').style.display = hasTipo ? '' : 'none';
@@ -12777,7 +12813,9 @@ function openModal(id){
   $('m-venc-field').style.display = conVenc ? 'block' : 'none';
   $('m-venc-label').textContent = puedeLotes ? 'Vencimientos' : 'Fecha de vencimiento';
   $('m-lotes').style.display = puedeLotes ? '' : 'none';
-  $('btnAddLote').style.display = puedeLotes ? '' : 'none';
+  $('btnAddLote').style.display = puedeLotes && !stockCortado ? '' : 'none';
+  $('m-lotes').style.pointerEvents=stockCortado?'none':'';
+  $('m-lotes').style.opacity=stockCortado?'0.65':'';
   $('m-venc-single').style.display = puedeSoloFecha ? '' : 'none';
   pintarLotes(puedeLotes ? lotesDe(modalProd.id) : []);
   if(puedeSoloFecha) $('m-venc-single').value = modalProd.vencimiento ?? '';
@@ -12807,9 +12845,10 @@ $('m-urgente').addEventListener('click',async()=>{
 function loteRow(cant, venc){
   const div=document.createElement('div');
   div.className='lote-row';
-  div.innerHTML = `<input type="number" class="lote-cant" step="0.5" min="0" value="${cant==null?'':cant}" aria-label="Cantidad">`
-    + `<input type="date" class="lote-venc" value="${venc||''}" aria-label="Fecha de vencimiento">`
-    + `<button type="button" class="lote-del" aria-label="Quitar fecha">✕</button>`;
+  const disabled=(SEDE==='central'||SEDE==='plaza')?' disabled':'';
+  div.innerHTML = `<input type="number" class="lote-cant" step="0.5" min="0" value="${cant==null?'':cant}" aria-label="Cantidad"${disabled}>`
+    + `<input type="date" class="lote-venc" value="${venc||''}" aria-label="Fecha de vencimiento"${disabled}>`
+    + `<button type="button" class="lote-del" aria-label="Quitar fecha"${disabled}>✕</button>`;
   return div;
 }
 function pintarLotes(lotes){
@@ -12879,7 +12918,8 @@ $('m-guardar').addEventListener('click',async()=>{
   // Solo se arma la lista de VARIAS fechas si de verdad se puede guardar
   // (tabla producto_lotes disponible). Si no, se usa el campo de una sola
   // fecha — nunca se construye algo que después no se persiste.
-  const usaLotes = quedaPerec && hasLotes;
+  const stockCortado=SEDE==='central'||SEDE==='plaza';
+  const usaLotes = !stockCortado && quedaPerec && hasLotes;
 
   const lotes=[];
   if(usaLotes){
@@ -12897,10 +12937,10 @@ $('m-guardar').addEventListener('click',async()=>{
   const fields={producto:nombre,stock_min:num($('m-min')),stock_max:num($('m-max')),rubro:rubroNuevo};
   // con varias fechas, el stock lo calcula la base sumando los lotes;
   // si no, el número del campo de stock se guarda tal cual (como siempre)
-  if(!lotes.length){ const s=num($('m-stock')); fields.stock_actual = s==null?s:Math.max(0,s); }
-  if(hasPerec) fields.perecedero=quedaPerec;
+  if(!stockCortado && !lotes.length){ const s=num($('m-stock')); fields.stock_actual = s==null?s:Math.max(0,s); }
+  if(hasPerec && !stockCortado) fields.perecedero=quedaPerec;
   if(hasTipo) fields.tipo = $('m-tipo').value.replace(/\s+/g,' ').trim() || null;
-  if(hasVenc) fields.vencimiento = !quedaPerec ? null
+  if(hasVenc && !stockCortado) fields.vencimiento = !quedaPerec ? null
     : usaLotes ? (lotes.length?lotes[0].vencimiento:null)
     : ($('m-venc-single').value || null);
 
@@ -12919,6 +12959,10 @@ $('m-guardar').addEventListener('click',async()=>{
    porque un guardado "silencioso" que no persiste es indistinguible de uno
    exitoso si no se verifica. */
 async function guardarLotes(pid, lotes){
+  if(SEDE==='central'||SEDE==='plaza'){
+    avisar('Los lotes de Bodega y Local 1 están en modo de solo lectura durante el corte.');
+    return;
+  }
   const del=await conReintento(()=>sb.from('producto_lotes').delete().eq('producto_id',pid));
   if(del.error){ console.error(del.error); avisar('No se pudieron guardar las fechas.\n\nDetalle: '+del.error.message); return; }
   if(lotes.length){
@@ -13001,6 +13045,10 @@ $('btnNuevo').addEventListener('click', async ()=>{
   $('n-sede-label').textContent = 'Se agregará a ' + SEDES[SEDE].label;
   $('n-nombre').value=''; $('n-perec').checked=false;   // n-rubro se rearma abajo
   $('n-stock').value=''; $('n-min').value=''; $('n-max').value='';
+  const stockCortado=SEDE==='central'||SEDE==='plaza';
+  $('n-stock').disabled=stockCortado;
+  $('n-stock').title=stockCortado?'El producto se crea con saldo cero; las existencias se cargarán desde el libro.':'';
+  if(stockCortado) $('n-stock').value='0';
   /* Solo secciones que existen de verdad, y en el mismo orden en que se ven
      en el inventario. Sin opción vacía, para que nunca se guarde sin sección. */
   $('n-rubro').innerHTML=seccionesDeLaSede()
@@ -13046,7 +13094,8 @@ $('n-guardar').addEventListener('click', async()=>{
   const dup=DATA.find(d=>normNombre(d.producto)===normNombre(nombre));
   if(dup){ avisar(`"${dup.producto}" ya existe en este inventario. Búscalo en la lista para editarlo.`); return; }
   const num=el=>el.value===''?null:+el.value;
-  const fila={producto:nombre, rubro, stock_actual:num($('n-stock')), stock_min:num($('n-min')), stock_max:num($('n-max')),
+  const stockInicial=(SEDE==='central'||SEDE==='plaza')?0:num($('n-stock'));
+  const fila={producto:nombre, rubro, stock_actual:stockInicial, stock_min:num($('n-min')), stock_max:num($('n-max')),
     activo:'SÍ', origen:'APP', notas:'', sede:SEDE};
   if(hasPerec) fila.perecedero=$('n-perec').checked;
   const btn=$('n-guardar'); btn.disabled=true; btn.textContent='Agregando…';
@@ -13329,6 +13378,10 @@ async function reintentarFudo(){
 window.addEventListener('online', reintentarFudo);
 
 async function llamarReparto(fn, args, exito){
+  if(SEDE==='central'||SEDE==='plaza'){
+    avisar('Repartos temporalmente pausados en Bodega y Local 1 durante el cambio al libro por ubicación.');
+    return false;
+  }
   const {data,error} = await sb.rpc(fn, args);
   if(error){
     console.error(error);
@@ -15251,6 +15304,10 @@ function ajRespaldosHTML(){
 async function ajRestaurar(){
   const sede = AJ_SEDE, fecha = AJ_DIA;
   if(!sede || !fecha) return;
+  if(sede==='central'||sede==='plaza'){
+    avisar('Restaurar respaldos está temporalmente pausado para Bodega y Local 1 durante el corte al libro por ubicación.');
+    return;
+  }
   const n = AJ_PREVIA ? AJ_PREVIA.cambios.length : 0;
   if(!await preguntar(
       'Devolver ' + SEDES[sede].label + ' al ' + fmtFecha(fecha),
@@ -15763,6 +15820,10 @@ async function ajFusionar(quedaId, otroId){
   const a = (AJ_PRODS||[]).find(p=>p.id===quedaId);
   const b = (AJ_PRODS||[]).find(p=>p.id===otroId);
   if(!a || !b) return;
+  if(a.sede==='central'||a.sede==='plaza'||b.sede==='central'||b.sede==='plaza'){
+    avisar('Las fusiones están temporalmente pausadas para productos de Bodega y Local 1 durante el corte al libro por ubicación.');
+    return;
+  }
   if(!await preguntar('Juntar en “'+a.producto+'”',
       '“'+b.producto+'” se apaga y su stock, sus fechas y sus recetas pasan a “'+a.producto+'”.\n\n'
       + 'Quedaría en ' + fmt((+a.stock_actual||0)+(+b.stock_actual||0)) + '. Se puede deshacer.',

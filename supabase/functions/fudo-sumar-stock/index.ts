@@ -113,6 +113,9 @@ Deno.serve(async (req) => {
     // ---------- qué se pidió ----------
     const body = await req.json().catch(() => ({}));
     const sede = String(body?.sede ?? "plaza").toLowerCase();
+    if (sede === "central" || sede === "plaza") {
+      return json({ error: "Stock por ubicación: Fudo no puede recibir sumas desde repartos antiguos de Bodega o Local 1." }, 409);
+    }
     const productoId = Number(body?.producto_id);
     const cantidad = Number(body?.cantidad);
     const itemId = body?.reparto_item_id != null ? Number(body.reparto_item_id) : null;

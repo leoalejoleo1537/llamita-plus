@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **B2.3 — corte coordinado REQUIERE DECISIÓN (2026-10-07)**. B2.2 está cerrado como decisión resuelta; B2.4 queda PENDIENTE y no activa; A3.4d conserva su estado previo.
+Estado actual: **B2.3 — corte coordinado COMPLETADO (2026-10-07)**. B2.2 está cerrado como decisión resuelta; B2.4 queda PENDIENTE y no activa; A3.4d conserva su estado previo.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -50,13 +50,13 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 
 ### Bloque B2 — Modelo de áreas y stock por área
 
-- Estado general: EN CURSO POR SUBFASES. **B2.1 COMPLETADO**; **B2.2 REQUIERE DECISIÓN RESUELTA** (arquitectura aprobada, sin implementación); **B2.3 REQUIERE DECISIÓN**; **B2.4 PENDIENTE**, no activa.
-- Decisión arquitectónica aprobada; precondiciones técnicas pendientes para la implementación: corte coordinado de escritores/lectores, adaptación de lotes, controles de acceso por sede/área y conciliación. Local 1 no es aislamiento técnico.
-- Objetivo restante: diseñar e implementar existencias por área sin duplicar `productos.stock_actual`, revisando lotes, repartos, mermas, Fudo y Lama antes de cualquier escritura.
+- Estado general: EN CURSO POR SUBFASES. **B2.1 COMPLETADO**; **B2.2 REQUIERE DECISIÓN RESUELTA** (arquitectura aprobada); **B2.3 COMPLETADO**; **B2.4 PENDIENTE**, no activa.
+- El libro por ubicación y el corte coordinado están implementados para `central` y `plaza`; controles de acceso por área y operaciones de stock por área quedan para fases futuras. Local 1 no es aislamiento técnico.
+- Objetivo restante: habilitar existencias por área sin duplicar `productos.stock_actual`, respetando lotes, transferencias, mermas, Fudo y Lama.
 - B2.1 creó solo el catálogo aditivo de áreas de `plaza` y una relación preparatoria vacía. No asignó productos ni stock. Evidencia: `docs/hermes/15-b2-1-cimientos-areas.md`.
 - Decisión aprobada: el libro de existencias por ubicación será la autoridad futura; Bodega central recibe stock; `plaza` inicia en Sin asignar; se prohíbe clasificación histórica automática; `productos.stock_actual` será proyección no editable. Detalle: `docs/hermes/17-decision-libro-existencias-ubicacion.md`.
-- La decisión no implementó tablas ni adaptó escritores. La ejecución técnica aprobada ahora como B2.3 fue detenida por los bloqueos auditados en el documento 18.
-- Fuera de B2.1: migrar stock, crear saldos por área, cambiar lotes, vencimientos o datos de reparto.
+- La ejecución inicial de B2.3 se detuvo ante los bloqueos descritos en el documento 18. La autorización posterior habilitó un corte coordinado que quedó completado; ver `docs/hermes/19-b2-3-corte-libro-ubicaciones.md`.
+- B2.3 no creó saldos en áreas físicas. B2.4 sigue pendiente y no está activada.
 
 ### Tarea B2.2 — Decisión arquitectónica del libro por ubicación
 
@@ -66,16 +66,17 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Operación aprobada: reparto con destino de área explícito y atomicidad salida/entrada; mermas en un módulo global con área de ocurrencia; críticos, reportes y búsqueda calculados por área; recetas y Lama–Stock real siguen apagados hasta que el modelo funcione.
 - Auditoría precedente: `docs/hermes/16-b2-2-auditoria-fuente-unica-stock.md`; decisión normativa: `docs/hermes/17-decision-libro-existencias-ubicacion.md`.
 - Sin implementación: no se ejecutó SQL, migración, cambio de código ni modificación de datos. No se activan repartos por área, interfaz ni formularios.
-- B2.3 fue activado en una ejecución posterior y quedó **REQUIERE DECISIÓN** antes de cualquier escritura de migración. Informe 18.
+- En el primer intento de B2.3, la ejecución quedó **REQUIERE DECISIÓN** antes de migrar; la autorización y cierre posteriores constan en la tarea B2.3 e informe 19. El informe 18 conserva el antecedente.
 
 ### Tarea B2.3 — Libro de existencias por ubicación y corte coordinado
 
-- Estado: **REQUIERE DECISIÓN (2026-10-07)**. No se implementó esquema ni se migraron saldos.
-- Autorización: Alejo activó únicamente B2.3 en esta ejecución, con condición explícita de detenerse si no era posible adaptar o bloquear todos los escritores sin doble fuente.
+- Estado: **COMPLETADA (2026-10-07)**. El bloqueo del primer intento (documento 18) fue resuelto por la autorización explícita posterior de Alejo.
+- Autorización: Alejo activó únicamente el corte coordinado B2.3 para `central` y `plaza`, con migración inicial a Bodega central y Sin asignar de Local 1.
 - Repositorio/proyecto verificados: `leoalejoleo1537/llamita-plus`; Supabase `llamita-plus`, ref `iuryhsjucblmebdogewa`.
-- Hallazgo: la tabla `productos` y `producto_lotes` aceptan DML directo de `anon` y `authenticated`, con RLS abierto; movimientos también permite DML amplio. La interfaz edita `stock_actual` y reemplaza lotes directamente. El trigger de lotes reescribe `productos.stock_actual`. Numerosos RPC `SECURITY DEFINER` ejecutables por roles de aplicación actualizan o delegan stock en esas tablas.
-- Resultado: no es seguro migrar ni activar el ledger hasta diseñar y verificar un corte completo de API/RLS, RPC, UI, trigger y consumidores. El detalle está en `docs/hermes/18-b2-3-bloqueo-corte-libro-ubicaciones.md`.
-- Límites: consultas SELECT-only; sin migración, RPC de escritura, código ni datos. Café del Desierto / Llamita Stock no fue consultado.
+- Resultado: ledger privado aditivo por sede/ubicación/producto/lote; aperturas idempotentes de `central` en Bodega central y `plaza` en Sin asignar; agregado `productos.stock_actual` protegido como proyección; rutas legacy no adaptadas bloqueadas explícitamente en estas sedes. `angamos` y `bodega` histórica conservan comportamiento.
+- Migraciones aplicadas: `20261007152558 b2_3_libro_existencias_corte` y `20261007152805 b2_3_indices_permisos_libro`. Informe, rollback y pruebas: `docs/hermes/19-b2-3-corte-libro-ubicaciones.md` y `sql/2026-10-b2-3-*`.
+- Validación: 1.437 productos y stock agregado 15.438,00 sin cambios; 408 aperturas en el libro, total 9.316,70; cuatro áreas físicas con saldo 0. Conteos de lotes, movimientos, repartos, recetas y permisos iguales antes/después. Pruebas de conciliación, RLS/grants, bloqueos, transferencia sintética e idempotencia pasaron en transacciones revertidas.
+- Fudo: guardas añadidas en las fuentes Edge, no desplegadas; ningún cambio remoto de stock. Fudo plaza sigue en prueba/cron apagado. Lama real apagado y `lama_stock_config` vacía. No se consultó ni tocó Café del Desierto / Llamita Stock.
 - B2.4 — existencias en áreas físicas — queda **PENDIENTE**, no activar automáticamente.
 
 ### Tarea B2.1 — Cimientos del modelo de áreas operativas

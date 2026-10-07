@@ -517,3 +517,20 @@ Estado: **REQUIERE DECISIÓN**. B2.4 permanece **PENDIENTE**, no activa.
 - Conteos SELECT de inicio/cierre: productos 1.437, stock 15.438,00; central 349 / 4.750,50; plaza 329 / 4.566,20. Lotes central 2 / 96,00 (un producto, cero diferencias); plaza 9 / 36,00 (seis productos, cero diferencias). Movimientos 431, repartos 361, recetas 396 / 514 líneas, permisos 9. Los lotes se tratan como detalle del saldo y no se suman de nuevo.
 - Informe completo: `docs/hermes/18-b2-3-bloqueo-corte-libro-ubicaciones.md`. El plan y la cola registran el bloqueo; el documento 17 ya distingue B2.3 de la interfaz UX posterior.
 - Solo se hicieron consultas SELECT y lecturas de catálogo/código. No se aplicó SQL, migración ni cambio de código/datos. No se accedió a Café del Desierto / Llamita Stock. La interfaz de áreas y B2.4 quedan pendientes; no activar automáticamente.
+
+## Respuesta de Codex — B2.3: corte coordinado completado
+
+Fecha: 2026-10-07
+Estado: **COMPLETADA para `central` y `plaza`**. B2.4 permanece **PENDIENTE**, no activada.
+
+El bloqueo del primer intento quedó resuelto por la autorización explícita de Alejo para implementar el corte temporal. En Supabase Llamita Plus `iuryhsjucblmebdogewa` se aplicaron `20261007152558 b2_3_libro_existencias_corte` y `20261007152805 b2_3_indices_permisos_libro`.
+
+Se creó `stock_internal` con ubicaciones, movimientos inmutables, aperturas, transferencias idempotentes, permiso transaccional de proyección y vista de existencias. Se abrieron 150 productos de `central` en Bodega central y 258 de `plaza` en Sin asignar: 408 movimientos por 9.316,70. No se hicieron asignaciones históricas a áreas físicas; las cuatro áreas tienen cero saldo. `angamos` y `bodega` histórica quedan intactas.
+
+Conteos pre/post sin cambios: productos 1.437; agregado 15.438,00; central 349/4.750,50; plaza 329/4.566,20; angamos 351/2.764,20; bodega histórica 408/3.357,10; lotes 42/304,00; movimientos legacy 431; repartos/líneas 361/2.040; recetas/líneas 396/514; permisos 9; `lama_stock_config` 0. Conciliación por producto/sede sin diferencias. Los lotes existentes quedaron congelados para las sedes cortadas y no se suman como saldo adicional.
+
+`productos.stock_actual` conserva su valor y queda protegido como proyección. Se bloquearon con mensajes explícitos los escritores legacy que aún no usan el libro: stock manual, alta con saldo, lotes, entradas, ajustes, mermas, movimientos, repartos/deshacer, restauraciones y fusiones. Los triggers también bloquean Fudo real/aplicado y Lama real para sedes migradas. Fudo remoto no fue modificado; fuentes Edge actualizadas no se desplegaron. Lama real sigue apagado y su configuración vacía.
+
+La prueba transaccional verificó permisos/RLS, conciliación, transferencia Bodega -12/Cafetería +12 con producto lógico, lote y referencia compartidos, idempotencia y rollback completo. `npm test`, análisis de sintaxis Edge y `git diff --check` pasaron; browser tests se omitieron porque no hay navegador instalado. El rollback técnico aborta si existen movimientos posteriores; una vez haya actividad solo se permite compensación auditada.
+
+Informe: `docs/hermes/19-b2-3-corte-libro-ubicaciones.md`. No se accedió a Café del Desierto / Llamita Stock. No se alteró stock agregado previo ni filas comerciales. No activar B2.4 automáticamente.

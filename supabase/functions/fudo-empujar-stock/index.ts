@@ -147,6 +147,9 @@ Deno.serve(async (req) => {
     // ---------- Qué se pidió ----------
     const body = await req.json().catch(() => ({}));
     const sede = String(body?.sede ?? "plaza").toLowerCase();
+    if (sede === "central" || sede === "plaza") {
+      return json({ error: "Stock por ubicación: el envío de stock antiguo a Fudo está pausado para Bodega y Local 1." }, 409);
+    }
     /* `probar` (2026-08-21) no empuja nada: le toma el pulso a Fudo. Nació
        del turno en que el botón devolvía 504 y no había forma de saber si
        el problema era Fudo o nuestro. Es la pregunta más barata que existe

@@ -123,6 +123,9 @@ Deno.serve(async (req) => {
     // ---------- 2) Qué producto vamos a tocar ----------
     const body = await req.json().catch(() => ({}));
     const sede = String(body?.sede ?? "plaza").toLowerCase();
+    if (sede === "central" || sede === "plaza") {
+      return json({ error: "Prueba detenida: no se escribe en el inventario remoto de Fudo para Bodega o Local 1." }, 409);
+    }
     const productId = body?.fudo_product_id ? String(body.fudo_product_id) : null;
     if (!productId) return json({ error: "Falta fudo_product_id: hay que decir sobre qué producto probar." }, 400);
 

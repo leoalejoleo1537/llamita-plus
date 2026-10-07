@@ -1,6 +1,6 @@
 # Plan de implementación: inventario por áreas operativas en Llamita Plus
 
-**Estado:** B1 y B2.1 completados. La decisión arquitectónica de B2.2 quedó aprobada por Alejo el 2026-10-07 y documentada en `docs/hermes/17-decision-libro-existencias-ubicacion.md`; B2.2 se cierra como **REQUIERE DECISIÓN RESUELTA**, sin implementación. B2.3 —libro y corte coordinado— queda **REQUIERE DECISIÓN** por escritores no adaptados; B2.4 —existencias por áreas operativas— queda **PENDIENTE**, no activa. No activar fases posteriores automáticamente.
+**Estado:** B1 y B2.1 completados. La decisión arquitectónica B2.2 fue aprobada y documentada en `docs/hermes/17-decision-libro-existencias-ubicacion.md`. B2.3 —libro por ubicación y corte coordinado— quedó **COMPLETADO (2026-10-07)** para `central` y `plaza`; B2.4 —existencias por áreas operativas— queda **PENDIENTE**, no activa. No activar fases posteriores automáticamente.
 
 **Repositorio objetivo:** `leoalejoleo1537/llamita-plus`, rama `master`.
 
@@ -147,21 +147,23 @@ Resultado detallado, pruebas, conteos y rollback: `docs/hermes/15-b2-1-cimientos
 1. Leer `CLAUDE.md`, las reglas de `docs/hermes/` y documentación relevante.
 2. Trazar el inventario actual: producto, stock por sede, secciones/rubros, movimientos, mermas, lotes, reparto, permisos, búsqueda y rutas.
 3. Verificar contra el esquema activo de Llamita Plus las tablas y columnas necesarias. No conectarse ni escribir en Café del Desierto.
-4. La fuente conceptual aprobada es un libro por producto/sede/ubicación/lote; queda pendiente su implementación física en una fase reactivada.
+4. La fuente aprobada e implementada en B2.3 es un libro por producto/sede/ubicación/lote.
 5. Migración inicial aprobada: `central` a Bodega central; `plaza` a Sin asignar; lotes de `plaza` a Sin asignar; no migrar `angamos` ni la clave histórica `bodega`.
 6. Toda futura transferencia debe ser explícita, atómica y conservar la trazabilidad; la clasificación por texto solo sugiere destino.
-7. `productos.stock_actual` se mantiene como proyección de compatibilidad no editable, después de adaptar todos sus escritores/lectores y permisos.
+7. `productos.stock_actual` se mantiene como proyección protegida para `central` y `plaza`; los caminos antiguos que todavía no escriben al libro están bloqueados.
 8. Recetas y Lama–Stock real no se activan antes de que el modelo por ubicación esté funcionando.
 
-**Resultado de arquitectura:** queda resuelto el bloqueo de decisión descrito en `docs/hermes/16-b2-2-auditoria-fuente-unica-stock.md`. Siguen pendientes la construcción del libro, el corte de escritores/lectores, permisos/RLS, lotes y conciliación. Ninguna cantidad se ha migrado.
+**Resultado de arquitectura:** queda resuelto el bloqueo de decisión descrito en `docs/hermes/16-b2-2-auditoria-fuente-unica-stock.md`. El libro por ubicación y su corte se implementaron en B2.3; las cantidades por áreas físicas siguen pendientes en B2.4.
 
 ### Bloque B2.3 — Libro por ubicación y corte coordinado de escritores
 
-**Estado: REQUIERE DECISIÓN (2026-10-07); implementación detenida antes de migrar.** Auditoría y bloqueo: `docs/hermes/18-b2-3-bloqueo-corte-libro-ubicaciones.md`. Las políticas DML y los RPC instalados permiten escrituras directas o heredadas al stock anterior; no se puede afirmar un corte seguro hasta adaptar o bloquear todos los caminos sin romper funciones de otras sedes.
+**Estado: COMPLETADO (2026-10-07) para `central` y `plaza`.** El primer intento quedó bloqueado según `docs/hermes/18-b2-3-bloqueo-corte-libro-ubicaciones.md`; Alejo autorizó después el corte coordinado. Resultado completo: `docs/hermes/19-b2-3-corte-libro-ubicaciones.md`.
 
-**Alcance al reactivar:** crear la fuente única por producto/sede/ubicación/lote; migrar únicamente `central` a Bodega central y `plaza` a Sin asignar, conservando lotes; volver `productos.stock_actual` una proyección compatible no editable; reemplazar o bloquear todos los escritores legacy en esos contextos; preservar compatibilidad de `angamos` y la clave histórica `bodega`. No crear saldos en Cocina fría, Cocina caliente, Barra ni Cafetería. No añadir interfaz, reparto visible, mermas por área, cambios de recetas ni Lama–Stock real.
+Se implementó un libro privado por producto/sede/ubicación/lote, con catálogo de ubicaciones, movimientos inmutables, aperturas auditables, transferencias idempotentes y vista de existencias. `central` se abrió en Bodega central; `plaza` en Sin asignar. No hubo clasificación histórica ni cantidades en Cocina fría, Cocina caliente, Barra o Cafetería. `angamos` y la clave histórica `bodega` no se migraron.
 
-**Criterios de salida:** ningún escritor de `central`/`plaza` puede mutar directamente el saldo agregado; los escritores que no estén adaptados fallan con mensaje explícito antes de modificar movimientos/caja/lotes; Fudo no puede dejar una escritura silenciosa; lotes se concilian sin doble suma; migración idempotente y conciliada por producto/sede; operación de transferencia interna atómica probada; permisos/RLS revisados; rollback seguro y sin borrado de operaciones posteriores; pruebas de esquema, privilegios, regresión y conteos pasan.
+`productos.stock_actual` conserva sus valores como proyección protegida. Escritura directa del agregado, alta con saldo no cero, reemplazo de lotes y caminos legacy de movimientos, entradas, mermas, repartos/deshacer, restauraciones y fusiones fallan con un mensaje explícito para sedes migradas; las sedes históricas mantienen compatibilidad. Los lotes actuales de `central` y `plaza` se mantienen congelados como detalle legado y no se vuelven a sumar. Fudo recibió guardas en código fuente, pero las Edge Functions no se desplegaron; sus escritores de base y la aplicación real permanecen bloqueados. Lama real sigue apagado.
+
+Las migraciones aplicadas en Llamita Plus fueron `20261007152558 b2_3_libro_existencias_corte` y `20261007152805 b2_3_indices_permisos_libro`. Pruebas de RLS/permisos, conciliación, bloqueos, transferencia Bodega -12/Cafetería +12 con producto lógico/lote/referencia compartidos e idempotencia pasaron dentro de una transacción revertida. El rollback técnico aborta si existen movimientos posteriores; en ese caso requiere reversión compensatoria auditada.
 
 ### Bloque B2.4 — Existencias por áreas operativas
 
@@ -235,9 +237,9 @@ Resultado detallado, pruebas, conteos y rollback: `docs/hermes/15-b2-1-cimientos
 
 ## 10. Decisiones y precondiciones vigentes
 
-La fuente futura, ubicaciones iniciales, tratamiento del stock histórico, transferencia atómica y proyección están aprobados y registrados en `docs/hermes/17-decision-libro-existencias-ubicacion.md`. No se ha implementado la arquitectura.
+La fuente única, ubicaciones iniciales, tratamiento del stock histórico, transferencia atómica y proyección aprobados están en `docs/hermes/17-decision-libro-existencias-ubicacion.md`. B2.3 implementó el libro y el corte para `central`/`plaza`; el resultado y sus límites están en `docs/hermes/19-b2-3-corte-libro-ubicaciones.md`. El documento 18 conserva el bloqueo del intento previo como antecedente.
 
-La decisión arquitectónica no activó por sí sola B2.3. Alejo activó después ese bloque, que quedó **REQUIERE DECISIÓN** antes de cualquier escritura; ver `docs/hermes/18-b2-3-bloqueo-corte-libro-ubicaciones.md`. Siguen pendientes adaptar todos los lectores/escritores y permisos al libro; implementar ubicación/trazabilidad de lotes; definir mínimos/máximos por ubicación; diseñar un corte sin escrituras parciales; y probar conciliación por producto, sede, ubicación y lote. `angamos` y la clave histórica `bodega` no se migran en esta fase.
+Quedan para fases posteriores: adaptar las operaciones cotidianas al libro; gestionar lotes desde sus ubicaciones; definir mínimos/máximos por ubicación; y construir las vistas e interfaces de áreas. `angamos` y la clave histórica `bodega` no se migraron. B2.4 sigue pendiente y requiere autorización separada.
 
 Estas verificaciones no son permiso para abrir alcance hacia Café del Desierto, ejecutar operaciones destructivas o automatizar el descuento de recetas.
 

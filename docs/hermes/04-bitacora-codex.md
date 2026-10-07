@@ -243,3 +243,18 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - Evidencia y matriz de bloqueos: `docs/hermes/18-b2-3-bloqueo-corte-libro-ubicaciones.md`. El documento 17 y plan 01 aclaran que la interfaz de áreas queda para UX posterior; B2.3 es el corte del libro.
 - Consultas SELECT-only y catálogo de políticas, grants, funciones y trigger; no se probaron escrituras ni migraciones por ser inseguro y no existir implementación. `git diff --check` se ejecuta antes de publicar documentación.
 - Sin cambios en Café del Desierto / Llamita Stock. B2.4 queda pendiente y no se activa automáticamente.
+
+## 2026-10-07 — B2.3: corte coordinado y libro por ubicación completados
+
+- Estado: **COMPLETADA** para `central` y `plaza`; B2.4 permanece **PENDIENTE**, no activa. El bloqueo del primer intento documentado arriba y en el informe 18 quedó resuelto por autorización explícita posterior de Alejo.
+- Entorno: repositorio `leoalejoleo1537/llamita-plus`, remoto oficial; rama de trabajo `work`. Proyecto Supabase Llamita Plus `iuryhsjucblmebdogewa`, confirmado antes de aplicar cambios.
+- Migraciones instaladas: `20261007152558 b2_3_libro_existencias_corte`; `20261007152805 b2_3_indices_permisos_libro`.
+- Modelo: esquema privado `stock_internal`; catálogo `ubicaciones`; libro inmutable `movimientos`; `aperturas`; `transferencias`; `permiso_proyeccion`; vista `existencias`. RLS y políticas restrictivas de denegación; sin permisos directos a roles de aplicación.
+- Apertura: 150 productos de `central` a Bodega central = 4.750,50; 258 de `plaza` a Sin asignar = 4.566,20. Libro: 408 aperturas/9.316,70. No hubo clasificación histórica y las cuatro ubicaciones físicas de `plaza` quedaron con saldo cero.
+- Conteos pre/post: productos 1.437; stock total 15.438,00; `central` 349/4.750,50; `plaza` 329/4.566,20; `angamos` 351/2.764,20; `bodega` histórica 408/3.357,10; lotes 42/304,00; movimientos legacy 431; repartos/líneas 361/2.040; recetas/líneas 396/514; permisos 9; `lama_stock_config` 0. Todos iguales. Conciliación por producto/sede sin diferencias.
+- Escritores: saldo directo, altas con saldo, lotes, trigger histórico de lotes y rutas legacy de movimientos, entradas, mermas, repartos/deshacer, restauraciones y fusiones bloqueados para `central`/`plaza`. `productos.stock_actual` queda como proyección protegida y se refresca solo con permiso interno transaccional. Otras sedes mantienen compatibilidad.
+- Fudo: guardas añadidas a cinco fuentes Edge, que **no fueron desplegadas**; triggers bloquean modo real y aplicación en base. Ningún cambio remoto de Fudo. Plaza sigue en modo prueba y cron apagado. Lama real sigue apagado; configuración vacía.
+- Pruebas: SQL sintético `BEGIN ... ROLLBACK` validó conciliación, lote sin doble suma, permisos, writers bloqueados, configuraciones reales bloqueadas, transferencia Bodega -12/Cafetería +12 con producto lógico/lote/referencia comunes, total conservado e idempotencia. Post-rollback no quedaron aplicaciones ni transferencias sintéticas. `npm test` exit 0; análisis esbuild de cinco fuentes Edge exit 0; `git diff --check` pasó. Pruebas visuales omitidas por ausencia de navegador.
+- Seguridad/rendimiento: advisor ya no marca `stock_internal` como RLS sin política; se agregaron índices de FK faltantes. Permanecen avisos previos de vistas/tablas ajenas y avisos de índices nuevos aún no usados.
+- Rollback técnico `sql/2026-10-b2-3-libro-existencias.rollback.sql`: aborta si hay operaciones posteriores; luego solo compensación auditada, sin borrar movimientos.
+- Resultado detallado: `docs/hermes/19-b2-3-corte-libro-ubicaciones.md`. No se tocó Café del Desierto / Llamita Stock; no se cambió ningún stock persistente previo ni datos comerciales. B2.4 no se activó.

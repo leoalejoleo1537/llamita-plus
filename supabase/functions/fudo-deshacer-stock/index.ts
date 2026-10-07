@@ -65,6 +65,9 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const sede = String(body?.sede ?? "plaza").toLowerCase();
+    if (sede === "central" || sede === "plaza") {
+      return json({ error: "Stock por ubicación: no se pueden deshacer empujes antiguos a Fudo para Bodega o Local 1." }, 409);
+    }
     const modo = body?.modo === "aplicar" ? "aplicar" : "simular";
 
     // ---------- Qué habría que devolver ----------
