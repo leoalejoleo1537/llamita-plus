@@ -505,3 +505,15 @@ Estado: **COMPLETADA**. B2.2 queda **PENDIENTE**, no activada.
 - Pruebas estructurales y de restricciones dentro de `BEGIN ... ROLLBACK`: áreas exactas/sede, sede cruzada, unicidad, coherencia estado/área, código reservado, clave estable, RLS/grants/policies y ausencia de columnas de saldo. Conteos post iguales. Advisor final sin FK desindexadas nuevas; RLS sin políticas es intencional y los índices de relación aún no se han usado porque está vacía. Rollback preparado y no ejecutado.
 - Evidencia detallada: `docs/hermes/15-b2-1-cimientos-areas.md`. No se tocó `central`, `angamos`, `bodega`, Lama, Fudo ni Café del Desierto/Llamita Stock. No se creó interfaz.
 - Riesgo abierto: los nombres/categorías actuales dejan productos en revisión; la regla de simulación requiere validación operativa. Fuente de stock, corte de escritores, cantidades por área y seguridad por sede quedan para B2.2.
+
+## Respuesta de Codex — B2.3: corte del libro por ubicación detenido
+
+Fecha: 2026-10-07
+Estado: **REQUIERE DECISIÓN**. B2.4 permanece **PENDIENTE**, no activa.
+
+- Repositorio: `leoalejoleo1537/llamita-plus`, rama `work`, al inicio alineada con `origin/master`. Proyecto Supabase: `llamita-plus` (`iuryhsjucblmebdogewa`), activo.
+- Se verificaron escritores de stock de la interfaz, grants/políticas DML, trigger de sincronización de lotes, RPC de inventario y delegaciones de Fudo/Lama. Estos caminos impiden afirmar que `stock_actual` pueda quedar como proyección no editable con seguridad sin una adaptación/bloqueo coordinado y pruebas por sede.
+- No se creó ledger ni se migraron saldos. `productos.stock_actual` permanece como fuente actual. No cambió cantidad o ubicación de lotes, movimientos, repartos, recetas, permisos ni datos comerciales.
+- Conteos SELECT de inicio/cierre: productos 1.437, stock 15.438,00; central 349 / 4.750,50; plaza 329 / 4.566,20. Lotes central 2 / 96,00 (un producto, cero diferencias); plaza 9 / 36,00 (seis productos, cero diferencias). Movimientos 431, repartos 361, recetas 396 / 514 líneas, permisos 9. Los lotes se tratan como detalle del saldo y no se suman de nuevo.
+- Informe completo: `docs/hermes/18-b2-3-bloqueo-corte-libro-ubicaciones.md`. El plan y la cola registran el bloqueo; el documento 17 ya distingue B2.3 de la interfaz UX posterior.
+- Solo se hicieron consultas SELECT y lecturas de catálogo/código. No se aplicó SQL, migración ni cambio de código/datos. No se accedió a Café del Desierto / Llamita Stock. La interfaz de áreas y B2.4 quedan pendientes; no activar automáticamente.

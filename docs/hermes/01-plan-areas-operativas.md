@@ -1,6 +1,6 @@
 # Plan de implementación: inventario por áreas operativas en Llamita Plus
 
-**Estado:** B1 y B2.1 completados. La decisión arquitectónica de B2.2 quedó aprobada por Alejo el 2026-10-07 y documentada en `docs/hermes/17-decision-libro-existencias-ubicacion.md`; B2.2 se cierra como **REQUIERE DECISIÓN RESUELTA**, sin implementación de tablas, datos o código. B2.3 queda **PENDIENTE**, no activa. No activar fases posteriores automáticamente.
+**Estado:** B1 y B2.1 completados. La decisión arquitectónica de B2.2 quedó aprobada por Alejo el 2026-10-07 y documentada en `docs/hermes/17-decision-libro-existencias-ubicacion.md`; B2.2 se cierra como **REQUIERE DECISIÓN RESUELTA**, sin implementación. B2.3 —libro y corte coordinado— queda **REQUIERE DECISIÓN** por escritores no adaptados; B2.4 —existencias por áreas operativas— queda **PENDIENTE**, no activa. No activar fases posteriores automáticamente.
 
 **Repositorio objetivo:** `leoalejoleo1537/llamita-plus`, rama `master`.
 
@@ -155,13 +155,17 @@ Resultado detallado, pruebas, conteos y rollback: `docs/hermes/15-b2-1-cimientos
 
 **Resultado de arquitectura:** queda resuelto el bloqueo de decisión descrito en `docs/hermes/16-b2-2-auditoria-fuente-unica-stock.md`. Siguen pendientes la construcción del libro, el corte de escritores/lectores, permisos/RLS, lotes y conciliación. Ninguna cantidad se ha migrado.
 
-### Bloque B2.3 — Interfaz y formularios (pendiente)
+### Bloque B2.3 — Libro por ubicación y corte coordinado de escritores
 
-**Estado: PENDIENTE; no activa.** No ejecutar hasta recibir activación explícita y verificar que el libro por ubicación, la migración conciliada y los adaptadores de lectura/escritura estén implementados y disponibles.
+**Estado: REQUIERE DECISIÓN (2026-10-07); implementación detenida antes de migrar.** Auditoría y bloqueo: `docs/hermes/18-b2-3-bloqueo-corte-libro-ubicaciones.md`. Las políticas DML y los RPC instalados permiten escrituras directas o heredadas al stock anterior; no se puede afirmar un corte seguro hasta adaptar o bloquear todos los caminos sin romper funciones de otras sedes.
 
-**Alcance previsto:** portada con las ubicaciones habilitadas; páginas de Bodega, Sin asignar y las cuatro áreas; búsqueda y vista global por ubicación; selección de área destino en la preparación de reparto; indicación del área en la merma global; formularios que llaman únicamente a operaciones del libro y nunca editan `productos.stock_actual`; filtros y mínimos/críticos calculados por área. La operación de transferencia pertenece a una transacción del backend, no a escrituras independientes de la interfaz.
+**Alcance al reactivar:** crear la fuente única por producto/sede/ubicación/lote; migrar únicamente `central` a Bodega central y `plaza` a Sin asignar, conservando lotes; volver `productos.stock_actual` una proyección compatible no editable; reemplazar o bloquear todos los escritores legacy en esos contextos; preservar compatibilidad de `angamos` y la clave histórica `bodega`. No crear saldos en Cocina fría, Cocina caliente, Barra ni Cafetería. No añadir interfaz, reparto visible, mermas por área, cambios de recetas ni Lama–Stock real.
 
-**Criterios de salida:** cada saldo se muestra en una sola ubicación; Sin asignar conserva lo no distribuido; un reparto indica destino y no permite confirmar si origen/destino no pueden aplicarse atómicamente; lote y auditoría visibles cuando existen; merma exige área; consultas y críticos se filtran por área; el total por producto/sede reconcilia; rutas y permisos no revelan ni permiten editar otra sede; `stock_actual` es solo lectura; ninguna clasificación por nombre mueve stock; pruebas desktop/móvil, errores/reintentos e idempotencia pasan. Las recetas y Lama–Stock real siguen apagados.
+**Criterios de salida:** ningún escritor de `central`/`plaza` puede mutar directamente el saldo agregado; los escritores que no estén adaptados fallan con mensaje explícito antes de modificar movimientos/caja/lotes; Fudo no puede dejar una escritura silenciosa; lotes se concilian sin doble suma; migración idempotente y conciliada por producto/sede; operación de transferencia interna atómica probada; permisos/RLS revisados; rollback seguro y sin borrado de operaciones posteriores; pruebas de esquema, privilegios, regresión y conteos pasan.
+
+### Bloque B2.4 — Existencias por áreas operativas
+
+**Estado: PENDIENTE; no activar automáticamente.** Solo después de completar B2.3 podrán trasladarse cantidades desde Sin asignar hacia Cocina fría, Cocina caliente, Barra o Cafetería mediante movimientos explícitos y conciliados. La clasificación por nombre seguirá siendo sugerencia, nunca asignación histórica automática. La interfaz y formularios de áreas permanecen para una fase posterior de UX.
 
 ### Bloque B3 — Portada, páginas de área, productos y búsquedas
 
@@ -233,7 +237,7 @@ Resultado detallado, pruebas, conteos y rollback: `docs/hermes/15-b2-1-cimientos
 
 La fuente futura, ubicaciones iniciales, tratamiento del stock histórico, transferencia atómica y proyección están aprobados y registrados en `docs/hermes/17-decision-libro-existencias-ubicacion.md`. No se ha implementado la arquitectura.
 
-Antes de cualquier fase de implementación siguen pendientes: adaptar todos los lectores/escritores y permisos al libro; implementar ubicación/trazabilidad de lotes; definir y verificar mínimos/máximos por ubicación; diseñar el corte sin escrituras parciales; y probar conciliación por producto, sede, ubicación y lote. La decisión no activa B2.3 ni autoriza SQL o cambios de datos. `angamos` y la clave histórica `bodega` no se migran en esta fase.
+La decisión arquitectónica no activó por sí sola B2.3. Alejo activó después ese bloque, que quedó **REQUIERE DECISIÓN** antes de cualquier escritura; ver `docs/hermes/18-b2-3-bloqueo-corte-libro-ubicaciones.md`. Siguen pendientes adaptar todos los lectores/escritores y permisos al libro; implementar ubicación/trazabilidad de lotes; definir mínimos/máximos por ubicación; diseñar un corte sin escrituras parciales; y probar conciliación por producto, sede, ubicación y lote. `angamos` y la clave histórica `bodega` no se migran en esta fase.
 
 Estas verificaciones no son permiso para abrir alcance hacia Café del Desierto, ejecutar operaciones destructivas o automatizar el descuento de recetas.
 

@@ -231,3 +231,15 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - Operación aprobada: nuevos productos físicos entran primero a Bodega; el reparto elige área y mueve stock atómicamente conservando producto, cantidad, usuario, fecha y lote; la merma global indica área; búsqueda, críticos y reportes calculan por área. Recetas y Lama–Stock real permanecen desactivados hasta que el modelo esté funcionando.
 - Alcance de esta ejecución: actualizar documentación Hermes únicamente. Sin SQL, tablas, migraciones, código, operaciones ni cambios de datos. Café del Desierto / Llamita Stock no fue tocado.
 - B2.3 (interfaz/formularios sobre el modelo implementado) queda **PENDIENTE**, no activado. El plan y el documento 17 describen sus precondiciones y criterios.
+
+## 2026-10-07 — B2.3: corte del libro por ubicación detenido
+
+- Estado: **REQUIERE DECISIÓN**; B2.4 queda **PENDIENTE**, no activada.
+- Entorno: repositorio `leoalejoleo1537/llamita-plus`, remoto origin esperado, rama `work`, HEAD igual a `origin/master` al inicio (`aaa428fe05d81191dcf58976e515518a688e6fe2`). Supabase `llamita-plus`, ref `iuryhsjucblmebdogewa`, `ACTIVE_HEALTHY`, PostgreSQL 17.6.
+- B2.3 se detuvo antes de cualquier cambio de base de datos/código: `productos.stock_actual` y `producto_lotes` conservan escritores de la interfaz, DML directo vía Data API con políticas/grants permisivos, un trigger de lotes que reescribe el agregado, RPC de inventario y rutas heredadas de Fudo y Lama. No se puede declarar que el saldo antiguo esté cortado ni bloquearlo con seguridad sin diseñar el alcance por sede y preservar operaciones relacionadas.
+- Conteos SELECT de inicio/cierre: productos 1.437, stock global 15.438,00; `central` 349 / 4.750,50; `plaza` 329 / 4.566,20. Lotes: `central` 2 / 96,00, un producto con lotes y cero diferencias; `plaza` 9 / 36,00, seis productos con lotes y cero diferencias. Los lotes no se suman otra vez al stock.
+- Otros conteos: movimientos 431 (403 central, 25 plaza), repartos 361, recetas 396, líneas de receta 514, permisos 9, asignaciones preparatorias producto-área 0, `lama_areas` 5. Sin escrituras no hay pre/post de migración; conteos inicio/cierre iguales. `angamos` y clave histórica `bodega` no se migraron.
+- `productos.stock_actual` continúa como fuente editable vigente, no como proyección. No se crearon libro, ubicaciones con saldo ni distribución hacia áreas. No cambió lotes, producto, movimientos, repartos, recetas, permisos, Fudo ni Lama.
+- Evidencia y matriz de bloqueos: `docs/hermes/18-b2-3-bloqueo-corte-libro-ubicaciones.md`. El documento 17 y plan 01 aclaran que la interfaz de áreas queda para UX posterior; B2.3 es el corte del libro.
+- Consultas SELECT-only y catálogo de políticas, grants, funciones y trigger; no se probaron escrituras ni migraciones por ser inseguro y no existir implementación. `git diff --check` se ejecuta antes de publicar documentación.
+- Sin cambios en Café del Desierto / Llamita Stock. B2.4 queda pendiente y no se activa automáticamente.

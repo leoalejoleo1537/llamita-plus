@@ -2,7 +2,7 @@
 
 Fecha de aprobación: 2026-10-07
 Aprobada por: Alejo
-Estado: **decisión aprobada; implementación no activada**. B2.2 se cierra como `REQUIERE DECISIÓN RESUELTA`. B2.3 queda pendiente.
+Estado: **decisión aprobada; implementación aún no realizada**. B2.2 se cierra como `REQUIERE DECISIÓN RESUELTA`. B2.3 fue activado y quedó `REQUIERE DECISIÓN` por el bloqueo registrado en `docs/hermes/18-b2-3-bloqueo-corte-libro-ubicaciones.md`.
 
 ## 1. Fuente futura de verdad
 
@@ -97,9 +97,9 @@ Las recetas no descuentan existencias por área en esta etapa. Lama–Stock real
 
 La configuración actual de prueba de Lama no se cambia con esta decisión.
 
-## 9. B2.3 — interfaz y formularios (pendiente)
+## 9. Interfaz y formularios de áreas (fase UX posterior)
 
-**Estado: PENDIENTE; no activado.** Su implementación requiere activación explícita y que el backend/modelo de ubicación y sus adaptadores estén listos. Esta especificación no autoriza cambios de interfaz.
+La interfaz de áreas no pertenece a B2.3. Queda para una fase UX posterior, pendiente y no activa. Su implementación requiere que B2.3 (libro y corte coordinado) y B2.4 (distribución inicial hacia áreas) estén completados, además de activación explícita. Esta especificación no autoriza cambios de interfaz.
 
 ### Alcance previsto
 
