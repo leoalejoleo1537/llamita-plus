@@ -1,6 +1,6 @@
 # Plan de implementación: inventario por áreas operativas en Llamita Plus
 
-**Estado:** B1, B2.1, B2.3, B2.3.1, B2.4 y B3.1 completados. B3.1 implementó lectura y navegación por áreas para `plaza` el 2026-10-07. B3.2 —operaciones de asignación/transferencia desde interfaz— queda **PENDIENTE**, no activa. No activar fases posteriores automáticamente.
+**Estado:** B1, B2.1, B2.3, B2.3.1, B2.4 y B3.1 completados. B3.1 implementó lectura y navegación por áreas para `plaza` el 2026-10-07. B3.2a —gestión de áreas y asignación preferida— está **REQUIERE DECISIÓN** por la autorización no confiable en `app_permisos`; B3.2b —transferencias visuales— sigue **PENDIENTE**, no activa. No activar fases posteriores automáticamente. Evidencia: `docs/hermes/23-b3-2a-bloqueo-autorizacion.md`.
 
 **Repositorio objetivo:** `leoalejoleo1537/llamita-plus`, rama `master`.
 
@@ -205,7 +205,15 @@ RLS y grants mantienen cerradas las tablas internas; la RPC requiere sesión aut
 
 #### B3.2 — Escrituras visuales por área
 
-**Estado: PENDIENTE, no activa.** Debe diseñar por separado la asignación inicial y el uso del motor `stock_transferir`, con permisos, auditoría e idempotencia adecuados. No debe habilitar ediciones directas de saldos ni ampliar los escritores legacy bloqueados.
+**Estado: dividido en subfases. B3.2a REQUIERE DECISIÓN; B3.2b PENDIENTE, no activa.** El intento de B3.2a se detuvo antes de cualquier cambio porque las políticas actuales de `public.app_permisos` permiten que clientes sin autorización modifiquen `puede_ajustes`. El permiso no puede usarse como puerta de backend hasta endurecer y probar su fuente de verdad. Ver informe 23.
+
+##### B3.2a — Gestión de áreas y asignación preferida de productos
+
+**Estado: REQUIERE DECISIÓN (2026-10-07).** El alcance funcional permanece aprobado, pero su requisito de autorización no se puede satisfacer de forma segura con la política instalada. Debe acordarse una fuente confiable de administración y su bootstrap antes de añadir CRUD de áreas, asignaciones o altas de productos que las escriban. El informe 23 contiene la evidencia y propuesta. No se hicieron cambios de aplicación, esquema o datos.
+
+##### B3.2b — Transferencias visuales
+
+**Estado: PENDIENTE, no activa.** No iniciar hasta que B3.2a quede resuelta y se active por separado. Esta fase deberá llamar únicamente a `stock_transferir`, con permiso, idempotencia, lotes y auditoría; nunca editará saldos directamente.
 
 **Objetivo:** hacer que la navegación refleje áreas sin perder inventario global. Lo implementado en B3.1 cubre únicamente lectura y navegación; los siguientes puntos continúan pendientes:
 

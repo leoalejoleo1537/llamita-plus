@@ -13,6 +13,17 @@
 
 Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resultado y riesgos pendientes.
 
+## 2026-10-07 — B3.2a: bloqueo de autorización documentado
+
+- Estado: **REQUIERE DECISIÓN**. Alejo activó B3.2a; la ejecución se detuvo antes de modificar código o base de datos al comprobar que `app_permisos.puede_ajustes` no es una fuente confiable con las políticas instaladas.
+- Repositorio: `leoalejoleo1537/llamita-plus`, rama `work`, remoto `origin` oficial. Supabase verificado: `llamita-plus`, ref `iuryhsjucblmebdogewa`, estado `ACTIVE_HEALTHY`, PostgreSQL 17.6.1.166.
+- Evidencia de solo lectura: políticas de `public.app_permisos`: `INSERT authenticated WITH CHECK true`; `UPDATE authenticated USING true WITH CHECK true`; y `UPDATE anon,authenticated USING true WITH CHECK true`. Grants directos amplios para anon y authenticated incluyen INSERT, UPDATE, DELETE y TRUNCATE. La tabla contiene 9 filas, 6 con `puede_ajustes=true`; estos valores no prueban quién está autorizado mientras las políticas permitan que el cliente los cambie.
+- Resultado: no se agregaron secciones de Ajustes, edición de área, asignación preferida ni creación por área. No se aplicó SQL/migración, no se cambió permiso alguno ni se insertaron datos sintéticos. Sin cambios en productos, stock, lotes, movimientos, transferencias, recetas o datos comerciales.
+- Decisión solicitada: definir/autorizar un endurecimiento de la administración de `app_permisos` que tenga bootstrap confiable y permita proteger sus escrituras mediante backend, o designar otra fuente de autorización confiable. La propuesta y sus límites están en `docs/hermes/23-b3-2a-bloqueo-autorizacion.md`.
+- B3.2b permanece **PENDIENTE**, no activa. No se accedió a Café del Desierto / Llamita Stock.
+- Verificación documental: `git diff --check` pasó. No se ejecutaron pruebas de aplicación/DB porque no hubo implementación ni cambios de esquema.
+- Publicación de documentación del bloqueo: autorizada a `master` por la solicitud original; commit pendiente.
+
 ## 2026-10-06 - Canal de comunicación Hermes/Codex y activación de A1
 
 - Estado: **A1 ACTIVA**, auditoría documental y técnica de solo lectura.

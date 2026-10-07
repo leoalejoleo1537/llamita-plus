@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **B3.1 COMPLETADA (2026-10-07)**. B3.2 queda **PENDIENTE**, no activa. B1, B2.1, B2.2 decisión resuelta, B2.3, B2.3.1 y B2.4 permanecen cerrados; A3.4d conserva su estado previo.
+Estado actual: **B3.1 COMPLETADA (2026-10-07)**. **B3.2a REQUIERE DECISIÓN** por bloqueo de seguridad; **B3.2b PENDIENTE**, no activa. B1, B2.1, B2.2 decisión resuelta, B2.3, B2.3.1 y B2.4 permanecen cerrados; A3.4d conserva su estado previo.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -123,6 +123,22 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Informe: `docs/hermes/22-b3-1-lectura-areas.md`. Migraciones: `20261007174518 b3_1_lectura_inventario_areas`, `20261007174626 b3_1_include_inactive_stock_products`.
 - Sin escrituras a productos/stock, lotes, movimientos, transferencias, recetas, POS ni datos comerciales; no se habilitó `stock_transferir` desde UI. Bodega mantiene su interfaz. No se accedió a Café del Desierto / Llamita Stock.
 - Publicación: implementación publicada en `master`, commit `2a9c8c2`. B3.2 queda PENDIENTE; no activarla automáticamente.
+
+### Tarea B3.2a — Gestión de áreas y asignación preferida de productos
+
+- Estado: **REQUIERE DECISIÓN (2026-10-07)**. Se detuvo antes de modificar código o base de datos.
+- Autorización: Alejo activó únicamente B3.2a mediante el texto adjunto. Esta actualización registra el bloqueo; no habilita B3.2b.
+- Evidencia: en Supabase Llamita Plus `iuryhsjucblmebdogewa`, `public.app_permisos` tiene políticas `INSERT authenticated WITH CHECK true`, `UPDATE authenticated USING true WITH CHECK true`, y otra política `UPDATE anon,authenticated USING true WITH CHECK true`. Los roles `anon` y `authenticated` además conservan grants directos amplios, incluidos INSERT/UPDATE/DELETE/TRUNCATE. Por tanto cualquier cliente puede alterar `puede_ajustes`; las RPC futuras no pueden tratar ese campo como autorización confiable.
+- Decisión requerida: autorizar el endurecimiento acotado de la administración de `app_permisos` para que solo una identidad con permiso administrativo previamente confiable pueda gestionarla, incluyendo el mecanismo de bootstrap y las RPC necesarias; o definir otra fuente confiable de autorización. No se debe construir CRUD de áreas/asignaciones hasta resolverlo.
+- No se modificó: código, SQL, migraciones, datos, permisos, áreas, productos, stock, lotes, movimientos, transferencias, recetas, POS ni datos comerciales.
+- Informe de bloqueo: `docs/hermes/23-b3-2a-bloqueo-autorizacion.md`.
+- B3.2b (transferencias visuales) queda **PENDIENTE**, no activa.
+
+### Tarea B3.2b — Transferencias visuales entre ubicaciones
+
+- Estado: **PENDIENTE**, no activa. No ejecutar hasta activación explícita.
+- Precondición: resolver primero el bloqueo de autorización de B3.2a y completar su cierre.
+- Alcance reservado: interfaz que llame exclusivamente a `stock_transferir`; no editar saldos directamente.
 
 ### Tarea B2.1 — Cimientos del modelo de áreas operativas
 

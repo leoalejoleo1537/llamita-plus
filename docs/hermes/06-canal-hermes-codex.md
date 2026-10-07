@@ -579,3 +579,21 @@ Conciliación autenticada: las cuatro áreas físicas tienen 0 productos con sal
 Supabase confirmó permisos: anon y service_role no ejecutan las funciones; authenticated sí; roles de aplicación sin INSERT en movimientos ni UPDATE de ubicaciones. La llamada sin sesión fue rechazada. Advisors muestran hallazgos globales previos en otros objetos del proyecto, documentados en el informe para su gestión separada.
 
 Las pruebas estáticas, `npm test`, consulta de permisos y conciliación pasaron. El entorno carece de Chromium; la comprobación DOM del navegador quedó omitida y el informe 22 contiene una secuencia manual para desktop/móvil y consola. Migraciones aplicadas solo a Llamita Plus: `20261007174518` y `20261007174626`. Informe: `docs/hermes/22-b3-1-lectura-areas.md`. Implementación publicada en `master` como `2a9c8c2`. No se accedió a Café del Desierto / Llamita Stock.
+
+## Respuesta de Codex — B3.2a: gestión de áreas y asignación preferida
+
+Fecha: 2026-10-07
+Estado: **REQUIERE DECISIÓN**. B3.2b queda **PENDIENTE**, no activa.
+
+Se verificó de nuevo que el proyecto Supabase es `llamita-plus` (`iuryhsjucblmebdogewa`, `ACTIVE_HEALTHY`, PostgreSQL 17.6.1.166). La inspección de solo lectura de `pg_policies` encontró en `public.app_permisos`:
+
+- `INSERT` para `authenticated` con `WITH CHECK true`.
+- `UPDATE` para `authenticated` con `USING true` y `WITH CHECK true`.
+- Otra política `UPDATE` para `anon,authenticated` con `USING true` y `WITH CHECK true`.
+- Grants directos para `anon` y `authenticated`, incluidos `INSERT`, `UPDATE`, `DELETE` y `TRUNCATE`.
+
+La tabla contiene nueve filas y seis tienen `puede_ajustes=true`, pero ese conteo no identifica autorizaciones confiables: las políticas permiten que clientes escriban esos mismos permisos. Una RPC que valide solamente `app_permisos.puede_ajustes` sería eludible. Por ello no se implementó ningún CRUD de áreas, asignación de productos ni alta desde el navegador.
+
+Se requiere una decisión de arquitectura: autorizar el endurecimiento de la administración de `app_permisos` de forma que solo un permiso existente y confiable pueda gestionarla, incluyendo el bootstrap y las operaciones backend necesarias, o definir otra fuente de autorización verificable. La propuesta, evidencia, alcance no ejecutado y condiciones para reanudar están en `docs/hermes/23-b3-2a-bloqueo-autorizacion.md`.
+
+No hubo cambios en código, SQL, migraciones, permisos, datos operativos ni stock; no se tocó `central`, `angamos`, `bodega`, POS, recetas ni datos comerciales. No se accedió a Café del Desierto / Llamita Stock. B3.2b permanece sin activar.
