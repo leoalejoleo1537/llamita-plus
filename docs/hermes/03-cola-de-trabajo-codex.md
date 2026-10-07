@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **S2 REQUIERE DECISIÓN (2026-10-07)**. La verificación de Data API, grants, RLS, RPC y regresión transaccional pasó, pero faltan sesiones GoTrue reales de las dos cuentas; no se fabricaron tokens ni cambiaron credenciales. **B3.2a y B3.2b permanecen PENDIENTES**, no activas. Las fases posteriores requieren activación separada.
+Estado actual: **S2 REQUIERE DECISIÓN (2026-10-07)**. Data API, grants, RLS, RPC, regresión y sesiones reales pasaron, pero la auditoría manual reportada no aparece en la tabla privada: conteo posterior 0. **B3.2a y B3.2b permanecen PENDIENTES**, no activas.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -60,8 +60,9 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Autorización: Alejo activó S2 sobre el commit S1 `6e1c2c2`, sin migraciones ni cambios persistentes.
 - Resultado: `docs/hermes/26-s2-pruebas-seguridad-regresion.md`.
 - Pasó: Data API anónima real; grants, RLS y EXECUTE; funciones S1; pruebas transaccionales de raíz, administrador operativo y usuario común; auditoría inmutable; `stock_transferir`; áreas; Bodega; ledger; lectura server-side Fudo; conteos y suite local.
-- Bloqueo: no existen credenciales o tokens reutilizables de las dos cuentas en el entorno. La segunda cuenta tampoco tiene una sesión registrada. No se modificó Auth para crear evidencia artificial.
-- Criterio pendiente: login supervisado de ambas cuentas y repetición por red de las rutas autenticadas, sin compartir secretos.
+- Prueba manual: Alejo confirmó login real de ambas cuentas. La raíz pudo leer globalmente, otorgar/revocar y generar auditoría; la cuenta operativa funcionó normalmente y no pudo administrar, escribir permisos ni autoelevarse.
+- Secretos: no se compartieron contraseñas, JWT ni claves; Auth no fue alterado para producir evidencia.
+- Discrepancia crítica: la consulta posterior muestra cero filas de auditoría. La cuenta operativa quedó restaurada correctamente, pero S2 no se cierra hasta reproducir y corroborar una auditoría persistente.
 - Estado operativo: Fudo en prueba/cron apagado, Lama real apagado, origen POS `ninguno`, stock y conteos intactos.
 - Publicación: solo documentación y resultados. B3.2a no se activa.
 

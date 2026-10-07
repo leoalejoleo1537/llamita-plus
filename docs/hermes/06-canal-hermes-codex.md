@@ -8,7 +8,9 @@ Estado: **REQUIERE DECISIÓN**
 
 La Data API anónima real rechazó todas las lecturas, escrituras y RPC administrativas contra `app_permisos`. Grants, RLS, EXECUTE, `search_path`, nombres calificados y validación interna de `auth.uid()` permanecen correctos. Las pruebas transaccionales de raíz, administrador operativo, usuario común, auditoría, `stock_transferir`, áreas, Bodega, ledger y lectura Fudo pasaron y fueron revertidas.
 
-No se pudo completar la condición de sesiones reales: el entorno no contiene credenciales ni tokens reutilizables; la segunda cuenta no tiene una sesión registrada. No se fabricaron JWT ni se cambiaron contraseñas. Se requiere una ventana supervisada donde ambas personas inicien sesión normalmente y se repitan las rutas autenticadas por red.
+Alejo completó la condición de sesiones reales sin compartir contraseñas, JWT ni secretos. La raíz inició sesión, leyó globalmente, otorgó y revocó permisos y generó auditoría. La cuenta operativa inició sesión y operó normalmente; no tuvo administración global y sus intentos de escritura directa y autoelevación fueron rechazados.
+
+La comprobación posterior encontró una contradicción: la tabla privada de auditoría contiene cero filas. La cuenta operativa sí conserva exactamente sus capacidades previstas. Como una concesión/revocación persistente debería dejar auditoría inmutable, S2 no puede cerrarse hasta reproducir una modificación controlada y confirmar el registro en base.
 
 Fudo sigue en prueba con cron apagado; Lama real continúa apagado; origen POS `ninguno`; stock, lotes, movimientos, ventas y caja no cambiaron. Resultado: `docs/hermes/26-s2-pruebas-seguridad-regresion.md`. Plan actualizado: `docs/hermes/27-plan-endurecimiento-seguridad.md`. B3.2a permanece pendiente y no activa.
 

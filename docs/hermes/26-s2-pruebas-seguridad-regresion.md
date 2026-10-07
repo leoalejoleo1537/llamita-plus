@@ -12,7 +12,7 @@ Supabase: `llamita-plus` (`iuryhsjucblmebdogewa`)
 
 La protección instalada por S1 pasó las pruebas directas anónimas de Data API, las comprobaciones de grants/RLS/RPC y las pruebas transaccionales de roles. No se encontró una ruta de elevación en `app_permisos` ni una regresión en las lecturas operativas ensayadas.
 
-S2 no puede marcarse completada porque el entorno no dispone de contraseñas, access tokens ni refresh tokens de las dos cuentas existentes. La cuenta operativa no tiene una sesión registrada y las sesiones registradas del propietario no contienen un token reutilizable accesible. Fabricar un JWT, cambiar contraseñas o emitir enlaces de recuperación habría alterado Auth y violado el alcance. Por tanto, las pruebas autenticadas se ejecutaron con contexto PostgreSQL/JWT transaccional equivalente, pero no atravesaron GoTrue/PostgREST con dos sesiones reales.
+La automatización inicial no dispuso de contraseñas, access tokens ni refresh tokens de las dos cuentas existentes, por lo que no fabricó JWT ni alteró Auth. Alejo completó después la prueba manual con sesiones reales de ambas cuentas, sin compartir credenciales, tokens ni secretos. Las rutas de sesión quedaron cubiertas, pero la comprobación posterior encontró una contradicción en la auditoría y S2 no puede cerrarse todavía.
 
 No se ejecutaron migraciones ni cambios de código, esquema, permisos o datos persistentes.
 
@@ -54,7 +54,7 @@ Un bloque `BEGIN ... ROLLBACK` validó:
 - lectura `service_role` de las dos filas vinculadas que necesita Fudo;
 - rollback total: auditoría persistente en cero y capacidades originales intactas.
 
-Estas pruebas usan los UUID reales y las definiciones instaladas, pero el contexto JWT se inyectó de forma transaccional. No sustituyen la prueba pendiente con sesiones GoTrue reales.
+Estas pruebas usan los UUID reales y las definiciones instaladas. El contexto JWT automatizado se inyectó de forma transaccional y fue complementado después por la prueba manual con sesiones GoTrue reales.
 
 ### Regresión operativa
 
@@ -98,10 +98,16 @@ Los conteos permanecen idénticos a S1: 1.437 productos; stock 15.438; 431 movim
 
 Fudo permanece en modo prueba con cron apagado. Lama real continúa apagado y su configuración está vacía. El origen POS sigue `ninguno` para las cuatro claves registradas. Bodega y el ledger conservaron sus lecturas. No hubo contacto con Fudo remoto.
 
-## Evidencia pendiente para completar S2
+## Prueba manual con sesiones reales
 
-Se necesita una ventana supervisada en la que el propietario y la segunda cuenta inicien sesión normalmente, sin compartir contraseñas ni tokens. Desde cada sesión debe ejecutarse el mismo conjunto de lecturas/RPC y observar las respuestas de red. Los cambios temporales del propietario deben restaurarse en la misma sesión y comprobarse en auditoría; si se automatizan, deben envolverse en una operación backend transaccional de prueba aprobada previamente.
+Alejo confirmó la ejecución manual:
 
-Hasta contar con esa evidencia, S2 queda `REQUIERE DECISIÓN`. No se activa B3.2a ni ninguna fase siguiente.
+- cuenta raíz: login correcto, acceso a administración, lectura global, otorgamiento y revocación correctos, con auditoría generada;
+- cuenta operativa: login y operación normal correctos, administración global no disponible, modificación directa y autoelevación rechazadas;
+- no se compartieron contraseñas, JWT ni secretos.
+
+La comprobación de solo lectura inmediatamente posterior devolvió `0` filas en `authz_internal.permisos_auditoria`, aunque el ensayo manual reportó una auditoría generada. Una concesión y revocación persistentes deberían dejar registros inmutables incluso cuando las capacidades terminen restauradas. La cuenta operativa sí quedó con sus capacidades esperadas: editar/Fudo/Ajustes habilitados, Lama apagado y cero bloqueos Fudo.
+
+Esta discrepancia afecta un criterio crítico. S2 permanece `REQUIERE DECISIÓN` hasta reproducir una única modificación controlada y confirmar la fila auditada en la base. No se activa B3.2a ni ninguna fase siguiente.
 
 No se accedió ni modificó Café del Desierto / Llamita Stock.
