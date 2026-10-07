@@ -13,6 +13,16 @@
 
 Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resultado y riesgos pendientes.
 
+## 2026-10-07 — S2: verificación de seguridad y regresión
+
+- Estado: **REQUIERE DECISIÓN**. No se halló escalamiento en las rutas probadas, pero faltó evidencia con sesiones GoTrue reales de ambas cuentas.
+- Data API anónima rechazó SELECT, INSERT, UPDATE, cambio de `auth_uid`, DELETE y las RPC administrativas. TRUNCATE está revocado para los tres roles API.
+- Pruebas `BEGIN ... ROLLBACK`: raíz, administrador operativo, usuario común, auditoría inmutable, RLS propia, DML denegado, `stock_transferir`, áreas, Bodega y lectura Fudo pasaron.
+- Las RPC S1 conservan `SECURITY DEFINER`, `search_path=''`, nombres calificados, comprobación de `auth.uid()` y ACL correcta. No hay políticas abiertas nuevas en `app_permisos`.
+- `npm test` pasó; Chromium no está instalado. Advisors conservan los hallazgos globales heredados de S0, fuera de S2.
+- Conteos post prueba iguales: 1.437 productos, stock 15.438, 431 movimientos, 42 lotes, 59 cuentas, 30 pagos, caja 2, Lama–Stock 0, Fudo 15.357, auditorías 0 y transferencias 0.
+- No hubo migraciones, código funcional, cambios persistentes, llamadas a Fudo remoto ni acceso a Café del Desierto. Informe 26 y plan 27.
+
 ## 2026-10-07 — S1: identidad raíz y gobierno seguro de permisos
 
 - Estado: **COMPLETADA**. Alejo confirmó el UUID raíz exacto; Supabase verificó que existe, está confirmado y no es anónimo.

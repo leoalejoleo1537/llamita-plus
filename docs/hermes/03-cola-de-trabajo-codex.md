@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **S1 COMPLETADA (2026-10-07)**; la identidad raíz y el gobierno de `app_permisos` ya son confiables. **B3.2a queda PENDIENTE tras resolverse su bloqueo de autorización**, no activa; **B3.2b PENDIENTE**, no activa. Las fases posteriores de endurecimiento general permanecen pendientes y requieren activación separada.
+Estado actual: **S2 REQUIERE DECISIÓN (2026-10-07)**. La verificación de Data API, grants, RLS, RPC y regresión transaccional pasó, pero faltan sesiones GoTrue reales de las dos cuentas; no se fabricaron tokens ni cambiaron credenciales. **B3.2a y B3.2b permanecen PENDIENTES**, no activas. Las fases posteriores requieren activación separada.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -53,6 +53,17 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Seguridad: raíz no degradable por RPC; anon sin lectura; authenticated solo su fila; `anon`, `authenticated` y `service_role` sin DML directo. Siete filas históricas sin Auth quedan inertes.
 - Pruebas: roles raíz/administrador/común/anon/service role, auditoría, Data API, transferencia, conteos, advisors, `npm test` y `git diff --check`.
 - Fases siguientes: las 36 tablas abiertas, RPC Lama/caja, Fudo operativo, recetas, logística y reportes siguen fuera de S1. No activar automáticamente.
+
+### Tarea S2 — Verificación real de seguridad y regresión
+
+- Estado: **REQUIERE DECISIÓN (2026-10-07)**.
+- Autorización: Alejo activó S2 sobre el commit S1 `6e1c2c2`, sin migraciones ni cambios persistentes.
+- Resultado: `docs/hermes/26-s2-pruebas-seguridad-regresion.md`.
+- Pasó: Data API anónima real; grants, RLS y EXECUTE; funciones S1; pruebas transaccionales de raíz, administrador operativo y usuario común; auditoría inmutable; `stock_transferir`; áreas; Bodega; ledger; lectura server-side Fudo; conteos y suite local.
+- Bloqueo: no existen credenciales o tokens reutilizables de las dos cuentas en el entorno. La segunda cuenta tampoco tiene una sesión registrada. No se modificó Auth para crear evidencia artificial.
+- Criterio pendiente: login supervisado de ambas cuentas y repetición por red de las rutas autenticadas, sin compartir secretos.
+- Estado operativo: Fudo en prueba/cron apagado, Lama real apagado, origen POS `ninguno`, stock y conteos intactos.
+- Publicación: solo documentación y resultados. B3.2a no se activa.
 
 ### Bloque 0 — Auditoría de inventario por áreas, sedes y Bodega
 
