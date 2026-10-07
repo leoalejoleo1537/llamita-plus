@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **B2.1 — cimientos del modelo de áreas COMPLETADO (2026-10-07)**. B2.2 — modelo de existencias por área permanece PENDIENTE y no activo; A3.4d conserva su estado previo.
+Estado actual: **B2.2 — modelo de existencias por área REQUIERE DECISIÓN (2026-10-07)**. B2.1 está COMPLETADO; B2.3 (interfaz/formularios) permanece PENDIENTE y no activa; A3.4d conserva su estado previo.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -50,12 +50,24 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 
 ### Bloque B2 — Modelo de áreas y stock por área
 
-- Estado general: EN CURSO POR SUBFASES. **B2.1 COMPLETADO**; **B2.2 PENDIENTE**, no activa.
+- Estado general: EN CURSO POR SUBFASES. **B2.1 COMPLETADO**; **B2.2 REQUIERE DECISIÓN**; **B2.3 (interfaz/formularios) PENDIENTE**, no activa.
 - Precondiciones para B2.2: definir fuente única de stock, corte coordinado de escritores, tratamiento del saldo sin asignar y controles de acceso por sede/área. Local 1 no es aislamiento técnico.
 - Objetivo restante: diseñar e implementar existencias por área sin duplicar `productos.stock_actual`, revisando lotes, repartos, mermas, Fudo y Lama antes de cualquier escritura.
 - B2.1 creó solo el catálogo aditivo de áreas de `plaza` y una relación preparatoria vacía. No asignó productos ni stock. Evidencia: `docs/hermes/15-b2-1-cimientos-areas.md`.
 - B2.2 deberá decidir/implementar el modelo de saldos, conciliación física, escritura única, corte de consumidores y permisos. Requiere nueva activación explícita.
 - Fuera de B2.1: migrar stock, crear saldos por área, cambiar lotes, vencimientos o datos de reparto.
+
+### Tarea B2.2 — Existencias por producto y área, fuente única
+
+- Estado: **REQUIERE DECISIÓN (2026-10-07)**. No se ejecutó migración de stock ni se creó tabla de saldos.
+- Autorización: Alejo activó únicamente B2.2 en esta ejecución.
+- Auditoría: `docs/hermes/16-b2-2-auditoria-fuente-unica-stock.md`.
+- Hallazgo determinante: la app y RPCs vigentes siguen escribiendo `productos.stock_actual`; lotes lo recalculan mediante trigger. La app actualiza `productos` y reemplaza filas de lotes directamente; Fudo, mermas, entradas/deshacer, repartos, restauraciones, fusiones, franquicia y Lama tienen funciones instaladas que escriben o delegan el saldo. No es seguro copiar ahora el saldo a otra tabla editable y conservar esos caminos.
+- Motivos: la relación B2.1 no tiene cantidad y admite una sola fila por producto/sede; lotes carecen de área; mínimos/máximos siguen en producto; las políticas RLS de productos/lotes/movimientos permiten escrituras amplias a roles de aplicación. La interfaz todavía consulta y modifica el saldo global.
+- Decisión solicitada antes de retomar: aprobar una transición coordinada donde una sola tabla/ledger sea autoridad para `plaza`, `productos.stock_actual` sea solo lectura/proyección compatible, y todos los escritores/lectores (incluida API/RLS, lotes y repartos) se adapten antes del corte; definir ubicación de lotes y asignación física inicial/stock sin asignar. Ver detalle en informe 16.
+- Límites ejecutados: consultas SELECT-only; sin migración, INSERT/UPDATE/DELETE, RPC de escritura ni cambio de código de aplicación. Datos y schema operativos permanecen como estaban.
+- Publicación: solo documentación de auditoría y bloqueo a `master`; no publicar cambios de código, esquema o datos.
+- Siguiente bloque: B2.3 (interfaz y formularios) se mantiene PENDIENTE y no se activa.
 
 ### Tarea B2.1 — Cimientos del modelo de áreas operativas
 

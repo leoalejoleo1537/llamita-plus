@@ -210,3 +210,14 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - Sin cambios en productos, stock, movimientos, repartos, lotes, recetas, permisos, `lama_areas`, `central`, `angamos` o `bodega`. No se accedió a Café del Desierto / Llamita Stock.
 - Riesgo: clasificación por heurísticas descriptivas requiere revisión humana; la relación actual no modela distribución cuantitativa y no debe sumarse como stock. B2.2 debe decidir el destino de un producto repartido entre áreas, el corte de escritores y el control por sede.
 - Rollback preparado, no ejecutado; aborta si hay asignaciones o catálogo distinto al estado inicial.
+
+## 2026-10-07 — B2.2: auditoría de fuente única; requiere decisión
+
+- Estado: **REQUIERE DECISIÓN**. B2.3 (interfaz y formularios) permanece pendiente y no se activó.
+- Repositorio verificado: `leoalejoleo1537/llamita-plus`, remoto origin correcto, rama `work`, sincronizada con `origin/master` en `60e83c68a4fa24dff461576c6ccd30b00323ba7c`. Supabase verificado por metadatos: `llamita-plus`, ref `iuryhsjucblmebdogewa`, activo, PostgreSQL 17.6.
+- Auditoría solo lectura: UI edita directamente `productos.stock_actual`, crea productos con saldo y reemplaza `producto_lotes`; el trigger `trg_sync_stock_lotes` recalcula el total. El catálogo instalado muestra escritores/delegados para mermas/reversa, entradas/reversa, repartos/reversa, Fudo, Lama, fusiones/reversa, restauraciones/reversa, franquicia y productos enlazados. Lectores, mínimos y máximos siguen usando saldo por producto.
+- Modelo B2.1: las cuatro áreas existen solo para `plaza`; `producto_area_asignacion` tiene 0 filas, no almacena cantidad, su constraint solo permite estado asignado/sin asignar y hoy limita la relación a una fila por producto/sede. El lote carece de ubicación.
+- Conteos inicio/cierre iguales: productos 1.437; stock total 15.438,00; plaza 329/4.566,20; movimientos 431/25; lotes 42/9; repartos 361/148 destino plaza; recetas 396/195. Asignaciones por área 0. Productos de plaza con lotes: 6, lotes suman 36,00 y no difieren de `stock_actual`.
+- Decisión: no poblar saldos por área mientras continúen los escritores y la interfaz sobre `stock_actual`; eso crearía doble fuente editable. Recomendar ledger por ubicación como autoridad de `plaza` con agregado global de compatibilidad solo de lectura tras corte coordinado. Hace falta resolver adaptación de escritores/permisos, lotes por área y confirmación de la simulación como ubicación física.
+- No hubo migración ni rollback SQL, RPC de escritura, cambios de código, SQL mutacional o cambios de datos. No se tocó `central`, `angamos`, `bodega` histórica ni áreas operativas. No se accedió a Café del Desierto / Llamita Stock.
+- Informe: `docs/hermes/16-b2-2-auditoria-fuente-unica-stock.md`. `git diff --check` debe pasar antes de publicar documentación. B2.3 sigue pendiente.

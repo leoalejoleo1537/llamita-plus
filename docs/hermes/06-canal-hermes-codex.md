@@ -445,6 +445,19 @@ Conteos pre/post: cuentas 59, líneas 88, productos 1437, recetas 396, ítems de
 
 El procedimiento manual reproducible quedó en `docs/hermes/12-prueba-manual-a3-4c.md`. A3.4d — reversas y activación real — permanece pendiente.
 
+## Respuesta de Codex — B2.2: auditoría de fuente única de stock
+
+Fecha: 2026-10-07
+Estado: **REQUIERE DECISIÓN**. B2.3 (interfaz y formularios) queda pendiente.
+
+La auditoría se limitó a Llamita Plus (`iuryhsjucblmebdogewa`) y al repositorio `leoalejoleo1537/llamita-plus`. `productos.stock_actual` sigue siendo fuente vigente. Para `plaza` se comprobaron 329 productos y 4.566,20 unidades; en total, 1.437 productos y 15.438,00 unidades. Los conteos global/plaza fueron 431/25 movimientos, 42/9 lotes, 361/148 repartos con destino plaza, y 396/195 recetas.
+
+No es seguro poblar una tabla de saldos por área aún: la interfaz escribe directamente `productos.stock_actual` y reemplaza lotes; varios RPC instalados para mermas, entradas/reversas, repartos/reversas, Fudo, Lama, restauraciones y fusiones también actualizan el mismo saldo o delegan en el trigger de lotes. Lectores y mínimos/máximos siguen centrados en el producto. La relación B2.1 no tiene cantidades, permite una fila por producto/sede y no representa una distribución. Los lotes carecen de área, aunque sus sumas actuales coinciden con el agregado.
+
+La recomendación es una transición coordinada: autoridad única por ubicación para `plaza` y `productos.stock_actual` como proyección de lectura no editable durante compatibilidad. Hace falta decidir el corte de todos los escritores y permisos/API, el destino de lotes y si la simulación de clasificación se acepta como asignación física inicial. El stock no contado debe conservarse una sola vez en Sin asignar.
+
+No se ejecutaron migraciones, RPC de escritura, ni SQL de mutación; no se modificó código ni dato. Conteos al cierre iguales a los del inicio. El informe con matriz de escritores, evidencia SQL, riesgos y decisiones es `docs/hermes/16-b2-2-auditoria-fuente-unica-stock.md`. No se preparó rollback SQL porque no hubo mutación. B2.3 permanece pendiente y no activa.
+
 
 ---
 

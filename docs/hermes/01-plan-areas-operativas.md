@@ -130,7 +130,7 @@ Resultado detallado, pruebas, conteos y rollback: `docs/hermes/15-b2-1-cimientos
 
 ### Bloque B2.2 — Modelo de existencias por área
 
-**Estado: PENDIENTE; requiere activación explícita.** B2.1 no autoriza saldos por área ni migración de stock.
+**Estado: REQUIERE DECISIÓN (2026-10-07).** El usuario activó B2.2, pero la auditoría de escritores detectó que el corte no puede hacerse con seguridad en esta fase sin una transición coordinada de código y permisos. No se creó modelo de saldos ni se migró stock. Evidencia: `docs/hermes/16-b2-2-auditoria-fuente-unica-stock.md`.
 
 **Objetivo:** resolver el modelo de cantidades por área y transición desde la fuente vigente `productos.stock_actual` sin duplicar stock.
 
@@ -143,7 +143,15 @@ Resultado detallado, pruebas, conteos y rollback: `docs/hermes/15-b2-1-cimientos
 7. Definir permisos por sede/área y el tratamiento futuro de productos que ocupan más de un área. La relación B2.1 solo admite una asignación y no resuelve cantidades partidas.
 8. Conciliar cantidades antes/después por sede, producto y destino antes de cualquier corte. No duplicar stock ni alterar movimientos históricos.
 
-**Criterios de salida:** arquitectura y corte aprobados; modelo de saldos aditivo; prueba de conciliación; escritores coordinados; permisos revisados; stock total conservado; sin doble fuente editable. La interfaz de tarjetas pertenece a B3 y no forma parte de B2.1/B2.2.
+**Bloqueo actual:** `productos.stock_actual` sigue siendo editable desde la interfaz y por numerosos RPCs; el trigger de lotes recalcula ese campo. Mantener saldo por área editable en paralelo crearía doble fuente. La relación B2.1 no tiene cantidades ni admite varias filas por producto/sede; `producto_lotes` no tiene ubicación; y los mínimos/máximos actuales son globales al producto. No se debe crear ni poblar un saldo nuevo hasta aprobar y ejecutar la migración coordinada de lectores, escritores, lotes y controles RLS.
+
+**Decisiones para reactivar:** aprobar que para `plaza` la tabla/ledger por ubicación sea autoridad única y `productos.stock_actual` pase a ser una proyección no editable compatible (o elegir otra arquitectura sin doble escritura); definir cómo se asignan físicamente los saldos iniciales y lo no contado; acordar si el lote se distribuye por área o queda temporalmente como detalle global con sus límites explícitos; aprobar un corte que adapte a la vez la edición directa, entradas, mermas, repartos/reversas, lotes, Fudo, Lama, restauración, fusión y permisos/API.
+
+**Criterios de salida:** arquitectura y corte aprobados; modelo de saldos aditivo; prueba de conciliación; escritores coordinados; permisos revisados; stock total conservado; sin doble fuente editable. La interfaz de tarjetas y formularios pertenece a B2.3 y no forma parte de esta fase.
+
+### Bloque B2.3 — Interfaz y formularios
+
+**Estado: PENDIENTE; no activar hasta completar B2.2.** No hay cambios de UI o formularios en B2.2. Sus dependencias y criterios originales de navegación se mantienen.
 
 ### Bloque B3 — Portada, páginas de área, productos y búsquedas
 
