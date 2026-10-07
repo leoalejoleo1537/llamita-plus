@@ -1,6 +1,6 @@
 # Plan de implementación: inventario por áreas operativas en Llamita Plus
 
-**Estado:** aprobado por Alejo para iniciar el Bloque 1. Los Bloques 2 y 3 requieren revisión del resultado del bloque anterior.
+**Estado:** Bloque 0 completado como auditoría de solo lectura (2026-10-07). B1 permanece pendiente y no activa hasta resolver la fuente única de stock, el corte coordinado de escritores y los controles de acceso. Los Bloques 2 y 3 siguen inactivos.
 
 **Repositorio objetivo:** `leoalejoleo1537/llamita-plus`, rama `master`.
 
@@ -107,6 +107,15 @@ Codex debe confirmar si área equivale a ubicación de stock, si lotes y vencimi
 
 ## 6. Fases de trabajo para Codex
 
+### Bloque 0 — Auditoría de áreas, sedes y Bodega
+
+**Estado: COMPLETADO (solo lectura y documentación).** El informe `docs/hermes/13-auditoria-areas-sedes-bodega.md` registra esquema instalado, sedes, stock, lotes, escritores, reparto, mermas, Fudo, Lama, permisos, arquitectura recomendada y conciliación. No se cambió código, esquema ni datos.
+
+Decisiones de negocio registradas: Local 1 (`plaza`) será el ensayo operativo, Local 2 (`angamos`) se archivará más adelante conservando historia, Bodega (`central`) es nodo logístico, las áreas serán configurables por sede, mermas siguen globales con área cuando corresponda, las clasificaciones son editables, la distribución identifica destino por línea y una sede futura solo copia configuración aprobada. Local 1 no es aislamiento técnico: comparte proyecto y políticas de datos permisivas.
+
+**Salida:** mantener B1 pendiente. Antes de habilitar stock de área se deben decidir autoridad única, corte de escritores, tratamiento de saldo sin asignar y controles de acceso. La selección de Local 1 no autoriza migrar ni clasificar stock.
+
+
 La cola tendrá una sola fase activa. Las tres ventanas sugeridas son **12:00, 14:00 y 17:00 hora de Santiago**, cada una para un bloque independiente. Si el bloque previo no terminó o dejó una decisión pendiente, el siguiente no empieza y registra el bloqueo. Codex no activa por su cuenta la fase siguiente.
 
 ### Bloque 1 — Verificación, modelo y preparación de datos
@@ -190,13 +199,16 @@ La cola tendrá una sola fase activa. Las tres ventanas sugeridas son **12:00, 1
 - Codex registra el resultado en `docs/hermes/04-bitacora-codex.md` y deja la cola en un estado que impida repetir o saltar fases.
 - El usuario revisa el resultado visible en Llamita Plus antes de activar el bloque siguiente.
 
-## 10. Pendientes que Codex debe confirmar durante el Bloque 1
+## 10. Pendientes antes de B1
 
-1. Qué sede de Llamita Plus será el contexto aislado de simulación.
-2. Si la bodega existente es una sede independiente o debe tratarse como destino especial en la recepción de repartos.
-3. Cómo representar temporalmente stock histórico no asignado sin mantener dos fuentes de verdad.
-4. Si lotes, vencimientos, mínimos y unidades se guardan actualmente por producto/sede y qué deben heredar por área.
-5. Si las recetas existen en el esquema activo y dónde se configura actualmente una receta para poder añadir el metadato.
-6. Qué operaciones están activas desde Fudo/POS y qué filtros existentes deben permanecer fuera de esta implementación.
+1. Definir la fuente única de stock y la secuencia de corte que adapte todos los escritores antes de crear saldos editables por área.
+2. Definir controles de acceso por sede/área; Local 1 es el ensayo elegido, pero no una frontera de aislamiento en el esquema actual.
+3. Aprobar cómo se representa el stock que no ha sido contado o transferido físicamente: debe permanecer sin asignar, sin duplicar.
+4. Diseñar destino por línea, origen y atomicidad para reparto Bodega→área, incluyendo unidad/factor y lote/vencimiento.
+5. Especificar cómo se reconcilian identidad de producto, stock mínimo/máximo y lotes por ubicación.
+6. Confirmar qué partes de Fudo/Lama permanecen como escritoras durante cada etapa; no activarlas sobre saldos nuevos sin adaptación.
+7. Definir archivo operativo de Local 2 preservando IDs, cantidades e historial; no borrar ni transferir stock por heurística.
+
+Los hechos actuales y la recomendación están en `docs/hermes/13-auditoria-areas-sedes-bodega.md`. Estas preguntas no autorizan cambios de aplicación, SQL, migración ni datos.
 
 Estas verificaciones no son permiso para abrir alcance hacia Café del Desierto, ejecutar operaciones destructivas o automatizar el descuento de recetas.

@@ -61,3 +61,27 @@ El esquema instalado guarda `productos.stock_actual`, `stock_min` y `stock_max` 
 - `repartos` lleva sede destino y `reparto_items` producto destino/origen/bodega, sin área. `reparto_recibir`, `reparto_descontar_bodega` y `reparto_deshacer` afectan el stock de producto.
 - `historial` y `historial_auto` guardan foto por sede/producto sin área; esos registros deben conservar el área nula y no se deben asignar retroactivamente por nombre. Las recetas son por sede (`recetas`) y ligan insumos a `productos.id` (`receta_items`); el área de elaboración debe ser metadato futuro, sin descuento automático.
 - La app actualiza stock directamente mediante `saveFields()` desde edición rápida/ficha y escribe lotes desde `guardarLotes()`. Las rutinas activas que contienen referencias a `productos.stock_actual` son `crear_producto_enlazado`, `descontar_con_reposicion`, `deshacer_entrada`, `deshacer_fusion`, `deshacer_merma`, `deshacer_restauracion`, `franquicia_linea_lista`, `fudo_stock_calculado`, `fusionar_productos`, `mermar`, `registrar_entrada`, `reparto_descontar_bodega`, `reparto_deshacer`, `reparto_recibir`, `restaurar_sede`, `sync_stock_desde_lotes`, `tomar_foto_inventario` y `urgente_solo_si_falta`. Además, `fudo_procesar_item` descuenta por `descontar_lotes` (que activa el trigger de lotes) o `descontar_con_reposicion` según lotes/modo. Los conteos y reportes leen `stock_actual` directamente.
+
+
+## Decisiones de negocio registradas para inventario por áreas — 2026-10-07
+
+Estas decisiones delimitan el diseño solicitado; no autorizan todavía mutaciones de esquema o datos.
+
+- Local 1 (`plaza`) será el contexto de ensayo operativo. No es un sandbox aislado: sigue dentro del proyecto poblado de Llamita Plus y RLS actual no aísla por sede.
+- Local 2 (`angamos`) se archivará en una fase posterior, conservando filas, lotes, historial e IDs. No borrar ni trasladar automáticamente sus saldos.
+- Bodega activa es `central`, tratada como nodo logístico distinto de áreas de tienda. La clave histórica `bodega` queda separada y no se reutiliza.
+- Las áreas son configurables por sede; mermas continúan globales, con ubicación/área registrada cuando proceda.
+- La clasificación de productos es simulada, revisable y corregible; no modifica `rubro`/`tipo` ni se considera definitiva por coincidencia de nombre.
+- Se requiere soportar productos nuevos y asignación de producto existente a varias áreas, con saldos por ubicación independientes y una sola identidad.
+- El reparto debe registrar destino por línea; sede destino y área son conceptos distintos.
+- La clonación futura de una sede copia solo configuración autorizada. No copia stock, lotes, movimientos, ventas/caja, historiales, usuarios ni credenciales/conectores.
+
+### Decisiones técnicas aún requeridas antes de B1
+
+1. Definir fuente única y corte coordinado para UI, lotes, entradas, mermas, reparto, Fudo, Lama, fusiones, restauraciones y demás escritores.
+2. Definir modelo de seguridad por sede/área y cerrar el acceso cruzado observado antes de usar datos operativos por área.
+3. Definir bucket temporal sin asignar y procedimiento de conteo/transferencia física sin duplicar cantidades.
+4. Definir transacción idempotente de reparto Bodega→área y el destino de lotes/vencimientos.
+5. Definir proyección compatible de `productos.stock_actual` y el retiro de escritura directa sobre ella.
+
+Bloque 0 concluyó con estas decisiones registradas y B1 continúa `PENDIENTE`, sin activación.

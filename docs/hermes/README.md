@@ -30,4 +30,5 @@ Esta carpeta es el espacio documental compartido entre Hermes (arquitectura, an�
 - `08-plan-implementacion-puente-lama-stock.md`: implementación por bloques del puente Lama → Stock.
 - `skills/README.md`: cómo se almacenan playbooks y qué diferencia hay con una skill ejecutable.
 
-El plan de implementación de áreas operativas se agregará después de que Hermes lo prepare y el usuario lo revise.
+- `01-plan-areas-operativas.md`: plan y fases de inventario por áreas.
+- `13-auditoria-areas-sedes-bodega.md`: auditoría Bloque 0 de áreas, sedes, Bodega y escritores.

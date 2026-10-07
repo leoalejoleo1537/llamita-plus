@@ -419,3 +419,22 @@ El evento quedó `prueba` y se generó una aplicación por ingrediente. Dos rein
 Conteos pre/post: cuentas 59, líneas 88, productos 1437, recetas 396, ítems de receta 514, comandas 50 y stock total 15438; eventos, aplicaciones, capturas y configuración quedaron en cero. No se usaron ventas reales, no se habilitó modo real, no se tocó Fudo, no se implementaron áreas y no se accedió a Café del Desierto/Llamita Stock.
 
 El procedimiento manual reproducible quedó en `docs/hermes/12-prueba-manual-a3-4c.md`. A3.4d — reversas y activación real — permanece pendiente.
+
+
+---
+
+## Respuesta de Codex — Bloque 0: auditoría de áreas, sedes y Bodega
+
+Fecha: 2026-10-07
+Estado: **COMPLETADO; solo lectura**. B1 queda **PENDIENTE**, no activa.
+
+- Repositorio confirmado: `leoalejoleo1537/llamita-plus`, remoto `origin` correcto, rama local `work`. Supabase confirmado por metadatos: `llamita-plus` (`iuryhsjucblmebdogewa`).
+- `plaza` corresponde a Local 1, `angamos` a Local 2, `central` a Bodega activa; `bodega` es una clave histórica distinta. Totales leídos: 1,437 filas de producto y `stock_actual` 15,438.00. El detalle de 42 lotes cuadra con su producto y no se suma de nuevo.
+- No existe modelo de inventario por área/sede normalizada. `lama_areas` son áreas de mesas; movimientos/mermas, lotes y repartos carecen de área explícita.
+- `productos.stock_actual` es autoridad actual, pero numerosas rutas lo escriben; los lotes se sincronizan por trigger. La recomendación de diseño es una autoridad única por producto/ubicación, con movimiento atómico/idempotente y saldo agregado de compatibilidad solo de lectura durante transición. No se fijan nombres de tablas/columnas.
+- Bodega `central` debe seguir como nodo logístico. Reparto actual puede registrar recepción y baja de origen en pasos separados; la futura transferencia a área requiere destino por línea, origen, unidad/factor, lotes y atomicidad.
+- Local 2 se archivaría después preservando IDs e historia. Mermas permanecen globales con área opcional para operaciones nuevas. Mínimos/críticos deben calcularse por ubicación. Clonar sede copia configuración aprobada y parte con stock cero.
+- Riesgo de seguridad: Local 1 no es sandbox. Las políticas RLS observadas son permisivas y los permisos de app son globales, sin alcance por sede/área.
+- Decisiones pendientes para B1: autoridad/corte de todos los escritores; límites RLS/API; stock sin asignar y conciliación física; reparto transaccional con lotes; estrategia de proyección y su retiro.
+
+Informe completo y consultas de solo lectura: `docs/hermes/13-auditoria-areas-sedes-bodega.md`. No hubo invocación de RPC, SQL de escritura, migración ni mutación de datos. No se consultó Café del Desierto / Llamita Stock. No se activó B1 ni bloques posteriores.

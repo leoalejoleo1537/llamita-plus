@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **A3.4c completada — prueba controlada Lama en modo prueba verificada**. A3.4d y B1 de áreas permanecen pendientes.
+Estado actual: **Bloque 0 de inventario por áreas completado (2026-10-07)**. A3.4d y B1 permanecen pendientes; no hay fase de áreas activa.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -30,10 +30,18 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Publicación: [sin push | push a master autorizado]
 - Riesgos conocidos:
 
+### Bloque 0 — Auditoría de inventario por áreas, sedes y Bodega
+
+- Estado: COMPLETADO (2026-10-07; solo lectura y documentación).
+- Autorización: Alejo solicitó activar únicamente Bloque 0 mediante el texto adjunto.
+- Resultado: `docs/hermes/13-auditoria-areas-sedes-bodega.md`; se actualizaron plan, canal, cola, bitácora y decisiones.
+- Supabase verificado: Llamita Plus `iuryhsjucblmebdogewa`. Solo lecturas. Sin código, SQL de escritura, migraciones o datos modificados.
+- Cierre: arquitectura actual, sedes, bodegas, lotes, escritores, reparto, mermas, Fudo, Lama, permisos y riesgos documentados. No activar B1 automáticamente.
+
 ### Tarea B1 — Verificación, modelo y preparación de datos
 
-- Estado: REQUIERE DECISIÓN
-- Autorización: Alejo aprobó el plan de áreas operativas y autorizó iniciar el Bloque 1.
+- Estado: PENDIENTE (no activa; requiere resolver decisiones de fuente única, corte de escritores y seguridad por sede/área).
+- Autorización: el usuario autorizó Bloque 0 y definió Local 1 como ensayo operativo, Local 2 para archivo posterior, Bodega como nodo logístico, mermas globales con área opcional y clasificación editable. B1 no queda activada.
 - Objetivo: verificar la arquitectura real de inventario por áreas y preparar una base aditiva, segura y conciliada para Llamita Plus.
 - Contexto: trabajar únicamente en Llamita Plus. Café del Desierto / Llamita Stock queda fuera de alcance.
 - Documentos obligatorios: CLAUDE.md, README.md, docs/hermes/00-reglas-operativas.md, docs/hermes/01-plan-areas-operativas.md y la documentación relevante de docs/.
@@ -43,9 +51,9 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Criterios de aceptación: arquitectura documentada; no existen dos fuentes editables de stock; no se duplican cantidades; productos y asignaciones son corregibles; datos y permisos verificados; pruebas ejecutadas; bitácora actualizada.
 - Publicación: push a master autorizado si la fase termina y las pruebas son satisfactorias. Si hay una decisión crítica abierta, detenerse y registrar BLOQUEADO o REQUIERE DECISIÓN.
 - Riesgos conocidos: stock histórico sin área, lotes sin ubicación, clasificación ambigua, falta de un contexto de datos aislado y corte de fuente única pendiente.
-- Resultado de preflight (2026-10-06): repositorio sincronizado por fast-forward hasta `c5cc8d6`; `work` coincide con `origin/master` y el árbol está limpio. Se confirmó por lectura que Supabase `iuryhsjucblmebdogewa` es `llamita-plus`.
-- Bloqueos: no existe un contexto aislado de datos de demostración; `modo_demostracion` solo cambia la presentación y las sedes existentes tienen datos. También falta acordar un corte de stock único que incluya todos los escritores actuales antes de habilitar existencias independientes por área.
-- Cambios en código, esquema y datos: ninguno. No activar B2.
+- Resultado de Bloque 0 (2026-10-07): auditoría de solo lectura en `docs/hermes/13-auditoria-areas-sedes-bodega.md`. Se confirmó que `plaza` es Local 1, `angamos` Local 2, `central` Bodega y `bodega` una clave histórica separada. Local 1 elegido como ensayo no equivale a aislamiento técnico: las políticas RLS son permisivas y la app comparte el proyecto.
+- Bloqueos vigentes: definir una única fuente de stock, corte coordinado de todos los escritores y controles de acceso por sede/área. Tampoco se debe distribuir el saldo de Local 1 en áreas sin conteo o transferencia trazable.
+- Cambios de aplicación, esquema y datos: ninguno. B1 está PENDIENTE y no activa; no activar Bloque 2 ni 3.
 
 ### Tarea A1 - Auditoría de integración Fudo y Llamita Lama
 

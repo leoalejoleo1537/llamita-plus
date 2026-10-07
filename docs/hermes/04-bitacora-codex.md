@@ -167,3 +167,17 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - Conteos pre/post: cuentas 59, líneas 88, productos 1437, recetas 396, ítems de receta 514, comandas 50, suma de stock 15438; configuración, eventos, aplicaciones y capturas 0 tras el rollback.
 - Los IDs son efímeros y fueron revertidos. No se usaron ventas reales, no se tocó Fudo, no se implementaron áreas y no se accedió a Café del Desierto/Llamita Stock.
 - Procedimiento manual: `docs/hermes/12-prueba-manual-a3-4c.md`.
+
+
+## 2026-10-07 — Bloque 0: auditoría de áreas, sedes y Bodega
+
+- Estado: **COMPLETADO — solo lectura y documentación**. B1 queda pendiente y no activa.
+- Repositorio: `leoalejoleo1537/llamita-plus`, remoto correcto, rama local `work`. Proyecto confirmado por metadatos: Supabase `llamita-plus` (`iuryhsjucblmebdogewa`, PostgreSQL 17.6).
+- Archivo nuevo: `docs/hermes/13-auditoria-areas-sedes-bodega.md`. Se actualizaron `01-plan-areas-operativas.md`, `03-cola-de-trabajo-codex.md`, `05-decisiones-pendientes.md` y este canal/bitácora.
+- Hechos clave: 1,437 productos en cuatro claves de sede (`plaza`, `angamos`, `central`, `bodega`) y stock agregado 15,438.00; Bodega activa es `central`; `bodega` queda como conjunto histórico. No hay tabla de inventario por área. Las áreas de `lama_areas` pertenecen al plano de mesas. Lotes no tienen ubicación y su suma coincide con el agregado actual por producto.
+- Se documentaron rutas de escritura, trigger de lotes, Fudo/Lama, recepción/repartos, mermas, mínimos/máximos, RLS/permisos, opción arquitectónica, conciliación, archivo de Local 2, Bodega y clonación futura.
+- Consultas/verificaciones: `git status`, `git remote -v`, `git branch --show-current`, lecturas `rg`/`sed`, metadatos Supabase, listado de tablas, `SELECT`, `information_schema` y `pg_catalog`; no se llamó RPC ni función de escritura.
+- Verificaciones: `git diff --check` satisfactorio. No se ejecutaron pruebas de aplicación: no hubo cambios de código.
+- Cambios de aplicación, esquema y datos: **ninguno**. Sin SQL de escritura, migración o inserción/actualización/borrado. No se accedió a Café del Desierto / Llamita Stock.
+- Riesgos/decisiones pendientes: fuente única y corte coordinado de escritores; seguridad por sede/área; ubicación temporal sin asignar; transferencia Bodega→área atómica con lote; compatibilidad de proyección.
+- Publicación autorizada: exclusivamente documentación de Bloque 0 a `master`, después de revisión de diff y `git diff --check`.
