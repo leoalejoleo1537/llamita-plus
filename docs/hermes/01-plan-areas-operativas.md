@@ -1,6 +1,6 @@
 # Plan de implementación: inventario por áreas operativas en Llamita Plus
 
-**Estado:** B1, B2.1, B2.3 y B2.3.1 completados. La decisión arquitectónica B2.2 está documentada en `docs/hermes/17-decision-libro-existencias-ubicacion.md`. B2.3.1 —blindaje de origen POS— quedó **COMPLETADO (2026-10-07)** para todas las sedes registradas; B2.4 —existencias por áreas operativas— queda **PENDIENTE**, no activa. No activar fases posteriores automáticamente.
+**Estado:** B1, B2.1, B2.3, B2.3.1 y B2.4 completados. B2.4 implementó y verificó el motor protegido de transferencias por ubicación en Llamita Plus el 2026-10-07. B3 —interfaz de áreas— queda **PENDIENTE**, no activa. No activar fases posteriores automáticamente.
 
 **Repositorio objetivo:** `leoalejoleo1537/llamita-plus`, rama `master`.
 
@@ -153,7 +153,7 @@ Resultado detallado, pruebas, conteos y rollback: `docs/hermes/15-b2-1-cimientos
 7. `productos.stock_actual` se mantiene como proyección protegida para `central` y `plaza`; los caminos antiguos que todavía no escriben al libro están bloqueados.
 8. Recetas y Lama–Stock real no se activan antes de que el modelo por ubicación esté funcionando.
 
-**Resultado de arquitectura:** queda resuelto el bloqueo de decisión descrito en `docs/hermes/16-b2-2-auditoria-fuente-unica-stock.md`. El libro por ubicación y su corte se implementaron en B2.3; las cantidades por áreas físicas siguen pendientes en B2.4.
+**Resultado de arquitectura:** queda resuelto el bloqueo de decisión descrito en `docs/hermes/16-b2-2-auditoria-fuente-unica-stock.md`. El libro por ubicación y su corte se implementaron en B2.3; el motor de transferencias se completó en B2.4. La distribución operativa y sus pantallas siguen pendientes de una fase posterior.
 
 ### Bloque B2.3 — Libro por ubicación y corte coordinado de escritores
 
@@ -177,11 +177,21 @@ Se desplegaron seis funciones Edge activas con JWT requerido y release marker `2
 
 No existe un selector de Ajustes. Para implementarlo, una operación de backend deberá verificar `app_permisos.puede_ajustes` y cambiar la fila por sede de forma atómica/auditable; si Alejo quiere delegar ese cambio a un grupo más pequeño, hace falta una capacidad administrativa específica. Reporte, pruebas y riesgos: `docs/hermes/20-b2-3-1-blindaje-origen-pos.md`.
 
-Fudo sigue en modo prueba con cron apagado en `plaza`; Lama permanece sin configuración real; la autoridad por ubicación sigue bloqueando operaciones de stock legacy. B2.4 permanece pendiente.
+Fudo sigue en modo prueba con cron apagado en `plaza`; Lama permanece sin configuración real; la autoridad por ubicación sigue bloqueando operaciones de stock legacy hasta que cada escritor se adapte al libro. B2.4 implementa solo transferencias explícitas y no abre otros escritores.
 
-### Bloque B2.4 — Existencias por áreas operativas
+### Bloque B2.4 — Motor seguro de transferencias entre ubicaciones
 
-**Estado: PENDIENTE; no activar automáticamente.** Solo después de completar B2.3 podrán trasladarse cantidades desde Sin asignar hacia Cocina fría, Cocina caliente, Barra o Cafetería mediante movimientos explícitos y conciliados. La clasificación por nombre seguirá siendo sugerencia, nunca asignación histórica automática. La interfaz y formularios de áreas permanecen para una fase posterior de UX.
+**Estado: COMPLETADO (2026-10-07).** Se habilitó el RPC protegido `public.stock_transferir` para cuentas autenticadas con `app_permisos.puede_editar=true`. La entrada pública es `SECURITY INVOKER`; el helper del esquema privado valida nuevamente el JWT/email y el permiso antes de ejecutar el núcleo transaccional. Las tablas `stock_internal` siguen sin mutación directa desde API, `anon` o `service_role`.
+
+Se admiten únicamente estos movimientos: Bodega central → área activa de Local 1 usando un enlace `producto_enlace` explícito con factor 1; Sin asignar → área activa de Local 1; área → otra área activa de Local 1 conservando el mismo producto. Se rechazan sedes `angamos` y `bodega`, equivalencias por nombre, destinos Sin asignar, productos sin enlace válido y saldos insuficientes.
+
+Cada llamada crea un encabezado inmutable y dos movimientos de igual referencia/idempotencia: salida negativa y entrada positiva. Un trigger diferido verifica al confirmar la transacción que exista el par completo y balanceado. El motor serializa por referencia y saldo origen, rechaza saldos negativos y revierte ambos lados ante cualquier excepción. Registra actor autenticado, fecha, motivo, productos, ubicaciones, lote y referencia; `reversa_de` deja preparada la trazabilidad de una futura reversa compensatoria, que aún no tiene endpoint.
+
+Para lotes se conserva el `producto_lotes.id` canónico y su vencimiento mediante `stock_internal.lote_continuidad`, que enlaza el mismo lote a los IDs de producto de Bodega y Local 1. No se inserta un lote ficticio en `producto_lotes`. El motor solo puede asignar detalle legado desde el saldo sin lote cuando la cantidad existente en `producto_lotes` cabe en el saldo no asignado; esa reclasificación se registra como dos movimientos compensados y ocurre en la misma transacción. Si no concilia, bloquea la transferencia.
+
+`productos.stock_actual` no se escribe desde la función: los triggers del libro actualizan su proyección. En una transferencia entre sedes con IDs maestros distintos, el agregado proyectado del producto origen disminuye y el del producto destino aumenta; el total global permanece igual. El rollback técnico aborta si existen transferencias o continuidad nuevas; después solo corresponde compensar con movimientos auditados. No se implementó interfaz ni asignación automática.
+
+Migraciones y pruebas: `docs/hermes/21-b2-4-motor-transferencias-ubicaciones.md`. B3 —portada, páginas, productos y búsqueda por áreas— queda **PENDIENTE**, no activada.
 
 ### Bloque B3 — Portada, páginas de área, productos y búsquedas
 
@@ -253,7 +263,7 @@ Fudo sigue en modo prueba con cron apagado en `plaza`; Lama permanece sin config
 
 La fuente única, ubicaciones iniciales, tratamiento del stock histórico, transferencia atómica y proyección aprobados están en `docs/hermes/17-decision-libro-existencias-ubicacion.md`. B2.3 implementó el libro y el corte para `central`/`plaza`; B2.3.1 añadió el origen POS único y el blindaje de Fudo/Lama. Resultados: `docs/hermes/19-b2-3-corte-libro-ubicaciones.md` y `docs/hermes/20-b2-3-1-blindaje-origen-pos.md`. El documento 18 conserva el bloqueo del intento previo como antecedente.
 
-Quedan para fases posteriores: adaptar las operaciones cotidianas al libro; gestionar lotes desde sus ubicaciones; definir mínimos/máximos por ubicación; y construir las vistas e interfaces de áreas. `angamos` y la clave histórica `bodega` no se migraron. B2.4 sigue pendiente y requiere autorización separada.
+Quedan para fases posteriores: adaptar entradas, ajustes, mermas, repartos y consumo de recetas al libro; definir mínimos/máximos por ubicación; e implementar las vistas e interfaces de áreas. `angamos` y la clave histórica `bodega` no se migraron. B3 continúa pendiente y requiere activación separada.
 
 Estas verificaciones no son permiso para abrir alcance hacia Café del Desierto, ejecutar operaciones destructivas o automatizar el descuento de recetas.
 

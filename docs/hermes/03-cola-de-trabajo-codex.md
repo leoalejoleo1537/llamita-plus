@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **B2.3.1 — blindaje POS COMPLETADO (2026-10-07)**. B2.3 permanece completado; B2.4 queda PENDIENTE y no activa; A3.4d conserva su estado previo.
+Estado actual: **B2.4 — motor seguro de transferencias COMPLETADO (2026-10-07)**. B1, B2.1, B2.2 decisión resuelta, B2.3 y B2.3.1 permanecen cerrados; B3 —interfaz por áreas— queda PENDIENTE y no activa. A3.4d conserva su estado previo.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -50,7 +50,7 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 
 ### Bloque B2 — Modelo de áreas y stock por área
 
-- Estado general: EN CURSO POR SUBFASES. **B2.1 COMPLETADO**; **B2.2 REQUIERE DECISIÓN RESUELTA**; **B2.3 COMPLETADO**; **B2.3.1 COMPLETADO**; **B2.4 PENDIENTE**, no activa.
+- Estado general: **B2.1 COMPLETADO**; **B2.2 REQUIERE DECISIÓN RESUELTA**; **B2.3 COMPLETADO**; **B2.3.1 COMPLETADO**; **B2.4 COMPLETADO**. El siguiente bloque visual B3 queda **PENDIENTE**, no activo.
 - El libro por ubicación y el corte coordinado están implementados para `central` y `plaza`; controles de acceso por área y operaciones de stock por área quedan para fases futuras. Local 1 no es aislamiento técnico.
 - Objetivo restante: habilitar existencias por área sin duplicar `productos.stock_actual`, respetando lotes, transferencias, mermas, Fudo y Lama.
 - B2.1 creó solo el catálogo aditivo de áreas de `plaza` y una relación preparatoria vacía. No asignó productos ni stock. Evidencia: `docs/hermes/15-b2-1-cimientos-areas.md`.
@@ -77,11 +77,11 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Migraciones aplicadas: `20261007152558 b2_3_libro_existencias_corte` y `20261007152805 b2_3_indices_permisos_libro`. Informe, rollback y pruebas: `docs/hermes/19-b2-3-corte-libro-ubicaciones.md` y `sql/2026-10-b2-3-*`.
 - Validación: 1.437 productos y stock agregado 15.438,00 sin cambios; 408 aperturas en el libro, total 9.316,70; cuatro áreas físicas con saldo 0. Conteos de lotes, movimientos, repartos, recetas y permisos iguales antes/después. Pruebas de conciliación, RLS/grants, bloqueos, transferencia sintética e idempotencia pasaron en transacciones revertidas.
 - Fudo: guardas añadidas en las fuentes Edge, no desplegadas; ningún cambio remoto de stock. Fudo plaza sigue en prueba/cron apagado. Lama real apagado y `lama_stock_config` vacía. No se consultó ni tocó Café del Desierto / Llamita Stock.
-- B2.4 — existencias en áreas físicas — queda **PENDIENTE**, no activar automáticamente.
+- En el cierre original de B2.3, B2.3.1 y B2.4 estaban pendientes; su estado actual se registra en sus entradas respectivas y en el encabezado de esta cola.
 
 ### Tarea B2.3.1 — Blindaje de conectores POS y origen activo por sede
 
-- Estado: **COMPLETADA (2026-10-07)**. B2.4 continúa **PENDIENTE**, no activa.
+- Estado: **COMPLETADA (2026-10-07)**. En el momento de cerrar B2.3.1, B2.4 estaba pendiente; posteriormente se completó según la entrada B2.4.
 - Autorización: Alejo activó únicamente B2.3.1; no activar Fudo/Lama real ni abrir selector de Ajustes.
 - Configuración comprobada: `fudo_sync` contiene modo/cursor de Fudo, `lama_stock_config` contiene modo de Lama y `ajustes` contiene flags booleanos; ninguna define un origen POS único. Se creó `stock_internal.origen_pos` en esquema privado. `plaza`, `central`, `angamos` y `bodega` quedan en `ninguno`.
 - Migración aplicada: `20261007162948 b2_3_1_pos_origin_guard`; archivo fuente `supabase/migrations/20261007162700_b2_3_1_pos_origin_guard.sql`.
@@ -90,6 +90,20 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Pruebas: `sql/2026-10-b2-3-1-pruebas-origen-pos.sql` con `BEGIN ... ROLLBACK`; RPC simulado como `service_role` devuelve false para Fudo/Lama en `plaza`; prueba endpoint sin JWT responde 401. Datos finales: origen `ninguno` en las cuatro sedes; `fudo_sync` de `plaza` sigue `prueba`/cron apagado; `lama_stock_config` 0; productos 1.437, stock 15.438,00, movimientos 431 y registros Fudo 15.357, sin cambios.
 - Sin usuario administrador para cambiar la tabla ni permisos API directos. Un futuro selector debe usar una operación backend que valide `app_permisos.puede_ajustes`; si se requiere delegación más acotada, debe aprobarse una capacidad específica. Informe: `docs/hermes/20-b2-3-1-blindaje-origen-pos.md`.
 - No hubo llamadas a Fudo, cambios de Fudo remoto, modo real, ventas, stock, recetas ni datos comerciales. Toteat solo quedó reservado. No activar B2.4 automáticamente.
+
+### Tarea B2.4 — Motor seguro de transferencias entre ubicaciones
+
+- Estado: **COMPLETADA (2026-10-07)**. B3 permanece **PENDIENTE**, no activa.
+- Autorización: Alejo activó únicamente B2.4; no crear interfaz ni asignaciones automáticas.
+- RPC público: `public.stock_transferir`, `SECURITY INVOKER`, solo `authenticated`; valida `auth.uid()`, claims de correo y `app_permisos.puede_editar`. El helper privado repite la validación antes de llamar al motor interno. Tablas internas siguen sin DML directo desde API o `service_role`.
+- Alcance: Bodega central → área de Local 1 con enlace real de producto 1:1; Sin asignar → área; área → área conservando el producto. Bloquea bodegas/áreas inactivas, `angamos`, `bodega`, producto sin enlace, unidades no equivalentes y saldo insuficiente.
+- Modelo: encabezado `stock_internal.transferencias` con referencia/idempotencia, actor, motivo y `reversa_de`; dos movimientos inmutables de salida/entrada con claves únicas y un trigger diferido que verifica par, cantidad, producto, ubicación, lote, actor y motivo.
+- Lotes: `stock_internal.lote_continuidad` liga el ID canónico de `producto_lotes` al producto destino y conserva el vencimiento sin insertar lotes ficticios. La reclasificación legado→libro se permite solo cuando el lote tiene respaldo suficiente en el saldo sin lote, mediante movimientos compensados.
+- Migraciones aplicadas (versiones confirmadas en Supabase): `20261007165310 b2_4_transferencias_ubicaciones_seguras`, `20261007165656 b2_4_index_lote_continuidad_transferencia`, `20261007165826 b2_4_secure_transfer_entrypoint` (ver informe 21 para archivos fuente).
+- Pruebas: SQL transaccional `BEGIN ... ROLLBACK`: Bodega→Cafetería, Sin asignar→Barra, área→área, lote y vencimiento, sin lote, insuficiencia, falta de enlace, idempotencia, error entre salida/entrada, permisos bajo rol authenticated, RLS/ACL, conciliación, no negativos y conservación de la proyección global. Conteos post rollback idénticos.
+- Estado posterior: 1.437 productos; `stock_actual` global 15.438,00; 42 lotes; libro 9.316,70; 0 transferencias persistentes, 0 relaciones de continuidad nuevas, 0 clasificaciones persistentes; 15.357 `fudo_movimientos`; 431 movimientos legacy; Lama real 0.
+- Fudo remoto no fue contactado ni modificado. No se activó Lama, no se implementó interfaz ni se distribuyeron productos persistentes. Informe y rollback: `docs/hermes/21-b2-4-motor-transferencias-ubicaciones.md`, `sql/2026-10-b2-4-transferencias-ubicaciones.rollback.sql`.
+- No activar B3 automáticamente.
 
 ### Tarea B2.1 — Cimientos del modelo de áreas operativas
 

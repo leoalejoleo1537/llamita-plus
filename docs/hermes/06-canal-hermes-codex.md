@@ -549,3 +549,18 @@ Se desplegaron seis Edge Functions como `ACTIVE`, v1, JWT requerido y release ma
 Pruebas `BEGIN ... ROLLBACK`: `plaza` en ninguno/prueba deniega Fudo y Lama; unicidad impide dos proveedores; central, angamos y bodega no aceptan origen activo; RPC/DML Fudo bloqueados; Lama real falla sin origen Lama; ACL/RLS y helper bajo rol `service_role`. Conteos persistentes: stock 15.438,00; productos 1.437; movimientos 431; registros Fudo 15.357; Lama config vacía. `fudo_sync` plaza continúa prueba/cron apagado. Sin cambios en Fudo remoto ni datos comerciales.
 
 No existe aún selector de Ajustes. Una futura ruta administrativa deberá verificar `app_permisos.puede_ajustes` desde backend y dejar auditoría del cambio. No se activa Fudo/Lama real, Toteat ni B2.4. Informe: `docs/hermes/20-b2-3-1-blindaje-origen-pos.md`. No se accedió a Café del Desierto / Llamita Stock.
+
+## Respuesta de Codex — B2.4: motor seguro de transferencias entre ubicaciones
+
+Fecha: 2026-10-07
+Estado: **COMPLETADA**. B3 queda **PENDIENTE**, no activada.
+
+Se aplicaron en Supabase Llamita Plus (`iuryhsjucblmebdogewa`) las versiones `20261007165310`, `20261007165656` y `20261007165826`. El RPC `public.stock_transferir` usa `SECURITY INVOKER`, solo se concede a `authenticated` y valida identidad JWT, email y `app_permisos.puede_editar`. El helper interno repite la validación y el motor queda fuera de acceso directo. Las tablas internas no reciben DML de `anon`, `authenticated` ni `service_role`.
+
+Las transferencias permitidas son Bodega central→área de Local 1 con enlace explícito factor 1, Sin asignar→área y área→área. Cada referencia idempotente produce dos movimientos opuestos dentro de una transacción; el trigger diferido rechaza pares incompletos o no balanceados. El origen y destino se validan como ubicaciones activas. La operación no hace UPDATE directo a `productos.stock_actual`; el trigger de proyección refleja los movimientos. En productos maestros distintos cambia el agregado de cada producto, pero la suma global no cambia.
+
+Los lotes mantienen su identidad mediante el ID canónico y una relación de continuidad que registra el producto enlazado y el vencimiento. No se insertan lotes ficticios. La transferencia fue probada con y sin lote, en todas las rutas solicitadas; también con saldo insuficiente, producto sin enlace, repetición, error forzado entre salida/entrada, usuario sin permiso y llamada como `authenticated`. Todo se revirtió con `ROLLBACK`.
+
+Post rollback: 1.437 productos, stock global 15.438,00, 42 lotes, libro neto 9.316,70; cero transferencias, continuidad, clasificación o movimientos de transferencia persistentes; `fudo_movimientos` 15.357, movimientos legacy 431 y Lama real 0. Fudo remoto no fue consultado ni modificado.
+
+El rollback técnico aborta si encuentra actividad B2.4; después de transferencias persistidas corresponde reversa compensatoria auditada. El campo `reversa_de` está preparado, sin operación de reversa expuesta. El informe y scripts son `docs/hermes/21-b2-4-motor-transferencias-ubicaciones.md`, `sql/2026-10-b2-4-pruebas-transferencias.sql` y `sql/2026-10-b2-4-transferencias-ubicaciones.rollback.sql`. No se construyó UI, no se activó Lama/Fudo y no se activó B3. No se accedió a Café del Desierto / Llamita Stock.
