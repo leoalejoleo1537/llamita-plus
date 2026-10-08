@@ -1,5 +1,15 @@
 # Bitácora de Codex
 
+## 2026-10-08 — Hermes: propuesta de remodelación móvil y prototipo v1
+
+- Estado: **DISEÑO PARA REVISIÓN; IMPLEMENTACIÓN NO ACTIVADA**. B3.2a.2 sigue completada. B3.2a.3 y B3.2b permanecen pendientes; este documento no altera la cola.
+- Origen: Alejo probó el inventario por áreas en teléfono y confirmó que Heladería aparece. Las capturas de Mesas e Inventario muestran una barra lateral permanente que ocupa ancho útil, caja comprimida, lista de mesas de una sola columna y recorrido vertical excesivo. Prioridad de producto: recuperar la navegabilidad móvil antes de seguir agregando operaciones.
+- Propuesta: en móvil, reemplazar la barra lateral fija por cabecera compacta, barra inferior Mesas/Inventario/Reparto/Mermas/Más y menú temporal completo. Mesas a cuadrícula adaptable; Inventario con áreas dinámicas, búsqueda y contenido a pantalla completa. Preservar paleta azul marino/azul/blanco, accesibilidad, permisos, modo demostración y diseño de escritorio.
+- Especificación: `docs/hermes/30-propuesta-remodelacion-movil.md`. Contiene evidencia, mapa de navegación, comportamiento de Mesas/Inventario, módulos secundarios, reglas responsive, fases M0–M4, límites y criterios de aceptación. Prototipo navegable: `docs/hermes/prototipos/llamita-movil-v1.html` (sin conexión, cifras ilustrativas). JavaScript del prototipo validado sintácticamente.
+- Decisión de diseño pendiente: confirmar orden final de accesos inferiores y patrón de detalle de mesa tras auditar la interfaz real. Codex debe inspeccionar DOM/CSS/JS y preparar un **modo plan de solo lectura**; no ejecutar M1 ni cambios de aplicación sin autorización nueva de Alejo.
+- Frontera técnica: no se modificaron `index.html`, Supabase, SQL, permisos, Fudo, Lama, Bodega, stock, recetas ni caja. El prototipo no es una migración ni fuente de datos. No se consultó ni tocó Café del Desierto / Llamita Stock.
+- Publicación: solo documentación y HTML de referencia en `master`. El estado de esta entrada no equivale a activar una tarea en la cola.
+
 ## 2026-10-06 — Inicialización del entorno
 
 - Estado: entorno documental creado.
