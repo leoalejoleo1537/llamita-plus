@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **S2 REQUIERE DECISIÓN (2026-10-07)**. Data API, grants, RLS, RPC, regresión y sesiones reales pasaron, pero la auditoría manual reportada no aparece en la tabla privada: conteo posterior 0. **B3.2a y B3.2b permanecen PENDIENTES**, no activas.
+Estado actual: **S2 COMPLETADA (2026-10-08)**. Data API, grants, RLS, RPC, regresión, sesiones reales y auditoría persistente pasaron. **B3.2a y B3.2b permanecen PENDIENTES**, no activas.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -56,15 +56,15 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 
 ### Tarea S2 — Verificación real de seguridad y regresión
 
-- Estado: **REQUIERE DECISIÓN (2026-10-07)**.
+- Estado: **COMPLETADA (2026-10-08)**.
 - Autorización: Alejo activó S2 sobre el commit S1 `6e1c2c2`, sin migraciones ni cambios persistentes.
 - Resultado: `docs/hermes/26-s2-pruebas-seguridad-regresion.md`.
 - Pasó: Data API anónima real; grants, RLS y EXECUTE; funciones S1; pruebas transaccionales de raíz, administrador operativo y usuario común; auditoría inmutable; `stock_transferir`; áreas; Bodega; ledger; lectura server-side Fudo; conteos y suite local.
 - Prueba manual: Alejo confirmó login real de ambas cuentas. La raíz pudo leer globalmente, otorgar/revocar y generar auditoría; la cuenta operativa funcionó normalmente y no pudo administrar, escribir permisos ni autoelevarse.
 - Secretos: no se compartieron contraseñas, JWT ni claves; Auth no fue alterado para producir evidencia.
-- Discrepancia crítica: la consulta posterior muestra cero filas de auditoría. La cuenta operativa quedó restaurada correctamente, pero S2 no se cierra hasta reproducir y corroborar una auditoría persistente.
-- Investigación: la auditoría se inserta en la misma transacción que el cambio; las pruebas SQL anteriores hicieron ROLLBACK. Los logs solo muestran el probe anónimo HTTP 401 y ninguna llamada autenticada exitosa a la RPC.
-- Probe solicitado no ejecutado: `s2-audit-probe` no pertenece al catálogo admitido por `permisos_actualizar` y el entorno no posee un token reutilizable de la sesión raíz. No se sustituyó el valor ni se simuló una sesión real.
+- Discrepancia resuelta: la ausencia inicial se explicó porque las pruebas SQL habían terminado con `ROLLBACK` y no existía una llamada Auth persistente a la RPC.
+- Prueba persistente final: desde la sesión Auth real del propietario se ejecutaron dos llamadas HTTP 200 a `permisos_actualizar`, primero `fudo_bloqueos: [] → ["boton"]` y luego `["boton"] → []`. Las filas inmutables de auditoría 7 y 8 persistieron con actor raíz, objetivo correcto, estados anterior/nuevo, acción y fecha.
+- Estado final de la cuenta operativa: `puede_editar=true`, `puede_fudo=true`, `puede_ajustes=true`, `puede_lama=false`, `fudo_bloqueos=[]`.
 - Estado operativo: Fudo en prueba/cron apagado, Lama real apagado, origen POS `ninguno`, stock y conteos intactos.
 - Publicación: solo documentación y resultados. B3.2a no se activa.
 

@@ -13,19 +13,20 @@
 
 Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resultado y riesgos pendientes.
 
-## 2026-10-07 — S2: verificación de seguridad y regresión
+## 2026-10-08 — S2: verificación de seguridad y regresión
 
-- Estado: **REQUIERE DECISIÓN**. No se halló escalamiento y las sesiones reales pasaron, pero la auditoría reportada manualmente no aparece en la tabla privada.
+- Estado: **COMPLETADA**. No se halló escalamiento; las sesiones reales y la auditoría persistente pasaron.
 - Data API anónima rechazó SELECT, INSERT, UPDATE, cambio de `auth_uid`, DELETE y las RPC administrativas. TRUNCATE está revocado para los tres roles API.
 - Pruebas `BEGIN ... ROLLBACK`: raíz, administrador operativo, usuario común, auditoría inmutable, RLS propia, DML denegado, `stock_transferir`, áreas, Bodega y lectura Fudo pasaron.
 - Las RPC S1 conservan `SECURITY DEFINER`, `search_path=''`, nombres calificados, comprobación de `auth.uid()` y ACL correcta. No hay políticas abiertas nuevas en `app_permisos`.
 - `npm test` pasó; Chromium no está instalado. Advisors conservan los hallazgos globales heredados de S0, fuera de S2.
 - Prueba manual: raíz con login, lectura global, otorgamiento/revocación y auditoría correctos; cuenta operativa con login y operación normal, sin administración global, escritura directa ni autoelevación. No se compartieron secretos.
-- Verificación posterior: `authz_internal.permisos_auditoria` contiene cero filas. La cuenta operativa conserva editar/Fudo/Ajustes, Lama apagado y cero bloqueos. Se requiere reproducir una modificación controlada y conciliar la auditoría antes de completar S2.
+- La contradicción inicial quedó resuelta: las pruebas SQL anteriores hicieron `ROLLBACK` y no hubo entonces una llamada Auth persistente a la RPC.
 - Causa comprobada: UPDATE de permisos e INSERT de auditoría son atómicos; todos los ensayos SQL previos finalizaron con ROLLBACK. Los logs no contienen ninguna llamada autenticada exitosa a `permisos_actualizar`, solo el probe anónimo 401. El conteo se hizo como `postgres`, por lo que RLS no ocultó filas.
-- Probe persistente detenido antes de escribir: falta un token raíz reutilizable y `s2-audit-probe` es rechazado por la lista cerrada de bloqueos Fudo. No se improvisó otro valor, no se modificó Auth y la tabla sigue vacía.
-- Conteos post prueba iguales: 1.437 productos, stock 15.438, 431 movimientos, 42 lotes, 59 cuentas, 30 pagos, caja 2, Lama–Stock 0, Fudo 15.357, auditorías 0 y transferencias 0.
-- No hubo migraciones, código funcional, cambios persistentes, llamadas a Fudo remoto ni acceso a Café del Desierto. Informe 26 y plan 27.
+- Prueba persistente final: el propietario raíz usó la interfaz con una sesión Auth real para cambiar únicamente `fudo_bloqueos` de `[]` a `["boton"]` y restaurarlo a `[]`. Los logs registran dos llamadas HTTP 200 y `authz_internal.permisos_auditoria` conserva las filas inmutables 7 y 8.
+- La cuenta operativa terminó exactamente con editar/Fudo/Ajustes habilitados, Lama apagado y cero bloqueos Fudo.
+- Conteos post prueba: 1.437 productos, stock 15.438, 431 movimientos, 42 lotes, 59 cuentas, 30 pagos, caja 2, Lama–Stock 0, Fudo 15.357, auditorías 2 y transferencias 0.
+- No hubo migraciones, cambios de código o esquema, llamadas a Fudo remoto ni acceso a Café del Desierto. Las dos filas de auditoría son la única evidencia persistente intencional. Informe 26 y plan 27.
 
 ## 2026-10-07 — S1: identidad raíz y gobierno seguro de permisos
 

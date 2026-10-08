@@ -1,8 +1,8 @@
 # S2 — verificación real de seguridad y regresión
 
-Fecha: 2026-10-07
+Fecha: 2026-10-08
 
-Estado: **REQUIERE DECISIÓN**
+Estado: **COMPLETADA**
 
 Repositorio: `leoalejoleo1537/llamita-plus`
 
@@ -12,9 +12,9 @@ Supabase: `llamita-plus` (`iuryhsjucblmebdogewa`)
 
 La protección instalada por S1 pasó las pruebas directas anónimas de Data API, las comprobaciones de grants/RLS/RPC y las pruebas transaccionales de roles. No se encontró una ruta de elevación en `app_permisos` ni una regresión en las lecturas operativas ensayadas.
 
-La automatización inicial no dispuso de contraseñas, access tokens ni refresh tokens de las dos cuentas existentes, por lo que no fabricó JWT ni alteró Auth. Alejo completó después la prueba manual con sesiones reales de ambas cuentas, sin compartir credenciales, tokens ni secretos. Las rutas de sesión quedaron cubiertas, pero la comprobación posterior encontró una contradicción en la auditoría y S2 no puede cerrarse todavía.
+La automatización inicial no dispuso de contraseñas, access tokens ni refresh tokens de las dos cuentas existentes, por lo que no fabricó JWT ni alteró Auth. Alejo completó después la prueba manual con sesiones reales de ambas cuentas, sin compartir credenciales, tokens ni secretos. La prueba persistente final confirmó dos auditorías inmutables y cerró la contradicción inicial.
 
-No se ejecutaron migraciones ni cambios de código, esquema, permisos o datos persistentes.
+No se ejecutaron migraciones ni cambios de código, esquema o permisos. Las únicas filas persistentes nuevas son las dos auditorías exigidas como evidencia.
 
 ## Pruebas ejecutadas
 
@@ -94,7 +94,7 @@ Referencias: [RLS](https://supabase.com/docs/guides/database/postgres/row-level-
 
 ## Estado operativo posterior
 
-Los conteos permanecen idénticos a S1: 1.437 productos; stock 15.438; 431 movimientos; 42 lotes; 59 cuentas; 30 pagos; 2 movimientos de caja; 0 eventos Lama–Stock; 15.357 movimientos Fudo; 9 filas de permisos; 0 auditorías y 0 transferencias.
+Los conteos operativos permanecen idénticos a S1: 1.437 productos; stock 15.438; 431 movimientos; 42 lotes; 59 cuentas; 30 pagos; 2 movimientos de caja; 0 eventos Lama–Stock; 15.357 movimientos Fudo; 9 filas de permisos y 0 transferencias. La auditoría contiene 2 filas, ambas creadas intencionalmente por la prueba persistente final.
 
 Fudo permanece en modo prueba con cron apagado. Lama real continúa apagado y su configuración está vacía. El origen POS sigue `ninguno` para las cuatro claves registradas. Bodega y el ledger conservaron sus lecturas. No hubo contacto con Fudo remoto.
 
@@ -108,7 +108,7 @@ Alejo confirmó la ejecución manual:
 
 La comprobación de solo lectura inmediatamente posterior devolvió `0` filas en `authz_internal.permisos_auditoria`, aunque el ensayo manual reportó una auditoría generada. Una concesión y revocación persistentes deberían dejar registros inmutables incluso cuando las capacidades terminen restauradas. La cuenta operativa sí quedó con sus capacidades esperadas: editar/Fudo/Ajustes habilitados, Lama apagado y cero bloqueos Fudo.
 
-Esta discrepancia afecta un criterio crítico. S2 permanece `REQUIERE DECISIÓN` hasta reproducir una única modificación controlada y confirmar la fila auditada en la base. No se activa B3.2a ni ninguna fase siguiente.
+Esta discrepancia se mantuvo como criterio crítico hasta ejecutar la prueba persistente descrita al final. B3.2a no se activa automáticamente.
 
 ## Investigación de la auditoría
 
@@ -132,6 +132,25 @@ No se ejecutó ninguna escritura. Fallaron dos precondiciones antes de llamar la
 1. El entorno no dispone del access token o refresh token de la sesión raíz real. La existencia de una fila en `auth.sessions` no permite reconstruir ni extraer un token reutilizable, y no se fabricaron JWT ni se cambiaron credenciales.
 2. La definición instalada admite únicamente `boton`, `ficha`, `todo`, `reparto`, `merma`, `crear`, `apagar` y `deshacer` en `fudo_bloqueos`. El valor solicitado `s2-audit-probe` produciría `22023: Existe un bloqueo Fudo desconocido` antes del UPDATE y del INSERT de auditoría.
 
-Usar otro bloqueo habría cambiado el caso aprobado; ampliar la lista requeriría una migración prohibida; simular el JWT no sería una sesión raíz real. Conforme a la regla de detención, S2 sigue `REQUIERE DECISIÓN`. No cambió `app_permisos` y la auditoría permanece en cero.
+Usar otro bloqueo habría cambiado el caso aprobado; ampliar la lista requeriría una migración prohibida; simular el JWT no sería una sesión raíz real. Conforme a la regla de detención, en ese momento S2 siguió `REQUIERE DECISIÓN`. La situación fue resuelta posteriormente mediante el valor válido `boton` y una sesión Auth real.
+
+## Cierre persistente de la auditoría
+
+Alejo, autenticado como propietario raíz real, ejecutó desde la interfaz las dos operaciones aprobadas mediante `permisos_actualizar`:
+
+1. `fudo_bloqueos: [] → ["boton"]`.
+2. `fudo_bloqueos: ["boton"] → []`.
+
+Los logs de Data API registran ambas llamadas reales con HTTP 200, a las 17:27:26 y 17:29:23 UTC del 2026-10-08. No fueron consultas SQL ni transacciones revertidas. La consulta privilegiada de servidor confirmó que `authz_internal.permisos_auditoria` conserva las filas 7 y 8, ambas con el propietario raíz como actor, la segunda cuenta como objetivo, acción `actualizar_permisos`, fecha y los estados anterior/nuevo esperados.
+
+La cuenta operativa terminó exactamente con:
+
+- `puede_editar=true`;
+- `puede_fudo=true`;
+- `puede_ajustes=true`;
+- `puede_lama=false`;
+- `fudo_bloqueos=[]`.
+
+No cambiaron productos, stock, lotes, movimientos, ventas, caja, eventos Lama, movimientos Fudo ni áreas. No hubo llamada a Fudo remoto. Con esta evidencia persistente, S2 queda **COMPLETADA**.
 
 No se accedió ni modificó Café del Desierto / Llamita Stock.

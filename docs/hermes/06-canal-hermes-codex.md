@@ -2,19 +2,21 @@
 
 ## Respuesta de Codex — S2: verificación de seguridad y regresión
 
-Fecha: 2026-10-07
+Fecha: 2026-10-08
 
-Estado: **REQUIERE DECISIÓN**
+Estado: **COMPLETADA**
 
 La Data API anónima real rechazó todas las lecturas, escrituras y RPC administrativas contra `app_permisos`. Grants, RLS, EXECUTE, `search_path`, nombres calificados y validación interna de `auth.uid()` permanecen correctos. Las pruebas transaccionales de raíz, administrador operativo, usuario común, auditoría, `stock_transferir`, áreas, Bodega, ledger y lectura Fudo pasaron y fueron revertidas.
 
 Alejo completó la condición de sesiones reales sin compartir contraseñas, JWT ni secretos. La raíz inició sesión, leyó globalmente, otorgó y revocó permisos y generó auditoría. La cuenta operativa inició sesión y operó normalmente; no tuvo administración global y sus intentos de escritura directa y autoelevación fueron rechazados.
 
-La comprobación posterior encontró una contradicción: la tabla privada de auditoría contiene cero filas. La cuenta operativa sí conserva exactamente sus capacidades previstas. Como una concesión/revocación persistente debería dejar auditoría inmutable, S2 no puede cerrarse hasta reproducir una modificación controlada y confirmar el registro en base.
+La contradicción inicial de auditoría quedó resuelta: las pruebas SQL anteriores terminaron con `ROLLBACK` y no habían producido una operación Auth persistente.
 
 La investigación resolvió la causa técnica: la RPC actualiza permisos e inserta auditoría dentro de la misma transacción; los ensayos automatizados finalizaron con ROLLBACK. El conteo fue privilegiado, no filtrado por RLS. Los logs posteriores a S1 no registran ninguna llamada autenticada exitosa a `permisos_actualizar`, solo el probe anónimo HTTP 401. Por tanto no existió una operación persistente que pudiera dejar auditoría.
 
-El probe solicitado quedó detenido antes de escribir: el entorno no dispone de un token raíz reutilizable y `s2-audit-probe` no es un bloqueo válido para la RPC instalada. Cambiar el catálogo requeriría una migración y sustituir el valor alteraría el caso aprobado. S2 permanece `REQUIERE DECISIÓN` sin cambios de datos.
+Alejo ejecutó después la prueba autorizada desde la interfaz y una sesión Auth real. La RPC recibió dos llamadas HTTP 200: `fudo_bloqueos` pasó de `[]` a `["boton"]` y luego volvió a `[]`. La consulta privilegiada confirmó las filas inmutables 7 y 8 con actor raíz, objetivo correcto, estados anterior/nuevo, acción y fecha. No fueron pruebas SQL revertidas.
+
+La cuenta operativa terminó con `puede_editar=true`, `puede_fudo=true`, `puede_ajustes=true`, `puede_lama=false` y `fudo_bloqueos=[]`. Las dos filas de auditoría se conservaron como evidencia.
 
 Fudo sigue en prueba con cron apagado; Lama real continúa apagado; origen POS `ninguno`; stock, lotes, movimientos, ventas y caja no cambiaron. Resultado: `docs/hermes/26-s2-pruebas-seguridad-regresion.md`. Plan actualizado: `docs/hermes/27-plan-endurecimiento-seguridad.md`. B3.2a permanece pendiente y no activa.
 
