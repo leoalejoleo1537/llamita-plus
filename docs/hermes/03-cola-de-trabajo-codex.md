@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **S2 COMPLETADA (2026-10-08)**. Data API, grants, RLS, RPC, regresión, sesiones reales y auditoría persistente pasaron. **B3.2a y B3.2b permanecen PENDIENTES**, no activas.
+Estado actual: **B3.2a.1 COMPLETADA (2026-10-08)**. Fundamentos, RPC protegidas y pruebas transaccionales pasaron. **B3.2a.2, B3.2a.3 y B3.2b permanecen PENDIENTES**, no activas.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -164,13 +164,15 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 
 ### Tarea B3.2a — Gestión de áreas y asignación preferida de productos
 
-- Estado: **REQUIERE DECISIÓN (2026-10-07)**. Se detuvo antes de modificar código o base de datos.
-- Autorización: Alejo activó únicamente B3.2a mediante el texto adjunto. Esta actualización registra el bloqueo; no habilita B3.2b.
-- Evidencia: en Supabase Llamita Plus `iuryhsjucblmebdogewa`, `public.app_permisos` tiene políticas `INSERT authenticated WITH CHECK true`, `UPDATE authenticated USING true WITH CHECK true`, y otra política `UPDATE anon,authenticated USING true WITH CHECK true`. Los roles `anon` y `authenticated` además conservan grants directos amplios, incluidos INSERT/UPDATE/DELETE/TRUNCATE. Por tanto cualquier cliente puede alterar `puede_ajustes`; las RPC futuras no pueden tratar ese campo como autorización confiable.
-- Decisión requerida: autorizar el endurecimiento acotado de la administración de `app_permisos` para que solo una identidad con permiso administrativo previamente confiable pueda gestionarla, incluyendo el mecanismo de bootstrap y las RPC necesarias; o definir otra fuente confiable de autorización. No se debe construir CRUD de áreas/asignaciones hasta resolverlo.
-- No se modificó: código, SQL, migraciones, datos, permisos, áreas, productos, stock, lotes, movimientos, transferencias, recetas, POS ni datos comerciales.
-- Informe de bloqueo: `docs/hermes/23-b3-2a-bloqueo-autorizacion.md`.
-- B3.2b (transferencias visuales) queda **PENDIENTE**, no activa.
+- Estado general: **EN CURSO POR SUBFASES**. B3.2a.1 completada; B3.2a.2 y B3.2a.3 pendientes, no activas.
+- Antecedente: el bloqueo de autorización del informe 23 fue resuelto por S1/S2. Alejo activó explícitamente solo B3.2a.1 el 2026-10-08.
+- B3.2a.1: **COMPLETADA (2026-10-08)**. Añadió actores, nombre normalizado, vínculo único área/ubicación, validación de áreas activas y seis RPC protegidas para listar/crear/editar/archivar áreas, guardar preferencias y crear productos `plaza` con stock cero.
+- Seguridad: operaciones de áreas requieren `puede_ajustes`; producto/preferencia requieren `puede_editar`; la lectura activa exige sesión. Solo `authenticated` ejecuta RPC y cada función vuelve a validar `auth.uid()` y capacidad efectiva S1. Tablas internas sin DML directo.
+- Migración remota: `20261008175901 b3_2a_1_fundamentos_areas_preferencias`; fuente local `supabase/migrations/20261008175539_b3_2a_1_fundamentos_areas_preferencias.sql`.
+- Pruebas: transacciones revertidas para áreas, ubicación, duplicados, sede, Sin asignar, archivo vacío/con preferencia/con saldo, áreas archivadas, productos con/sin área, Fudo enlazado, roles y DML directo; `npm test`, advisors y `git diff --check`.
+- Conteos: 1.437 productos, stock 15.438,00, 4 áreas, 0 asignaciones, 408 movimientos de ledger, 0 transferencias, 42 lotes, 396 recetas, 15.357 movimientos Fudo y 0 eventos Lama, sin cambios persistentes.
+- Resultado: `docs/hermes/28-b3-2a-1-fundamentos-areas-preferencias.md`.
+- B3.2a.2 (lectura/UI dinámica y adaptación de formularios), B3.2a.3 y B3.2b quedan **PENDIENTES**, no activas.
 
 ### Tarea B3.2b — Transferencias visuales entre ubicaciones
 

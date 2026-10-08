@@ -1,6 +1,6 @@
 # Plan de implementación: inventario por áreas operativas en Llamita Plus
 
-**Estado:** B1, B2.1, B2.3, B2.3.1, B2.4, B3.1 y S1 completados. S1 resolvió la fuente confiable de autorización por UUID y separó propietario raíz de administración operativa. B3.2a queda **PENDIENTE tras resolver su bloqueo**, no activa; B3.2b sigue **PENDIENTE**, no activa. Las fases generales de seguridad posteriores a S1 requieren autorización separada. Evidencia: documentos 23, 24 y `docs/hermes/25-s1-identidad-raiz-gobierno-permisos.md`.
+**Estado:** B1, B2.1, B2.3, B2.3.1, B2.4, B3.1, S1, S2 y B3.2a.1 completados. B3.2a.1 instaló fundamentos y RPC protegidas sin interfaz ni movimiento de stock. B3.2a.2, B3.2a.3 y B3.2b siguen **PENDIENTES**, no activas. Evidencia: documentos 23–28.
 
 **Repositorio objetivo:** `leoalejoleo1537/llamita-plus`, rama `master`.
 
@@ -205,13 +205,17 @@ RLS y grants mantienen cerradas las tablas internas; la RPC requiere sesión aut
 
 #### B3.2 — Escrituras visuales por área
 
-**Estado: dividido en subfases. B3.2a PENDIENTE tras resolver el bloqueo de autorización; B3.2b PENDIENTE, no activa.** S1 cerró el DML directo de `public.app_permisos`, vinculó capacidades a `auth.uid()` y reservó su gobierno al propietario raíz. Esto satisface la precondición de seguridad, pero no activa ni implementa B3.2a. Ver informes 23 y 25.
+**Estado: dividido en subfases. B3.2a.1 COMPLETADA; B3.2a.2, B3.2a.3 y B3.2b PENDIENTES, no activas.** S1/S2 cerraron el bloqueo de autorización y B3.2a.1 instaló el contrato de datos/RPC. La interfaz y el corte de formularios heredados requieren activación separada. Ver informes 23, 25, 26 y 28.
 
 La auditoría S0 amplió la evidencia: 36 tablas operativas tienen políticas abiertas `ALL`, y 40 funciones `SECURITY DEFINER` son ejecutables por anon. S1 debe resolver primero identidad, gobierno de permisos y las rutas críticas por fases. No debe mezclarse ese corte transversal con la UI de áreas. Informe: `docs/hermes/24-auditoria-integral-seguridad-permisos.md`.
 
 ##### B3.2a — Gestión de áreas y asignación preferida de productos
 
-**Estado: PENDIENTE, bloqueo resuelto por S1 (2026-10-07), no activa.** El alcance funcional conserva su aprobación previa y ya dispone de una fuente confiable de administración. Requiere una activación explícita nueva antes de añadir CRUD de áreas, asignaciones o altas de productos.
+**Estado: EN CURSO POR SUBFASES.**
+
+- **B3.2a.1 COMPLETADA (2026-10-08):** contrato aditivo, actores, nombres normalizados, área/ubicación 1:1, archivo seguro, preferencia única y RPC de producto con stock cero. No mueve existencias. Informe 28.
+- **B3.2a.2 PENDIENTE:** lectura dinámica y adaptación de formularios/UX para consumir las RPC; debe retirar las listas fijas de cuatro códigos sin tocar transferencias.
+- **B3.2a.3 PENDIENTE:** cierre coordinado de rutas heredadas y regresión visual/operativa que se defina al activar la fase.
 
 ##### B3.2b — Transferencias visuales
 

@@ -13,6 +13,21 @@
 
 Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resultado y riesgos pendientes.
 
+## 2026-10-08 — B3.2a.1: fundamentos de áreas y preferencias
+
+- Estado: **COMPLETADA**. B3.2a.2, B3.2a.3 y B3.2b quedan pendientes y no se activan.
+- Entorno: repositorio oficial `leoalejoleo1537/llamita-plus`, rama local `work` sincronizada; Supabase `llamita-plus` ref `iuryhsjucblmebdogewa`, activo, PostgreSQL 17.6.1.166.
+- Migración remota: `20261008175901 b3_2a_1_fundamentos_areas_preferencias`; fuente `supabase/migrations/20261008175539_b3_2a_1_fundamentos_areas_preferencias.sql`.
+- Modelo: actores de creación/modificación/archivo, nombre normalizado único, preferencia única producto/sede, rechazo de área archivada y relación 1:1 área/ubicación. `Sin asignar` permanece como `area_id=NULL`.
+- RPC: listado; crear/editar/archivar área; guardar preferencia; crear producto `plaza` con stock cero. Área requiere `puede_ajustes`; producto/preferencia `puede_editar`; sesión y capacidad se validan en servidor mediante S1.
+- Seguridad: solo `authenticated` ejecuta las RPC; `PUBLIC`, `anon` y `service_role` no. Las tablas continúan sin grants directos. El administrador operativo puede operar áreas/productos, pero no gestionar usuarios.
+- Pruebas `BEGIN ... ROLLBACK`: área+ubicación, duplicados, sedes, reserva `sin_asignar`, archivo sin/con preferencias y con saldo, área archivada, productos con/sin área, producto enlazado Fudo, propietario/operador/común/anon, DML directo y continuidad de `stock_transferir`. Pasaron.
+- `npm test` pasó; Chromium no está instalado. Advisors revisados: sin ejecución anónima, `search_path` mutable ni grants nuevos de B3.2a.1. Avisos de RLS sin política/RPC definer autenticadas son intencionales y están documentados. Índices nuevos aún sin uso porque no hay asignaciones persistentes.
+- Conteos pre/post: productos 1.437; stock 15.438,00; áreas 4; asignaciones 0; ubicaciones 6; ledger 408/9.316,70; transferencias 0; lotes 42; movimientos 431; recetas/ítems 396/514; enlaces 513; Fudo 15.357; Lama–Stock 0; cuentas/pagos 59/30. Sin cambios.
+- Rollback: `sql/2026-10-b3-2a-1-fundamentos-areas-preferencias.rollback.sql`; aborta tras actividad persistente. Pruebas: `sql/2026-10-b3-2a-1-pruebas-transaccionales.sql`.
+- Informe: `docs/hermes/28-b3-2a-1-fundamentos-areas-preferencias.md`.
+- No se modificaron UI, Fudo, Lama, Bodega, caja, recetas, lotes, mermas, stock ni datos comerciales. No se accedió a Café del Desierto / Llamita Stock.
+
 ## 2026-10-08 — S2: verificación de seguridad y regresión
 
 - Estado: **COMPLETADA**. No se halló escalamiento; las sesiones reales y la auditoría persistente pasaron.

@@ -1,5 +1,21 @@
 # Canal de comunicación Hermes ↔ Codex
 
+## Respuesta de Codex — B3.2a.1: fundamentos de áreas y preferencias
+
+Fecha: 2026-10-08
+
+Estado: **COMPLETADA**
+
+La migración remota `20261008175901 b3_2a_1_fundamentos_areas_preferencias` añadió actores, nombre normalizado único, archivo coherente y vínculo único entre área y ubicación. `producto_area_asignacion` conserva una sola preferencia por producto/sede, sin cantidades; `Sin asignar` sigue siendo `area_id=NULL`.
+
+Se instalaron seis RPC protegidas para listar áreas, crear/editar/archivar, guardar preferencia y crear una ficha `plaza` con stock cero. Área usa `puede_ajustes`; producto/preferencia usa `puede_editar`; lectura activa exige sesión. Todas validan `auth.uid()` y capacidad efectiva S1, usan `search_path=''` y solo conceden ejecución a `authenticated`. Las tablas internas siguen sin acceso directo.
+
+El archivo rechaza cualquier saldo. Con saldo cero y preferencias exige confirmación y cambia solo metadata a Sin asignar. Crear un producto no crea existencias, lotes, movimientos, recetas, enlaces Fudo ni ficha de Bodega.
+
+La prueba transaccional cubrió raíz, administrador operativo, usuario común y anon; área/ubicación, duplicados, sedes, archivo, preferencias, producto con/sin área, producto enlazado y saldo sintético revertido mediante `stock_transferir`. Pasaron `npm test`, ACL, advisors y `git diff --check`. Los conteos operativos permanecen intactos: 1.437 productos, stock 15.438,00, 4 áreas, 0 asignaciones, 408 movimientos de ledger, 0 transferencias, 42 lotes, 396 recetas, 15.357 movimientos Fudo y 0 eventos Lama.
+
+No se modificaron interfaz, Fudo, Lama, Bodega, caja, recetas, stock, lotes o mermas. Informe: `docs/hermes/28-b3-2a-1-fundamentos-areas-preferencias.md`. B3.2a.2, B3.2a.3 y B3.2b quedan pendientes; no se activan automáticamente. No se accedió a Café del Desierto / Llamita Stock.
+
 ## Respuesta de Codex — S2: verificación de seguridad y regresión
 
 Fecha: 2026-10-08
