@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111827">
+  <title>Llamita Plus — propuesta móvil v1</title>
+  <style>
+    :root { color-scheme: light; --navy:#111827; --blue:#2d55d9; --blue-pale:#eaf0ff; --ink:#192239; --muted:#64728c; --line:#dbe2ee; --surface:#f5f7fb; --green:#e7f6ec; --green-ink:#226d3c; --amber:#fdf1d9; --amber-ink:#8a5818; --white:#fff; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#e9edf4; color:var(--ink); font:16px/1.4 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    button, input { font:inherit; }
+    button { cursor:pointer; }
+    .notice { margin:14px auto; width:min(100% - 24px,600px); color:#3c4b67; font-size:13px; text-align:center; }
+    .phone { position:relative; width:min(100%,430px); height:min(860px,calc(100dvh - 30px)); min-height:580px; margin:0 auto 24px; overflow:hidden; background:var(--surface); box-shadow:0 18px 60px #14213d33; border:1px solid #cfd8e6; border-radius:30px; }
+    .top { height:76px; padding:14px 16px; background:var(--white); border-bottom:1px solid var(--line); display:grid; grid-template-columns:50px 1fr 50px; align-items:center; position:relative; z-index:3; }
+    .title { text-align:center; font-size:19px; font-weight:800; line-height:1.15; }
+    .title small { display:block; margin-top:3px; color:var(--muted); font-size:12px; font-weight:600; }
+    .icon-button { border:0; border-radius:15px; min-height:48px; min-width:48px; display:grid; place-items:center; color:var(--navy); background:#f2f5fa; }
+    .icon-button.primary { color:var(--white); background:var(--blue); }
+    svg { width:23px; height:23px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .scroll { height:calc(100% - 76px - 77px); overflow-y:auto; overscroll-behavior:contain; padding:18px 16px 28px; }
+    .view[hidden], .drawer[hidden], .scrim[hidden] { display:none !important; }
+    .eyebrow { color:var(--muted); font-size:12px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; }
+    .section-head { display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin:22px 0 12px; }
+    h1,h2,h3,p { margin:0; }
+    h1 { font-size:22px; letter-spacing:-.025em; }
+    h2 { font-size:18px; letter-spacing:-.02em; }
+    h3 { font-size:16px; }
+    .count { color:var(--muted); font-size:13px; }
+    .card { background:var(--white); border:1px solid var(--line); border-radius:18px; box-shadow:0 2px 9px #1a315a08; }
+    .cash { padding:16px; display:flex; gap:13px; align-items:center; }
+    .cash-symbol { height:46px; width:46px; flex:none; display:grid; place-items:center; border-radius:14px; color:var(--blue); background:var(--blue-pale); }
+    .cash strong { display:block; font-size:15px; }
+    .cash small { color:var(--muted); }
+    .cash .link { margin-left:auto; font-weight:700; color:var(--blue); text-decoration:none; white-space:nowrap; font-size:13px; }
+    .chips { display:flex; gap:8px; overflow-x:auto; padding:4px 1px 12px; scrollbar-width:none; }
+    .chips::-webkit-scrollbar { display:none; }
+    .chip { flex:none; min-height:42px; padding:0 15px; border:1px solid var(--line); border-radius:999px; color:#475671; background:var(--white); font-size:14px; font-weight:700; }
+    .chip.active { border-color:var(--blue); color:#fff; background:var(--blue); }
+    .tables { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+    .table { min-height:100px; border:1px solid #cae9d5; border-radius:18px; padding:10px; background:var(--green); color:var(--green-ink); text-align:left; display:flex; flex-direction:column; justify-content:space-between; }
+    .table.busy { background:var(--navy); border-color:var(--navy); color:white; }
+    .table.pending { background:var(--amber); border-color:#f2dfb7; color:var(--amber-ink); }
+    .table .num { font-size:27px; line-height:1; font-weight:800; }
+    .table .state { font-size:12px; font-weight:700; }
+    .table:focus-visible,.chip:focus-visible,.icon-button:focus-visible,.nav-item:focus-visible,.area-card:focus-visible { outline:3px solid #7d9aff; outline-offset:2px; }
+    .hint { margin-top:15px; color:var(--muted); font-size:13px; }
+    .search { display:flex; gap:10px; align-items:center; background:var(--white); border:1px solid var(--line); border-radius:16px; height:50px; padding:0 14px; color:var(--muted); }
+    .search input { width:100%; border:0; outline:none; color:var(--ink); background:transparent; }
+    .area-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .area-card { text-align:left; padding:15px; min-height:120px; border:1px solid var(--line); background:var(--white); border-radius:18px; }
+    .area-card strong,.area-card span,.area-card small { display:block; }
+    .area-card strong { font-size:16px; margin-bottom:14px; }
+    .area-card span { font-size:20px; font-weight:800; }
+    .area-card small { color:var(--muted); font-size:12px; }
+    .area-card.selected { border:2px solid var(--blue); padding:14px; box-shadow:0 3px 14px #2d55d91a; }
+    .product { padding:14px 16px; display:flex; align-items:center; gap:10px; margin:8px 0; }
+    .product strong,.product small { display:block; }
+    .product small { color:var(--muted); font-size:12px; margin-top:2px; }
+    .qty { margin-left:auto; text-align:right; white-space:nowrap; font-weight:800; }
+    .qty small { font-weight:500; }
+    .empty { padding:22px 18px; color:var(--muted); }
+    .empty strong { display:block; margin-bottom:5px; color:var(--ink); }
+    .button { display:inline-flex; align-items:center; justify-content:center; min-height:46px; border-radius:12px; border:1px solid var(--blue); padding:0 16px; background:var(--blue); color:white; font-weight:700; }
+    .button.ghost { background:white; color:var(--blue); }
+    .buttons { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+    .tabbar { height:77px; padding:6px 4px calc(7px + env(safe-area-inset-bottom)); position:absolute; z-index:4; bottom:0; left:0; right:0; background:var(--white); border-top:1px solid var(--line); display:grid; grid-template-columns:repeat(5,1fr); }
+    .nav-item { min-width:0; border:0; background:none; border-radius:13px; color:#63718b; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; font-size:11px; font-weight:700; }
+    .nav-item svg { width:22px; height:22px; }
+    .nav-item.active { color:var(--blue); background:#eff3ff; }
+    .scrim { position:absolute; z-index:5; inset:0; background:#0a142599; }
+    .drawer { position:absolute; z-index:6; top:0; bottom:0; left:0; width:min(84%,320px); background:var(--white); box-shadow:10px 0 30px #10182733; padding:24px 17px; overflow-y:auto; }
+    .drawer-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+    .drawer-list { display:grid; gap:5px; }
+    .drawer-item { min-height:48px; width:100%; text-align:left; border:0; border-radius:12px; background:transparent; padding:0 14px; font-weight:650; color:var(--ink); }
+    .drawer-item:hover,.drawer-item:focus-visible { background:var(--blue-pale); }
+    .drawer-label { margin:20px 10px 8px; color:var(--muted); font-size:12px; text-transform:uppercase; font-weight:700; }
+    .toast { position:absolute; z-index:8; left:16px; right:16px; bottom:90px; padding:12px 15px; border-radius:12px; color:#fff; background:var(--navy); font-size:13px; box-shadow:0 7px 20px #13203955; }
+    .toast[hidden] { display:none; }
+    @media (max-width:440px) { .notice { display:none; } .phone { width:100%; height:100dvh; min-height:0; margin:0; border:0; border-radius:0; box-shadow:none; } .top { padding-top:calc(14px + env(safe-area-inset-top)); height:calc(76px + env(safe-area-inset-top)); } .scroll { height:calc(100% - 153px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); } .tabbar { height:calc(77px + env(safe-area-inset-bottom)); } }
+    @media (max-width:340px) { .tables { grid-template-columns:repeat(2,minmax(0,1fr)); } .area-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <p class="notice">Prototipo navegable de diseño · datos ilustrativos · sin conexión a Llamita Plus</p>
+  <div class="phone" id="app">
+    <header class="top">
+      <button class="icon-button" id="menuOpen" aria-label="Abrir menú" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <div class="title">Local 1<small id="currentModule">Mesas</small></div>
+      <button class="icon-button primary" id="refresh" aria-label="Actualizar pantalla"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2 6M20 4v7h-7"/></svg></button>
+    </header>
+    <main class="scroll" id="mainContent">
+      <section class="view" data-view="mesas">
+        <div class="card cash"><div class="cash-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16v11H4zM7 7V4h10v3M8 13h8"/></svg></div><div><small>Caja abierta</small><strong>Desde las 20:18</strong></div><a class="link" href="#" data-demo="Detalle de caja">Detalle</a></div>
+        <div class="section-head"><h1>Mesas del salón</h1><span class="count">12 mesas</span></div>
+        <div class="chips" aria-label="Zona de mesas"><button class="chip active" type="button">Salón</button><button class="chip" type="button" data-demo="Terraza">Terraza</button><button class="chip" type="button" data-demo="Para llevar">Para llevar</button></div>
+        <div class="tables" aria-label="Mesas del salón">
+          <button class="table" data-table="1"><span class="num">1</span><span class="state">Disponible</span></button>
+          <button class="table" data-table="2"><span class="num">2</span><span class="state">Disponible</span></button>
+          <button class="table busy" data-table="3"><span class="num">3</span><span class="state">Ocupada</span></button>
+          <button class="table" data-table="4"><span class="num">4</span><span class="state">Disponible</span></button>
+          <button class="table" data-table="5"><span class="num">5</span><span class="state">Disponible</span></button>
+          <button class="table pending" data-table="6"><span class="num">6</span><span class="state">Por cobrar</span></button>
+          <button class="table" data-table="7"><span class="num">7</span><span class="state">Disponible</span></button>
+          <button class="table" data-table="8"><span class="num">8</span><span class="state">Disponible</span></button>
+          <button class="table" data-table="9"><span class="num">9</span><span class="state">Disponible</span></button>
+          <button class="table" data-table="10"><span class="num">10</span><span class="state">Disponible</span></button>
+          <button class="table" data-table="11"><span class="num">11</span><span class="state">Disponible</span></button>
+          <button class="table" data-table="12"><span class="num">12</span><span class="state">Disponible</span></button>
+        </div>
+        <p class="hint">La cuadrícula ocupa todo el ancho. Al tocar una mesa se abriría su cuenta actual, sin cambiar la lógica comercial.</p>
+      </section>
+      <section class="view" data-view="inventario" hidden>
+        <label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><input id="search" type="search" placeholder="Buscar productos" aria-label="Buscar productos del área"></label>
+        <div class="section-head"><h1>Inventario por áreas</h1></div>
+        <div class="area-grid" id="areaGrid">
+          <button class="area-card" data-area="Cocina fría"><strong>Cocina fría</strong><span>0</span><small>unidades · sin mínimos</small></button>
+          <button class="area-card" data-area="Cocina caliente"><strong>Cocina caliente</strong><span>0</span><small>unidades · sin mínimos</small></button>
+          <button class="area-card" data-area="Barra"><strong>Barra</strong><span>0</span><small>unidades · sin mínimos</small></button>
+          <button class="area-card" data-area="Cafetería"><strong>Cafetería</strong><span>0</span><small>unidades · sin mínimos</small></button>
+          <button class="area-card" data-area="Heladería"><strong>Heladería</strong><span>0</span><small>unidades · sin mínimos</small></button>
+          <button class="area-card selected" data-area="Sin asignar"><strong>Sin asignar</strong><span>4.566,20</span><small>unidades · ubicación inicial</small></button>
+        </div>
+        <div class="section-head"><h2 id="areaTitle">Sin asignar</h2><button class="chip" type="button" id="allAreas">Todas</button></div>
+        <div id="inventoryList"><div class="card product"><div><strong>Leche entera</strong><small>Existencia física · Sin asignar</small></div><div class="qty">12<small>unidades</small></div></div><div class="card product"><div><strong>Café en grano</strong><small>Existencia física · Sin asignar</small></div><div class="qty">8<small>kg</small></div></div></div>
+        <p class="hint">Las cantidades de productos aquí son ilustrativas. El total de Sin asignar corresponde al último informe, no a una consulta en vivo.</p>
+      </section>
+      <section class="view" data-view="reparto" hidden><p class="eyebrow">Propuesta visual</p><h1>Repartos</h1><div class="card empty" style="margin-top:15px"><strong>Bodega → área</strong>El acceso directo queda en la navegación principal. Las transferencias reales se construirán en B3.2b y utilizarán exclusivamente la operación protegida de stock.</div><div class="buttons"><button class="button" data-demo="Transferir stock">Nueva transferencia</button></div></section>
+      <section class="view" data-view="mermas" hidden><p class="eyebrow">Propuesta visual</p><h1>Mermas</h1><div class="card empty" style="margin-top:15px"><strong>Vista general de la sede</strong>Un único módulo para consultar mermas de todas las áreas. La ubicación de la merma se podrá filtrar en una fase posterior.</div></section>
+      <section class="view" data-view="mas" hidden><h1>Más módulos</h1><p class="hint">Acceso a todo lo que no cabe en la barra inferior.</p><div class="drawer-list" style="margin-top:14px"><button class="drawer-item card" data-demo="Arqueo">Arqueo</button><button class="drawer-item card" data-demo="Movimientos">Movimientos</button><button class="drawer-item card" data-demo="Recetas">Recetas</button><button class="drawer-item card" data-demo="Historial">Historial</button><button class="drawer-item card" data-demo="Ajustes">Ajustes</button><button class="drawer-item card" data-demo="Cambiar sede">Cambiar sede</button><button class="drawer-item card" data-demo="Apariencia">Apariencia</button></div></section>
+    </main>
+    <nav class="tabbar" aria-label="Navegación principal">
+      <button class="nav-item active" data-target="mesas" aria-current="page"><svg viewBox="0 0 24 24"><path d="M4 10h16M6 10v7m12-7v7M8 6h8v4M4 17h16"/></svg>Mesas</button>
+      <button class="nav-item" data-target="inventario"><svg viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5ZM3 8v9l9 5 9-5V8M12 13v9"/></svg>Inventario</button>
+      <button class="nav-item" data-target="reparto"><svg viewBox="0 0 24 24"><path d="M2 6h13v11H2zM15 10h4l3 3v4h-7M6 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm12 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/></svg>Reparto</button>
+      <button class="nav-item" data-target="mermas"><svg viewBox="0 0 24 24"><path d="M4 6h4l4 6 4-3 4 9M17 18h3v-3"/></svg>Mermas</button>
+      <button class="nav-item" data-target="mas"><svg viewBox="0 0 24 24"><circle cx="4" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="20" cy="12" r="1"/></svg>Más</button>
+    </nav>
+    <div class="scrim" id="scrim" hidden></div>
+    <aside class="drawer" id="drawer" aria-label="Menú completo" hidden>
+      <div class="drawer-head"><div><strong>Llamita Plus</strong><div class="count">Local 1 · menú completo</div></div><button class="icon-button" id="menuClose" aria-label="Cerrar menú">×</button></div>
+      <div class="drawer-label">Operación</div><div class="drawer-list"><button class="drawer-item" data-target="mesas">Mesas</button><button class="drawer-item" data-target="inventario">Inventario</button><button class="drawer-item" data-target="reparto">Reparto</button><button class="drawer-item" data-target="mermas">Mermas</button><button class="drawer-item" data-demo="Arqueo">Arqueo</button><button class="drawer-item" data-demo="Movimientos">Movimientos</button><button class="drawer-item" data-demo="Recetas">Recetas</button><button class="drawer-item" data-demo="Historial">Historial</button></div>
+      <div class="drawer-label">Sistema</div><div class="drawer-list"><button class="drawer-item" data-demo="Ajustes">Ajustes</button><button class="drawer-item" data-demo="Cambiar sede">Cambiar sede</button><button class="drawer-item" data-demo="Apariencia">Apariencia</button><button class="drawer-item" data-demo="Actualizar">Actualizar</button><button class="drawer-item" data-demo="Cerrar sesión">Cerrar sesión</button></div>
+    </aside>
+    <div class="toast" id="toast" role="status" hidden></div>
+  </div>
+  <script>
+    const views=[...document.querySelectorAll('.view')], tabs=[...document.querySelectorAll('.nav-item')];
+    const drawer=document.getElementById('drawer'), scrim=document.getElementById('scrim'), menuOpen=document.getElementById('menuOpen'), content=document.getElementById('mainContent'), toast=document.getElementById('toast');
+    let toastTimer;
+    function message(text){toast.textContent=text;toast.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.hidden=true,3400)}
+    function closeMenu(){drawer.hidden=true;scrim.hidden=true;menuOpen.setAttribute('aria-expanded','false');menuOpen.focus()}
+    function show(name){views.forEach(v=>v.hidden=v.dataset.view!==name);tabs.forEach(t=>{const on=t.dataset.target===name;t.classList.toggle('active',on);on?t.setAttribute('aria-current','page'):t.removeAttribute('aria-current')});document.getElementById('currentModule').textContent=({mesas:'Mesas',inventario:'Inventario',reparto:'Reparto',mermas:'Mermas',mas:'Más'})[name];content.scrollTop=0;drawer.hidden=true;scrim.hidden=true;menuOpen.setAttribute('aria-expanded','false')}
+    document.querySelectorAll('[data-target]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.target)));
+    menuOpen.addEventListener('click',()=>{drawer.hidden=false;scrim.hidden=false;menuOpen.setAttribute('aria-expanded','true');document.getElementById('menuClose').focus()});
+    document.getElementById('menuClose').addEventListener('click',closeMenu);scrim.addEventListener('click',closeMenu);document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!drawer.hidden)closeMenu()});
+    document.getElementById('refresh').addEventListener('click',()=>message('Prototipo: no consulta datos reales.'));
+    document.querySelectorAll('[data-demo]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();message(`${b.dataset.demo}: ubicación de referencia; sin operaciones reales.`)}));
+    document.querySelectorAll('[data-table]').forEach(b=>b.addEventListener('click',()=>message(`Mesa ${b.dataset.table}: aquí se abriría su cuenta real.`)));
+    const areaTitle=document.getElementById('areaTitle'), list=document.getElementById('inventoryList');
+    document.querySelectorAll('[data-area]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-area]').forEach(a=>a.classList.toggle('selected',a===b));areaTitle.textContent=b.dataset.area;list.innerHTML=b.dataset.area==='Sin asignar'?'<div class="card product"><div><strong>Leche entera</strong><small>Existencia física · Sin asignar</small></div><div class="qty">12<small>unidades</small></div></div><div class="card product"><div><strong>Café en grano</strong><small>Existencia física · Sin asignar</small></div><div class="qty">8<small>kg</small></div></div>':'<div class="card empty"><strong>Aún no hay existencias aquí</strong>Asignar un producto no mueve sus unidades. La transferencia se diseñará en B3.2b.</div>';document.getElementById('search').value='';areaTitle.scrollIntoView({block:'nearest',behavior:'smooth'})}));
+    document.getElementById('allAreas').addEventListener('click',()=>{areaTitle.textContent='Todas las áreas';document.querySelectorAll('[data-area]').forEach(a=>a.classList.remove('selected'));list.innerHTML='<div class="card empty"><strong>Vista global</strong>En la aplicación real, cada producto aparecerá desglosado por ubicación física; esta maqueta no consulta la base.</div>'});
+    document.getElementById('search').addEventListener('input',e=>{for(const row of list.querySelectorAll('.product'))row.hidden=!row.textContent.toLowerCase().includes(e.target.value.trim().toLowerCase())});
+  </script>
+</body>
+</html>
