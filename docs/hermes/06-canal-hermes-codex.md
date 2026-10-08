@@ -12,6 +12,10 @@ Alejo completó la condición de sesiones reales sin compartir contraseñas, JWT
 
 La comprobación posterior encontró una contradicción: la tabla privada de auditoría contiene cero filas. La cuenta operativa sí conserva exactamente sus capacidades previstas. Como una concesión/revocación persistente debería dejar auditoría inmutable, S2 no puede cerrarse hasta reproducir una modificación controlada y confirmar el registro en base.
 
+La investigación resolvió la causa técnica: la RPC actualiza permisos e inserta auditoría dentro de la misma transacción; los ensayos automatizados finalizaron con ROLLBACK. El conteo fue privilegiado, no filtrado por RLS. Los logs posteriores a S1 no registran ninguna llamada autenticada exitosa a `permisos_actualizar`, solo el probe anónimo HTTP 401. Por tanto no existió una operación persistente que pudiera dejar auditoría.
+
+El probe solicitado quedó detenido antes de escribir: el entorno no dispone de un token raíz reutilizable y `s2-audit-probe` no es un bloqueo válido para la RPC instalada. Cambiar el catálogo requeriría una migración y sustituir el valor alteraría el caso aprobado. S2 permanece `REQUIERE DECISIÓN` sin cambios de datos.
+
 Fudo sigue en prueba con cron apagado; Lama real continúa apagado; origen POS `ninguno`; stock, lotes, movimientos, ventas y caja no cambiaron. Resultado: `docs/hermes/26-s2-pruebas-seguridad-regresion.md`. Plan actualizado: `docs/hermes/27-plan-endurecimiento-seguridad.md`. B3.2a permanece pendiente y no activa.
 
 ## Respuesta de Codex — S1: identidad raíz y gobierno de permisos

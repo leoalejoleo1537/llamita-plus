@@ -63,6 +63,8 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Prueba manual: Alejo confirmó login real de ambas cuentas. La raíz pudo leer globalmente, otorgar/revocar y generar auditoría; la cuenta operativa funcionó normalmente y no pudo administrar, escribir permisos ni autoelevarse.
 - Secretos: no se compartieron contraseñas, JWT ni claves; Auth no fue alterado para producir evidencia.
 - Discrepancia crítica: la consulta posterior muestra cero filas de auditoría. La cuenta operativa quedó restaurada correctamente, pero S2 no se cierra hasta reproducir y corroborar una auditoría persistente.
+- Investigación: la auditoría se inserta en la misma transacción que el cambio; las pruebas SQL anteriores hicieron ROLLBACK. Los logs solo muestran el probe anónimo HTTP 401 y ninguna llamada autenticada exitosa a la RPC.
+- Probe solicitado no ejecutado: `s2-audit-probe` no pertenece al catálogo admitido por `permisos_actualizar` y el entorno no posee un token reutilizable de la sesión raíz. No se sustituyó el valor ni se simuló una sesión real.
 - Estado operativo: Fudo en prueba/cron apagado, Lama real apagado, origen POS `ninguno`, stock y conteos intactos.
 - Publicación: solo documentación y resultados. B3.2a no se activa.
 

@@ -22,6 +22,8 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - `npm test` pasó; Chromium no está instalado. Advisors conservan los hallazgos globales heredados de S0, fuera de S2.
 - Prueba manual: raíz con login, lectura global, otorgamiento/revocación y auditoría correctos; cuenta operativa con login y operación normal, sin administración global, escritura directa ni autoelevación. No se compartieron secretos.
 - Verificación posterior: `authz_internal.permisos_auditoria` contiene cero filas. La cuenta operativa conserva editar/Fudo/Ajustes, Lama apagado y cero bloqueos. Se requiere reproducir una modificación controlada y conciliar la auditoría antes de completar S2.
+- Causa comprobada: UPDATE de permisos e INSERT de auditoría son atómicos; todos los ensayos SQL previos finalizaron con ROLLBACK. Los logs no contienen ninguna llamada autenticada exitosa a `permisos_actualizar`, solo el probe anónimo 401. El conteo se hizo como `postgres`, por lo que RLS no ocultó filas.
+- Probe persistente detenido antes de escribir: falta un token raíz reutilizable y `s2-audit-probe` es rechazado por la lista cerrada de bloqueos Fudo. No se improvisó otro valor, no se modificó Auth y la tabla sigue vacía.
 - Conteos post prueba iguales: 1.437 productos, stock 15.438, 431 movimientos, 42 lotes, 59 cuentas, 30 pagos, caja 2, Lama–Stock 0, Fudo 15.357, auditorías 0 y transferencias 0.
 - No hubo migraciones, código funcional, cambios persistentes, llamadas a Fudo remoto ni acceso a Café del Desierto. Informe 26 y plan 27.
 

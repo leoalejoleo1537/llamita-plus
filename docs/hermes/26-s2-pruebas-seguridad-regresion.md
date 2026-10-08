@@ -110,4 +110,28 @@ La comprobación de solo lectura inmediatamente posterior devolvió `0` filas en
 
 Esta discrepancia afecta un criterio crítico. S2 permanece `REQUIERE DECISIÓN` hasta reproducir una única modificación controlada y confirmar la fila auditada en la base. No se activa B3.2a ni ninguna fase siguiente.
 
+## Investigación de la auditoría
+
+La inspección de las definiciones instaladas confirmó:
+
+- `authz_internal.permisos_auditoria` pertenece a `postgres`, tiene RLS habilitada y forzada, cero políticas y grants únicamente para `postgres`;
+- `anon`, `authenticated` y `service_role` no pueden leerla directamente;
+- el conteo de cero fue ejecutado como rol privilegiado `postgres`, por lo que las filas no están ocultas por RLS;
+- el trigger `permisos_auditoria_inmutable` se ejecuta antes de UPDATE o DELETE y siempre lanza `42501`; no bloquea INSERT;
+- `permisos_actualizar(...)` es `SECURITY DEFINER`, pertenece a `postgres`, fija `search_path=''` e inserta `estado_anterior`, `estado_nuevo`, actor, objetivo, acción y fecha inmediatamente después del UPDATE de `app_permisos`;
+- el cambio y su auditoría están en la misma transacción. Un COMMIT conserva ambos; un error o ROLLBACK elimina ambos;
+- las pruebas automatizadas S1/S2 terminaron explícitamente con `ROLLBACK`, por lo que sus filas temporales debían desaparecer;
+- la segunda cuenta conserva los valores originales, pero eso por sí solo no demuestra una concesión/revocación: una restauración exitosa habría dejado dos filas inmutables.
+
+Los logs de Data API posteriores a la instalación de S1 contienen un único POST a `/rest/v1/rpc/permisos_actualizar`, correspondiente a la prueba anónima automatizada, con HTTP 401. No hay una llamada autenticada exitosa registrada. Por tanto, la causa del conteo cero es que no hubo una ejecución persistente confirmada de la RPC: las ejecuciones SQL fueron revertidas y la acción manual reportada no alcanzó ese endpoint con éxito.
+
+## Probe controlado solicitado
+
+No se ejecutó ninguna escritura. Fallaron dos precondiciones antes de llamar la RPC:
+
+1. El entorno no dispone del access token o refresh token de la sesión raíz real. La existencia de una fila en `auth.sessions` no permite reconstruir ni extraer un token reutilizable, y no se fabricaron JWT ni se cambiaron credenciales.
+2. La definición instalada admite únicamente `boton`, `ficha`, `todo`, `reparto`, `merma`, `crear`, `apagar` y `deshacer` en `fudo_bloqueos`. El valor solicitado `s2-audit-probe` produciría `22023: Existe un bloqueo Fudo desconocido` antes del UPDATE y del INSERT de auditoría.
+
+Usar otro bloqueo habría cambiado el caso aprobado; ampliar la lista requeriría una migración prohibida; simular el JWT no sería una sesión raíz real. Conforme a la regla de detención, S2 sigue `REQUIERE DECISIÓN`. No cambió `app_permisos` y la auditoría permanece en cero.
+
 No se accedió ni modificó Café del Desierto / Llamita Stock.

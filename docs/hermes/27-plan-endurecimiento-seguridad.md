@@ -12,7 +12,7 @@ Fecha de actualización: 2026-10-07
 
 ## Criterio de salida de S2
 
-Las dos cuentas existentes ya probaron mediante login real el gobierno exclusivo de la raíz, el rechazo del administrador operativo y la operación normal. Falta reproducir una concesión/revocación controlada y confirmar que la auditoría inmutable persiste: la consulta posterior devolvió cero filas. No se compartieron credenciales, JWT ni refresh tokens.
+Las dos cuentas existentes ya probaron mediante login real el gobierno exclusivo de la raíz, el rechazo del administrador operativo y la operación normal. Los logs no muestran una llamada autenticada exitosa a la RPC de gestión y los ensayos SQL fueron revertidos, por lo que la auditoría permanece vacía. Falta aprobar un probe con un valor admitido y ejecutarlo desde una sesión raíz real disponible, sin compartir credenciales, JWT ni refresh tokens.
 
 ## Fases posteriores separadas
 
