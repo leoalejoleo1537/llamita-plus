@@ -365,3 +365,16 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - Rollback: `sql/2026-10-b3-1-lectura-areas.rollback.sql` elimina solo ambas funciones de lectura. Sin filas/saldos nuevos que revertir.
 - Informe: `docs/hermes/22-b3-1-lectura-areas.md`. B3.2 sigue sin activar. No se accedió a Café del Desierto / Llamita Stock.
 - Publicación de aplicación y migraciones: commit `2a9c8c2` enviado a `origin/master`.
+## 2026-10-08 — B3.2a.2 completada: interfaz dinámica de áreas
+
+- Repositorio y destino verificados: `leoalejoleo1537/llamita-plus`; Supabase `llamita-plus` (`iuryhsjucblmebdogewa`).
+- La lectura del ledger dejó de filtrar cuatro códigos: usa todas las áreas activas vinculadas de `plaza` y conserva `sin_asignar` como ubicación lógica.
+- Se añadió `producto_area_preferencia_leer(bigint,text)` con sesión obligatoria, `search_path=''`, objetos calificados y `EXECUTE` solo para `authenticated`.
+- La interfaz de Inventario genera tarjetas desde las RPC, incorpora áreas nuevas con saldo cero, conserva Todas/Sin asignar y no cambia Bodega.
+- Ajustes administra crear/editar/archivar mediante las cuatro RPC de B3.2a.1. La UI no hace DML directo sobre áreas/asignaciones.
+- Las altas normales y del taller de recetas en `plaza` usan `producto_plaza_crear`; Bodega/Enlaces y Edge Functions Fudo quedaron intactos. La edición de preferencia usa su RPC y muestra aparte ubicación/saldo físico.
+- Migraciones remotas: `20261008210149 b3_2a_2_lectura_dinamica_areas` y corrección de delegación invoker `20261008210212 b3_2a_2_restaurar_execute_lector`. La primera prueba detectó el grant faltante; falló antes de persistir y se revirtió. La corrección solo restituyó el `EXECUTE` requerido por `stock_leer_areas`.
+- Prueba SQL transaccional final correcta: Heladería dinámica, renombre, producto con/sin preferencia, archivo y roles; `ROLLBACK` dejó cero sintéticos.
+- Conteos pre/post idénticos: 1.437 productos; stock global 15.438,00; ledger 9.316,70; 42 lotes; 431 movimientos legacy; 408 ledger; 0 transferencias; 396 recetas; 15.357 movimientos Fudo; 0 eventos Lama.
+- `npm test`, sintaxis JS, advisors, ACL/RPC y `git diff --check` pasaron. No había Chromium; procedimiento manual desktop/móvil documentado en el informe 29.
+- No se accedió a Café del Desierto / Llamita Stock. B3.2a.3 y B3.2b siguen pendientes.

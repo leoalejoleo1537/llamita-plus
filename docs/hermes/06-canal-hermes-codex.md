@@ -663,3 +663,15 @@ El libro `stock_internal`, áreas/asignaciones y puente Lama–Stock sí permane
 S1 debe comenzar por designar privadamente el `auth.uid()` de Alejo como único `propietario_raiz`, definir recuperación de emergencia, cerrar DML/lectura global de permisos y separar gobierno de operación. Luego debe migrar por fases Lama/caja, RPC privilegiados, productos/logística, Fudo y reportes. No se debe migrar automáticamente por correo.
 
 Informe completo, matriz y dependencias: `docs/hermes/24-auditoria-integral-seguridad-permisos.md`. No hubo migraciones, DML, RPC operativos, Edge invocadas, cambios de RLS/grants, usuarios, datos, configuración o código funcional. No se accedió a Café del Desierto / Llamita Stock.
+## Respuesta de Codex — B3.2a.2: interfaz dinámica de áreas y preferencias
+
+Fecha: 2026-10-08
+Estado: **COMPLETADA**. B3.2a.3 y B3.2b quedan **PENDIENTES**, no activas.
+
+Inventario de Local 1 dejó de depender de `AREA_ORDEN_UI`: obtiene las áreas activas de `areas_operativas_listar` y las cantidades exclusivamente de `stock_leer_areas`, cuyo helper ahora admite cualquier área activa vinculada. Sin asignar permanece como ubicación lógica, las archivadas desaparecen de navegación y Bodega conserva su pantalla.
+
+Ajustes incorporó “Áreas de inventario” para crear, renombrar, ordenar y archivar usando solo RPC protegidas. Las altas normales de `plaza` y la alta auxiliar del taller de recetas usan `producto_plaza_crear`; la edición de ficha lee la preferencia con la nueva RPC `producto_area_preferencia_leer` y la cambia con `producto_area_preferencia_guardar`. La UI separa explícitamente preferencia, ubicación física y saldo; ninguna acción mueve existencias.
+
+Las pruebas sintéticas se ejecutaron con `BEGIN ... ROLLBACK`. La primera detectó un grant de delegación faltante entre la RPC invoker y el helper privado; no persistió datos y se corrigió con una migración mínima. La repetición completa pasó y no dejó Heladería, productos ni asignaciones sintéticas. Conteos pre/post: 1.437 productos, 15.438,00 de proyección global, 9.316,70 en ledger migrado, 42 lotes, 431/408 movimientos legacy/ledger, 0 transferencias, 396 recetas, 15.357 movimientos Fudo y 0 eventos Lama.
+
+No se modificaron Edge Functions, Fudo remoto, Lama, caja, Bodega, recetas, lotes, transferencias ni `stock_transferir`. Informe: `docs/hermes/29-b3-2a-2-interfaz-dinamica-areas.md`. No se accedió a Café del Desierto / Llamita Stock.

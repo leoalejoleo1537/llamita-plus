@@ -413,12 +413,17 @@
   .area-card{display:flex;flex-direction:column;align-items:stretch;gap:7px;text-align:left;min-width:0;
     padding:15px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:15px;
     box-shadow:var(--sombra);font:inherit;cursor:pointer;transition:transform .12s ease,box-shadow .15s ease}
+  article.area-card{cursor:default}
+  .area-card-open{display:flex;flex:1;flex-direction:column;align-items:stretch;gap:7px;text-align:left;
+    padding:0;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer}
   .area-card:hover{box-shadow:0 8px 22px rgba(25,35,50,.08)}
   .area-card-title{font-size:15px;font-weight:750;line-height:1.25}
   .area-card-count{font-size:12px;color:var(--muted)}
   .area-card-units{font-size:22px;font-weight:800;letter-spacing:-.02em}
   .area-card-state{font-size:11px;color:var(--muted);padding-top:7px;border-top:1px solid var(--border)}
   .area-card-extra{font-size:11px;color:var(--muted);line-height:1.4}
+  .area-create{margin-top:auto;border:0;background:transparent;color:var(--orange);font:inherit;
+    font-size:11px;font-weight:800;text-align:left;padding:3px 0;cursor:pointer}
   .area-aggregate{background:var(--gray-bg)}
   .area-list-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:2px 0 10px}
   .area-list-total{font-size:12px;color:var(--muted)}
@@ -429,6 +434,7 @@
   .area-read-name{font-size:14px;font-weight:700;min-width:0;overflow-wrap:anywhere}
   .area-read-sub{font-size:11px;color:var(--muted);margin-top:3px}
   .area-read-qty{font-size:15px;font-weight:800;white-space:nowrap}
+  button.area-read-row{width:100%;border-left:0;border-right:0;border-top:0;color:var(--text);font:inherit;text-align:left;cursor:pointer}
   .area-global-product{background:var(--card);border:1px solid var(--border);border-radius:13px;
     padding:11px 12px;margin:0 0 8px;box-shadow:var(--sombra)}
   .area-global-balances{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:8px}
@@ -438,8 +444,20 @@
   .area-global-link span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .area-global-link strong{white-space:nowrap}
   .area-loading{padding:22px;text-align:center;color:var(--muted);font-size:13px}
+  .area-pref-box{background:var(--gray-bg);border-radius:11px;padding:10px 12px;margin:10px 0}
+  .area-pref-box strong{display:block;font-size:12px;margin-bottom:3px}
+  .area-pref-box span{display:block;font-size:11px;color:var(--muted);line-height:1.4}
+  .area-admin-row{display:grid;grid-template-columns:minmax(0,1fr) 88px auto;gap:8px;align-items:end;
+    border-top:1px solid var(--border);padding:12px 0}
+  .area-admin-row:first-child{border-top:0}
+  .area-admin-meta{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4}
+  .area-admin-actions{display:flex;gap:6px;align-items:center}
+  .area-admin-actions button{min-height:38px}
+  .area-admin-row.archivada{opacity:.72}
+  .area-admin-new{display:grid;grid-template-columns:minmax(0,1fr) 90px auto;gap:8px;align-items:end}
   @media(max-width:700px){.area-cover{grid-template-columns:repeat(2,minmax(0,1fr))}.area-card{padding:12px}}
-  @media(max-width:420px){.area-cover{gap:7px}.area-global-balances{grid-template-columns:1fr}.area-card-title{font-size:13px}}
+  @media(max-width:620px){.area-admin-row,.area-admin-new{grid-template-columns:1fr}.area-admin-actions{justify-content:flex-start}.area-admin-row input,.area-admin-new input{width:100%;min-width:0}}
+  @media(max-width:420px){.area-cover{grid-template-columns:1fr;gap:7px}.area-global-balances{grid-template-columns:1fr}.area-card-title{font-size:13px}}
 
   /* ---- las tres sedes, vistas desde Bodega ----
      Adriana no cuenta en bodega para saber cómo está bodega: cuenta para
@@ -3918,6 +3936,14 @@
       <input type="text" id="m-tipo" list="lista-tipos" placeholder="Tortas, Bollería, Sándwiches…">
       <datalist id="lista-tipos"></datalist>
     </div>
+    <div id="m-area-wrap" style="display:none">
+      <div class="field">
+        <label>Área preferida</label>
+        <select id="m-area"></select>
+        <small style="display:block;color:var(--muted);margin-top:6px">Cambiar esta preferencia no mueve unidades.</small>
+      </div>
+      <div class="area-pref-box" id="m-area-fisica"><strong>Ubicación física actual</strong><span>Cargando saldo real…</span></div>
+    </div>
     <button type="button" class="btn-urg" id="m-urgente" style="display:none">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>
       <span id="m-urgente-txt">Marcar urgente</span>
@@ -3968,6 +3994,11 @@
            en una sección inventada no aparece en ninguna parte de la lista.
            Mismo control que usa la ficha del producto (m-seccion). -->
       <select id="n-rubro"></select>
+    </div>
+    <div class="field" id="n-area-wrap" style="display:none">
+      <label>Área operativa inicial</label>
+      <select id="n-area"></select>
+      <small style="display:block;color:var(--muted);margin-top:6px">Es una preferencia operativa. El producto se crea con saldo cero y sin existencias.</small>
     </div>
     <label class="chkrow">
       <input type="checkbox" id="n-perec">
@@ -4070,11 +4101,11 @@ let DATA = [];
 /* Solo lectura para B3.1. Estas filas vienen de public.stock_leer_areas(),
    que las agrega desde el libro por ubicación y nunca desde stock_actual. */
 let AREA_ROWS = [];
+let AREAS_CATALOGO = [];
 let AREA_ERROR = null;
 let AREA_LOADING = false;
 let areaActual = null;              // null=portada; '__todas__'=vista global; otro=ubicación plaza
 const AREA_TODAS = '__todas__';
-const AREA_ORDEN_UI = ['cocina_fria','cocina_caliente','barra','cafeteria','sin_asignar'];
 let filterState = null;
 let hasVenc = false;      // true cuando exista la columna vencimiento en la tabla
 let hasPerec = false;     // true cuando exista la columna perecedero
@@ -4082,6 +4113,7 @@ let hasUrgente = false;   // true cuando exista la columna urgente
 let hasTipo = false;      // true cuando exista la columna tipo
 let tipoSel = null;       // tipo de producto elegido en la franja
 let modalProd = null;
+let NUEVO_AREA_ID = null;
 let carrito = [];         // productos que llegaron, pendientes de registrar
 
 /* ¿este producto es perecedero? (usa la columna si existe; si no, la regla vieja de Sándwiches) */
@@ -4108,10 +4140,33 @@ const qEl=$('q'), listEl=$('list');
 let openSecs=new Set();   // secciones desplegadas
 
 function areaLabel(codigo){
-  return AREA_ROWS.find(x=>x.area_codigo===codigo)?.area_nombre || ({
-    cocina_fria:'Cocina fría', cocina_caliente:'Cocina caliente', barra:'Barra',
-    cafeteria:'Cafetería', sin_asignar:'Sin asignar'
-  }[codigo]||codigo);
+  return AREAS_CATALOGO.find(x=>x.codigo===codigo)?.nombre
+    || AREA_ROWS.find(x=>x.area_codigo===codigo)?.area_nombre
+    || (codigo==='sin_asignar'?'Sin asignar':codigo);
+}
+function areasNavegacion(){
+  const desdeCatalogo=AREAS_CATALOGO.filter(a=>a.estado==='activa')
+    .sort((a,b)=>(a.orden-b.orden)||a.nombre.localeCompare(b.nombre,'es'))
+    .map(a=>a.codigo);
+  const desdeLibro=[...new Set(AREA_ROWS.map(r=>r.area_codigo))]
+    .filter(c=>c!=='sin_asignar')
+    .sort((a,b)=>{
+      const ra=AREA_ROWS.find(r=>r.area_codigo===a), rb=AREA_ROWS.find(r=>r.area_codigo===b);
+      return ((ra?.area_orden??0)-(rb?.area_orden??0))||areaLabel(a).localeCompare(areaLabel(b),'es');
+    });
+  const codigos=[...new Set([...desdeCatalogo,...desdeLibro])];
+  if(AREA_ROWS.some(r=>r.area_codigo==='sin_asignar')) codigos.push('sin_asignar');
+  return codigos;
+}
+function areaIdPorCodigo(codigo){
+  return AREAS_CATALOGO.find(a=>a.codigo===codigo&&a.estado==='activa')?.id||null;
+}
+function opcionesAreasHTML(valor){
+  const v=valor||'';
+  return `<option value=""${v===''?' selected':''}>Sin asignar</option>`
+    + AREAS_CATALOGO.filter(a=>a.estado==='activa')
+      .sort((a,b)=>(a.orden-b.orden)||a.nombre.localeCompare(b.nombre,'es'))
+      .map(a=>`<option value="${esc(a.id)}"${v===a.id?' selected':''}>${esc(a.nombre)}</option>`).join('');
 }
 function tituloInventarioArea(){
   if(SEDE!=='plaza' || vistaActual!=='inv') return;
@@ -4122,7 +4177,7 @@ function tituloInventarioArea(){
 }
 function cambiarArea(codigo, producto=''){
   if(SEDE!=='plaza') return;
-  if(codigo!==null && codigo!==AREA_TODAS && !AREA_ROWS.some(r=>r.area_codigo===codigo)) return;
+  if(codigo!==null && codigo!==AREA_TODAS && !areasNavegacion().includes(codigo)) return;
   areaActual=codigo;
   qEl.value=producto;
   filterState=null; tipoSel=null; openSecs.clear();
@@ -4139,12 +4194,15 @@ function htmlTarjetaArea(codigo){
   const s=areaStats(codigo);
   const extra=codigo==='sin_asignar'
     ? '<span class="area-card-extra">Stock pendiente de distribución a las áreas.</span>' : '';
-  return `<button type="button" class="area-card" data-area-open="${esc(codigo)}">
-    <span class="area-card-title">${esc(areaLabel(codigo))}</span>
-    <span class="area-card-count">${s.productos} productos con saldo</span>
-    <span class="area-card-units">${fmt(s.unidades)} <small>unidades</small></span>
-    <span class="area-card-state">Críticos · sin mínimos configurados</span>${extra}
-  </button>`;
+  return `<article class="area-card">
+    <button type="button" class="area-card-open" data-area-open="${esc(codigo)}">
+      <span class="area-card-title">${esc(areaLabel(codigo))}</span>
+      <span class="area-card-count">${s.productos} productos con saldo</span>
+      <span class="area-card-units">${fmt(s.unidades)} <small>unidades</small></span>
+      <span class="area-card-state">Críticos · sin mínimos configurados</span>${extra}
+    </button>
+    ${PERMISOS.puede_editar?`<button type="button" class="area-create" data-area-create="${esc(codigo)}">＋ Crear producto en esta área</button>`:''}
+  </article>`;
 }
 function renderAreaPortada(){
   $('areaNav').style.display='none'; $('areaNote').style.display='none';
@@ -4153,10 +4211,11 @@ function renderAreaPortada(){
   $('btnNuevo').style.display='none'; $('inv-estado').style.display='none';
   if(AREA_LOADING){ listEl.innerHTML='<div class="area-loading">Cargando existencias por ubicación…</div>'; return; }
   if(AREA_ERROR){ listEl.innerHTML='<div class="empty">No se pudo leer el libro de existencias de Local 1. Vuelve a cargar para intentarlo otra vez.</div>'; return; }
-  const total=AREA_ORDEN_UI.reduce((s,c)=>s+areaStats(c).unidades,0);
+  const codigos=areasNavegacion();
+  const total=codigos.reduce((s,c)=>s+areaStats(c).unidades,0);
   const productos=new Set(AREA_ROWS.filter(r=>Number(r.cantidad)>0).map(r=>r.producto_id)).size;
   listEl.innerHTML=`<div class="area-cover" aria-label="Áreas de inventario">
-    ${AREA_ORDEN_UI.map(htmlTarjetaArea).join('')}
+    ${codigos.map(htmlTarjetaArea).join('')}
     <button type="button" class="area-card area-aggregate" data-area-open="${AREA_TODAS}">
       <span class="area-card-title">Todas las áreas</span>
       <span class="area-card-count">${productos} productos con saldo</span>
@@ -4168,7 +4227,7 @@ function renderAreaPortada(){
 }
 function renderAreaLista(){
   const global=areaActual===AREA_TODAS;
-  $('areaNav').style.display='flex'; $('areaNav').innerHTML=`<button type="button" class="area-back" data-area-home>← Todas las áreas</button><span class="area-context">Solo lectura · Local 1</span>`;
+  $('areaNav').style.display='flex'; $('areaNav').innerHTML=`<button type="button" class="area-back" data-area-home>← Todas las áreas</button><span class="area-context">${global?'Lectura global · Local 1':esc(areaLabel(areaActual))}</span>${!global&&PERMISOS.puede_editar?`<button type="button" class="area-back" data-area-create="${esc(areaActual)}">＋ Crear producto</button>`:''}`;
   $('invFiltros').style.display=''; $('metrics').style.display='none';
   $('critSedes').style.display='none'; $('metaPortada').style.display='none';
   $('btnNuevo').style.display='none'; $('inv-estado').style.display='none';
@@ -4194,12 +4253,13 @@ function renderAreaLista(){
   });
   const productos=[...porProducto.values()].sort((a,b)=>a.producto.localeCompare(b.producto,'es',{sensitivity:'base'}));
   if(global){
+    const orden=areasNavegacion();
     const salida=productos.map(p=>{
-      p.rows.sort((a,b)=>AREA_ORDEN_UI.indexOf(a.area_codigo)-AREA_ORDEN_UI.indexOf(b.area_codigo));
+      p.rows.sort((a,b)=>orden.indexOf(a.area_codigo)-orden.indexOf(b.area_codigo));
       return `<article class="area-global-product"><div class="area-read-name">${esc(p.producto)}</div><div class="area-read-sub">${esc(p.rubro)}${p.tipo?' · '+esc(p.tipo):''}</div>
         <div class="area-global-balances">${p.rows.map(r=>`<button type="button" class="area-global-link" data-area-open="${esc(r.area_codigo)}" data-area-product="${esc(p.producto)}" aria-label="Ver ${esc(p.producto)} en ${esc(r.area_nombre)}"><span>${esc(r.area_nombre)}</span><strong>${fmt(Number(r.cantidad)||0)}</strong></button>`).join('')}</div></article>`;
     }).join('');
-    listEl.innerHTML=`<div class="area-list-head"><span class="area-list-total">${productos.length} productos · ${AREA_ORDEN_UI.length} ubicaciones</span></div>${salida||'<div class="empty">No hay productos que coincidan.</div>'}`;
+    listEl.innerHTML=`<div class="area-list-head"><span class="area-list-total">${productos.length} productos · ${orden.length} ubicaciones</span></div>${salida||'<div class="empty">No hay productos que coincidan.</div>'}`;
     return;
   }
   const rows=AREA_ROWS.filter(r=>r.area_codigo===areaActual && Number(r.cantidad)>0
@@ -4207,7 +4267,7 @@ function renderAreaLista(){
     &&(!tipo||(r.tipo||'').trim()===tipo))
     .sort((a,b)=>a.producto.localeCompare(b.producto,'es',{sensitivity:'base'}));
   const stats=areaStats(areaActual);
-  const salida=rows.map(r=>`<div class="area-read-row"><div><div class="area-read-name">${esc(r.producto)}</div><div class="area-read-sub">${esc(r.rubro||'Sin sección')}${r.tipo?' · '+esc(r.tipo):''}</div></div><div class="area-read-qty">${fmt(Number(r.cantidad)||0)}${r.unidad?' '+esc(r.unidad):''}</div></div>`).join('');
+  const salida=rows.map(r=>`<button type="button" class="area-read-row" data-open="${r.producto_id}"><div><div class="area-read-name">${esc(r.producto)}</div><div class="area-read-sub">${esc(r.rubro||'Sin sección')}${r.tipo?' · '+esc(r.tipo):''}</div></div><div class="area-read-qty">${fmt(Number(r.cantidad)||0)}${r.unidad?' '+esc(r.unidad):''}</div></button>`).join('');
   listEl.innerHTML=`<div class="area-list-head"><span class="area-list-total">${stats.productos} productos con saldo · ${fmt(stats.unidades)} unidades</span></div>${salida||'<div class="empty">No hay productos que coincidan.</div>'}`;
 }
 
@@ -4928,7 +4988,7 @@ function pickSede(s){
     return;
   }
   SEDE = s;
-  AREA_ROWS=[]; AREA_ERROR=null; AREA_LOADING=s==='plaza'; areaActual=null;
+  AREA_ROWS=[]; AREAS_CATALOGO=[]; AREA_ERROR=null; AREA_LOADING=s==='plaza'; areaActual=null;
   /* Con el panel fijo el cajón nunca se abre, así que su nombre de sede hay
      que refrescarlo acá: es el momento en que deja de ser "—". */
   setTimeout(refrescarMenu, 0);
@@ -12024,13 +12084,17 @@ async function loadData(){
   if(sedeCarga==='plaza'){
     AREA_LOADING=true; AREA_ERROR=null;
     render();
-    const {data:areaData,error:areaError}=await sb.rpc('stock_leer_areas');
+    const [lectura,catalogo]=await Promise.all([
+      sb.rpc('stock_leer_areas'),
+      sb.rpc('areas_operativas_listar',{p_sede:'plaza',p_incluir_archivadas:false})
+    ]);
     if(SEDE!==sedeCarga) return;
     AREA_LOADING=false;
-    AREA_ERROR=areaError||null;
-    AREA_ROWS=areaError?[]:(areaData||[]);
+    AREA_ERROR=lectura.error||catalogo.error||null;
+    AREA_ROWS=lectura.error?[]:(lectura.data||[]);
+    AREAS_CATALOGO=catalogo.error?[]:(catalogo.data||[]);
   }else{
-    AREA_LOADING=false; AREA_ERROR=null; AREA_ROWS=[];
+    AREA_LOADING=false; AREA_ERROR=null; AREA_ROWS=[]; AREAS_CATALOGO=[];
   }
   $('m-fudo').style.display = puedeEnFudo('ficha') ? '' : 'none';
   $('m-tipo-row').style.display = hasTipo ? '' : 'none';
@@ -12118,7 +12182,7 @@ async function conReintento(fn,intentos=3){
 async function saveFields(id,fields){
   if((SEDE==='central'||SEDE==='plaza') && Object.prototype.hasOwnProperty.call(fields,'stock_actual')){
     avisar('Saldo de solo lectura: Bodega y Local 1 usan existencias por ubicación.');
-    return;
+    return false;
   }
   const row=document.querySelector(`.row[data-row="${id}"]`);
   if(row)row.classList.add('saving');
@@ -12126,8 +12190,9 @@ async function saveFields(id,fields){
   if(row)row.classList.remove('saving');
   if(error){
     const msg=error.code==='23514'?'El stock no puede quedar negativo.':'No se pudo guardar. La conexión falló varias veces — revisa tu señal e inténtalo de nuevo.';
-    avisar(msg);console.error(error);
+    avisar(msg);console.error(error);return false;
   }
+  return true;
 }
 
 /* edición rápida (input de la fila) */
@@ -12424,6 +12489,8 @@ async function copiarTexto(txt){
 
 /* abrir/cerrar sección, o abrir ficha de producto */
 listEl.addEventListener('click',e=>{
+  const crear=e.target.closest('[data-area-create]');
+  if(crear){ abrirNuevoProducto(crear.dataset.areaCreate); return; }
   const area=e.target.closest('[data-area-open]');
   if(area){ cambiarArea(area.dataset.areaOpen,area.dataset.areaProduct||''); return; }
   const cop=e.target.closest('[data-copiar]');
@@ -12448,6 +12515,8 @@ listEl.addEventListener('click',e=>{
   openModal(+info.dataset.open);
 });
 $('areaNav').addEventListener('click',e=>{
+  const crear=e.target.closest('[data-area-create]');
+  if(crear){ abrirNuevoProducto(crear.dataset.areaCreate); return; }
   if(e.target.closest('[data-area-home]')) cambiarArea(null);
 });
 /* El buscador SIEMPRE busca en todo el inventario. Al tocarlo se sueltan los
@@ -12941,6 +13010,10 @@ $('m-fudo').addEventListener('click', async()=>{
    Antes esto abría el alta suelta de la sede abierta — un producto que
    nacía sin enlace, y que el reparto después no podía mover. */
 $('adm-nuevo').addEventListener('click', async ()=>{
+  if(SEDE==='plaza'){
+    abrirNuevoProducto(null);
+    return;
+  }
   if(SEDE !== 'central'){
     if(!await preguntar('Crear un producto',
         'Se crea desde Bodega, para que nazca enlazado con los locales y con Fudo.',
@@ -12962,7 +13035,19 @@ $('adm-edicion').addEventListener('click', ()=>{
 });
 
 /* ---------------- modal ---------------- */
-function openModal(id){
+async function cargarPreferenciaProducto(id){
+  const {data,error}=await sb.rpc('producto_area_preferencia_leer',{p_producto_id:id,p_sede:'plaza'});
+  if(error) return {error};
+  return {data:data||{producto_id:id,area_id:null,estado:'sin_asignar',ubicaciones:[]}};
+}
+function pintarUbicacionFisica(preferencia){
+  const box=$('m-area-fisica');
+  const filas=Array.isArray(preferencia?.ubicaciones)?preferencia.ubicaciones:[];
+  box.innerHTML='<strong>Ubicación física actual</strong><span>'+(filas.length
+    ? filas.map(x=>`${esc(x.nombre)} · ${fmt(Number(x.cantidad)||0)}`).join('<br>')
+    : 'Sin saldo físico en ninguna ubicación.')+'</span>';
+}
+async function openModal(id){
   modalProd=DATA.find(d=>d.id===id); if(!modalProd)return;
   $('m-nombre').textContent=modalProd.producto;
   $('m-producto').value=modalProd.producto??'';
@@ -12986,6 +13071,24 @@ function openModal(id){
     // se ofrecen los tipos que ya existen, para no inventar uno nuevo por una tilde
     const tipos=[...new Set(DATA.map(tipoDe).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
     $('lista-tipos').innerHTML = tipos.map(t=>`<option value="${esc(t)}">`).join('');
+  }
+  $('m-area-wrap').style.display=SEDE==='plaza'?'block':'none';
+  if(SEDE==='plaza'){
+    $('m-area').innerHTML=opcionesAreasHTML('');
+    $('m-area').disabled=true;
+    $('m-area-fisica').innerHTML='<strong>Ubicación física actual</strong><span>Cargando saldo real…</span>';
+    const pid=modalProd.id;
+    const pref=await cargarPreferenciaProducto(pid);
+    if(!modalProd||modalProd.id!==pid) return;
+    if(pref.error){
+      $('m-area-fisica').innerHTML='<strong>Ubicación física actual</strong><span>No se pudo leer la preferencia y el saldo físico.</span>';
+      $('m-area').disabled=true;
+    }else{
+      modalProd._areaOriginal=pref.data.area_id||'';
+      $('m-area').innerHTML=opcionesAreasHTML(modalProd._areaOriginal);
+      $('m-area').disabled=!PERMISOS.puede_editar;
+      pintarUbicacionFisica(pref.data);
+    }
   }
   $('m-perec-row').style.display = hasPerec ? 'flex' : 'none';
   if(hasPerec) $('m-perec').checked = !!modalProd.perecedero;
@@ -13137,12 +13240,26 @@ $('m-guardar').addEventListener('click',async()=>{
     : ($('m-venc-single').value || null);
 
   const savedId=modalProd.id;
+  const areaAnterior=modalProd._areaOriginal??'';
+  const areaNueva=SEDE==='plaza'?$('m-area').value:'';
   Object.assign(modalProd,fields);
   if(lotes.length) modalProd.stock_actual = lotes.reduce((t,l)=>t+l.cantidad,0);
   if(usaLotes) LOTES[savedId]=lotes.map(l=>({...l, producto_id:savedId}));
-  metrics(); renderTipos(); render(); closeModal();
-  await saveFields(savedId, fields);
+  const guardado=await saveFields(savedId, fields);
+  if(!guardado) return;
+  if(SEDE==='plaza'&&areaNueva!==areaAnterior){
+    const pref=await conReintento(()=>sb.rpc('producto_area_preferencia_guardar',{
+      p_producto_id:savedId,p_area_id:areaNueva||null,p_sede:'plaza'
+    }));
+    if(pref.error){
+      avisar('La ficha se guardó, pero no se pudo cambiar el área preferida. No se movió ninguna unidad.\n\n'+pref.error.message);
+      return;
+    }
+    modalProd._areaOriginal=areaNueva;
+  }
   if(usaLotes) await guardarLotes(savedId, lotes);
+  metrics(); renderTipos(); render(); closeModal();
+  if(SEDE==='plaza') aviso('✓ Producto guardado · la preferencia no movió existencias');
 });
 /* Reemplaza los lotes del producto por los del modal. El trigger de la base
    recalcula el stock del producto sumando las cantidades.
@@ -13208,32 +13325,11 @@ $('m-eliminar').addEventListener('click', async()=>{
 });
 
 /* ---------------- nuevo producto ---------------- */
-$('btnNuevo').addEventListener('click', async ()=>{
+function abrirNuevoProducto(areaCodigo=null){
   /* En bodega el + es un atajo a Enlaces: un producto nuevo casi nunca es solo
      de bodega — hay que crearlo también en los locales y dejarlo enlazado, o
      nace suelto y el reparto no lo puede mover. */
   if(SEDE==='central'){ pickTab('enlaces'); setTimeout(()=>$('enl-n-nombre').focus(), 260); return; }
-
-  /* Y DESDE UN LOCAL, LO MISMO — porque el problema es el mismo (Jhon,
-     2026-08-20). Un producto creado suelto en Plaza no tiene pareja en
-     bodega, así que el reparto no lo puede mover y hay que volver a crearlo
-     allá. Desde Enlaces nace en bodega, en los locales que se elijan, en Fudo
-     y con su receta, todo en un gesto.
-
-     Se PREGUNTA en vez de saltar solo: cambiar de sede rehace la pantalla
-     entera, y hacer eso sin avisar sería el peor tipo de sorpresa. Quien
-     igual quiera el camino corto lo tiene abajo. */
-  const irABodega = await preguntar('Crear un producto',
-    'Lo mejor es crearlo desde Bodega: nace allá, en los locales que elijas, en Fudo y '
-    + 'con su receta, todo de una vez.\n\nSi lo creas solo acá queda suelto, y el reparto '
-    + 'no lo va a poder mover hasta que exista en bodega.',
-    'Ir a Bodega');
-  if(irABodega){
-    await pickSede('central');
-    pickTab('enlaces');
-    setTimeout(()=>{ const n=$('enl-n-nombre'); if(n) n.focus(); }, 320);
-    return;
-  }
   $('n-sede-label').textContent = 'Se agregará a ' + SEDES[SEDE].label;
   $('n-nombre').value=''; $('n-perec').checked=false;   // n-rubro se rearma abajo
   $('n-stock').value=''; $('n-min').value=''; $('n-max').value='';
@@ -13241,14 +13337,19 @@ $('btnNuevo').addEventListener('click', async ()=>{
   $('n-stock').disabled=stockCortado;
   $('n-stock').title=stockCortado?'El producto se crea con saldo cero; las existencias se cargarán desde el libro.':'';
   if(stockCortado) $('n-stock').value='0';
+  NUEVO_AREA_ID=SEDE==='plaza'?areaIdPorCodigo(areaCodigo):null;
+  $('n-area-wrap').style.display=SEDE==='plaza'?'block':'none';
+  if(SEDE==='plaza') $('n-area').innerHTML=opcionesAreasHTML(NUEVO_AREA_ID||'');
   /* Solo secciones que existen de verdad, y en el mismo orden en que se ven
      en el inventario. Sin opción vacía, para que nunca se guarde sin sección. */
   $('n-rubro').innerHTML=seccionesDeLaSede()
     .map(r=>`<option value="${esc(r)}">${esc(r)}</option>`).join('');
   $('overlay-nuevo').classList.add('open');
   setTimeout(()=>$('n-nombre').focus(),50);
-});
-function closeNuevo(){ $('overlay-nuevo').classList.remove('open'); }
+}
+$('btnNuevo').addEventListener('click',()=>abrirNuevoProducto(
+  SEDE==='plaza'&&areaActual&&areaActual!==AREA_TODAS?areaActual:null));
+function closeNuevo(){ $('overlay-nuevo').classList.remove('open'); NUEVO_AREA_ID=null; }
 $('n-cancelar').addEventListener('click',closeNuevo);
 $('overlay-nuevo').addEventListener('click',e=>{ if(e.target===$('overlay-nuevo')) closeNuevo(); });
 /* Nombre sin el apellido de sección: "Donas frambuesa vitrina" y
@@ -13292,14 +13393,26 @@ $('n-guardar').addEventListener('click', async()=>{
   if(hasPerec) fila.perecedero=$('n-perec').checked;
   const btn=$('n-guardar'); btn.disabled=true; btn.textContent='Agregando…';
   try{
-    const {data,error}=await conReintento(()=>sb.from('productos').insert([fila]).select());
+    const areaId=SEDE==='plaza'?($('n-area').value||null):null;
+    const peticion=SEDE==='plaza'
+      ? ()=>sb.rpc('producto_plaza_crear',{
+          p_nombre:nombre,p_rubro:rubro,p_stock_min:fila.stock_min??0,p_stock_max:fila.stock_max??0,
+          p_perecedero:!!fila.perecedero,p_tipo:null,p_unidad:null,p_area_id:areaId,
+          p_notas:null,p_sede:'plaza'
+        })
+      : ()=>sb.from('productos').insert([fila]).select();
+    const {data,error}=await conReintento(peticion);
     if(error){
-      if(error.code==='42501'){ avisar('Agregar productos aún no está activado en la base de datos.\nPídele a Claude el SQL para activarlo.'); }
-      else { avisar('No se pudo agregar. Revisa tu señal e inténtalo de nuevo.'); }
+      avisar(error.message||'No se pudo agregar. Revisa tu señal e inténtalo de nuevo.');
       console.error(error); return;
     }
-    if(data && data[0]) DATA.push(data[0]);
-    closeNuevo(); metrics(); render();
+    if(SEDE==='plaza'){
+      closeNuevo();
+      await loadData();
+      aviso(`✓ Producto creado y ${areaId?'asignado a '+(AREAS_CATALOGO.find(a=>a.id===areaId)?.nombre||'el área'):'dejado Sin asignar'} · saldo cero`);
+    }else if(data && data[0]){
+      DATA.push(data[0]); closeNuevo(); metrics(); render();
+    }
     qEl.value=nombre; filterState=null;
     document.querySelectorAll('.mcard').forEach(x=>x.classList.remove('sel'));
     render();
@@ -13979,6 +14092,7 @@ const ICO = {
   interruptores:'<rect x="2.5" y="7" width="19" height="10" rx="5"></rect><circle cx="16.5" cy="12" r="2.4"></circle>',
   productos:'<path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"></path><path d="M3 7.5 12 12l9-4.5"></path><path d="M12 12v9"></path>',
   secciones:'<rect x="3" y="4" width="18" height="5" rx="1.5"></rect><rect x="3" y="14" width="18" height="5" rx="1.5"></rect>',
+  areas:'<path d="M4 5h6v6H4z"></path><path d="M14 5h6v6h-6z"></path><path d="M4 15h6v5H4z"></path><path d="M14 15h6v5h-6z"></path>',
   relaciones:'<path d="M9.5 14.5 14.5 9.5"></path><path d="M8 12H6a3.5 3.5 0 0 1 0-7h2"></path><path d="M16 12h2a3.5 3.5 0 0 1 0 7h-2"></path>',
   metas:'<circle cx="12" cy="12" r="8.5"></circle><circle cx="12" cy="12" r="4.5"></circle><circle cx="12" cy="12" r="1"></circle>',
   personas:'<path d="M16 20v-1.6a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20"></path><circle cx="9.5" cy="7" r="3.2"></circle><path d="M21 20v-1.6a4 4 0 0 0-3-3.87"></path>',
@@ -13998,6 +14112,54 @@ const ICO = {
    mapa entero desde el principio. */
 const ajPronto = (lista) =>
   lista.map(t=>`<div class="aj-caja"><h3>${esc(t)}<span class="aj-pronto">pronto</span></h3></div>`).join('');
+
+let AJ_AREAS = null;
+async function ajCargarAreas(){
+  const {data,error}=await sb.rpc('areas_operativas_listar',{p_sede:'plaza',p_incluir_archivadas:true});
+  AJ_AREAS=error?{error}:(data||[]);
+  if(ajActual==='areas') pintarAjustes();
+}
+function ajAreasHTML(){
+  if(AJ_AREAS===null) return '<div class="aj-caja"><p>Cargando áreas…</p></div>';
+  if(AJ_AREAS.error) return `<div class="aj-caja"><p>No se pudieron leer las áreas.</p><p class="aj-nota">${esc(AJ_AREAS.error.message||'Acceso rechazado')}</p></div>`;
+  const filas=AJ_AREAS.map(a=>`<div class="area-admin-row ${a.estado==='archivada'?'archivada':''}" data-area-admin="${esc(a.id)}">
+    <div><label class="aj-nota">Nombre</label><input type="text" data-area-name value="${esc(a.nombre)}" maxlength="80" ${a.estado==='archivada'?'disabled':''}>
+      <div class="area-admin-meta">${a.estado==='archivada'?'Archivada':`${a.productos_preferidos} productos preferidos · ${fmt(Number(a.unidades)||0)} unidades físicas`}</div></div>
+    <div><label class="aj-nota">Orden</label><input type="number" min="0" step="1" data-area-order value="${a.orden}" ${a.estado==='archivada'?'disabled':''}></div>
+    <div class="area-admin-actions">${a.estado==='activa'?`<button type="button" class="btn btn-outline btn-sm" data-area-save="${esc(a.id)}">Guardar</button><button type="button" class="btn btn-gris btn-sm" data-area-archive="${esc(a.id)}">Archivar</button>`:'<span class="aj-nota">Solo historial</span>'}</div>
+  </div>`).join('');
+  return `<div class="aj-caja"><h3>Crear área</h3><p class="aj-nota">Cada área nueva aparece automáticamente en Inventario y nace con saldo cero.</p>
+    <div class="area-admin-new"><div><label class="aj-nota">Nombre</label><input type="text" id="aj-area-nombre" maxlength="80" placeholder="Ej: Heladería"></div>
+      <div><label class="aj-nota">Orden</label><input type="number" id="aj-area-orden" min="0" step="1" value="${(AJ_AREAS.filter(a=>a.estado==='activa').reduce((m,a)=>Math.max(m,a.orden),0)+10)}"></div>
+      <button type="button" class="adm-btn" data-area-new>Crear área</button></div></div>
+    <div class="aj-caja"><h3>Áreas de Local 1</h3><p class="aj-nota">“Sin asignar” es una ubicación lógica protegida y no se administra como área. Archivar nunca mueve stock.</p>${filas||'<div class="aj-vacio">No hay áreas.</div>'}</div>`;
+}
+async function ajAreaCrear(){
+  const nombre=$('aj-area-nombre')?.value.trim(), orden=Number($('aj-area-orden')?.value||0);
+  if(!nombre){ avisar('Escribe el nombre del área.'); return; }
+  const {error}=await sb.rpc('area_operativa_crear',{p_nombre:nombre,p_orden:orden,p_codigo:null,p_sede:'plaza'});
+  if(error){ avisar(error.message||'No se pudo crear el área.'); return; }
+  aviso('✓ Área creada con saldo cero'); AJ_AREAS=null; await Promise.all([ajCargarAreas(),loadData()]);
+}
+async function ajAreaEditar(id){
+  const row=document.querySelector(`[data-area-admin="${id}"]`); if(!row)return;
+  const nombre=row.querySelector('[data-area-name]').value.trim(), orden=Number(row.querySelector('[data-area-order]').value||0);
+  const {error}=await sb.rpc('area_operativa_editar',{p_area_id:id,p_nombre:nombre,p_orden:orden});
+  if(error){ avisar(error.message||'No se pudo editar el área.'); return; }
+  aviso('✓ Área actualizada'); AJ_AREAS=null; await Promise.all([ajCargarAreas(),loadData()]);
+}
+async function ajAreaArchivar(id){
+  const area=(AJ_AREAS||[]).find(a=>a.id===id); if(!area)return;
+  if(Number(area.unidades)!==0){ avisar('No se puede archivar un área con saldo. Transfiere primero todas sus unidades.'); return; }
+  const conPreferencias=Number(area.productos_preferidos)>0;
+  const detalle=conPreferencias
+    ? `${area.productos_preferidos} producto(s) quedarán con preferencia “Sin asignar”. No se moverá ninguna unidad.`
+    : 'El área dejará de aparecer en la navegación. No se moverá ninguna unidad.';
+  if(!await preguntar('Archivar '+area.nombre,detalle,'Archivar'))return;
+  const {error}=await sb.rpc('area_operativa_archivar',{p_area_id:id,p_reasignar_sin_asignar:conPreferencias});
+  if(error){ avisar(error.message||'No se pudo archivar el área.'); return; }
+  aviso('✓ Área archivada'); AJ_AREAS=null; await Promise.all([ajCargarAreas(),loadData()]);
+}
 
 const AJUSTES = [
   { id:'interruptores', ico:'interruptores', tit:'Interruptores',
@@ -14035,8 +14197,14 @@ const AJUSTES = [
       nu.style.display = PERMISOS.puede_editar ? '' : 'none';
       nu.querySelector('h4').textContent = '＋ Crear producto';
       nu.querySelector('.adm-d').textContent =
-        'En bodega, en los locales que elijas y en Fudo, con su receta';
+        SEDE==='plaza'?'Crea la ficha en Local 1 con saldo cero y área inicial':'En bodega, en los locales que elijas y en Fudo, con su receta';
     } },
+
+  { id:'areas', ico:'areas', tit:'Áreas de inventario',
+    sub:'Crear, ordenar y archivar áreas operativas de Local 1. Las preferencias no mueven stock.',
+    ver:()=>SEDE==='plaza'&&!!PERMISOS.puede_ajustes,
+    render:()=>ajAreasHTML(),
+    montar:()=>{ if(AJ_AREAS===null) ajUnaVez('areas',ajCargarAreas); } },
 
   { id:'secciones', ico:'secciones', tit:'Secciones y turnos',
     sub:'Dónde vive cada producto, en qué orden se cuenta y qué toca en la mañana y qué en la tarde.',
@@ -14140,7 +14308,7 @@ const AJUSTES = [
 
 /* Las secciones que esta cuenta puede ver. Una sección sin `ver()` la ve
    todo el mundo, que es como se comportaban las nueve de antes. */
-const DEMO_AJUSTES = new Set(['interruptores','productos','secciones','personas','respaldos']);
+const DEMO_AJUSTES = new Set(['interruptores','productos','areas','secciones','personas','respaldos']);
 const ajVisibles = () => AJUSTES.filter(a => (!modoDemo() || DEMO_AJUSTES.has(a.id)) && (!a.ver || a.ver()));
 
 /* ==================================================================
@@ -16703,6 +16871,12 @@ $('overlay-fperm').addEventListener('click', e=>{
 });
 
 $('aj-pane').addEventListener('click', async e=>{
+  const an=e.target.closest('[data-area-new]');
+  if(an){ await ajAreaCrear(); return; }
+  const as=e.target.closest('[data-area-save]');
+  if(as){ await ajAreaEditar(as.dataset.areaSave); return; }
+  const aa=e.target.closest('[data-area-archive]');
+  if(aa){ await ajAreaArchivar(aa.dataset.areaArchive); return; }
   /* AJUSTES · MESAS. Estos manejadores vivían en `view-lama` y se mudaron acá
      junto con la pantalla. Van primero porque la ficha de edición flota sobre
      todo lo demás. */
@@ -17238,12 +17412,24 @@ async function crearProducto(){
   }
   const rubro = await elegirSeccion();
   if(!rubro) return;
-  const r = await conReintento(()=> sb.from('productos')
-    .insert({sede:SEDE, producto:nombre, rubro, stock_actual:0, activo:'SÍ'}).select().single());
+  const r = SEDE==='plaza'
+    ? await conReintento(()=>sb.rpc('producto_plaza_crear',{
+        p_nombre:nombre,p_rubro:rubro,p_stock_min:0,p_stock_max:0,p_perecedero:false,
+        p_tipo:null,p_unidad:null,p_area_id:null,p_notas:null,p_sede:'plaza'
+      }))
+    : await conReintento(()=>sb.from('productos')
+        .insert({sede:SEDE, producto:nombre, rubro, stock_actual:0, activo:'SÍ'}).select().single());
   if(r.error){ avisar('No se pudo crear el producto.\n\nDetalle: '+r.error.message); return; }
-  DATA.push(r.data);
+  let nuevo=r.data;
+  if(SEDE==='plaza'){
+    const id=Number(r.data?.producto_id);
+    const leido=await sb.from('productos').select('*').eq('id',id).eq('sede','plaza').maybeSingle();
+    if(leido.error||!leido.data){ avisar('El producto se creó, pero no se pudo releer para continuar la receta.'); return; }
+    nuevo=leido.data;
+  }
+  DATA.push(nuevo);
   metrics(); render();
-  SEL.add(r.data.id);
+  SEL.add(nuevo.id);
   pintarTaller();
 }
 

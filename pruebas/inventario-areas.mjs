@@ -13,8 +13,9 @@ const productos=[
   {id:2,sede:'plaza',producto:'Azúcar blanca',rubro:'Endulzantes',tipo:'Envasados',unidad:'kg',stock_actual:999,stock_min:1,activo:'SÍ'},
   {id:3,sede:'central',producto:'Leche Bodega',rubro:'Lácteos',tipo:'Envasados',unidad:'L',stock_actual:17,stock_min:1,activo:'SÍ'},
 ];
-const areas=['cocina_fria','cocina_caliente','barra','cafeteria','sin_asignar'];
-const nombres={cocina_fria:'Cocina fría',cocina_caliente:'Cocina caliente',barra:'Barra',cafeteria:'Cafetería',sin_asignar:'Sin asignar'};
+const areas=['cocina_fria','cocina_caliente','barra','cafeteria','heladeria','sin_asignar'];
+const nombres={cocina_fria:'Cocina fría',cocina_caliente:'Cocina caliente',barra:'Barra',cafeteria:'Cafetería',heladeria:'Heladería',sin_asignar:'Sin asignar'};
+const catalogo=areas.filter(x=>x!=='sin_asignar').map((codigo,i)=>({id:`area-${i}`,sede:'plaza',codigo,nombre:nombres[codigo],estado:'activa',orden:i,productos_preferidos:0,productos_con_saldo:0,unidades:0}));
 const saldos={'1|cafeteria':3,'1|barra':2,'1|sin_asignar':5,'2|sin_asignar':7};
 const lectura=areas.flatMap((codigo,i)=>productos.filter(p=>p.sede==='plaza').map(p=>({
   area_codigo:codigo,area_nombre:nombres[codigo],area_orden:i,
@@ -23,7 +24,7 @@ const lectura=areas.flatMap((codigo,i)=>productos.filter(p=>p.sede==='plaza').ma
 })));
 const permisos=[{correo:'lectura@test.invalid',nombre:'Lectura',puede_editar:true,puede_fudo:false,puede_ajustes:true,puede_lama:false}];
 const page=await browser.newPage();
-await page.addInitScript(({productos,permisos,lectura})=>{
+await page.addInitScript(({productos,permisos,lectura,catalogo})=>{
   window.__writes=[];window.__rpc=[];
   const SES={user:{id:'b3-read-user',email:'lectura@test.invalid',user_metadata:{nombre:'Lectura'}}};
   const tables={productos,app_permisos:permisos,secciones:[],ajustes:[],metas:[],tareas:[],
@@ -44,14 +45,14 @@ await page.addInitScript(({productos,permisos,lectura})=>{
   }
   window.supabase={createClient:()=>({
     from:query,
-    rpc:(name)=>{window.__rpc.push(name);return Promise.resolve({data:name==='stock_leer_areas'?lectura:[],error:null});},
+    rpc:(name)=>{window.__rpc.push(name);return Promise.resolve({data:name==='stock_leer_areas'?lectura:name==='areas_operativas_listar'?catalogo:[],error:null});},
     auth:{getSession:async()=>({data:{session:SES}}),getUser:async()=>({data:{user:SES.user}}),
       onAuthStateChange(cb){setTimeout(()=>cb&&cb('SIGNED_IN',SES),0);return {data:{subscription:{unsubscribe(){}}}};},
       signInWithPassword:async()=>({data:{session:SES},error:null}),signOut:async()=>({})},
     channel:()=>({on(){return this;},subscribe(cb){cb&&cb('SUBSCRIBED');return this;},track:async()=>{},presenceState:()=>({})}),
     removeChannel(){},functions:{invoke:async()=>({data:{ok:true},error:null})},
   })};
-},{productos,permisos,lectura});
+},{productos,permisos,lectura,catalogo});
 await page.route('**/supabase-js*',r=>r.fulfill({status:200,contentType:'application/javascript',body:'/* mock */'}));
 const errors=[];page.on('pageerror',e=>errors.push(String(e)));
 await page.goto(pathToFileURL(join(raiz,'index.html')).href);
@@ -61,29 +62,29 @@ const failures=[];
 const check=async(name,fn)=>{try{const ok=await fn();if(!ok)failures.push(name);console.log(`${ok?'✓':'✗'} ${name}`);}catch(e){failures.push(name);console.log(`✗ ${name}: ${e.message}`);}};
 
 await page.click('.gate-btn[data-sede="plaza"]');
-await page.waitForSelector('.area-card[data-area-open="cafeteria"]');
-await check('portada ofrece las cuatro áreas, Sin asignar y Todas las áreas',async()=>
-  await page.locator('.area-card').count()===6);
+await page.waitForSelector('[data-area-open="cafeteria"]');
+await check('portada agrega automáticamente Heladería, Sin asignar y Todas las áreas',async()=>
+  await page.locator('.area-card').count()===7);
 await check('áreas físicas empiezan en cero y no inventan críticos',async()=>{
   const t=await page.locator('.area-cover').innerText();
-  return ['Cocina fría','Cocina caliente','Barra','Cafetería'].every(n=>t.includes(n))
-    && (t.match(/0 productos con saldo/g)||[]).length===4
-    && (t.match(/0 unidades/g)||[]).length===4
+  return ['Cocina fría','Cocina caliente','Barra','Cafetería','Heladería'].every(n=>t.includes(n))
+    && (t.match(/0 productos con saldo/g)||[]).length===5
+    && (t.match(/0 unidades/g)||[]).length===5
     && t.includes('sin mínimos configurados');
 });
 await check('Sin asignar y Todas las áreas muestran unidades del libro',async()=>{
-  const sin=await page.locator('.area-card[data-area-open="sin_asignar"]').innerText();
+  const sin=await page.locator('[data-area-open="sin_asignar"]').innerText();
   const all=await page.locator('.area-card[data-area-open="__todas__"]').innerText();
   return sin.includes('12 unidades')&&all.includes('17 unidades');
 });
 
-await page.click('.area-card[data-area-open="cocina_fria"]');
+await page.click('[data-area-open="cocina_fria"]');
 await check('un área sin saldo no muestra el catálogo de otras ubicaciones',async()=>
   (await page.locator('#list').innerText()).includes('No hay productos que coincidan.')
   && !(await page.locator('#list').innerText()).includes('Leche entera'));
 
 await page.click('#areaNav [data-area-home]');
-await page.click('.area-card[data-area-open="cafeteria"]');
+await page.click('[data-area-open="cafeteria"]');
 await page.fill('#q','leche');
 await page.waitForTimeout(30);
 await check('buscar leche en Cafetería aísla la lectura a esa ubicación',async()=>{
