@@ -1,6 +1,16 @@
 # Cola de trabajo de Codex
 
-Estado actual: **B3.2a.3 COMPLETADA (2026-10-09)**. La administración de áreas quedó localizable, el producto existente puede asignarse sin duplicarlo ni mover existencias y los destinos muestran solo áreas físicas. **M2–M4 y B3.2b permanecen PENDIENTES**, no activas.
+Estado actual: **C0 COMPLETADA CON BLOQUEO DE DECISIÓN (2026-10-09)**. La auditoría confirmó que el catálogo de áreas es dinámico, pero el motor instalado de transferencias solo admite cuatro códigos fundacionales. **C1–C3 quedan REQUIERE DECISIÓN y C4 PENDIENTE**; no se modificaron aplicación, esquema ni datos. El frente móvil M2–M4 queda pausado.
+
+### Tarea C0 — Auditoría del circuito interno de inventario por áreas
+
+- Estado: **COMPLETADA; C1–C3 REQUIEREN DECISIÓN (2026-10-09)**.
+- Autorización: Alejo pausó el frente móvil y solicitó ejecutar C0 antes de secciones internas y transferencias visuales.
+- Resultado: `docs/hermes/33-c0-auditoria-circuito-inventario-areas.md`.
+- Hallazgo bloqueante: `areas_operativas` y la interfaz admiten áreas dinámicas y ya existe `heladeria`, pero `stock_internal.transferir_aplicar` valida destino y origen de área contra una lista fija de `cocina_fria`, `cocina_caliente`, `barra` y `cafeteria`. Heladería puede recibir preferencia, pero no saldo mediante `stock_transferir`.
+- Clasificaciones: `productos.rubro` y `public.secciones` contienen etiquetas legadas como Limpieza, Vitrina, Sándwiches y Congelador; `productos.tipo` es otra clasificación. Ninguna es una ubicación del ledger.
+- Decisión necesaria: autorizar una subfase del motor para validar cualquier ubicación enlazada a un área activa de `plaza`, o limitar formalmente las transferencias a las cuatro áreas fundacionales. No construir C1/C2/C3 antes de resolverlo.
+- Sin cambios operativos: solo consultas SQL de lectura y documentación; cero migraciones, transferencias o DML. C4 no se ejecutó.
 
 ### Tarea M1 — Armazón de navegación móvil
 

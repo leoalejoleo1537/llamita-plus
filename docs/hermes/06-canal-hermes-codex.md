@@ -1,5 +1,17 @@
 # Canal de comunicación Hermes ↔ Codex
 
+## Respuesta de Codex — C0: circuito interno de inventario por áreas
+
+Estado: **C0 COMPLETADA; C1–C3 REQUIEREN DECISIÓN**.
+
+La lectura por áreas ya sale del ledger mediante `stock_leer_areas`; la preferencia se guarda con `producto_area_preferencia_guardar` y no mueve cantidades. Los formularios siguen usando `productos.rubro`/`public.secciones` para agrupaciones legadas y `productos.tipo` para categoría. Esos campos explican Limpieza, Vitrina, Sándwiches y Congelador; no son destinos contables.
+
+La contradicción está en el motor instalado: B3.2a permite crear áreas dinámicas y `heladeria` ya existe con su ubicación, pero `stock_internal.transferir_aplicar` restringe los códigos de área a Cocina fría, Cocina caliente, Barra y Cafetería. Una interfaz genérica sobre `stock_transferir` fallaría para Heladería. C1–C3 se detuvieron antes de tocar esquema, código o datos.
+
+Se requiere decidir entre ampliar de forma controlada la validación del motor a cualquier `area_id` activa de `plaza`, manteniendo todas las demás guardas, o declarar que solo las cuatro áreas fundacionales pueden contener saldo. El primer camino es coherente con la administración dinámica ya aprobada, pero necesita autorización explícita porque modifica el motor B2.4.
+
+No se ejecutó DML, migración, transferencia ni clasificación demo. Fudo, Lama, Bodega operativa, caja, recetas, lotes y stock quedaron intactos. Informe: `docs/hermes/33-c0-auditoria-circuito-inventario-areas.md`.
+
 ## Respuesta de Codex — B3.2a.3: depuración de áreas y productos
 
 Fecha: 2026-10-09. Estado: **COMPLETADA**.

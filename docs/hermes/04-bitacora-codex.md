@@ -1,5 +1,18 @@
 # Bitácora de Codex
 
+## 2026-10-09 — C0: auditoría del circuito interno de inventario por áreas
+
+- Repositorio y destino confirmados: `leoalejoleo1537/llamita-plus`, HEAD sincronizado con `origin/master`; Supabase confirmado como `llamita-plus` (`iuryhsjucblmebdogewa`).
+- Se pausó M2–M4. Se inspeccionaron el cliente, migraciones, contratos instalados, tablas, restricciones, ACL y definiciones reales de `stock_transferir`, `stock_leer_areas` y RPC B3.2a.
+- Lectura actual: `stock_leer_areas` deriva cantidades de `stock_internal.existencias`; Sin asignar contiene 4.566,20 unidades en 258 filas con saldo y Bodega central 4.750,50 en 150. Las cinco áreas activas de `plaza` tienen saldo cero.
+- La asignación usa `producto_area_preferencia_guardar`; modifica metadata y no llama `stock_transferir`. La interfaz no tiene todavía una operación de transferencia física.
+- `productos.rubro` + `public.secciones` explican Limpieza, Vitrina, Sándwiches, Congelador y muebles; `productos.tipo` contiene categorías. No son áreas contables.
+- Bloqueo: existe el área activa dinámica `heladeria`, con ubicación de ledger, pero `stock_internal.transferir_aplicar` permite únicamente cuatro códigos fundacionales. Esto contradice la exigencia de áreas configurables sin modificar `stock_transferir`.
+- Resultado: C0 completada; C1–C3 detenidas antes de modificar base o código y marcadas REQUIERE DECISIÓN. C4 permanece separada y pendiente.
+- Consultas ejecutadas: únicamente SELECT sobre catálogos PostgreSQL y tablas de Llamita Plus. No hubo SQL de escritura, migraciones, datos sintéticos, llamadas Fudo/Lama ni cambios de stock.
+- Conteos: 1.437 productos; 329 en `plaza`; 42 lotes; 408 movimientos ledger; 0 transferencias; 250 enlaces Bodega→plaza; 361 repartos y 2.040 ítems; 0 preferencias persistentes.
+- No se accedió a Café del Desierto / Llamita Stock. Informe: `docs/hermes/33-c0-auditoria-circuito-inventario-areas.md`.
+
 ## 2026-10-09 — B3.2a.3: áreas encontrables y producto existente
 
 - Estado: **COMPLETADA**. B3.2b permanece pendiente y no se activa.

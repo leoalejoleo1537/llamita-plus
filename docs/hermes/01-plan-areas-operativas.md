@@ -1,6 +1,10 @@
 # Plan de implementación: inventario por áreas operativas en Llamita Plus
 
-**Estado:** B1, B2.1, B2.3, B2.3.1, B2.4, B3.1, S1, S2 y B3.2a.1–B3.2a.3 completados. B3.2a usa RPC protegidas para administrar áreas y preferencias sin mover stock. B3.2b sigue **PENDIENTE**, no activa. Evidencia: documentos 23–29 y 32.
+**Estado:** B1, B2.1, B2.3, B2.3.1, B2.4, B3.1, S1, S2 y B3.2a.1–B3.2a.3 completados. C0 auditó el circuito de transferencias y detectó una incompatibilidad entre áreas dinámicas y la lista fija del motor; C1–C3 están **REQUIERE DECISIÓN**. El frente móvil M2–M4 está pausado. Evidencia: documentos 23–29, 32 y 33.
+
+### C0 — Auditoría del circuito interno
+
+**Estado: COMPLETADA CON BLOQUEO (2026-10-09).** La lectura física y la asignación preferida están correctamente separadas. `productos.rubro`/`secciones` y `productos.tipo` son clasificaciones legadas, no ubicaciones. Sin embargo, aunque el catálogo y las ubicaciones admiten áreas dinámicas, el núcleo B2.4 solo acepta cuatro códigos de área. Antes de implementar secciones internas o una interfaz de transferencias se debe decidir si B2.4 se amplía para validar por `area_id` activa en vez de una lista fija. Ver informe 33.
 
 **Repositorio objetivo:** `leoalejoleo1537/llamita-plus`, rama `master`.
 
