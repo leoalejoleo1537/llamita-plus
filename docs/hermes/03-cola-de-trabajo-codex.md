@@ -1,6 +1,6 @@
 # Cola de trabajo de Codex
 
-Estado actual: **M1 COMPLETADA (2026-10-09)** por autorización posterior de Alejo para comenzar la remodelación móvil. **M2–M4, B3.2a.3 y B3.2b permanecen PENDIENTES**, no activas.
+Estado actual: **B3.2a.3 COMPLETADA (2026-10-09)**. La administración de áreas quedó localizable, el producto existente puede asignarse sin duplicarlo ni mover existencias y los destinos muestran solo áreas físicas. **M2–M4 y B3.2b permanecen PENDIENTES**, no activas.
 
 ### Tarea M1 — Armazón de navegación móvil
 
@@ -10,7 +10,7 @@ Estado actual: **M1 COMPLETADA (2026-10-09)** por autorización posterior de Ale
 - Alcance: retirar el riel fijo solo bajo 720 px, reutilizarlo como menú temporal, añadir accesos inferiores contextuales, cabecera compacta y safe area. Las rutas originales siguen gobernando permisos y modo demostración.
 - Sin cambios: Supabase, Auth, permisos, stock, Fudo, Lama comercial, Bodega operativa ni escritorio.
 - Pruebas: `npm test`, navegador sintético M1 en 390/1280 px y `git diff --check`. Las pruebas de navegador antiguas `inventario-areas` y `lama-ancho` tienen fixtures desactualizados y no validaron de punta a punta; detalle en el informe.
-- Próximo bloque: M2 (Mesas y POS táctil), pendiente de activación específica. B3.2a.3 y B3.2b continúan pendientes.
+- Próximo bloque móvil: M2 (Mesas y POS táctil), pendiente de activación específica. B3.2b también continúa pendiente y requiere activación separada.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 
@@ -174,7 +174,7 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 
 ### Tarea B3.2a — Gestión de áreas y asignación preferida de productos
 
-- Estado general: **EN CURSO POR SUBFASES**. B3.2a.1 y B3.2a.2 completadas; B3.2a.3 pendiente, no activa.
+- Estado general: **COMPLETADA POR SUBFASES**. B3.2a.1, B3.2a.2 y B3.2a.3 completadas; B3.2b pendiente, no activa.
 - Antecedente: el bloqueo de autorización del informe 23 fue resuelto por S1/S2. B3.2a.1 quedó completada y Alejo activó explícitamente B3.2a.2 el 2026-10-08.
 - B3.2a.1: **COMPLETADA (2026-10-08)**. Añadió actores, nombre normalizado, vínculo único área/ubicación, validación de áreas activas y seis RPC protegidas para listar/crear/editar/archivar áreas, guardar preferencias y crear productos `plaza` con stock cero.
 - Seguridad: operaciones de áreas requieren `puede_ajustes`; producto/preferencia requieren `puede_editar`; la lectura activa exige sesión. Solo `authenticated` ejecuta RPC y cada función vuelve a validar `auth.uid()` y capacidad efectiva S1. Tablas internas sin DML directo.
@@ -183,7 +183,8 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Conteos: 1.437 productos, stock 15.438,00, 4 áreas, 0 asignaciones, 408 movimientos de ledger, 0 transferencias, 42 lotes, 396 recetas, 15.357 movimientos Fudo y 0 eventos Lama, sin cambios persistentes.
 - Resultado: `docs/hermes/28-b3-2a-1-fundamentos-areas-preferencias.md`.
 - B3.2a.2: **COMPLETADA (2026-10-08)**. Eliminó la lista fija de áreas, incorporó áreas activas automáticamente desde RPC/ledger, añadió administración por RPC en Ajustes y adaptó altas/edición de `plaza` a preferencia separada del saldo físico. Informe `docs/hermes/29-b3-2a-2-interfaz-dinamica-areas.md`.
-- B3.2a.3 y B3.2b quedan **PENDIENTES**, no activas. No se implementaron transferencias visuales.
+- B3.2a.3 quedó **COMPLETADA (2026-10-09)**: acceso a gestión de áreas desde Inventario, asignación protegida de fichas existentes, recuperación ante duplicados y separación visual entre área física y categoría. Resultado: `docs/hermes/32-b3-2a-3-depuracion-areas-productos.md`.
+- B3.2b queda **PENDIENTE**, no activa. No se implementaron transferencias visuales.
 
 ### Tarea B3.2b — Transferencias visuales entre ubicaciones
 

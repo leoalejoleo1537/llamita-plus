@@ -1,5 +1,17 @@
 # Canal de comunicación Hermes ↔ Codex
 
+## Respuesta de Codex — B3.2a.3: depuración de áreas y productos
+
+Fecha: 2026-10-09. Estado: **COMPLETADA**.
+
+La creación de áreas estaba operativa, pero escondida en la subsección `Ajustes → Áreas de inventario`; se añadió un enlace contextual desde Inventario sin duplicar lógica. La autorización continúa siendo `puede_ajustes` y el servidor sigue validando la RPC. Las tarjetas ahora distinguen asignar una ficha existente de crear una nueva.
+
+El flujo nuevo busca por nombre, ID interno, rubro o tipo, consulta preferencia y ubicación física mediante las RPC protegidas y guarda solo `producto_area_preferencia_guardar`. Si un alta encuentra un nombre coincidente, ofrece **Usar producto existente**. No crea duplicado, lote, movimiento ni transferencia. Los selectores de Área operativa contienen únicamente áreas activas de `plaza` y Sin asignar; categorías heredadas permanecen separadas.
+
+No hubo migraciones ni cambios persistentes. La prueba SQL terminó con `ROLLBACK`; Chromium validó móvil/escritorio y permisos; `npm test`, regresión M1 y `git diff --check` pasaron. Conteos de productos, stock, lotes, movimientos, transferencias, recetas, Fudo y Lama quedaron idénticos. Informe completo: `docs/hermes/32-b3-2a-3-depuracion-areas-productos.md`.
+
+B3.2b continúa **PENDIENTE**: mover existencias deberá ser una operación explícita, idempotente y separada mediante `stock_transferir`. No se modificaron Fudo, Lama, Bodega, caja, recetas ni stock, y no se accedió a Café del Desierto / Llamita Stock.
+
 ## Respuesta de Codex — M1: navegación móvil
 
 Fecha: 2026-10-09. Estado: **COMPLETADA** tras instrucción posterior de Alejo de comenzar.

@@ -1,6 +1,6 @@
 # Plan de implementación: inventario por áreas operativas en Llamita Plus
 
-**Estado:** B1, B2.1, B2.3, B2.3.1, B2.4, B3.1, S1, S2, B3.2a.1 y B3.2a.2 completados. B3.2a.2 conectó la interfaz dinámica a las RPC protegidas sin mover stock. B3.2a.3 y B3.2b siguen **PENDIENTES**, no activas. Evidencia: documentos 23–29.
+**Estado:** B1, B2.1, B2.3, B2.3.1, B2.4, B3.1, S1, S2 y B3.2a.1–B3.2a.3 completados. B3.2a usa RPC protegidas para administrar áreas y preferencias sin mover stock. B3.2b sigue **PENDIENTE**, no activa. Evidencia: documentos 23–29 y 32.
 
 **Repositorio objetivo:** `leoalejoleo1537/llamita-plus`, rama `master`.
 
@@ -205,17 +205,19 @@ RLS y grants mantienen cerradas las tablas internas; la RPC requiere sesión aut
 
 #### B3.2 — Escrituras visuales por área
 
-**Estado: dividido en subfases. B3.2a.1 y B3.2a.2 COMPLETADAS; B3.2a.3 y B3.2b PENDIENTES, no activas.** S1/S2 cerraron el bloqueo de autorización; B3.2a.1 instaló el contrato de datos/RPC y B3.2a.2 la lectura/UX dinámica. El cierre adicional de rutas heredadas y las transferencias requieren activación separada. Ver informes 23, 25, 26, 28 y 29.
+**Estado: dividido en subfases. B3.2a.1–B3.2a.3 COMPLETADAS; B3.2b PENDIENTE, no activa.** S1/S2 cerraron el bloqueo de autorización; B3.2a.1 instaló el contrato de datos/RPC, B3.2a.2 la lectura/UX dinámica y B3.2a.3 hizo encontrable la gestión y separó asignación de existencia física. Las transferencias requieren activación separada. Ver informes 23, 25, 26, 28, 29 y 32.
 
 La auditoría S0 amplió la evidencia: 36 tablas operativas tienen políticas abiertas `ALL`, y 40 funciones `SECURITY DEFINER` son ejecutables por anon. S1 debe resolver primero identidad, gobierno de permisos y las rutas críticas por fases. No debe mezclarse ese corte transversal con la UI de áreas. Informe: `docs/hermes/24-auditoria-integral-seguridad-permisos.md`.
 
 ##### B3.2a — Gestión de áreas y asignación preferida de productos
 
-**Estado: EN CURSO POR SUBFASES.**
+**Estado: COMPLETADA POR SUBFASES.**
 
 - **B3.2a.1 COMPLETADA (2026-10-08):** contrato aditivo, actores, nombres normalizados, área/ubicación 1:1, archivo seguro, preferencia única y RPC de producto con stock cero. No mueve existencias. Informe 28.
 - **B3.2a.2 COMPLETADA (2026-10-08):** lectura dinámica y formularios/UX consumen RPC protegidas; nuevas áreas aparecen sin listas fijas. Preferencia y saldo físico se muestran por separado, sin transferencias. Informe 29.
-- **B3.2a.3 PENDIENTE:** cierre coordinado de rutas heredadas y regresión visual/operativa que se defina al activar la fase.
+- **B3.2a.3 COMPLETADA (2026-10-09):** “Gestionar áreas” enlaza Inventario con la única pantalla administrativa; las tarjetas separan agregar una ficha existente de crear una nueva; un duplicado ofrece reutilizar la ficha; preferencia y ubicación física se explican por separado. Los selectores de destino usan solo áreas activas y Sin asignar. Informe 32.
+
+La jerarquía queda explícita: la **sede** es el nodo operativo; **Bodega central** es un nodo logístico, no un área de Local 1; un **área operativa** es una ubicación física vinculada al ledger; el **área preferida** es metadata organizativa sin cantidad; la **ubicación física** contiene el saldo; una futura **sección interna** podría subdividir visualmente un área, pero todavía no existe; categoría, rubro y tipo siguen siendo clasificaciones descriptivas y nunca destinos del ledger. Limpieza, Vitrina y Sándwiches no se convierten automáticamente en ubicaciones.
 
 ##### B3.2b — Transferencias visuales
 

@@ -424,6 +424,27 @@
   .area-card-extra{font-size:11px;color:var(--muted);line-height:1.4}
   .area-create{margin-top:auto;border:0;background:transparent;color:var(--orange);font:inherit;
     font-size:11px;font-weight:800;text-align:left;padding:3px 0;cursor:pointer}
+  .area-card-actions{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:auto;padding-top:3px}
+  .area-card-actions .area-create{margin-top:0;min-height:30px}
+  .area-cover-head{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:2px 2px 5px}
+  .area-cover-head strong{display:block;font-size:14px}
+  .area-cover-head span{display:block;margin-top:2px;color:var(--muted);font-size:11px;line-height:1.4}
+  .area-manage{flex:0 0 auto;min-height:40px;padding:8px 12px;border:1px solid var(--border);border-radius:10px;
+    background:var(--card);color:var(--orange-dark);font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+  .area-nav-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
+  .area-assign-modal{width:min(620px,94vw)}
+  .area-assign-explain{padding:10px 12px;margin:0 0 12px;border-radius:11px;background:var(--gray-bg);
+    color:var(--gray-fg);font-size:12px;line-height:1.45}
+  .area-product-results{max-height:250px;overflow-y:auto;border:1px solid var(--border);border-radius:11px;background:var(--card)}
+  .area-product-result{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:58px;
+    padding:10px 12px;border:0;border-bottom:1px solid var(--border);background:var(--card);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+  .area-product-result:last-child{border-bottom:0}.area-product-result.on{background:var(--sec-bg)}
+  .area-product-result strong{display:block;font-size:13px}.area-product-result span{display:block;margin-top:3px;color:var(--muted);font-size:11px}
+  .area-product-result .saldo{flex:0 0 auto;font-size:11px;font-weight:750;color:var(--muted);text-align:right}
+  .area-assign-detail{margin-top:12px;padding:12px;border:1px solid var(--border);border-radius:11px;background:var(--card)}
+  .area-assign-detail h3{margin:0 0 7px;font-size:14px}.area-assign-detail p{margin:4px 0;color:var(--muted);font-size:12px;line-height:1.4}
+  .area-assign-detail .notice{color:var(--text);font-weight:700}
   .area-aggregate{background:var(--gray-bg)}
   .area-list-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:2px 0 10px}
   .area-list-total{font-size:12px;color:var(--muted)}
@@ -455,9 +476,9 @@
   .area-admin-actions button{min-height:38px}
   .area-admin-row.archivada{opacity:.72}
   .area-admin-new{display:grid;grid-template-columns:minmax(0,1fr) 90px auto;gap:8px;align-items:end}
-  @media(max-width:700px){.area-cover{grid-template-columns:repeat(2,minmax(0,1fr))}.area-card{padding:12px}}
+  @media(max-width:700px){.area-cover{grid-template-columns:repeat(2,minmax(0,1fr))}.area-card{padding:12px}.area-cover-head{align-items:flex-start}.area-nav{align-items:flex-start;flex-wrap:wrap}.area-context{order:3;width:100%;text-align:left}.area-nav-actions{justify-content:flex-start}}
   @media(max-width:620px){.area-admin-row,.area-admin-new{grid-template-columns:1fr}.area-admin-actions{justify-content:flex-start}.area-admin-row input,.area-admin-new input{width:100%;min-width:0}}
-  @media(max-width:420px){.area-cover{grid-template-columns:1fr;gap:7px}.area-global-balances{grid-template-columns:1fr}.area-card-title{font-size:13px}}
+  @media(max-width:420px){.area-cover{grid-template-columns:1fr;gap:7px}.area-global-balances{grid-template-columns:1fr}.area-card-title{font-size:13px}.area-cover-head{display:grid}.area-manage{width:100%}.area-product-result{align-items:flex-start}.area-product-result .saldo{max-width:34%}}
 
   /* ---- las tres sedes, vistas desde Bodega ----
      Adriana no cuenta en bodega para saber cómo está bodega: cuenta para
@@ -3920,8 +3941,9 @@
         <input type="text" id="m-producto" autocomplete="off">
       </div>
       <div class="field">
-        <label>Sección</label>
+      <label>Sección o categoría</label>
         <select id="m-seccion"></select>
+      <small style="display:block;color:var(--muted);margin-top:6px">Describe qué es o cómo se agrupa el producto. No es una ubicación física.</small>
       </div>
     </div>
     <div class="field" style="text-align:center;margin-top:0">
@@ -3994,12 +4016,13 @@
       <input type="text" id="n-nombre" placeholder="Ej: Torta selva negra" maxlength="60">
     </div>
     <div class="field">
-      <label>Sección</label>
+      <label>Sección o categoría</label>
       <!-- Desplegable, no texto libre: escribiendo a mano se creaban secciones
            nuevas por una tilde o un plural ("Mesones" y "mesón"), y un producto
            en una sección inventada no aparece en ninguna parte de la lista.
            Mismo control que usa la ficha del producto (m-seccion). -->
       <select id="n-rubro"></select>
+      <small style="display:block;color:var(--muted);margin-top:6px">Clasifica el producto; no decide dónde están sus existencias.</small>
     </div>
     <div class="field" id="n-area-wrap" style="display:none">
       <label>Área operativa inicial</label>
@@ -4018,6 +4041,25 @@
     <div class="mbtns">
       <button class="btn btn-outline" id="n-cancelar">Cancelar</button>
       <button class="btn btn-orange" id="n-guardar">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Asigna una preferencia operativa a una ficha que ya existe. No mueve saldo. -->
+<div class="overlay" id="overlay-area-producto">
+  <div class="modal area-assign-modal" role="dialog" aria-modal="true" aria-labelledby="area-producto-titulo">
+    <h2 id="area-producto-titulo">Asignar producto existente</h2>
+    <p class="mr" id="area-producto-destino"></p>
+    <div class="area-assign-explain" id="area-producto-explica">Asignar cambia dónde se organiza normalmente el producto. Las existencias físicas no se mueven.</div>
+    <div class="field" style="margin-top:0">
+      <label>Buscar producto</label>
+      <input type="search" id="area-producto-q" placeholder="Nombre, ID, sección o categoría" autocomplete="off">
+    </div>
+    <div class="area-product-results" id="area-producto-resultados" aria-live="polite"></div>
+    <div class="area-assign-detail" id="area-producto-detalle" hidden></div>
+    <div class="mbtns">
+      <button type="button" class="btn btn-outline" id="area-producto-cancelar">Cancelar</button>
+      <button type="button" class="btn btn-orange" id="area-producto-guardar" disabled>Asignar producto</button>
     </div>
   </div>
 </div>
@@ -4120,6 +4162,9 @@ let hasTipo = false;      // true cuando exista la columna tipo
 let tipoSel = null;       // tipo de producto elegido en la franja
 let modalProd = null;
 let NUEVO_AREA_ID = null;
+let ASIGNAR_AREA_CODIGO = null;
+let ASIGNAR_PRODUCTO_ID = null;
+let ASIGNAR_PREFERENCIA = null;
 let carrito = [];         // productos que llegaron, pendientes de registrar
 
 /* ¿este producto es perecedero? (usa la columna si existe; si no, la regla vieja de Sándwiches) */
@@ -4207,7 +4252,10 @@ function htmlTarjetaArea(codigo){
       <span class="area-card-units">${fmt(s.unidades)} <small>unidades</small></span>
       <span class="area-card-state">Críticos · sin mínimos configurados</span>${extra}
     </button>
-    ${PERMISOS.puede_editar?`<button type="button" class="area-create" data-area-create="${esc(codigo)}">＋ Crear producto en esta área</button>`:''}
+    ${PERMISOS.puede_editar?`<div class="area-card-actions">
+      <button type="button" class="area-create" data-area-assign="${esc(codigo)}">＋ Agregar producto existente</button>
+      <button type="button" class="area-create" data-area-create="${esc(codigo)}">Crear producto nuevo</button>
+    </div>`:''}
   </article>`;
 }
 function renderAreaPortada(){
@@ -4221,6 +4269,8 @@ function renderAreaPortada(){
   const total=codigos.reduce((s,c)=>s+areaStats(c).unidades,0);
   const productos=new Set(AREA_ROWS.filter(r=>Number(r.cantidad)>0).map(r=>r.producto_id)).size;
   listEl.innerHTML=`<div class="area-cover" aria-label="Áreas de inventario">
+    <div class="area-cover-head"><div><strong>Ubicaciones físicas de Local 1</strong><span>Las categorías describen productos; estas áreas indican dónde se organiza el inventario.</span></div>
+      ${PERMISOS.puede_ajustes?'<button type="button" class="area-manage" data-area-manage>Gestionar áreas</button>':''}</div>
     ${codigos.map(htmlTarjetaArea).join('')}
     <button type="button" class="area-card area-aggregate" data-area-open="${AREA_TODAS}">
       <span class="area-card-title">Todas las áreas</span>
@@ -4233,7 +4283,7 @@ function renderAreaPortada(){
 }
 function renderAreaLista(){
   const global=areaActual===AREA_TODAS;
-  $('areaNav').style.display='flex'; $('areaNav').innerHTML=`<button type="button" class="area-back" data-area-home>← Todas las áreas</button><span class="area-context">${global?'Lectura global · Local 1':esc(areaLabel(areaActual))}</span>${!global&&PERMISOS.puede_editar?`<button type="button" class="area-back" data-area-create="${esc(areaActual)}">＋ Crear producto</button>`:''}`;
+  $('areaNav').style.display='flex'; $('areaNav').innerHTML=`<button type="button" class="area-back" data-area-home>← Todas las áreas</button><span class="area-context">${global?'Lectura global · Local 1':esc(areaLabel(areaActual))}</span>${!global&&PERMISOS.puede_editar?`<span class="area-nav-actions"><button type="button" class="area-back" data-area-assign="${esc(areaActual)}">＋ Agregar existente</button><button type="button" class="area-back" data-area-create="${esc(areaActual)}">Crear nuevo</button></span>`:''}`;
   $('invFiltros').style.display=''; $('metrics').style.display='none';
   $('critSedes').style.display='none'; $('metaPortada').style.display='none';
   $('btnNuevo').style.display='none'; $('inv-estado').style.display='none';
@@ -12552,8 +12602,100 @@ async function copiarTexto(txt){
   }catch(e){ console.error(e); return false; }
 }
 
+/* ASIGNAR NO ES MOVER. Este flujo solo guarda producto_area_asignacion.
+   El saldo que se muestra viene del ledger y queda intacto hasta B3.2b. */
+function resumenFisicoProducto(id, ubicaciones=null){
+  const filas=Array.isArray(ubicaciones)
+    ? ubicaciones.filter(x=>Number(x.cantidad)!==0).map(x=>({nombre:x.nombre,cantidad:Number(x.cantidad)||0}))
+    : AREA_ROWS.filter(x=>String(x.producto_id)===String(id)&&Number(x.cantidad)!==0)
+        .map(x=>({nombre:x.area_nombre,cantidad:Number(x.cantidad)||0}));
+  return filas.length ? filas.map(x=>`${x.nombre} · ${fmt(x.cantidad)}`).join(' / ')
+    : 'Sin saldo físico en ninguna ubicación';
+}
+function cerrarAsignarProducto(){
+  $('overlay-area-producto').classList.remove('open');
+  ASIGNAR_AREA_CODIGO=null; ASIGNAR_PRODUCTO_ID=null; ASIGNAR_PREFERENCIA=null;
+}
+function pintarProductosAsignables(){
+  const q=normNombre($('area-producto-q').value);
+  const lista=DATA.filter(p=>{
+    if(!q)return true;
+    return normNombre([p.producto,p.id,p.rubro,p.tipo].filter(Boolean).join(' ')).includes(q);
+  }).slice(0,40);
+  $('area-producto-resultados').innerHTML=lista.length?lista.map(p=>{
+    const fisico=resumenFisicoProducto(p.id);
+    return `<button type="button" class="area-product-result${p.id===ASIGNAR_PRODUCTO_ID?' on':''}" data-area-producto="${p.id}">
+      <span><strong>${esc(p.producto)}</strong><span>ID ${p.id} · ${esc(p.rubro||'Sin sección')}${p.tipo?' · '+esc(p.tipo):''}</span></span>
+      <span class="saldo">${esc(fisico)}</span></button>`;
+  }).join(''):'<div class="area-loading">No hay productos coincidentes.</div>';
+}
+async function seleccionarProductoAsignacion(id){
+  const p=DATA.find(x=>x.id===id); if(!p)return;
+  ASIGNAR_PRODUCTO_ID=id; ASIGNAR_PREFERENCIA=null; pintarProductosAsignables();
+  const detalle=$('area-producto-detalle'); detalle.hidden=false;
+  detalle.innerHTML=`<h3>${esc(p.producto)}</h3><p>Cargando preferencia y saldo físico…</p>`;
+  $('area-producto-guardar').disabled=true;
+  const leida=await cargarPreferenciaProducto(id);
+  if(ASIGNAR_PRODUCTO_ID!==id)return;
+  if(leida.error){
+    detalle.innerHTML=`<h3>${esc(p.producto)}</h3><p>No se pudo consultar su preferencia. No se hizo ningún cambio.</p>`;
+    return;
+  }
+  ASIGNAR_PREFERENCIA=leida.data;
+  const preferida=leida.data.area_nombre||'Sin asignar';
+  const fisico=resumenFisicoProducto(id,leida.data.ubicaciones);
+  detalle.innerHTML=`<h3>${esc(p.producto)}</h3>
+    <p><strong>Área preferida actual:</strong> ${esc(preferida)}</p>
+    <p><strong>Ubicación física actual:</strong> ${esc(fisico)}</p>
+    <p class="notice">Se asignará a ${esc(areaLabel(ASIGNAR_AREA_CODIGO))}. Las existencias no se moverán.</p>`;
+  $('area-producto-guardar').disabled=false;
+}
+function abrirAsignarProducto(codigo,productoId=null,duplicado=false){
+  if(SEDE!=='plaza'||!PERMISOS.puede_editar)return;
+  const permitido=codigo==='sin_asignar'||!!areaIdPorCodigo(codigo);
+  if(!permitido){avisar('El área ya no está activa. Vuelve a cargar Inventario.');return;}
+  ASIGNAR_AREA_CODIGO=codigo; ASIGNAR_PRODUCTO_ID=null; ASIGNAR_PREFERENCIA=null;
+  $('area-producto-titulo').textContent=duplicado?'Este producto ya existe':'Asignar producto existente';
+  $('area-producto-destino').textContent='Área preferida de destino: '+areaLabel(codigo);
+  $('area-producto-explica').textContent=duplicado
+    ? 'Encontramos una ficha coincidente. Puedes usarla y asignarla al área; no se creará una copia ni se moverán existencias. Si es otro producto, vuelve y usa un nombre realmente distinto.'
+    : 'Asignar cambia dónde se organiza normalmente el producto. Mover existencias será una transferencia explícita en una fase posterior.';
+  $('area-producto-guardar').dataset.duplicado=duplicado?'1':'0';
+  $('area-producto-guardar').textContent=duplicado?'Usar producto existente':'Asignar producto';
+  $('area-producto-q').value=''; $('area-producto-detalle').hidden=true;
+  $('area-producto-guardar').disabled=true; pintarProductosAsignables();
+  $('overlay-area-producto').classList.add('open');
+  if(productoId){
+    const p=DATA.find(x=>x.id===productoId);
+    if(p)$('area-producto-q').value=p.producto;
+    pintarProductosAsignables(); seleccionarProductoAsignacion(productoId);
+  }else setTimeout(()=>$('area-producto-q').focus(),40);
+}
+async function guardarProductoEnArea(){
+  const p=DATA.find(x=>x.id===ASIGNAR_PRODUCTO_ID); if(!p||!ASIGNAR_PREFERENCIA)return;
+  const codigo=ASIGNAR_AREA_CODIGO;
+  const areaId=codigo==='sin_asignar'?null:areaIdPorCodigo(codigo);
+  if(codigo!=='sin_asignar'&&!areaId){avisar('El área ya no está activa. No se hizo ningún cambio.');return;}
+  const btn=$('area-producto-guardar');btn.disabled=true;btn.textContent='Asignando…';
+  const {error}=await conReintento(()=>sb.rpc('producto_area_preferencia_guardar',{
+    p_producto_id:p.id,p_area_id:areaId,p_sede:'plaza'
+  }));
+  btn.textContent=btn.dataset.duplicado==='1'?'Usar producto existente':'Asignar producto';
+  if(error){btn.disabled=false;avisar(error.message||'No se pudo asignar el producto.');return;}
+  const fisico=resumenFisicoProducto(p.id,ASIGNAR_PREFERENCIA.ubicaciones);
+  cerrarAsignarProducto(); await loadData();
+  avisar(`Producto asignado a ${areaLabel(codigo)}.\n\nLas existencias no se movieron.\nSaldo físico actual: ${fisico}.`);
+}
+function gestionarAreas(){
+  if(SEDE!=='plaza'||!PERMISOS.puede_ajustes)return;
+  ajActual='areas'; pickTab('ajustes');
+}
+
 /* abrir/cerrar sección, o abrir ficha de producto */
 listEl.addEventListener('click',e=>{
+  if(e.target.closest('[data-area-manage]')){gestionarAreas();return;}
+  const asignar=e.target.closest('[data-area-assign]');
+  if(asignar){abrirAsignarProducto(asignar.dataset.areaAssign);return;}
   const crear=e.target.closest('[data-area-create]');
   if(crear){ abrirNuevoProducto(crear.dataset.areaCreate); return; }
   const area=e.target.closest('[data-area-open]');
@@ -12580,9 +12722,19 @@ listEl.addEventListener('click',e=>{
   openModal(+info.dataset.open);
 });
 $('areaNav').addEventListener('click',e=>{
+  const asignar=e.target.closest('[data-area-assign]');
+  if(asignar){abrirAsignarProducto(asignar.dataset.areaAssign);return;}
   const crear=e.target.closest('[data-area-create]');
   if(crear){ abrirNuevoProducto(crear.dataset.areaCreate); return; }
   if(e.target.closest('[data-area-home]')) cambiarArea(null);
+});
+$('area-producto-q').addEventListener('input',()=>{ASIGNAR_PRODUCTO_ID=null;ASIGNAR_PREFERENCIA=null;$('area-producto-detalle').hidden=true;$('area-producto-guardar').disabled=true;pintarProductosAsignables();});
+$('area-producto-resultados').addEventListener('click',e=>{const b=e.target.closest('[data-area-producto]');if(b)seleccionarProductoAsignacion(+b.dataset.areaProducto);});
+$('area-producto-cancelar').addEventListener('click',cerrarAsignarProducto);
+$('area-producto-guardar').addEventListener('click',guardarProductoEnArea);
+$('overlay-area-producto').addEventListener('click',e=>{if(e.target===$('overlay-area-producto'))cerrarAsignarProducto();});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&$('overlay-area-producto').classList.contains('open'))cerrarAsignarProducto();
 });
 /* El buscador SIEMPRE busca en todo el inventario. Al tocarlo se sueltan los
    filtros de crítico / sobre-stock / sin dato: si alguien busca "torta de
@@ -13450,7 +13602,13 @@ $('n-guardar').addEventListener('click', async()=>{
   if(!nombre){ avisar('Escribe el nombre del producto.'); $('n-nombre').focus(); return; }
   if(!rubro){ avisar('Elige una sección.'); $('n-rubro').focus(); return; }
   const dup=DATA.find(d=>normNombre(d.producto)===normNombre(nombre));
-  if(dup){ avisar(`"${dup.producto}" ya existe en este inventario. Búscalo en la lista para editarlo.`); return; }
+  if(dup){
+    const areaId=$('n-area').value||null;
+    const destino=areaId ? (AREAS_CATALOGO.find(a=>a.id===areaId)?.codigo||'sin_asignar') : 'sin_asignar';
+    closeNuevo();
+    abrirAsignarProducto(destino,dup.id,true);
+    return;
+  }
   const num=el=>el.value===''?null:+el.value;
   const stockInicial=(SEDE==='central'||SEDE==='plaza')?0:num($('n-stock'));
   const fila={producto:nombre, rubro, stock_actual:stockInicial, stock_min:num($('n-min')), stock_max:num($('n-max')),
@@ -14193,11 +14351,11 @@ function ajAreasHTML(){
     <div><label class="aj-nota">Orden</label><input type="number" min="0" step="1" data-area-order value="${a.orden}" ${a.estado==='archivada'?'disabled':''}></div>
     <div class="area-admin-actions">${a.estado==='activa'?`<button type="button" class="btn btn-outline btn-sm" data-area-save="${esc(a.id)}">Guardar</button><button type="button" class="btn btn-gris btn-sm" data-area-archive="${esc(a.id)}">Archivar</button>`:'<span class="aj-nota">Solo historial</span>'}</div>
   </div>`).join('');
-  return `<div class="aj-caja"><h3>Crear área</h3><p class="aj-nota">Cada área nueva aparece automáticamente en Inventario y nace con saldo cero.</p>
+  return `<div class="aj-caja"><h3>Nueva área</h3><p class="aj-nota">Un área es una ubicación física de inventario. Cada área nueva aparece automáticamente en Inventario y nace con saldo cero.</p>
     <div class="area-admin-new"><div><label class="aj-nota">Nombre</label><input type="text" id="aj-area-nombre" maxlength="80" placeholder="Ej: Heladería"></div>
       <div><label class="aj-nota">Orden</label><input type="number" id="aj-area-orden" min="0" step="1" value="${(AJ_AREAS.filter(a=>a.estado==='activa').reduce((m,a)=>Math.max(m,a.orden),0)+10)}"></div>
       <button type="button" class="adm-btn" data-area-new>Crear área</button></div></div>
-    <div class="aj-caja"><h3>Áreas de Local 1</h3><p class="aj-nota">“Sin asignar” es una ubicación lógica protegida y no se administra como área. Archivar nunca mueve stock.</p>${filas||'<div class="aj-vacio">No hay áreas.</div>'}</div>`;
+    <div class="aj-caja"><h3>Áreas de Local 1</h3><p class="aj-nota">“Sin asignar” es una ubicación lógica protegida y no se administra como área. Archivar nunca mueve stock. Limpieza, Vitrina y Sándwiches son secciones o categorías de producto: no son destinos físicos.</p>${filas||'<div class="aj-vacio">No hay áreas.</div>'}</div>`;
 }
 async function ajAreaCrear(){
   const nombre=$('aj-area-nombre')?.value.trim(), orden=Number($('aj-area-orden')?.value||0);

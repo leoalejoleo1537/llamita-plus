@@ -1,5 +1,15 @@
 # Bitácora de Codex
 
+## 2026-10-09 — B3.2a.3: áreas encontrables y producto existente
+
+- Estado: **COMPLETADA**. B3.2b permanece pendiente y no se activa.
+- Causa: crear área estaba implementado solo dentro de `Ajustes → Áreas de inventario`; no había acceso desde Inventario y en móvil la subsección era difícil de descubrir. La RPC no estaba fallando.
+- Interfaz: Inventario ofrece **Gestionar áreas** solo con `puede_ajustes`. Cada área separa **Agregar producto existente** de **Crear producto nuevo**. Un nombre duplicado abre la ficha coincidente y ofrece reutilizarla, sin crear copia.
+- Datos: la asignación usa `producto_area_preferencia_guardar`; muestra preferencia y saldo físico por separado y avisa que no mueve existencias. Los destinos salen solo de áreas activas más Sin asignar; rubros/categorías como Limpieza, Vitrina o Sándwiches conservan su campo descriptivo, pero no son ubicaciones.
+- No hubo migraciones. La prueba SQL real terminó con `ROLLBACK`; conteos pre/post: 1.437 productos, stock 15.438,00, 42 lotes, 431 movimientos legacy, 408 ledger, 0 transferencias, 396 recetas, 513 enlaces, 15.357 movimientos Fudo y 0 eventos Lama.
+- Pasaron `npm test`, pruebas estáticas, navegador Chromium 390/1280, regresión M1, RPC/permisos/conteos y `git diff --check`. Fudo remoto, Lama real, Bodega, stock, lotes, movimientos y recetas no fueron alterados.
+- Informe: `docs/hermes/32-b3-2a-3-depuracion-areas-productos.md`. No se accedió a Café del Desierto / Llamita Stock.
+
 ## 2026-10-09 — M1: navegación móvil
 
 - Estado: **COMPLETADA** tras autorización de Alejo para comenzar la remodelación. M2–M4, B3.2a.3 y B3.2b siguen pendientes.
