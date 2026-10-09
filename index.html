@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Inventario</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0F1E31">
@@ -3050,6 +3050,9 @@
 
 <div class="topbar">
   <div class="inner">
+    <button type="button" class="mobile-menu-trigger" id="mobileMenuTrigger" aria-label="Abrir menú" aria-controls="mobileNav" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+    </button>
     <div class="top-tit">
       <!-- ARRIBA VA LA SEDE, no el nombre de la pantalla. La pestaña activa
            ya dice en qué pantalla estás; equivocarse de sede, en cambio, sí
@@ -3084,7 +3087,9 @@
   </div>
 </div>
 
-<div class="tabs">
+<div class="mobile-nav-scrim" id="mobileNavScrim" hidden></div>
+<div class="tabs" id="mobileNav">
+  <div class="mobile-nav-heading"><span>Menú</span><button type="button" id="mobileNavClose" aria-label="Cerrar menú">×</button></div>
   <div class="inner">
     <span class="tab-carril" id="tabCarril" aria-hidden="true"></span>
     <!-- ⌂ EL HOGAR DE LA APP ES MESAS (Jhon, 2026-09-03).
@@ -3198,6 +3203,7 @@
   </div>
 </aside>
 </div>
+<nav class="mobile-bottom" id="mobileBottom" aria-label="Navegación principal"></nav>
 
 <div class="motor-aviso" id="motorAviso">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>
@@ -4826,8 +4832,67 @@ function refrescarMenu(){
   if(a) a.textContent = etiquetaSedeUI(SEDE);
   if(b) b.textContent = saludo();
 }
-/* La navegación permanece visible; cerrar solo descarta el selector personal. */
-function cerrarMenu(){ cerrarPaleta(); }
+/* En escritorio el riel permanece fijo; en móvil el mismo DOM es temporal.
+   Los accesos inferiores delegan en sus pestañas originales: una sola ruta,
+   un solo control de permisos y ninguna copia de la lógica de cada módulo. */
+function cerrarMenu(devolverFoco=false){
+  cerrarPaleta();
+  document.body.classList.remove('mobile-menu-open');
+  $('mobileNavScrim').hidden=true;
+  $('mobileMenuTrigger').setAttribute('aria-expanded','false');
+  if(matchMedia('(max-width:719px)').matches) $('mobileNav').inert=true;
+  if(devolverFoco) $('mobileMenuTrigger').focus();
+}
+function abrirMenuMovil(){
+  if(!matchMedia('(max-width:719px)').matches) return;
+  $('mobileNav').inert=false;
+  $('mobileNavScrim').hidden=false;
+  document.body.classList.add('mobile-menu-open');
+  $('mobileMenuTrigger').setAttribute('aria-expanded','true');
+  $('mobileNavClose').focus();
+}
+function sincronizarNavegacionMovil(){
+  const nav=$('mobileBottom');
+  const candidatos=SEDE==='central'
+    ? ['inv','recepcion','envios','mermas']
+    : ['lama','inv','reparto','mermas'];
+  nav.replaceChildren();
+  for(const ruta of candidatos){
+    const original=document.querySelector(`.tab[data-tab="${ruta}"]`);
+    if(!original || getComputedStyle(original).display==='none' ||
+       (modoDemo() && !demoPermiteVista(ruta))) continue;
+    const btn=document.createElement('button');
+    btn.type='button'; btn.className='mobile-bottom-item'; btn.dataset.mobileTab=ruta;
+    btn.setAttribute('aria-label',original.getAttribute('aria-label') || original.querySelector('.nav-label')?.firstChild?.textContent.trim() || ruta);
+    btn.append(original.querySelector('svg').cloneNode(true));
+    const label=document.createElement('span');
+    label.textContent=original.querySelector('.nav-label')?.firstChild?.textContent.trim() || ruta;
+    btn.append(label); nav.append(btn);
+  }
+  const mas=document.createElement('button');
+  mas.type='button'; mas.className='mobile-bottom-item'; mas.dataset.mobileMore='';
+  mas.setAttribute('aria-label','Abrir todos los módulos');
+  mas.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></svg><span>Más</span>';
+  nav.append(mas);
+  nav.querySelectorAll('[data-mobile-tab]').forEach(btn=>{
+    const activa=btn.dataset.mobileTab===vistaActual;
+    btn.classList.toggle('active',activa);
+    if(activa) btn.setAttribute('aria-current','page');
+  });
+}
+$('mobileMenuTrigger').addEventListener('click',abrirMenuMovil);
+$('mobileNavClose').addEventListener('click',()=>cerrarMenu(true));
+$('mobileNavScrim').addEventListener('click',()=>cerrarMenu(true));
+$('mobileBottom').addEventListener('click',e=>{
+  const mas=e.target.closest('[data-mobile-more]');
+  if(mas){abrirMenuMovil();return;}
+  const btn=e.target.closest('[data-mobile-tab]'); if(!btn)return;
+  const original=document.querySelector(`.tab[data-tab="${btn.dataset.mobileTab}"]`);
+  if(original && getComputedStyle(original).display!=='none') original.click();
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape' && document.body.classList.contains('mobile-menu-open')) cerrarMenu(true);
+});
 function cerrarPaleta(){
   $('paleta-popover').hidden=true;
   $('paleta-trigger').setAttribute('aria-expanded','false');
@@ -16195,6 +16260,7 @@ function aplicarNavegacionDemo(){
   document.body.classList.toggle('demo-activo', modoDemo());
   $('tabInv').querySelector('.nav-label').textContent = modoDemo() ? 'Inicio · Inventario' : 'Inventario';
   if(SEDE && modoDemo() && !demoPermiteVista(vistaActual)) pickTab('inv');
+  sincronizarNavegacionMovil();
 }
 
 const INTERRUPTORES = [
@@ -16990,6 +17056,12 @@ $('aj-rail').addEventListener('click', e=>{
 function aplicarNavegacionFija(){
   document.body.classList.add('navegacion-fija','menu-fijo');
   document.body.classList.toggle('pc-ancho',matchMedia('(min-width:1080px)').matches);
+  if(matchMedia('(max-width:719px)').matches){
+    $('mobileNav').inert=!document.body.classList.contains('mobile-menu-open');
+  }else{
+    cerrarMenu();
+    $('mobileNav').inert=false;
+  }
   refrescarMenu();
 }
 function moverCarril(){
@@ -17095,8 +17167,12 @@ function pickTab(tab){
     modoRecetas(ajVal('modo_enlazar','',false) ? 'enlazar' : 'combos');
     loadRecetas();
   }
+  sincronizarNavegacionMovil();
 }
-document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>pickTab(t.dataset.tab)));
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  cerrarMenu();
+  pickTab(t.dataset.tab);
+}));
 
 /* ---------------- recetas ---------------- */
 let FUDOPROD=[];   // productos activos de Fudo de la sede (para el desplegable)

@@ -1,6 +1,16 @@
 # Cola de trabajo de Codex
 
-Estado actual: **B3.2a.2 COMPLETADA (2026-10-08)**. Lectura dinámica, administración de áreas y formularios protegidos quedaron verificados. **B3.2a.3 y B3.2b permanecen PENDIENTES**, no activas.
+Estado actual: **M1 COMPLETADA (2026-10-09)** por autorización posterior de Alejo para comenzar la remodelación móvil. **M2–M4, B3.2a.3 y B3.2b permanecen PENDIENTES**, no activas.
+
+### Tarea M1 — Armazón de navegación móvil
+
+- Estado: **COMPLETADA (2026-10-09)**.
+- Autorización: Alejo indicó «Ya comienza» y luego solicitó continuar; se ejecutó únicamente la primera fase de interfaz de `docs/hermes/30-propuesta-remodelacion-movil.md`.
+- Resultado: `docs/hermes/31-m1-navegacion-movil.md`.
+- Alcance: retirar el riel fijo solo bajo 720 px, reutilizarlo como menú temporal, añadir accesos inferiores contextuales, cabecera compacta y safe area. Las rutas originales siguen gobernando permisos y modo demostración.
+- Sin cambios: Supabase, Auth, permisos, stock, Fudo, Lama comercial, Bodega operativa ni escritorio.
+- Pruebas: `npm test`, navegador sintético M1 en 390/1280 px y `git diff --check`. Las pruebas de navegador antiguas `inventario-areas` y `lama-ancho` tienen fixtures desactualizados y no validaron de punta a punta; detalle en el informe.
+- Próximo bloque: M2 (Mesas y POS táctil), pendiente de activación específica. B3.2a.3 y B3.2b continúan pendientes.
 
 Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cada ejecución programada.
 

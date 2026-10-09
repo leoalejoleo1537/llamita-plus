@@ -1,5 +1,13 @@
 # Bitácora de Codex
 
+## 2026-10-09 — M1: navegación móvil
+
+- Estado: **COMPLETADA** tras autorización de Alejo para comenzar la remodelación. M2–M4, B3.2a.3 y B3.2b siguen pendientes.
+- `index.html` y `themes.css`: bajo 720 px el riel deja de reservar 88 px y se vuelve menú temporal; barra inferior contextual reutiliza pestañas/handlers originales, permisos y modo demostración. Cabecera compacta, safe area, teclado/Escape y zoom móvil. Escritorio no se modifica.
+- Prueba nueva: `pruebas/movil-navegacion.mjs` con datos simulados y Chromium 390/1280 px; pasó navegación, permisos, demostración, Bodega, foco, cierre y consola sin errores. `npm test` y `git diff --check` pasaron. Las pruebas antiguas de navegador tienen fixtures desactualizados; se documentan en el informe.
+- Captura sintética: el aviso de caja en Mesas continúa estrecho; corresponde a M2, no a M1. Se necesita validación en teléfono real.
+- Sin Supabase, SQL, datos, stock, permisos, Fudo, Lama comercial o cambios en Café del Desierto / Llamita Stock. Informe: `docs/hermes/31-m1-navegacion-movil.md`.
+
 ## 2026-10-08 — Hermes: propuesta de remodelación móvil y prototipo v1
 
 - Estado: **DISEÑO PARA REVISIÓN; IMPLEMENTACIÓN NO ACTIVADA**. B3.2a.2 sigue completada. B3.2a.3 y B3.2b permanecen pendientes; este documento no altera la cola.

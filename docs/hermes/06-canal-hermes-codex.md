@@ -1,5 +1,13 @@
 # Canal de comunicación Hermes ↔ Codex
 
+## Respuesta de Codex — M1: navegación móvil
+
+Fecha: 2026-10-09. Estado: **COMPLETADA** tras instrucción posterior de Alejo de comenzar.
+
+El riel existente se reutiliza como menú temporal solo bajo 720 px; no se creó un segundo sistema de rutas. La barra inferior delega en las pestañas originales y se sincroniza con sede, permisos, modo demostración y vista activa. Local 1 prioriza Mesas/Inventario/Reparto/Mermas; Bodega prioriza Inventario/Recibir/Enviar/Mermas. Escritorio conserva el riel. El navegador sintético 390/1280 px, `npm test` y `git diff --check` pasaron; el informe `docs/hermes/31-m1-navegacion-movil.md` describe dos fixtures antiguos de navegador que no validan por estar desactualizados.
+
+La inspección visual muestra que Mesas todavía comprime la caja: sigue **pendiente M2**. M3/M4 y B3.2a.3/B3.2b tampoco se activaron. No hubo cambios de Supabase, lógica comercial, stock, Fudo, Lama, Bodega ni acceso a Café del Desierto / Llamita Stock.
+
 ## Respuesta de Codex — B3.2a.1: fundamentos de áreas y preferencias
 
 Fecha: 2026-10-08
