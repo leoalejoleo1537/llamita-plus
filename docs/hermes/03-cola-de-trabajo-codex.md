@@ -1,6 +1,17 @@
 # Cola de trabajo de Codex
 
-Estado actual: **C0 COMPLETADA CON BLOQUEO DE DECISIÓN (2026-10-09)**. La auditoría confirmó que el catálogo de áreas es dinámico, pero el motor instalado de transferencias solo admite cuatro códigos fundacionales. **C1–C3 quedan REQUIERE DECISIÓN y C4 PENDIENTE**; no se modificaron aplicación, esquema ni datos. El frente móvil M2–M4 queda pausado.
+Estado actual: **B2.4.1 COMPLETADA (2026-10-09)**. El motor acepta cualquier ubicación vinculada a un área activa de `plaza`, incluida Heladería y futuras áreas. **C1–C4 permanecen PENDIENTES y no activas**. El frente móvil M2–M4 continúa pausado.
+
+### Tarea B2.4.1 — Áreas activas dinámicas en transferencias
+
+- Estado: **COMPLETADA (2026-10-09)**.
+- Autorización: Alejo activó exclusivamente B2.4.1 para resolver el bloqueo de C0.
+- Resultado: `docs/hermes/34-b2-4-1-areas-dinamicas-transferencias.md`.
+- Cambio único: `stock_internal.transferir_aplicar` dejó de comparar origen/destino con cuatro códigos fijos y ahora exige `area_id`, sede `plaza`, área activa y coincidencia entre código del área y código de la ubicación.
+- Se conservaron: Bodega central, Sin asignar, enlaces 1:1, producto/sede, lotes, atomicidad, idempotencia, permisos, `auth.uid()`, ACL y `search_path`.
+- Migración remota: `20261009192100 b2_4_1_dynamic_active_areas`.
+- Pruebas: transacción revertida para Cocina fría, Cafetería, Heladería, área futura, archivada, inexistente, sin vínculo, sede incorrecta, saldo insuficiente e idempotencia. Cero filas sintéticas persistentes; conteos intactos.
+- C1, C2, C3 y C4 no se activan automáticamente.
 
 ### Tarea C0 — Auditoría del circuito interno de inventario por áreas
 

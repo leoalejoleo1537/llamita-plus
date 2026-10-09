@@ -1,5 +1,17 @@
 # Bitácora de Codex
 
+## 2026-10-09 — B2.4.1: áreas activas dinámicas en transferencias
+
+- Estado: **COMPLETADA**. Se ejecutó únicamente B2.4.1; C1–C4 siguen pendientes.
+- Migración aplicada en Llamita Plus: `20261009192100 b2_4_1_dynamic_active_areas`.
+- Cambio: las dos listas fijas del núcleo fueron sustituidas por validación de `area_id`, `plaza`, estado activo y coincidencia `areas_operativas.codigo = ubicaciones.codigo`. No cambió ninguna otra parte de la función.
+- Suite `BEGIN … ROLLBACK`: Cocina fría, Cafetería, Heladería y área futura aceptadas; área archivada, UUID inexistente, ubicación sin vínculo, destino en sede incorrecta y saldo insuficiente rechazados; reintento idéntico conservó una transferencia y dos movimientos.
+- Los dos primeros intentos del fixture abortaron antes de transferir por reglas reales del esquema —columna normalizada generada y ubicación archivada obligatoriamente inactiva—. Se corrigió el fixture y la repetición integral pasó; ningún intento dejó filas.
+- Rollback técnico ensayado dentro de transacción revertida. Se bloquea si existen transferencias persistentes vinculadas a áreas dinámicas.
+- Verificación final: 1.437 productos; stock 15.438,00; 42 lotes; 431 movimientos legacy; 408 movimientos ledger; ledger 9.316,70; 0 transferencias; 0 áreas/ubicaciones sintéticas.
+- `npm test` y `git diff --check` pasaron. Advisors revisados: solo hallazgos heredados; B2.4.1 no añadió exposición, grants ni `search_path` inseguro.
+- No se modificaron Fudo, Lama, Bodega operativa, productos, recetas, caja, mermas ni Café del Desierto / Llamita Stock.
+
 ## 2026-10-09 — C0: auditoría del circuito interno de inventario por áreas
 
 - Repositorio y destino confirmados: `leoalejoleo1537/llamita-plus`, HEAD sincronizado con `origin/master`; Supabase confirmado como `llamita-plus` (`iuryhsjucblmebdogewa`).

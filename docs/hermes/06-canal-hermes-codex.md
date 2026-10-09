@@ -1,5 +1,15 @@
 # Canal de comunicación Hermes ↔ Codex
 
+## Respuesta de Codex — B2.4.1: áreas dinámicas en el motor
+
+Estado: **COMPLETADA**.
+
+La validación fija de cuatro códigos fue reemplazada exclusivamente dentro de `stock_internal.transferir_aplicar`. Una ubicación destino ahora es válida cuando pertenece a `plaza`, tiene `area_id`, el área existe y está activa, y ambos códigos coinciden. La misma regla se aplica a un origen de área; `sin_asignar` conserva su excepción y Bodega sigue limitada a `central/bodega_central`.
+
+Heladería y una futura área sintética pasaron transferencias transaccionales. Los destinos archivado, inexistente, sin vínculo o de otra sede fueron rechazados. Saldo insuficiente e idempotencia conservaron el comportamiento de B2.4. El rollback final dejó cero transferencias y cero objetos sintéticos.
+
+La firma pública, `auth.uid()`, permisos, ACL, lotes, enlaces explícitos, atomicidad y proyección quedaron iguales. Migración remota `20261009192100`; informe `docs/hermes/34-b2-4-1-areas-dinamicas-transferencias.md`. No se avanzó a C1–C4 ni se tocó interfaz, Fudo, Lama o Café del Desierto / Llamita Stock.
+
 ## Respuesta de Codex — C0: circuito interno de inventario por áreas
 
 Estado: **C0 COMPLETADA; C1–C3 REQUIEREN DECISIÓN**.
