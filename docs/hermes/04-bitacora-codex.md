@@ -1,5 +1,18 @@
 # Bitácora de Codex
 
+## 2026-10-11 — Bloque 1A: inventario funcional por área y secciones internas
+
+- Estado: **COMPLETADA**. Se implementó Producto → Área → Sección → mínimo/máximo sin introducir cantidades fuera del ledger.
+- Migraciones aplicadas en Supabase Llamita Plus: `20261011181753 bloque_1a_inventario_area_seccion` y `20261011181901 bloque_1a_indice_seccion_area`.
+- Datos: nueva tabla cerrada `area_secciones`; `producto_area_asignacion` admite varias áreas por producto y guarda sección, límites y principal. No se migraron `public.secciones`, `productos.rubro` ni categorías ambiguas; no se crearon secciones ni configuraciones nuevas. La única fila asignada previa quedó marcada principal para conservar compatibilidad.
+- Lectura: `stock_leer_areas` devuelve configuraciones con saldo cero y saldos físicos no configurados. Lee `stock_internal.existencias`, nunca `productos.stock_actual`.
+- Interfaz: las tarjetas abren inventarios funcionales con buscador, filtros por `productos.tipo`, métricas, secciones desplegables, organización AM/PM visual y modal histórico adaptado. La ficha separa grupo histórico, sección física, saldo ledger y límites por área. Ajustes administra secciones mediante RPC; no hay DML directo.
+- Prueba `BEGIN … ROLLBACK`: sección, duplicado, dos áreas para un producto, principal único, límites, producto nuevo con saldo cero, raíz/administrador/común/anon, archivo lógico, firma de `stock_transferir` y ausencia de efectos contables. Pasó y no dejó filas sintéticas.
+- Conteos pre/post: 1.438 productos; stock 15.438,00; 42 lotes; 431 movimientos legacy; 408 movimientos ledger/9.316,70; 361 repartos; 396 recetas; 15.357 movimientos Fudo; 0 eventos Lama; 5 áreas; 3 configuraciones; 0 secciones nuevas persistentes.
+- `npm test`, sintaxis JavaScript inline y `git diff --check` pasaron. Chromium no está instalado, por lo que la verificación visual real de escritorio/móvil queda como riesgo manual documentado.
+- Advisors: la tabla nueva aparece como RLS sin política de forma intencional porque no tiene grants; RPC solo para `authenticated` con autorización servidor. El índice compuesto requerido por el advisor se añadió en la segunda migración. Los demás avisos son heredados y quedan fuera de 1A.
+- No se implementaron carga inicial, ajuste de stock, reparto, despacho, recepción, transferencia, Fudo, Lama, lotes, caja, recetas ni Bodega legacy. No se accedió a Café del Desierto / Llamita Stock.
+
 ## 2026-10-11 — Decisiones operativas Brunetti para Inventario por Áreas
 
 - Estado: **DECISIONES APROBADAS POR ALEJO** para la implementación posterior al preflight de Bloque 1A.

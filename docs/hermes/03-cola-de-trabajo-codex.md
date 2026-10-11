@@ -1,6 +1,17 @@
 # Cola de trabajo de Codex
 
-Estado actual: **B2.4.1 COMPLETADA (2026-10-09)**. El motor acepta cualquier ubicación vinculada a un área activa de `plaza`, incluida Heladería y futuras áreas. **C1–C4 permanecen PENDIENTES y no activas**. El frente móvil M2–M4 continúa pausado.
+Estado actual: **BLOQUE 1A COMPLETADO (2026-10-11)**. Local 1 ya dispone del contrato Producto → Área → Sección → mínimo/máximo y de una pantalla funcional de inventario por área, con cantidades exclusivamente desde el ledger. La carga inicial, ajustes auditados, reparto, despacho, recepción y transferencias visuales siguen **PENDIENTES** y no se activan automáticamente. El frente móvil M2–M4 continúa pausado.
+
+### Tarea Bloque 1A — Inventario funcional por área y secciones internas
+
+- Estado: **COMPLETADA (2026-10-11)**.
+- Autorización: Alejo activó expresamente Bloque 1A con las decisiones operativas de Brunetti.
+- Resultado: `docs/hermes/35-bloque-1a-inventario-area-seccion.md`.
+- Modelo: `area_secciones` no contiene cantidades; `producto_area_asignacion` admite el mismo producto en varias áreas y guarda sección, mínimo/máximo y principal por área. `stock_internal.existencias` sigue siendo la única fuente física.
+- Interfaz: cada área abre un inventario de trabajo con buscador, grupos históricos reales, indicadores, secciones desplegables AM/PM, productos con saldo cero y ficha histórica adaptada. Ajustes administra secciones por RPC protegida.
+- Migraciones remotas: `20261011181753 bloque_1a_inventario_area_seccion` y `20261011181901 bloque_1a_indice_seccion_area`.
+- Pruebas: suite SQL transaccional revertida, ACL/RLS, roles, conteos, advisors, sintaxis inline, `npm test` y `git diff --check`. No hubo carga ni filas sintéticas persistentes.
+- Siguiente trabajo: carga inicial revisada y ajuste auditado, reparto/recepción y transferencias visuales requieren bloques separados. No activar automáticamente.
 
 ### Tarea B2.4.1 — Áreas activas dinámicas en transferencias
 

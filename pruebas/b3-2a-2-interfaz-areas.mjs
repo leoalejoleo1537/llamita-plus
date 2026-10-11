@@ -13,7 +13,7 @@ check('la navegación combina catálogo dinámico y lectura del ledger',html.inc
 check('Ajustes usa solo RPC protegidas para áreas',['area_operativa_crear','area_operativa_editar','area_operativa_archivar'].every(x=>html.includes(`sb.rpc('${x}'`)));
 check('las altas normales de plaza usan producto_plaza_crear',html.includes("sb.rpc('producto_plaza_crear'"));
 check('la preferencia usa lectura y escritura protegidas',html.includes("sb.rpc('producto_area_preferencia_leer'")&&html.includes("sb.rpc('producto_area_preferencia_guardar'"));
-check('la interfaz distingue preferencia y saldo físico',html.includes('Cambiar esta preferencia no mueve unidades.')&&html.includes('Ubicación física actual'));
+check('la interfaz distingue configuración y saldo físico',html.includes('La cantidad pertenece al ledger del área')&&html.includes('Ubicación física actual'));
 check('el lector SQL acepta cualquier área activa vinculada',migration.includes("u.area_id is not null and a.id is not null")&&!migration.includes("u.codigo in ('cocina_fria'"));
 check('la RPC de preferencia exige sesión/capacidad y queda solo para authenticated',migration.includes("exigir_capacidad_b3_2a('lectura')")&&migration.includes('grant execute on function public.producto_area_preferencia_leer(bigint,text)\n  to authenticated'));
 check('el bloque no escribe existencias ni movimientos',!migration.match(/insert\s+into\s+stock_internal\.(existencias|movimientos)/i)&&!migration.match(/update\s+stock_internal\.(existencias|movimientos)/i));

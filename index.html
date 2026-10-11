@@ -456,6 +456,17 @@
   .area-read-sub{font-size:11px;color:var(--muted);margin-top:3px}
   .area-read-qty{font-size:15px;font-weight:800;white-space:nowrap}
   button.area-read-row{width:100%;border-left:0;border-right:0;border-top:0;color:var(--text);font:inherit;text-align:left;cursor:pointer}
+  .area-work-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 12px}
+  .area-work-metric{padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card)}
+  .area-work-metric strong{display:block;font-size:20px;line-height:1.1}.area-work-metric span{display:block;margin-top:4px;color:var(--muted);font-size:11px}
+  .area-config-note{display:inline-flex;align-items:center;margin-top:4px;padding:2px 7px;border-radius:999px;background:var(--gray-bg);color:var(--gray-fg);font-size:10px;font-weight:750}
+  .area-physical-section{margin:0 0 9px;border:1px solid var(--border);border-radius:13px;background:var(--card);overflow:hidden;box-shadow:var(--sombra)}
+  .area-physical-head{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:46px;padding:10px 12px;border:0;background:var(--sec-bg);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+  .area-physical-head strong{font-size:13px}.area-physical-head span{color:var(--muted);font-size:11px}.area-physical-body{border-top:1px solid var(--border)}
+  .area-turn-label{margin:14px 2px 7px;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.09em}
+  .area-section-admin{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+  .area-section-admin-row{display:grid;grid-template-columns:minmax(0,1fr) 76px 72px auto;gap:7px;align-items:end;padding:9px 0;border-top:1px solid var(--border)}
+  .area-section-admin-row:first-child{border-top:0}.area-section-admin-row.archivada{opacity:.65}
   .area-global-product{background:var(--card);border:1px solid var(--border);border-radius:13px;
     padding:11px 12px;margin:0 0 8px;box-shadow:var(--sombra)}
   .area-global-balances{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:8px}
@@ -476,8 +487,8 @@
   .area-admin-actions button{min-height:38px}
   .area-admin-row.archivada{opacity:.72}
   .area-admin-new{display:grid;grid-template-columns:minmax(0,1fr) 90px auto;gap:8px;align-items:end}
-  @media(max-width:700px){.area-cover{grid-template-columns:repeat(2,minmax(0,1fr))}.area-card{padding:12px}.area-cover-head{align-items:flex-start}.area-nav{align-items:flex-start;flex-wrap:wrap}.area-context{order:3;width:100%;text-align:left}.area-nav-actions{justify-content:flex-start}}
-  @media(max-width:620px){.area-admin-row,.area-admin-new{grid-template-columns:1fr}.area-admin-actions{justify-content:flex-start}.area-admin-row input,.area-admin-new input{width:100%;min-width:0}}
+  @media(max-width:700px){.area-cover{grid-template-columns:repeat(2,minmax(0,1fr))}.area-card{padding:12px}.area-cover-head{align-items:flex-start}.area-nav{align-items:flex-start;flex-wrap:wrap}.area-context{order:3;width:100%;text-align:left}.area-nav-actions{justify-content:flex-start}.area-work-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:620px){.area-admin-row,.area-admin-new,.area-section-admin-row{grid-template-columns:1fr}.area-admin-actions{justify-content:flex-start}.area-admin-row input,.area-admin-new input{width:100%;min-width:0}}
   @media(max-width:420px){.area-cover{grid-template-columns:1fr;gap:7px}.area-global-balances{grid-template-columns:1fr}.area-card-title{font-size:13px}.area-cover-head{display:grid}.area-manage{width:100%}.area-product-result{align-items:flex-start}.area-product-result .saldo{max-width:34%}}
 
   /* ---- las tres sedes, vistas desde Bodega ----
@@ -3941,9 +3952,9 @@
         <input type="text" id="m-producto" autocomplete="off">
       </div>
       <div class="field">
-      <label>Sección o categoría</label>
+      <label>Clasificación histórica</label>
         <select id="m-seccion"></select>
-      <small style="display:block;color:var(--muted);margin-top:6px">Describe qué es o cómo se agrupa el producto. No es una ubicación física.</small>
+      <small style="display:block;color:var(--muted);margin-top:6px">Se conserva como dato descriptivo. La sección física del área se elige abajo.</small>
       </div>
     </div>
     <div class="field" style="text-align:center;margin-top:0">
@@ -3955,9 +3966,9 @@
       </div>
       <small id="m-stock-corte" style="display:none;color:var(--muted);margin-top:6px">Saldo de solo lectura: Bodega y Local 1 usan existencias por ubicación.</small>
     </div>
-    <div style="display:flex;gap:10px">
-      <div class="field" style="flex:1"><label>Stock mínimo</label><input type="number" step="0.5" min="0" id="m-min"></div>
-      <div class="field" style="flex:1"><label>Stock máximo</label><input type="number" step="0.5" min="0" id="m-max"></div>
+      <div style="display:flex;gap:10px">
+      <div class="field" style="flex:1"><label id="m-min-label">Stock mínimo</label><input type="number" step="0.5" min="0" id="m-min"></div>
+      <div class="field" style="flex:1"><label id="m-max-label">Stock máximo</label><input type="number" step="0.5" min="0" id="m-max"></div>
     </div>
     <div class="field" id="m-tipo-row" style="display:none">
       <label>Tipo</label>
@@ -3966,9 +3977,14 @@
     </div>
     <div id="m-area-wrap" style="display:none">
       <div class="field">
-        <label>Área preferida</label>
+        <label>Área de esta ficha</label>
         <select id="m-area"></select>
-        <small style="display:block;color:var(--muted);margin-top:6px">Cambiar esta preferencia no mueve unidades.</small>
+        <small style="display:block;color:var(--muted);margin-top:6px">La cantidad pertenece al ledger del área; esta ficha solo guarda organización y límites.</small>
+      </div>
+      <div class="field" id="m-area-seccion-wrap">
+        <label>Sección física dentro del área</label>
+        <select id="m-area-seccion"></select>
+        <small style="display:block;color:var(--muted);margin-top:6px">AM/PM organiza visualmente el conteo. No divide ni mueve existencias.</small>
       </div>
       <div class="area-pref-box" id="m-area-fisica"><strong>Ubicación física actual</strong><span>Cargando saldo real…</span></div>
     </div>
@@ -4016,18 +4032,23 @@
       <input type="text" id="n-nombre" placeholder="Ej: Torta selva negra" maxlength="60">
     </div>
     <div class="field">
-      <label>Sección o categoría</label>
+      <label>Grupo de producto</label>
       <!-- Desplegable, no texto libre: escribiendo a mano se creaban secciones
            nuevas por una tilde o un plural ("Mesones" y "mesón"), y un producto
            en una sección inventada no aparece en ninguna parte de la lista.
            Mismo control que usa la ficha del producto (m-seccion). -->
       <select id="n-rubro"></select>
-      <small style="display:block;color:var(--muted);margin-top:6px">Clasifica el producto; no decide dónde están sus existencias.</small>
+      <small style="display:block;color:var(--muted);margin-top:6px">Usa los grupos existentes del inventario; no decide dónde están sus existencias.</small>
     </div>
     <div class="field" id="n-area-wrap" style="display:none">
       <label>Área operativa inicial</label>
       <select id="n-area"></select>
       <small style="display:block;color:var(--muted);margin-top:6px">Es una preferencia operativa. El producto se crea con saldo cero y sin existencias.</small>
+    </div>
+    <div class="field" id="n-area-seccion-wrap" style="display:none">
+      <label>Sección física inicial</label>
+      <select id="n-area-seccion"></select>
+      <small style="display:block;color:var(--muted);margin-top:6px">Opcional. Configura dónde encontrarlo; no crea saldo.</small>
     </div>
     <label class="chkrow">
       <input type="checkbox" id="n-perec">
@@ -4161,6 +4182,8 @@ let hasUrgente = false;   // true cuando exista la columna urgente
 let hasTipo = false;      // true cuando exista la columna tipo
 let tipoSel = null;       // tipo de producto elegido en la franja
 let modalProd = null;
+let MODAL_AREA_ROW = null; // configuración/ubicación concreta desde la que se abrió la ficha
+let AREA_SECCIONES = new Map();
 let NUEVO_AREA_ID = null;
 let ASIGNAR_AREA_CODIGO = null;
 let ASIGNAR_PRODUCTO_ID = null;
@@ -4238,8 +4261,31 @@ function cambiarArea(codigo, producto=''){
 }
 function areaStats(codigo){
   const rows=AREA_ROWS.filter(r=>r.area_codigo===codigo), conSaldo=rows.filter(r=>Number(r.cantidad)>0);
-  return {productos:new Set(conSaldo.map(r=>r.producto_id)).size,
-          unidades:rows.reduce((s,r)=>s+(Number(r.cantidad)||0),0)};
+  const configurados=rows.filter(r=>r.configurado);
+  const criticos=configurados.filter(r=>r.stock_min!=null&&Number(r.cantidad)<=Number(r.stock_min)).length;
+  const sobre=configurados.filter(r=>r.stock_max!=null&&Number(r.cantidad)>Number(r.stock_max)).length;
+  const sinDato=configurados.filter(r=>r.stock_min==null&&r.stock_max==null).length;
+  return {productos:new Set(rows.map(r=>r.producto_id)).size,
+          productosConSaldo:new Set(conSaldo.map(r=>r.producto_id)).size,
+          unidades:rows.reduce((s,r)=>s+(Number(r.cantidad)||0),0),criticos,sobre,sinDato};
+}
+function estadoArea(r){
+  if(!r.configurado||r.stock_min==null&&r.stock_max==null)return 'sindato';
+  const cantidad=Number(r.cantidad)||0;
+  if(r.stock_min!=null&&cantidad<=Number(r.stock_min))return 'critico';
+  if(r.stock_max!=null&&cantidad>Number(r.stock_max))return 'sobre';
+  return 'ok';
+}
+async function cargarSeccionesArea(areaId,incluirArchivadas=false){
+  if(!areaId)return [];
+  const clave=areaId+'|'+(incluirArchivadas?'1':'0');
+  const {data,error}=await sb.rpc('area_secciones_listar',{p_area_id:areaId,p_incluir_archivadas:incluirArchivadas});
+  if(error)throw error;
+  const filas=data||[]; AREA_SECCIONES.set(clave,filas); return filas;
+}
+function opcionesSeccionesAreaHTML(filas,valor){
+  return '<option value="">Sin sección</option>'+(filas||[]).filter(s=>s.estado==='activa').map(s=>
+    `<option value="${esc(s.id)}"${String(valor||'')===String(s.id)?' selected':''}>${esc(s.nombre)} · ${String(s.turno||'pm').toUpperCase()}</option>`).join('');
 }
 function htmlTarjetaArea(codigo){
   const s=areaStats(codigo);
@@ -4248,9 +4294,9 @@ function htmlTarjetaArea(codigo){
   return `<article class="area-card">
     <button type="button" class="area-card-open" data-area-open="${esc(codigo)}">
       <span class="area-card-title">${esc(areaLabel(codigo))}</span>
-      <span class="area-card-count">${s.productos} productos con saldo</span>
+      <span class="area-card-count">${s.productos} productos configurados o con saldo</span>
       <span class="area-card-units">${fmt(s.unidades)} <small>unidades</small></span>
-      <span class="area-card-state">Críticos · sin mínimos configurados</span>${extra}
+      <span class="area-card-state">${s.criticos} críticos · ${s.sobre} sobre-stock · ${s.sinDato} sin límites</span>${extra}
     </button>
     ${PERMISOS.puede_editar?`<div class="area-card-actions">
       <button type="button" class="area-create" data-area-assign="${esc(codigo)}">＋ Agregar producto existente</button>
@@ -4267,14 +4313,14 @@ function renderAreaPortada(){
   if(AREA_ERROR){ listEl.innerHTML='<div class="empty">No se pudo leer el libro de existencias de Local 1. Vuelve a cargar para intentarlo otra vez.</div>'; return; }
   const codigos=areasNavegacion();
   const total=codigos.reduce((s,c)=>s+areaStats(c).unidades,0);
-  const productos=new Set(AREA_ROWS.filter(r=>Number(r.cantidad)>0).map(r=>r.producto_id)).size;
+  const productos=new Set(AREA_ROWS.filter(r=>r.configurado||Number(r.cantidad)!==0).map(r=>r.producto_id)).size;
   listEl.innerHTML=`<div class="area-cover" aria-label="Áreas de inventario">
     <div class="area-cover-head"><div><strong>Ubicaciones físicas de Local 1</strong><span>Las categorías describen productos; estas áreas indican dónde se organiza el inventario.</span></div>
       ${PERMISOS.puede_ajustes?'<button type="button" class="area-manage" data-area-manage>Gestionar áreas</button>':''}</div>
     ${codigos.map(htmlTarjetaArea).join('')}
     <button type="button" class="area-card area-aggregate" data-area-open="${AREA_TODAS}">
       <span class="area-card-title">Todas las áreas</span>
-      <span class="area-card-count">${productos} productos con saldo</span>
+      <span class="area-card-count">${productos} productos configurados o con saldo</span>
       <span class="area-card-units">${fmt(total)} <small>unidades</small></span>
       <span class="area-card-state">Críticos · sin mínimos configurados</span>
       <span class="area-card-extra">Vista agrupada con cantidades separadas por ubicación.</span>
@@ -4289,19 +4335,15 @@ function renderAreaLista(){
   $('btnNuevo').style.display='none'; $('inv-estado').style.display='none';
   $('areaNote').style.display='block';
   $('areaNote').textContent=global
-    ? 'Cada producto muestra su saldo separado por ubicación. Los totales incluyen únicamente Local 1; Bodega permanece aparte. Sin mínimos configurados por área, no se calculan críticos.'
+    ? 'Cada producto muestra su saldo separado por ubicación. Los totales incluyen únicamente Local 1; Bodega permanece aparte.'
     : areaActual==='sin_asignar'
-      ? 'Sin asignar contiene el stock inicial de Local 1 que aún está pendiente de distribución. Esta pantalla solo consulta existencias.'
-      : `${areaLabel(areaActual)} · Saldos leídos del libro de existencias. Sin mínimos configurados por área, no se calculan críticos.`;
+      ? 'Sin asignar contiene existencias de Local 1 pendientes de distribución. No es un área física ni tiene secciones propias.'
+      : `${areaLabel(areaActual)} · Cantidades leídas del ledger; secciones y límites son configuración operativa y no mueven stock.`;
   if(AREA_LOADING){ listEl.innerHTML='<div class="area-loading">Cargando existencias por ubicación…</div>'; return; }
   if(AREA_ERROR){ listEl.innerHTML='<div class="empty">No se pudo leer el libro de existencias de Local 1. Vuelve a cargar para intentarlo otra vez.</div>'; return; }
   const q=normNombre(qEl.value), tipo=tipoSel;
-  const idsConSaldoGlobal=global
-    ? new Set(AREA_ROWS.filter(r=>Number(r.cantidad)>0).map(r=>r.producto_id))
-    : null;
   const porProducto=new Map();
   AREA_ROWS.forEach(r=>{
-    if(global&&!idsConSaldoGlobal.has(r.producto_id)) return;
     if(q&&!normNombre(r.producto).includes(q)) return;
     if(tipo&&(r.tipo||'').trim()!==tipo) return;
     if(!porProducto.has(r.producto_id)) porProducto.set(r.producto_id,{producto:r.producto,rubro:r.rubro||'Sin sección',tipo:r.tipo||'',rows:[]});
@@ -4312,19 +4354,41 @@ function renderAreaLista(){
     const orden=areasNavegacion();
     const salida=productos.map(p=>{
       p.rows.sort((a,b)=>orden.indexOf(a.area_codigo)-orden.indexOf(b.area_codigo));
-      return `<article class="area-global-product"><div class="area-read-name">${esc(p.producto)}</div><div class="area-read-sub">${esc(p.rubro)}${p.tipo?' · '+esc(p.tipo):''}</div>
+      return `<article class="area-global-product"><div class="area-read-name">${esc(p.producto)}</div><div class="area-read-sub">${esc(p.tipo||p.rubro||'Sin grupo')}</div>
         <div class="area-global-balances">${p.rows.map(r=>`<button type="button" class="area-global-link" data-area-open="${esc(r.area_codigo)}" data-area-product="${esc(p.producto)}" aria-label="Ver ${esc(p.producto)} en ${esc(r.area_nombre)}"><span>${esc(r.area_nombre)}</span><strong>${fmt(Number(r.cantidad)||0)}</strong></button>`).join('')}</div></article>`;
     }).join('');
     listEl.innerHTML=`<div class="area-list-head"><span class="area-list-total">${productos.length} productos · ${orden.length} ubicaciones</span></div>${salida||'<div class="empty">No hay productos que coincidan.</div>'}`;
     return;
   }
-  const rows=AREA_ROWS.filter(r=>r.area_codigo===areaActual && Number(r.cantidad)>0
+  const rows=AREA_ROWS.filter(r=>r.area_codigo===areaActual && (r.configurado||Number(r.cantidad)!==0)
     &&(!q||normNombre(r.producto).includes(q))
     &&(!tipo||(r.tipo||'').trim()===tipo))
     .sort((a,b)=>a.producto.localeCompare(b.producto,'es',{sensitivity:'base'}));
   const stats=areaStats(areaActual);
-  const salida=rows.map(r=>`<button type="button" class="area-read-row" data-open="${r.producto_id}"><div><div class="area-read-name">${esc(r.producto)}</div><div class="area-read-sub">${esc(r.rubro||'Sin sección')}${r.tipo?' · '+esc(r.tipo):''}</div></div><div class="area-read-qty">${fmt(Number(r.cantidad)||0)}${r.unidad?' '+esc(r.unidad):''}</div></button>`).join('');
-  listEl.innerHTML=`<div class="area-list-head"><span class="area-list-total">${stats.productos} productos con saldo · ${fmt(stats.unidades)} unidades</span></div>${salida||'<div class="empty">No hay productos que coincidan.</div>'}`;
+  const hoy=new Date(); hoy.setHours(0,0,0,0); const limite=new Date(hoy); limite.setDate(limite.getDate()+7);
+  const porVencer=new Set(rows.filter(r=>lotesDe(r.producto_id).some(l=>{const d=new Date(l.vencimiento+'T00:00:00');return d>=hoy&&d<=limite;})).map(r=>r.producto_id)).size;
+  const grupos=new Map();
+  rows.forEach(r=>{
+    const nombre=areaActual==='sin_asignar'?'Pendiente de distribución':r.configurado?(r.seccion_nombre||'Sin sección'):'Sin configurar';
+    const key=(r.seccion_id||nombre), turno=r.seccion_turno||'pm';
+    if(!grupos.has(key))grupos.set(key,{nombre,turno,orden:r.seccion_orden??2147483647,rows:[]});
+    grupos.get(key).rows.push(r);
+  });
+  const orden=[...grupos.values()].sort((a,b)=>(a.turno===b.turno?0:a.turno==='am'?-1:1)||(a.orden-b.orden)||a.nombre.localeCompare(b.nombre,'es'));
+  const filtrando=!!q||!!tipoSel||!!filterState;
+  const fila=r=>{
+    const e=estadoArea(r),cf=CFG[e], configurado=r.configurado
+      ? (Number(r.cantidad)===0?'<span class="area-config-note">Configurado · sin existencias</span>':'')
+      : '<span class="area-config-note">Saldo sin configurar</span>';
+    return `<button type="button" class="area-read-row" data-open="${r.producto_id}" data-area-code="${esc(r.area_codigo)}"><div><div class="area-read-name">${esc(r.producto)}</div><div class="area-read-sub">${esc(r.tipo||r.rubro||'Sin grupo')} · mín ${r.stock_min==null?'—':fmt(Number(r.stock_min))} · máx ${r.stock_max==null?'—':fmt(Number(r.stock_max))}</div>${configurado}</div><div><span class="pill" style="background:${cf.bg};color:${cf.fg}">${cf.t}</span><div class="area-read-qty">${fmt(Number(r.cantidad)||0)}${r.unidad?' '+esc(r.unidad):''}</div></div></button>`;
+  };
+  const seccion=g=>{
+    const clave='area:'+areaActual+':'+g.nombre, abierta=filtrando||openSecs.has(clave);
+    return `<section class="area-physical-section"><button type="button" class="area-physical-head" data-sec="${esc(clave)}"><strong>${esc(g.nombre)}</strong><span>${g.rows.length} producto${g.rows.length===1?'':'s'} · ${fmt(g.rows.reduce((s,r)=>s+(Number(r.cantidad)||0),0))} unidades</span></button>${abierta?`<div class="area-physical-body">${g.rows.map(fila).join('')}</div>`:''}</section>`;
+  };
+  const bloque=(turno,label)=>{const gs=orden.filter(g=>g.turno===turno);return gs.length?`<div class="area-turn-label">${label}</div>${gs.map(seccion).join('')}`:''};
+  const salida=tipoSel?orden.map(seccion).join(''):bloque('am','AM · organización visual')+bloque('pm','PM · organización visual');
+  listEl.innerHTML=`<div class="area-work-metrics"><div class="area-work-metric"><strong>${stats.productos}</strong><span>Productos visibles</span></div><div class="area-work-metric"><strong>${stats.criticos}</strong><span>Críticos</span></div><div class="area-work-metric"><strong>${stats.sobre}</strong><span>Sobre-stock</span></div><div class="area-work-metric"><strong>${porVencer}</strong><span>Por vencer en 7 días</span></div></div><div class="area-list-head"><span class="area-list-total">${stats.productosConSaldo} con saldo · ${fmt(stats.unidades)} unidades físicas · ${stats.sinDato} sin límites</span></div>${salida||'<div class="empty">No hay productos configurados o con saldo que coincidan.</div>'}`;
 }
 
 /* Normaliza texto para buscar y comparar: sin tildes, sin mayúsculas y sin
@@ -12102,7 +12166,8 @@ function renderTipos(){
   const barra=$('tipos'), cuenta=new Map();
   if(hasTipo){
     if(SEDE==='plaza' && areaActual!==null){
-      const filas=AREA_ROWS.filter(r=>(areaActual===AREA_TODAS||r.area_codigo===areaActual)&&Number(r.cantidad)>0);
+      const filas=AREA_ROWS.filter(r=>(areaActual===AREA_TODAS||r.area_codigo===areaActual)
+        &&(r.configurado||Number(r.cantidad)!==0));
       filas.forEach(r=>{const t=(r.tipo||'').trim();if(t)cuenta.set(t,(cuenta.get(t)||0)+1);});
     }else DATA.forEach(p=>{const t=tipoDe(p);if(t)cuenta.set(t,(cuenta.get(t)||0)+1);});
   }
@@ -12677,9 +12742,12 @@ async function guardarProductoEnArea(){
   const areaId=codigo==='sin_asignar'?null:areaIdPorCodigo(codigo);
   if(codigo!=='sin_asignar'&&!areaId){avisar('El área ya no está activa. No se hizo ningún cambio.');return;}
   const btn=$('area-producto-guardar');btn.disabled=true;btn.textContent='Asignando…';
-  const {error}=await conReintento(()=>sb.rpc('producto_area_preferencia_guardar',{
-    p_producto_id:p.id,p_area_id:areaId,p_sede:'plaza'
-  }));
+  const {error}=await conReintento(()=>codigo==='sin_asignar'
+    ? sb.rpc('producto_area_preferencia_guardar',{p_producto_id:p.id,p_area_id:null,p_sede:'plaza'})
+    : sb.rpc('producto_area_configuracion_guardar',{
+        p_producto_id:p.id,p_area_id:areaId,p_seccion_id:null,p_stock_min:null,p_stock_max:null,
+        p_es_principal:!ASIGNAR_PREFERENCIA.area_id,p_sede:'plaza'
+      }));
   btn.textContent=btn.dataset.duplicado==='1'?'Usar producto existente':'Asignar producto';
   if(error){btn.disabled=false;avisar(error.message||'No se pudo asignar el producto.');return;}
   const fisico=resumenFisicoProducto(p.id,ASIGNAR_PREFERENCIA.ubicaciones);
@@ -12719,6 +12787,9 @@ listEl.addEventListener('click',e=>{
     return;
   }
   const info=e.target.closest('[data-open]'); if(!info)return;
+  MODAL_AREA_ROW=SEDE==='plaza'&&info.dataset.areaCode
+    ? AREA_ROWS.find(r=>String(r.producto_id)===String(info.dataset.open)&&r.area_codigo===info.dataset.areaCode)||null
+    : null;
   openModal(+info.dataset.open);
 });
 $('areaNav').addEventListener('click',e=>{
@@ -13266,6 +13337,7 @@ function pintarUbicacionFisica(preferencia){
 }
 async function openModal(id){
   modalProd=DATA.find(d=>d.id===id); if(!modalProd)return;
+  if(SEDE!=='plaza')MODAL_AREA_ROW=null;
   $('m-nombre').textContent=modalProd.producto;
   $('m-producto').value=modalProd.producto??'';
   /* La sección actual del producto se agrega aunque ya no exista en la lista:
@@ -13273,15 +13345,20 @@ async function openModal(id){
      guardar sin querer lo movería de lugar. */
   const secs=[...new Set([...seccionesDeLaSede(), modalProd.rubro].filter(Boolean))];
   $('m-seccion').innerHTML=secs.map(s=>`<option${s===modalProd.rubro?' selected':''}>${esc(s)}</option>`).join('');
-  $('m-stock').value=modalProd.stock_actual??'';
+  $('m-stock').value=SEDE==='plaza'&&MODAL_AREA_ROW?Number(MODAL_AREA_ROW.cantidad)||0:(modalProd.stock_actual??'');
   const stockCortado=SEDE==='central'||SEDE==='plaza';
   $('m-stock').disabled=stockCortado;
   $('m-stock').title=stockCortado?'Saldo de solo lectura: existencias por ubicación':'';
   $('m-menos').disabled=stockCortado; $('m-mas').disabled=stockCortado;
   $('m-stock-corte').style.display=stockCortado?'block':'none';
   $('m-perec').disabled=stockCortado; $('m-venc-single').disabled=stockCortado;
-  $('m-min').value=modalProd.stock_min??'';
-  $('m-max').value=modalProd.stock_max??'';
+  const configArea=SEDE==='plaza'&&MODAL_AREA_ROW&&MODAL_AREA_ROW.area_id;
+  $('m-min').value=configArea?(MODAL_AREA_ROW.stock_min??''):(modalProd.stock_min??'');
+  $('m-max').value=configArea?(MODAL_AREA_ROW.stock_max??''):(modalProd.stock_max??'');
+  $('m-min-label').textContent=configArea?'Mínimo en esta área':'Stock mínimo';
+  $('m-max-label').textContent=configArea?'Máximo en esta área':'Stock máximo';
+  $('m-min').disabled=SEDE==='plaza'&&(!configArea||!PERMISOS.puede_editar);
+  $('m-max').disabled=SEDE==='plaza'&&(!configArea||!PERMISOS.puede_editar);
   $('m-tipo-row').style.display = hasTipo ? '' : 'none';
   if(hasTipo){
     $('m-tipo').value = modalProd.tipo ?? '';
@@ -13291,20 +13368,34 @@ async function openModal(id){
   }
   $('m-area-wrap').style.display=SEDE==='plaza'?'block':'none';
   if(SEDE==='plaza'){
-    $('m-area').innerHTML=opcionesAreasHTML('');
+    const areaId=configArea||'';
+    $('m-area').innerHTML=areaId
+      ? `<option value="${esc(areaId)}">${esc(MODAL_AREA_ROW.area_nombre)}</option>`
+      : '<option value="">Sin asignar</option>';
     $('m-area').disabled=true;
+    $('m-area-seccion-wrap').style.display=areaId?'block':'none';
+    $('m-area-seccion').disabled=true;
+    $('m-area-seccion').innerHTML='<option>Cargando secciones…</option>';
     $('m-area-fisica').innerHTML='<strong>Ubicación física actual</strong><span>Cargando saldo real…</span>';
     const pid=modalProd.id;
-    const pref=await cargarPreferenciaProducto(pid);
+    const [pref,secciones]=await Promise.all([
+      cargarPreferenciaProducto(pid),
+      areaId?cargarSeccionesArea(areaId,false).then(data=>({data})).catch(error=>({error})):Promise.resolve({data:[]})
+    ]);
     if(!modalProd||modalProd.id!==pid) return;
     if(pref.error){
       $('m-area-fisica').innerHTML='<strong>Ubicación física actual</strong><span>No se pudo leer la preferencia y el saldo físico.</span>';
       $('m-area').disabled=true;
     }else{
-      modalProd._areaOriginal=pref.data.area_id||'';
-      $('m-area').innerHTML=opcionesAreasHTML(modalProd._areaOriginal);
-      $('m-area').disabled=!PERMISOS.puede_editar;
       pintarUbicacionFisica(pref.data);
+    }
+    if(areaId){
+      if(secciones.error){
+        $('m-area-seccion').innerHTML='<option value="">No se pudieron leer las secciones</option>';
+      }else{
+        $('m-area-seccion').innerHTML=opcionesSeccionesAreaHTML(secciones.data,MODAL_AREA_ROW.seccion_id);
+        $('m-area-seccion').disabled=!PERMISOS.puede_editar;
+      }
     }
   }
   $('m-perec-row').style.display = hasPerec ? 'flex' : 'none';
@@ -13383,7 +13474,7 @@ function sumarLotes(){
   stock.readOnly=conLotes;
   $('m-menos').style.visibility = conLotes?'hidden':'visible';
   $('m-mas').style.visibility   = conLotes?'hidden':'visible';
-  if(conLotes){
+  if(conLotes && SEDE!=='central' && SEDE!=='plaza'){
     stock.value = filas.reduce((t,f)=>t+(+f.querySelector('.lote-cant').value||0),0);
   }
 }
@@ -13412,7 +13503,7 @@ $('m-perec').addEventListener('change',()=>{
   if(!puedeLotes) pintarLotes([]);
   if(puedeSoloFecha) $('m-venc-single').value = modalProd.vencimiento ?? '';
 });
-function closeModal(){ $('overlay').classList.remove('open'); modalProd=null; }
+function closeModal(){ $('overlay').classList.remove('open'); modalProd=null; MODAL_AREA_ROW=null; }
 $('m-cancelar').addEventListener('click',closeModal);
 $('overlay').addEventListener('click',e=>{ if(e.target===$('overlay')) closeModal(); });
 $('m-menos').addEventListener('click',()=>{const i=$('m-stock');i.value=Math.max(0,(+i.value||0)-1);});
@@ -13446,7 +13537,12 @@ $('m-guardar').addEventListener('click',async()=>{
     if(new Set(fechas).size!==fechas.length){ avisar('Hay una fecha repetida. Déjala en una sola línea con la cantidad total.'); return; }
   }
 
-  const fields={producto:nombre,stock_min:num($('m-min')),stock_max:num($('m-max')),rubro:rubroNuevo};
+  const minArea=num($('m-min')), maxArea=num($('m-max'));
+  if(minArea!=null&&minArea<0||maxArea!=null&&maxArea<0||minArea!=null&&maxArea!=null&&maxArea<minArea){
+    avisar('El máximo del área no puede ser menor que el mínimo.'); return;
+  }
+  const fields={producto:nombre,rubro:rubroNuevo};
+  if(SEDE!=='plaza'){ fields.stock_min=minArea; fields.stock_max=maxArea; }
   // con varias fechas, el stock lo calcula la base sumando los lotes;
   // si no, el número del campo de stock se guarda tal cual (como siempre)
   if(!stockCortado && !lotes.length){ const s=num($('m-stock')); fields.stock_actual = s==null?s:Math.max(0,s); }
@@ -13457,26 +13553,26 @@ $('m-guardar').addEventListener('click',async()=>{
     : ($('m-venc-single').value || null);
 
   const savedId=modalProd.id;
-  const areaAnterior=modalProd._areaOriginal??'';
-  const areaNueva=SEDE==='plaza'?$('m-area').value:'';
   Object.assign(modalProd,fields);
   if(lotes.length) modalProd.stock_actual = lotes.reduce((t,l)=>t+l.cantidad,0);
   if(usaLotes) LOTES[savedId]=lotes.map(l=>({...l, producto_id:savedId}));
   const guardado=await saveFields(savedId, fields);
   if(!guardado) return;
-  if(SEDE==='plaza'&&areaNueva!==areaAnterior){
-    const pref=await conReintento(()=>sb.rpc('producto_area_preferencia_guardar',{
-      p_producto_id:savedId,p_area_id:areaNueva||null,p_sede:'plaza'
+  if(SEDE==='plaza'&&MODAL_AREA_ROW?.area_id){
+    const config=await conReintento(()=>sb.rpc('producto_area_configuracion_guardar',{
+      p_producto_id:savedId,p_area_id:MODAL_AREA_ROW.area_id,
+      p_seccion_id:$('m-area-seccion').value||null,p_stock_min:minArea,p_stock_max:maxArea,
+      p_es_principal:!!MODAL_AREA_ROW.es_principal,p_sede:'plaza'
     }));
-    if(pref.error){
-      avisar('La ficha se guardó, pero no se pudo cambiar el área preferida. No se movió ninguna unidad.\n\n'+pref.error.message);
+    if(config.error){
+      avisar('La ficha maestra se guardó, pero no se pudo guardar la configuración del área. No se movió ninguna unidad.\n\n'+config.error.message);
       return;
     }
-    modalProd._areaOriginal=areaNueva;
   }
   if(usaLotes) await guardarLotes(savedId, lotes);
-  metrics(); renderTipos(); render(); closeModal();
-  if(SEDE==='plaza') aviso('✓ Producto guardado · la preferencia no movió existencias');
+  if(SEDE==='plaza') await loadData(); else { metrics(); renderTipos(); render(); }
+  closeModal();
+  if(SEDE==='plaza') aviso('✓ Ficha del área guardada · ninguna existencia se movió');
 });
 /* Reemplaza los lotes del producto por los del modal. El trigger de la base
    recalcula el stock del producto sumando las cantidades.
@@ -13542,7 +13638,20 @@ $('m-eliminar').addEventListener('click', async()=>{
 });
 
 /* ---------------- nuevo producto ---------------- */
-function abrirNuevoProducto(areaCodigo=null){
+async function cargarSeccionesNuevoProducto(){
+  const areaId=$('n-area').value||null;
+  $('n-area-seccion-wrap').style.display=areaId?'block':'none';
+  if(!areaId){$('n-area-seccion').innerHTML='<option value="">Sin sección</option>';return;}
+  $('n-area-seccion').disabled=true;$('n-area-seccion').innerHTML='<option>Cargando secciones…</option>';
+  try{
+    const filas=await cargarSeccionesArea(areaId,false);
+    $('n-area-seccion').innerHTML=opcionesSeccionesAreaHTML(filas,'');
+    $('n-area-seccion').disabled=false;
+  }catch(error){
+    $('n-area-seccion').innerHTML='<option value="">No se pudieron leer las secciones</option>';
+  }
+}
+async function abrirNuevoProducto(areaCodigo=null){
   /* En bodega el + es un atajo a Enlaces: un producto nuevo casi nunca es solo
      de bodega — hay que crearlo también en los locales y dejarlo enlazado, o
      nace suelto y el reparto no lo puede mover. */
@@ -13556,16 +13665,21 @@ function abrirNuevoProducto(areaCodigo=null){
   if(stockCortado) $('n-stock').value='0';
   NUEVO_AREA_ID=SEDE==='plaza'?areaIdPorCodigo(areaCodigo):null;
   $('n-area-wrap').style.display=SEDE==='plaza'?'block':'none';
-  if(SEDE==='plaza') $('n-area').innerHTML=opcionesAreasHTML(NUEVO_AREA_ID||'');
-  /* Solo secciones que existen de verdad, y en el mismo orden en que se ven
-     en el inventario. Sin opción vacía, para que nunca se guarde sin sección. */
-  $('n-rubro').innerHTML=seccionesDeLaSede()
-    .map(r=>`<option value="${esc(r)}">${esc(r)}</option>`).join('');
+  if(SEDE==='plaza'){
+    $('n-area').innerHTML=opcionesAreasHTML(NUEVO_AREA_ID||'');
+    await cargarSeccionesNuevoProducto();
+  }
+  /* Los grupos salen del catálogo histórico real (productos.tipo). No se
+     transforma automáticamente rubro o public.secciones en secciones físicas. */
+  const grupos=[...new Set(DATA.map(p=>tipoDe(p)||p.rubro).filter(Boolean))]
+    .sort((a,b)=>a.localeCompare(b,'es'));
+  $('n-rubro').innerHTML=grupos.map(r=>`<option value="${esc(r)}">${esc(r)}</option>`).join('');
   $('overlay-nuevo').classList.add('open');
   setTimeout(()=>$('n-nombre').focus(),50);
 }
 $('btnNuevo').addEventListener('click',()=>abrirNuevoProducto(
   SEDE==='plaza'&&areaActual&&areaActual!==AREA_TODAS?areaActual:null));
+$('n-area').addEventListener('change',cargarSeccionesNuevoProducto);
 function closeNuevo(){ $('overlay-nuevo').classList.remove('open'); NUEVO_AREA_ID=null; }
 $('n-cancelar').addEventListener('click',closeNuevo);
 $('overlay-nuevo').addEventListener('click',e=>{ if(e.target===$('overlay-nuevo')) closeNuevo(); });
@@ -13618,10 +13732,10 @@ $('n-guardar').addEventListener('click', async()=>{
   try{
     const areaId=SEDE==='plaza'?($('n-area').value||null):null;
     const peticion=SEDE==='plaza'
-      ? ()=>sb.rpc('producto_plaza_crear',{
+      ? ()=>sb.rpc('producto_plaza_crear_configurado',{
           p_nombre:nombre,p_rubro:rubro,p_stock_min:fila.stock_min??0,p_stock_max:fila.stock_max??0,
-          p_perecedero:!!fila.perecedero,p_tipo:null,p_unidad:null,p_area_id:areaId,
-          p_notas:null,p_sede:'plaza'
+          p_perecedero:!!fila.perecedero,p_tipo:rubro,p_unidad:null,p_area_id:areaId,
+          p_seccion_id:areaId?($('n-area-seccion').value||null):null,p_notas:null,p_sede:'plaza'
         })
       : ()=>sb.from('productos').insert([fila]).select();
     const {data,error}=await conReintento(peticion);
@@ -14433,6 +14547,10 @@ const AJUSTES = [
     sub:'Dónde vive cada producto, en qué orden se cuenta y qué toca en la mañana y qué en la tarde.',
     render:()=>ajSeccionesHTML(),
     montar:()=>{
+      if(SEDE==='plaza'){
+        if(AJ_AREA_SEC_FILAS===null)ajUnaVez('area-secciones',ajCargarSeccionesOperativas);
+        return;
+      }
       const b = $('aj-renombrar-sec');
       if(b) b.addEventListener('click', abrirSecciones);
       const nq = $('aj-sec-q');
@@ -15316,8 +15434,62 @@ $('fr-enviar').addEventListener('click', frCrear);
      · el `rubro` de cada producto es lo que de verdad lo pone ahí.
    Renombrar toca las dos; mover un producto toca solo la segunda.        */
 let AJ_SECQ = '';          // lo que se escribió en "mover productos"
+let AJ_AREA_SEC_AREA = null;
+let AJ_AREA_SEC_FILAS = null;
+
+async function ajCargarSeccionesOperativas(){
+  if(!AJ_AREAS||AJ_AREAS.error)await ajCargarAreas();
+  const activas=(AJ_AREAS||[]).filter(a=>a.estado==='activa');
+  if(!activas.some(a=>a.id===AJ_AREA_SEC_AREA))AJ_AREA_SEC_AREA=activas[0]?.id||null;
+  if(!AJ_AREA_SEC_AREA){AJ_AREA_SEC_FILAS=[];if(ajActual==='secciones')pintarAjustes();return;}
+  const {data,error}=await sb.rpc('area_secciones_listar',{
+    p_area_id:AJ_AREA_SEC_AREA,p_incluir_archivadas:true
+  });
+  AJ_AREA_SEC_FILAS=error?{error}:(data||[]);
+  if(ajActual==='secciones')pintarAjustes();
+}
+function ajAreaSeccionesHTML(){
+  const areas=(AJ_AREAS&&!AJ_AREAS.error?AJ_AREAS:[]).filter(a=>a.estado==='activa');
+  const opciones=areas.map(a=>`<option value="${esc(a.id)}"${a.id===AJ_AREA_SEC_AREA?' selected':''}>${esc(a.nombre)}</option>`).join('');
+  if(AJ_AREA_SEC_FILAS===null)return `<div class="aj-caja"><h3>Secciones físicas por área</h3><p class="aj-nota">Cargando catálogo protegido…</p></div>`;
+  if(AJ_AREA_SEC_FILAS.error)return `<div class="aj-caja"><h3>Secciones físicas por área</h3><p class="aj-nota">${esc(AJ_AREA_SEC_FILAS.error.message||'No se pudieron leer.')}</p></div>`;
+  const filas=(AJ_AREA_SEC_FILAS||[]).map(s=>`<div class="area-section-admin-row ${s.estado==='archivada'?'archivada':''}" data-area-section-row="${esc(s.id)}">
+    <div><label class="aj-nota">Nombre</label><input type="text" data-area-section-name value="${esc(s.nombre)}" maxlength="80" ${s.estado==='archivada'?'disabled':''}><div class="area-admin-meta">${s.productos_configurados} productos configurados${s.estado==='archivada'?' · archivada':''}</div></div>
+    <div><label class="aj-nota">Orden</label><input type="number" min="0" step="1" data-area-section-order value="${s.orden}" ${s.estado==='archivada'?'disabled':''}></div>
+    <div><label class="aj-nota">Bloque</label><select data-area-section-turno ${s.estado==='archivada'?'disabled':''}><option value="am"${s.turno==='am'?' selected':''}>AM</option><option value="pm"${s.turno==='pm'?' selected':''}>PM</option></select></div>
+    <div class="area-admin-actions">${s.estado==='activa'?`<button type="button" class="btn btn-outline btn-sm" data-area-section-save="${esc(s.id)}">Guardar</button><button type="button" class="btn btn-gris btn-sm" data-area-section-archive="${esc(s.id)}">Archivar</button>`:'<span class="aj-nota">Solo historial</span>'}</div>
+  </div>`).join('');
+  return `<div class="aj-caja"><h3>Secciones físicas por área</h3><p class="aj-nota">Sirven para encontrar productos dentro del área. AM/PM solo ordena visualmente; ninguna sección contiene stock.</p><div class="field"><label>Área</label><select data-area-sec-area>${opciones}</select></div>
+    <div class="area-admin-new"><div><label class="aj-nota">Nueva sección</label><input type="text" id="aj-area-sec-nombre" maxlength="80" placeholder="Ej: Refrigerador"></div><div><label class="aj-nota">Orden</label><input type="number" id="aj-area-sec-orden" min="0" value="${(AJ_AREA_SEC_FILAS||[]).reduce((m,s)=>Math.max(m,s.orden),0)+10}"></div><div><label class="aj-nota">Bloque visual</label><select id="aj-area-sec-turno"><option value="am">AM</option><option value="pm" selected>PM</option></select></div><button type="button" class="adm-btn" data-area-section-new>Crear</button></div>
+    <div class="area-section-admin">${filas||'<div class="aj-vacio">Esta área aún no tiene secciones físicas.</div>'}</div></div>`;
+}
+async function ajAreaSeccionCrear(){
+  const nombre=$('aj-area-sec-nombre')?.value.trim();if(!nombre)return avisar('Escribe el nombre de la sección.');
+  const {error}=await sb.rpc('area_seccion_crear',{p_area_id:AJ_AREA_SEC_AREA,p_nombre:nombre,
+    p_orden:Number($('aj-area-sec-orden').value||0),p_turno:$('aj-area-sec-turno').value,p_codigo:null});
+  if(error)return avisar(error.message||'No se pudo crear la sección.');
+  AREA_SECCIONES.clear();AJ_AREA_SEC_FILAS=null;await ajCargarSeccionesOperativas();aviso('✓ Sección creada sin alterar existencias');
+}
+async function ajAreaSeccionEditar(id){
+  const row=document.querySelector(`[data-area-section-row="${id}"]`);if(!row)return;
+  const {error}=await sb.rpc('area_seccion_editar',{p_seccion_id:id,
+    p_nombre:row.querySelector('[data-area-section-name]').value.trim(),
+    p_orden:Number(row.querySelector('[data-area-section-order]').value||0),
+    p_turno:row.querySelector('[data-area-section-turno]').value});
+  if(error)return avisar(error.message||'No se pudo guardar la sección.');
+  AREA_SECCIONES.clear();AJ_AREA_SEC_FILAS=null;await ajCargarSeccionesOperativas();await loadData();aviso('✓ Sección actualizada');
+}
+async function ajAreaSeccionArchivar(id){
+  const sec=(AJ_AREA_SEC_FILAS||[]).find(s=>s.id===id);if(!sec)return;
+  const tiene=Number(sec.productos_configurados)>0;
+  if(!await preguntar('Archivar '+sec.nombre,tiene?`${sec.productos_configurados} producto(s) quedarán Sin sección. No se moverán unidades.`:'La sección dejará de aparecer en el inventario.','Archivar'))return;
+  const {error}=await sb.rpc('area_seccion_archivar',{p_seccion_id:id,p_desasignar_productos:tiene});
+  if(error)return avisar(error.message||'No se pudo archivar la sección.');
+  AREA_SECCIONES.clear();AJ_AREA_SEC_FILAS=null;await ajCargarSeccionesOperativas();await loadData();aviso('✓ Sección archivada · stock intacto');
+}
 
 function ajSeccionesHTML(){
+  if(SEDE==='plaza')return ajAreaSeccionesHTML();
   /* La lista junta las dos fuentes: las secciones guardadas y las que
      existen porque hay productos con ese rubro. Si una está solo en los
      productos, igual aparece — si no, una sección de verdad quedaría
@@ -17076,6 +17248,8 @@ function pintarAjustes(){
    cambio de valor. Va en el panel entero y no en cada fila, así sigue
    funcionando cuando la lista se repinta. */
 $('aj-pane').addEventListener('change', e=>{
+  const areaSec=e.target.closest('[data-area-sec-area]');
+  if(areaSec){AJ_AREA_SEC_AREA=areaSec.value;AJ_AREA_SEC_FILAS=null;ajCargarSeccionesOperativas();return;}
   const mv = e.target.closest('[data-secmover]');
   if(mv){ ajMoverProducto(+mv.dataset.secmover, mv.value); return; }
   const ct = e.target.closest('[data-ajcat]');
@@ -17095,6 +17269,12 @@ $('overlay-fperm').addEventListener('click', e=>{
 });
 
 $('aj-pane').addEventListener('click', async e=>{
+  const areaSecNew=e.target.closest('[data-area-section-new]');
+  if(areaSecNew){await ajAreaSeccionCrear();return;}
+  const areaSecSave=e.target.closest('[data-area-section-save]');
+  if(areaSecSave){await ajAreaSeccionEditar(areaSecSave.dataset.areaSectionSave);return;}
+  const areaSecArchive=e.target.closest('[data-area-section-archive]');
+  if(areaSecArchive){await ajAreaSeccionArchivar(areaSecArchive.dataset.areaSectionArchive);return;}
   const an=e.target.closest('[data-area-new]');
   if(an){ await ajAreaCrear(); return; }
   const as=e.target.closest('[data-area-save]');

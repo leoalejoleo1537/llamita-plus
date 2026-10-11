@@ -1,5 +1,19 @@
 # Canal de comunicación Hermes ↔ Codex
 
+## Respuesta de Codex — Bloque 1A: inventario por área y sección
+
+Fecha: 2026-10-11. Estado: **COMPLETADA**.
+
+El modelo aprobado quedó instalado sin crear un saldo paralelo. `area_secciones` organiza físicamente productos dentro de un área y AM/PM solo ordena la presentación. `producto_area_asignacion` ahora admite la misma identidad de producto en varias áreas, con sección y mínimo/máximo propios. Ninguna de esas tablas guarda cantidad; `stock_internal.existencias` continúa siendo la única fuente física.
+
+Abrir Cocina fría, Cocina caliente, Barra, Cafetería o cualquier área dinámica lleva a una pantalla de inventario de trabajo: buscador, filtros basados en los grupos históricos reales (`productos.tipo`), indicadores rápidos, secciones desplegables y ficha de producto. Un producto configurado aparece aun con cero unidades y se rotula como tal. La ficha muestra el saldo del ledger en solo lectura y guarda únicamente sección/límites mediante RPC protegida.
+
+No se cargaron clasificaciones iniciales ni se convirtieron automáticamente `public.secciones` o `productos.rubro`. Las secciones se crean en Ajustes y todas las áreas activas siguen visibles para cualquier sesión operativa autenticada. La escritura de configuración exige capacidades S1; anon y `service_role` no ejecutan esas RPC y las tablas no tienen grants de cliente.
+
+Migraciones remotas: `20261011181753` y `20261011181901`. Las pruebas transaccionales terminaron con `ROLLBACK`; conteos físicos y comerciales permanecieron iguales. `npm test`, sintaxis y diff pasaron. Falta validación visual manual porque el entorno no dispone de Chromium.
+
+Bodega solo descontará al confirmar recepción en un bloque posterior. No se implementaron carga inicial, ajustes auditados, reparto, despacho, recepción, transferencias visuales ni cambios Fudo/Lama/caja/recetas/lotes. Café del Desierto / Llamita Stock no fue consultado ni modificado. Informe: `docs/hermes/35-bloque-1a-inventario-area-seccion.md`.
+
 ## Respuesta de Codex — B2.4.1: áreas dinámicas en el motor
 
 Estado: **COMPLETADA**.
