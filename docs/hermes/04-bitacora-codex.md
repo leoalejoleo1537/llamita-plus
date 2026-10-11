@@ -1,5 +1,16 @@
 # Bitácora de Codex
 
+## 2026-10-11 — Decisiones operativas Brunetti para Inventario por Áreas
+
+- Estado: **DECISIONES APROBADAS POR ALEJO** para la implementación posterior al preflight de Bloque 1A.
+- Turnos: Brunetti realiza inventario PM. Por ahora AM/PM es solo organización visual de secciones y recordatorio del conteo; no condiciona saldos, transferencias, mínimos, máximos ni reglas del ledger.
+- Momento contable del reparto: Bodega central pierde existencias únicamente cuando el responsable del área confirma la recepción real. Preparar y despachar son estados documentales/reservas. Al confirmar recepción, se ejecuta una única transferencia idempotente Bodega → área con la cantidad efectivamente recibida.
+- Visibilidad: no existe censura entre áreas durante esta fase. Cualquier encargado puede ver Bodega y todas las áreas. Las restricciones de lectura o de ajustes se definirán después de conversar con Don Juan.
+- Píldoras: reciclar el comportamiento y los grupos existentes de la interfaz histórica. No inventar grupos nuevos. Si un valor histórico es ambiguo o no corresponde, conservarlo para revisión posterior antes de cambiarlo.
+- Ajustes de cantidad: durante la prueba, todos los usuarios operativos pueden crear ajustes auditados. Esto no autoriza escritura directa sobre `productos.stock_actual`; la interfaz debe usar la futura RPC protegida de ajuste. La política final de quién ajusta stock queda pendiente de validación con Don Juan.
+- Requisito de UX confirmado: al abrir un área se entra a una pantalla de trabajo de inventario, no a Ajustes. Debe reutilizar buscador, píldoras históricas, agrupaciones desplegables, fichas de producto, críticos, vencimientos y modal de producto; las secciones físicas pertenecen al área y los filtros de grupo se reciclan desde el comportamiento histórico.
+- Próxima ejecución: implementar Bloque 1A según preflight, incorporando estas decisiones. No activar aún carga inicial, ajustes, reparto/recepción, Fudo, Lama, Bodega legacy, lotes ni `stock_transferir`.
+
 ## 2026-10-11 — Decisión de reconstrucción: Bodega → Área → Sección → Producto
 
 - Estado: **PLAN APROBADO; IMPLEMENTACIÓN AÚN NO ACTIVADA**.
