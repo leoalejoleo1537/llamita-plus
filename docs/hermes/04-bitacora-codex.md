@@ -1,5 +1,28 @@
 # Bitácora de Codex
 
+## 2026-10-11 — Decisión de reconstrucción: Bodega → Área → Sección → Producto
+
+- Estado: **PLAN APROBADO; IMPLEMENTACIÓN AÚN NO ACTIVADA**.
+- Decisión de Alejo: las áreas internas de Local 1 —Cafetería, Barra, Cocina fría, Cocina caliente y futuras áreas— conservan saldo físico propio. No se crearán sedes ficticias para representarlas.
+- Flujo objetivo mínimo antes del 31 de octubre: Don Juan consulta necesidades por área desde Bodega central, prepara y despacha un reparto; el responsable del área registra la recepción real; solo la recepción confirmada mueve existencias mediante el ledger. El área puede realizar conteos y ajustes auditados.
+- Identidad: un producto conserva una identidad lógica común. Una misma leche puede tener existencias en Bodega, Cafetería y Barra; cambia su ubicación, no el producto.
+- Modelo objetivo:
+  1. Bodega central → Local 1 → Área → Sección interna → Producto.
+  2. Producto + área + sección configura mínimo, máximo, estado y área principal; no contiene cantidades.
+  3. El ledger conserva las cantidades físicas por ubicación y lote.
+  4. Un reparto conserva estados Borrador → Preparado → Despachado → Recibido → Cerrado. En esta primera versión, preparar y despachar son documentales/reservas; la recepción confirmada ejecuta una sola transferencia idempotente.
+  5. Cambiar una cantidad desde la interfaz crea un ajuste auditado con diferencia, motivo, actor y referencia; nunca escribe directamente `productos.stock_actual`.
+- Recuperación: la interfaz histórica de secciones, mínimos, máximos, editor de cantidades y repartos no fue eliminada. Quedó congelada por B2.3 y oculta para `plaza` por B3.1. Debe reutilizarse visualmente, conectándola a las RPC y al ledger nuevos; no debe reactivar escritores legacy.
+- Secciones: `public.secciones` y `productos.rubro` contienen datos históricos mezclados. No se migrarán automáticamente. Primero se construirá catálogo de secciones internas ligado a cada `area_id`, con vista previa y asignación explícita. Categorías como Limpieza, Sándwiches o Tortas no se tratarán como ubicaciones físicas.
+- Alcance de reconstrucción, en orden:
+  1. Configuración producto–área–sección con mínimo/máximo por área y visibilidad de productos configurados aun con saldo cero.
+  2. Carga inicial y ajustes auditados sobre el ledger.
+  3. Reparto Bodega → área con preparación, despacho documental, recepción, diferencias e idempotencia.
+  4. Recuperación de la interfaz histórica sobre el modelo protegido y preparación de datos de demostración.
+- Fuera de alcance hasta completar este circuito: nuevas sedes para áreas, remodelación móvil adicional, cambios a Fudo, Lama, caja, POS, recetas o Café del Desierto / Llamita Stock.
+- Regla de trabajo: ejecutar una sola subfase por vez. En cada preflight, leer únicamente esta entrada, el último informe de la subfase relacionada y las definiciones/código que vayan a cambiar; no releer toda la historia Hermes salvo que aparezca una dependencia concreta.
+- Próxima tarea: preflight de solo lectura del Bloque 1 para diseñar una única relación producto–área–sección que admita un producto en múltiples áreas sin crear dos fuentes de stock.
+
 ## 2026-10-09 — B2.4.1: áreas activas dinámicas en transferencias
 
 - Estado: **COMPLETADA**. Se ejecutó únicamente B2.4.1; C1–C4 siguen pendientes.
