@@ -1,5 +1,29 @@
 # Bitácora de Codex
 
+
+## 2026-10-12 — Decisión aprobada: producto maestro único y configuración por área
+
+- Estado: **DECISIÓN APROBADA; IMPLEMENTACIÓN PENDIENTE**.
+- Objetivo inmediato: simplificar el motor de demostración y permitir que cada área construya su propio inventario sin clasificaciones automáticas arbitrarias.
+- Regla principal: un producto físico/conceptual tiene un único producto maestro y un único ID lógico. Cafetería, Barra, Cocina fría y Cocina caliente no crearán copias independientes de una misma leche, manzana u otro insumo.
+- Bodega es el catálogo maestro y el origen operativo. La creación de productos nuevos se realiza en Bodega. Desde un área solo se puede buscar y configurar un producto que ya existe en Bodega.
+- “Crear producto en el área” debe convertirse en “Agregar producto existente a esta área”. La operación crea o activa una configuración producto–área–sección; no crea un nuevo producto maestro ni existencia inicial.
+- Si el producto no existe en Bodega, el flujo debe guiar al usuario a crear primero el producto maestro en Bodega y luego regresar a la configuración del área.
+- La misma identidad puede configurarse en varias áreas. Cada configuración puede tener sección física, mínimo, máximo, estado y área principal; las cantidades viven únicamente en stock_internal.existencias.
+- El sistema puede sugerir coincidencias por nombre, pero nunca debe enlazar automáticamente una coincidencia ambigua. Debe mostrar candidatos con nombre, marca, formato y unidad cuando existan, exigir confirmación humana y bloquear el guardado si hay ambigüedad no resuelta.
+- Ejemplo obligatorio: si el usuario escribe “menta”, no debe crear automáticamente otro producto si existen “hojas de menta”, “menta hoja” u otros candidatos. Debe mostrar la lista de candidatos y una acción clara de “Usar este producto”. Solo si no existe un candidato adecuado se habilita “Crear producto maestro en Bodega”.
+- No debe existir una falla silenciosa. Coincidencia dudosa, producto sin enlace, receta sin área, área de producción ausente o ingrediente sin ubicación válida deben generar alerta visible y estado pendiente de resolución.
+- Bodega pierde stock únicamente cuando el área confirma la recepción real del reparto. Preparar y despachar son estados documentales/reservas; recibir ejecuta una transferencia idempotente del mismo producto y lote cuando corresponda.
+- Fudo continúa vinculado al producto maestro y su adaptador no debe modificarse por esta decisión. La configuración de áreas no crea IDs Fudo nuevos.
+- Lama conserva el flujo de cierre de mesa ya implementado. Para descontar una receta: identificar producto vendido → leer receta capturada → resolver área de producción → descontar ingredientes desde esa área. Si falta área o existe ambigüedad, el evento queda pendiente con alerta y no se aplica un descuento inventado.
+- Regla de resolución para Lama: primero área de producción del producto vendido; después área definida en la receta; después configuración explícita del ingrediente únicamente si es inequívoca. No se usará un área predeterminada silenciosa.
+- Requisito de frontend prioritario: el flujo debe ser comprensible para personas con poca experiencia digital. La interfaz debe explicar “producto maestro”, “producto ya existente”, “agregar a esta área” y “no se mueve stock” con lenguaje cotidiano. Debe mostrar candidatos claramente, advertir duplicados antes de guardar, confirmar qué producto se enlazó y ofrecer recuperar/corregir una selección sin perder información.
+- El frontend debe privilegiar prevención de errores sobre velocidad de escritura: búsqueda tolerante a tildes, singular/plural y variaciones razonables; resultados con contexto; estados visibles; confirmación antes de crear un producto nuevo; y alertas persistentes para pendientes.
+- Fuera de alcance de esta decisión: clasificar automáticamente todo el Excel, inventar familias o secciones, duplicar productos por área, modificar Fudo remoto, cambiar recetas históricas o habilitar descuentos silenciosos.
+- Regla de trabajo para Codex: leer esta entrada, el último informe de Bloque 1A y únicamente los archivos/RPC que vaya a modificar. No releer toda la historia Hermes ni repetir auditorías cerradas.
+- Próxima fase propuesta: preflight acotado del motor “Agregar producto existente a un área”, seguido de implementación por una sola subfase. Debe incluir búsqueda/candidatos, confirmación humana, creación de producto maestro exclusivamente en Bodega cuando no exista y pruebas de duplicados/ambigüedad.
+
+
 ## 2026-10-11 — Bloque 1A: inventario funcional por área y secciones internas
 
 - Estado: **COMPLETADA**. Se implementó Producto → Área → Sección → mínimo/máximo sin introducir cantidades fuera del ledger.
