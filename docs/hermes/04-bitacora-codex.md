@@ -5,7 +5,7 @@
 
 - Estado: **DECISIÓN APROBADA; IMPLEMENTACIÓN PENDIENTE**.
 - Objetivo inmediato: simplificar el motor de demostración y permitir que cada área construya su propio inventario sin clasificaciones automáticas arbitrarias.
-- Regla principal: un producto físico/conceptual tiene un único producto maestro y un único ID lógico. Cafetería, Barra, Cocina fría y Cocina caliente no crearán copias independientes de una misma leche, manzana u otro insumo.
+- Regla principal: un producto físico/conceptual tiene un único producto maestro y una identidad lógica común. Cuando el esquema heredado tenga filas o IDs distintos entre Bodega y Local 1, se usará un enlace explícito y auditable; nunca se fusionarán filas a ciegas. Cafetería, Barra, Cocina fría y Cocina caliente no crearán copias independientes de una misma leche, manzana u otro insumo.
 - Bodega es el catálogo maestro y el origen operativo. La creación de productos nuevos se realiza en Bodega. Desde un área solo se puede buscar y configurar un producto que ya existe en Bodega.
 - “Crear producto en el área” debe convertirse en “Agregar producto existente a esta área”. La operación crea o activa una configuración producto–área–sección; no crea un nuevo producto maestro ni existencia inicial.
 - Si el producto no existe en Bodega, el flujo debe guiar al usuario a crear primero el producto maestro en Bodega y luego regresar a la configuración del área.
