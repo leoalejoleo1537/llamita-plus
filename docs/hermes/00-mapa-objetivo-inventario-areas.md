@@ -1,8 +1,8 @@
 # Mapa de objetivo — Inventario por áreas
 
-> Estado de planificación: 13 de octubre de 2026.
+> Estado actualizado: 13 de octubre de 2026. B1 completado; B2 es el siguiente nodo y requiere activación explícita.
 >
-> Este documento es el tablero de orientación del proyecto. No reemplaza la bitácora: resume qué ya existe, cuál es el único frente activo y qué queda después.
+> Este documento es el tablero de orientación del proyecto. No reemplaza la bitácora: resume qué ya existe, cuál es el siguiente frente y qué queda después.
 
 ## Objetivo visible de la demo
 
@@ -30,9 +30,9 @@ INVENTARIO POR ÁREAS
 │   ├── Configuración producto → área → sección → mínimos/máximos  [x]
 │   └── Base de permisos S1/S2                                    [x]
 │
-├── B. Catálogo operativo sin existencias                          [ACTIVO]
-│   ├── B1. Maestro Bodega → representación Local 1 enlazada      [~]
-│   ├── B2. Recuperar interfaz histórica dentro de cada área      [ ]
+├── B. Catálogo operativo sin existencias                          [EN CURSO]
+│   ├── B1. Maestro Bodega → representación Local 1 enlazada      [x]
+│   ├── B2. Recuperar interfaz histórica dentro de cada área      [→ SIGUIENTE; PENDIENTE DE ACTIVACIÓN]
 │   └── B3. Alta/configuración manual de productos demo           [ ]
 │
 ├── C. Operación física                                            [PENDIENTE]
@@ -58,7 +58,7 @@ INVENTARIO POR ÁREAS
 - Una hoja técnica no se declara terminada si impide el objetivo visible que habilita.
 - La bitácora debe señalar el siguiente nodo exacto, no una lista abierta de posibilidades.
 
-## Bloque activo: B1 — Maestro de Bodega hacia un área
+## Resultado completado: B1 — Maestro de Bodega hacia un área
 
 **Decisión aprobada:** Bodega es el catálogo maestro. Las áreas no crean copias independientes del mismo producto.
 
@@ -73,13 +73,13 @@ Al añadir un producto desde un área:
 
 No habrá coincidencias automáticas ambiguas por nombre. Si no existe el producto maestro, primero se crea en Bodega.
 
-### Criterio de salida de B1
+### Resultado verificado de B1
 
-Un usuario puede elegir `Leche sin lactosa` desde Bodega y configurarla en Cafetería o Barra con el mismo producto lógico/enlace, saldo cero y sin tocar stock.
+Publicado en `master` en el commit `e7f0f40892ab2d190426ed4a07b4853890a3171c`. Las migraciones `20261013002913` y `20261013003415` están instaladas en Llamita Plus; las RPC de búsqueda y agregado fueron verificadas en el proyecto remoto. Codex reportó pruebas transaccionales, `npm test` y `git diff --check` satisfactorios. La prueba visual autenticada aún corresponde al usuario.
 
-## Siguiente bloque visible: B2 — Interfaz histórica dentro de un área
+## Siguiente nodo: B2 — Interfaz histórica dentro de un área (pendiente de activación)
 
-Una vez completado B1, la prioridad es recuperar y conectar la interfaz histórica existente, no diseñar otra interfaz:
+Al activar B2, la prioridad es recuperar y conectar la interfaz histórica existente, no diseñar otra interfaz:
 
 ```text
 Tarjeta de área → pantalla operativa del área
@@ -93,7 +93,7 @@ La pantalla debe mostrar tanto productos configurados sin saldo como saldos fís
 
 ### Criterio de salida de B2
 
-Al entrar a Cafetería, una persona puede navegar el patrón histórico completo y abrir una ficha de producto desde una sección, aunque el saldo sea cero.
+Al entrar a Cafetería, una persona puede navegar el patrón histórico completo y abrir una ficha de producto desde una sección, aunque el saldo sea cero. B2 no debe reimplementar el motor de vinculación B1 ni reactivar ediciones legacy de stock.
 
 ## Después de B2: B3 — Onboarding demo
 
