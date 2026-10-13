@@ -1,6 +1,13 @@
 # Cola de trabajo de Codex
 
-Estado actual: **BLOQUE 1A COMPLETADO (2026-10-11)**. Local 1 ya dispone del contrato Producto → Área → Sección → mínimo/máximo y de una pantalla funcional de inventario por área, con cantidades exclusivamente desde el ledger. La carga inicial, ajustes auditados, reparto, despacho, recepción y transferencias visuales siguen **PENDIENTES** y no se activan automáticamente. El frente móvil M2–M4 continúa pausado.
+## Estado del árbol de Inventario por Áreas — 2026-10-13
+
+- **B1 — Maestro de Bodega → representación Local 1:** COMPLETADO en el commit `e7f0f40892ab2d190426ed4a07b4853890a3171c`; las dos migraciones están instaladas y las RPC verificadas en Llamita Plus.
+- **Siguiente nodo: B2 — Recuperar la interfaz histórica dentro de cada área.** Pendiente de activación explícita; no empezar hasta recibirla.
+- Alcance esperado de B2: reusar la experiencia histórica de inventario dentro de la pantalla de área (buscador, píldoras, secciones desplegables, filas y modal), leer cantidades del ledger y mostrar configurados con saldo cero. No rehacer tarjetas ni rediseñar móvil.
+- Resultado detallado de B1: entrada superior de `docs/hermes/04-bitacora-codex.md`. Mapa completo: `docs/hermes/00-mapa-objetivo-inventario-areas.md`.
+
+Estado actual: **B1 COMPLETADO (2026-10-13); B2 ES EL SIGUIENTE NODO, PENDIENTE DE ACTIVACIÓN**. Local 1 ya dispone del contrato Producto → Área → Sección → mínimo/máximo y de una pantalla funcional de inventario por área, con cantidades exclusivamente desde el ledger. La carga inicial, ajustes auditados, reparto, despacho, recepción y transferencias visuales siguen **PENDIENTES** y no se activan automáticamente. El frente móvil M2–M4 continúa pausado.
 
 ### Tarea Bloque 1A — Inventario funcional por área y secciones internas
 
