@@ -1,5 +1,14 @@
 # Bitácora de Codex
 
+## 2026-10-13 — Corrección visual de B2 verificada con Chromium
+
+- La revisión de las capturas reales del usuario mostró que el resultado publicado no correspondía al diseño: una regla general de escritorio aplicaba dos columnas a `#list`, incluyendo encabezados y acordeones del área. Eso comprimía las tarjetas y mandaba las secciones a la segunda columna.
+- Se corrigió el layout únicamente para el espacio de inventario por área: la lista ahora fluye en una columna y llena el ancho disponible. Se agregó un título visible del área debajo del botón de regreso; las tarjetas y el inventario quedan debajo en el mismo flujo.
+- Se revisó `index.html` con Chromium 151 y Playwright en escritorio (1567 px), tamaño intermedio (768 px) y teléfono (390 px), usando productos ficticios en memoria y sin sesión contra Supabase. Se observaron 4, 2 y 1 columnas de tarjetas; los productos aparecen dentro del acordeón; no hubo errores de página. Esto verifica la presentación, no datos ni la sesión real de producción.
+- La nota anterior de que Chromium no estaba instalado fue incorrecta: `/usr/bin/chromium` y Playwright sí están disponibles. El script general de `npm test` omite ciertas pruebas visuales, pero se pudo hacer una revisión directa con el navegador del entorno.
+- Pruebas: `npm test` y `git diff --check` pasan. No se realizaron escrituras ni consultas a Supabase; ningún dato cambió.
+- No se tocó Fudo, Lama, caja, recetas, lotes ni stock. No se accedió a Café del Desierto / Llamita Stock.
+
 ## 2026-10-13 — B2: refinamiento de filtros y alta desde Bodega
 
 - Se refinó la pantalla de trabajo dentro de cada área sin alterar la navegación general ni los datos del inventario. Las cuatro tarjetas son filtros en la misma lista: **Críticos** (bajo mínimo o saldo cero), **Sobre-stock** (sobre máximo), **Sin límites** (falta mínimo o máximo) y **Vencimientos** (con grupos separados para vencidos y próximos a vencer, ventana de 7 días).
@@ -20,7 +29,7 @@
 - Se bloquearon los gestos legacy de swipe al navegar dentro de las áreas, para que no abran reparto ni merma. No se modificó la lógica comercial de esas funciones.
 - Alta desde Bodega simplificada: resultados y detalle no muestran IDs, factores ni IDs de fichas locales. Se muestra nombre, unidad, stock de Bodega, destino y configuración mínima del área. Si hay una sola representación ya enlazada se reutiliza automáticamente; varias representaciones enlazadas requieren selección; candidatos locales sin vínculo solo se presentan cuando son pertinentes y requieren confirmación. No se muestran ni reutilizan fichas ligadas a otro maestro. Si se crea una representación local, nace con saldo cero y la confirmación dice que las unidades llegarán al recibir reparto.
 - El agregado continúa usando `bodega_producto_area_agregar`; no crea stock, lotes, movimientos, transferencias, recetas ni enlaces Fudo. No hubo migraciones ni escrituras de base de datos.
-- Pruebas: `npm test` completado con exit 0; incluye la prueba estática nueva `pruebas/b2-interfaz-area-historica.mjs`, prueba vigente del flujo B1 y `pruebas/pantalla-sana.mjs`. `git diff --check` pasó. La prueba visual autenticada de escritorio/móvil no pudo ejecutarse: Chromium no está instalado en el entorno.
+- Pruebas: `npm test` completado con exit 0; incluye la prueba estática nueva `pruebas/b2-interfaz-area-historica.mjs`, prueba vigente del flujo B1 y `pruebas/pantalla-sana.mjs`. `git diff --check` pasó. La limitación de revisión visual consignada en esta entrada fue corregida en la entrada superior.
 - Archivos cambiados: `index.html`, `pruebas/b2-interfaz-area-historica.mjs`, `pruebas/b3-2a-3-asignacion-existente.mjs`, este registro, cola y mapa objetivo. No cambió esquema, RLS, permisos ni datos; Fudo, Lama, Bodega operativa, recetas, caja y stock permanecen intactos.
 - Siguiente nodo: **B3 — alta/configuración manual de productos demo**, pendiente de activación explícita. Carga inicial/ajustes, reparto/recepción y transferencias visuales no quedan habilitados por B2.
 

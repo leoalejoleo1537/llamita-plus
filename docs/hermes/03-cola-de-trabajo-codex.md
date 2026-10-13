@@ -4,6 +4,7 @@
 
 - **B1 — Maestro de Bodega → representación Local 1:** COMPLETADO en el commit `e7f0f40892ab2d190426ed4a07b4853890a3171c`; las dos migraciones están instaladas y las RPC verificadas en Llamita Plus.
 - **B2 — Recuperar la interfaz histórica dentro de cada área:** COMPLETADO y refinado en esta ejecución. Se recuperaron grupos/píldoras de tipo, acordeones de sección, filas de inventario y ficha adaptada al ledger; se añadieron cuatro filtros de estado responsivos y un panel de secciones dentro del flujo de agregado desde Bodega.
+- **Corrección visual posterior:** la regla de dos columnas compartida estaba partiendo la lista del área. Ya se limitó a un flujo vertical y se verificó con Chromium/Playwright en escritorio, tablet y teléfono usando datos de presentación en memoria.
 - **Siguiente nodo: B3 — Alta/configuración manual de productos demo.** PENDIENTE de activación explícita; no comenzar automáticamente.
 - Resultado detallado de B1: entrada superior de `docs/hermes/04-bitacora-codex.md`. Mapa completo: `docs/hermes/00-mapa-objetivo-inventario-areas.md`.
 

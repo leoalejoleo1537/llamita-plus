@@ -387,6 +387,10 @@
   /* ---------- layout ---------- */
   .wrap{max-width:900px;margin:0 auto;padding:14px 16px 90px}
   #view-inv.area-workspace-wide{width:auto;max-width:none;margin:0;padding:14px 22px 90px}
+  /* La lista por área contiene métricas, encabezados de turno y acordeones
+     relacionados. La cuadrícula general de escritorio los separaba en
+     columnas distintas y dejaba media pantalla vacía. */
+  body.pc-ancho #view-inv.area-workspace-wide #list{display:block;grid-template-columns:none;column-count:1}
   .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
   input[type=text],select,input[type=date]{flex:1;min-width:150px;height:42px;padding:0 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;background:var(--card);color:var(--text)}
   .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
@@ -410,6 +414,10 @@
   .area-context{font-size:12px;color:var(--muted);text-align:right}
   .area-note{margin:0 0 12px;padding:10px 12px;background:var(--gray-bg);color:var(--gray-fg);
     border-radius:11px;font-size:12px;line-height:1.45}
+  .area-page-heading{margin:12px 0 18px}
+  .area-page-heading h2{margin:0;color:var(--text);font-size:clamp(27px,3vw,36px);line-height:1.1;letter-spacing:-.025em}
+  .area-page-heading p{margin:6px 0 0;color:var(--muted);font-size:14px;line-height:1.45}
+  .area-page-heading[hidden]{display:none}
   .area-cover{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
   .area-card{display:flex;flex-direction:column;align-items:stretch;gap:7px;text-align:left;min-width:0;
     padding:15px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:15px;
@@ -3406,6 +3414,7 @@
 <!-- ================= INVENTARIO ================= -->
 <div class="wrap" id="view-inv">
   <div class="area-nav" id="areaNav" style="display:none"></div>
+  <div class="area-page-heading" id="area-page-heading" hidden></div>
   <div class="area-note" id="areaNote" style="display:none"></div>
   <div class="inv-filtros" id="invFiltros">
     <label class="inv-busca" for="q">
@@ -4422,6 +4431,7 @@ function htmlTarjetaArea(codigo){
 }
 function renderAreaPortada(){
   $('view-inv').classList.remove('area-workspace-wide');
+  $('area-page-heading').hidden=true;
   $('areaNav').style.display='none'; $('areaNote').style.display='none';
   $('areaTipoPills').style.display='none'; $('areaTipoPills').innerHTML=''; $('tipos').style.display='';
   $('invFiltros').style.display='none'; $('metrics').style.display='none';
@@ -4490,16 +4500,17 @@ function renderAreaLista(){
   const global=areaActual===AREA_TODAS;
   $('view-inv').classList.add('area-workspace-wide');
   renderAreaTipoPills();
-  $('areaNav').style.display='flex'; $('areaNav').innerHTML=`<button type="button" class="area-back" data-area-home>← Todas las áreas</button><span class="area-context">${global?'Lectura global · Local 1':esc(areaLabel(areaActual))}</span>${!global&&areaActual!=='sin_asignar'&&PERMISOS.puede_editar?`<span class="area-nav-actions"><button type="button" class="area-back" data-area-assign="${esc(areaActual)}">＋ Agregar producto de Bodega</button></span>`:''}`;
+  $('areaNav').style.display='flex'; $('areaNav').innerHTML=`<button type="button" class="area-back" data-area-home>← Todas las áreas</button>${!global&&areaActual!=='sin_asignar'&&PERMISOS.puede_editar?`<span class="area-nav-actions"><button type="button" class="area-back" data-area-assign="${esc(areaActual)}">＋ Agregar producto de Bodega</button></span>`:''}`;
+  const titulo=global?'Todas las áreas':areaLabel(areaActual);
+  const bajada=global?'Vista agrupada de Local 1 · los saldos se muestran separados por ubicación.'
+    :areaActual==='sin_asignar'?'Existencias pendientes de distribución · saldo físico leído del ledger.'
+    :'Cantidades físicas leídas del ledger · secciones y límites sirven para organizar y no mueven stock.';
+  $('area-page-heading').innerHTML=`<h2>${esc(titulo)}</h2><p>${esc(bajada)}</p>`;
+  $('area-page-heading').hidden=false;
   $('invFiltros').style.display=''; $('metrics').style.display='none';
   $('critSedes').style.display='none'; $('metaPortada').style.display='none';
   $('btnNuevo').style.display='none'; $('inv-estado').style.display='none';
-  $('areaNote').style.display='block';
-  $('areaNote').textContent=global
-    ? 'Cada producto muestra su saldo separado por ubicación. Los totales incluyen únicamente Local 1; Bodega permanece aparte.'
-    : areaActual==='sin_asignar'
-      ? 'Sin asignar contiene existencias de Local 1 pendientes de distribución. No es un área física ni tiene secciones propias.'
-      : `${areaLabel(areaActual)} · Cantidades leídas del ledger; secciones y límites son configuración operativa y no mueven stock.`;
+  $('areaNote').style.display='none';
   if(AREA_LOADING){ listEl.innerHTML='<div class="area-loading">Cargando existencias por ubicación…</div>'; return; }
   if(AREA_ERROR){ listEl.innerHTML='<div class="empty">No se pudo leer el libro de existencias de Local 1. Vuelve a cargar para intentarlo otra vez.</div>'; return; }
   const q=normNombre(qEl.value), tipo=tipoSel;
@@ -5347,6 +5358,7 @@ function pickSede(s){
   SEDE = s;
   AREA_ROWS=[]; AREAS_CATALOGO=[]; AREA_ERROR=null; AREA_LOADING=s==='plaza'; areaActual=null;areaFilterCard=null;
   $('view-inv').classList.remove('area-workspace-wide');
+  $('area-page-heading').hidden=true;
   /* Con el panel fijo el cajón nunca se abre, así que su nombre de sede hay
      que refrescarlo acá: es el momento en que deja de ser "—". */
   setTimeout(refrescarMenu, 0);
