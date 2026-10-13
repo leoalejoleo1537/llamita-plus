@@ -1,5 +1,13 @@
 # Bitácora de Codex
 
+## 2026-10-13 — Revalidación de B1 publicado
+
+- B1 ya estaba implementado en `e7f0f40` y documentado como COMPLETADO; se comprobó que `origin/master` contiene también el mapa y la cola que dejan B2 como siguiente nodo pendiente. No se inició B2.
+- Proyecto Supabase confirmado por historial: `llamita-plus` (`iuryhsjucblmebdogewa`); las migraciones `20261013002913` y `20261013003415` siguen instaladas.
+- Se volvió a ejecutar la suite `supabase/tests/bodega_producto_area_rpc.sql` en una sentencia transaccional con rollback forzado al final. Pasaron búsqueda, enlace/creación, reutilización, idempotencia, configuración en varias áreas, ausencia de stock/movimientos/lotes y grants. Una identidad `authenticated` sin `puede_editar` fue rechazada por la RPC antes de validar o escribir producto.
+- Conteos observados después de la prueba: productos 1.438; stock proyectado 15.438,00; existencias ledger 408 filas / 9.316,70 unidades; lotes 42; movimientos legacy 431; movimientos ledger 408; transferencias 0; recetas 396; movimientos Fudo locales 15.357; configuración Lama–Stock 0. No quedaron productos sintéticos persistentes. La suite compara dentro de su subtransacción los conteos de lotes, movimientos y ledger antes/después.
+- `npm test` y `git diff --check` pasaron. Sigue pendiente una comprobación visual autenticada del usuario. No se cambió código ni esquema; no se accedió a Café del Desierto / Llamita Stock.
+
 ## 2026-10-13 — Vínculo Bodega → Local 1 desde un área
 
 - Estado: **IMPLEMENTADO Y DESPLEGADO EN SUPABASE; PRUEBAS TRANSACCIONALES COMPLETADAS**.
