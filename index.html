@@ -4234,6 +4234,7 @@ let AREA_ERROR = null;
 let AREA_LOADING = false;
 let areaActual = null;              // null=portada; '__todas__'=vista global; otro=ubicación plaza
 const AREA_TODAS = '__todas__';
+let AREA_PRIMERA_SECCION_ABIERTA = true;
 let filterState = null;
 let areaFilterCard = null;
 let hasVenc = false;      // true cuando exista la columna vencimiento en la tabla
@@ -4322,7 +4323,7 @@ function cambiarArea(codigo, producto=''){
   if(codigo!==null && codigo!==AREA_TODAS && !areasNavegacion().includes(codigo)) return;
   areaActual=codigo;
   qEl.value=producto;
-  filterState=null; areaFilterCard=null; tipoSel=null; openSecs.clear();
+  filterState=null; areaFilterCard=null; tipoSel=null; openSecs.clear();AREA_PRIMERA_SECCION_ABIERTA=true;
   $('view-inv').classList.toggle('area-workspace-wide',codigo!==null);
   document.querySelectorAll('.mcard').forEach(x=>x.classList.remove('sel'));
   renderTipos(); render(); tituloInventarioArea();
@@ -4554,6 +4555,9 @@ function renderAreaLista(){
   });
   const orden=[...grupos.values()].sort((a,b)=>(a.turno===b.turno?0:a.turno==='am'?-1:1)||(a.orden-b.orden)||a.nombre.localeCompare(b.nombre,'es'));
   const filtrando=!!q||!!tipoSel||!!filterState||!!areaFilterCard;
+  if(!filtrando&&AREA_PRIMERA_SECCION_ABIERTA&&orden.length){
+    const primera=orden[0];openSecs.add('area:'+areaActual+':'+primera.nombre);AREA_PRIMERA_SECCION_ABIERTA=false;
+  }
   const seccion=g=>{
     const clave='area:'+areaActual+':'+g.nombre, abierta=filtrando||openSecs.has(clave);
     const criticos=g.rows.filter(r=>estadoArea(r)==='critico').length;

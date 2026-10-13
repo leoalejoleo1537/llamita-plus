@@ -49,6 +49,9 @@ check('La vista de área tiene encabezado propio y un único flujo vertical para
   html.includes('<div class="area-page-heading" id="area-page-heading" hidden></div>')
   &&html.includes("$('area-page-heading').innerHTML=")
   &&html.includes("$('area-page-heading').hidden=false"));
+check('Al entrar al área se abre la primera sección física para mostrar productos sin una pantalla vacía',
+  html.includes('AREA_PRIMERA_SECCION_ABIERTA=true')
+  &&html.includes('openSecs.add(\'area:\'+areaActual+\':\'+primera.nombre)'));
 check('El panel de secciones reutiliza lectura y RPC protegida de creación; no hace DML directo ni escribe stock',
   html.includes("sb.rpc('area_seccion_crear'")&&html.includes("sb.rpc('area_secciones_listar'")
   &&html.includes('p_turno:\'pm\'')&&!html.includes("sb.from('area_secciones').insert"));

@@ -4,8 +4,10 @@
 
 - La revisión de las capturas reales del usuario mostró que el resultado publicado no correspondía al diseño: una regla general de escritorio aplicaba dos columnas a `#list`, incluyendo encabezados y acordeones del área. Eso comprimía las tarjetas y mandaba las secciones a la segunda columna.
 - Se corrigió el layout únicamente para el espacio de inventario por área: la lista ahora fluye en una columna y llena el ancho disponible. Se agregó un título visible del área debajo del botón de regreso; las tarjetas y el inventario quedan debajo en el mismo flujo.
-- Se revisó `index.html` con Chromium 151 y Playwright en escritorio (1567 px), tamaño intermedio (768 px) y teléfono (390 px), usando productos ficticios en memoria y sin sesión contra Supabase. Se observaron 4, 2 y 1 columnas de tarjetas; los productos aparecen dentro del acordeón; no hubo errores de página. Esto verifica la presentación, no datos ni la sesión real de producción.
+- Al entrar al área se abre la primera sección física, para que el contenido del inventario aparezca de inmediato. Las demás siguen siendo desplegables.
+- Se revisó la versión local con Chromium 151 y Playwright en escritorio (1567 px), tamaño intermedio (768 px) y teléfono (390 px), usando productos ficticios en memoria y sin sesión contra Supabase. Después se comprobó el HTML servido por producción y se abrió con el mismo fixture: cuatro tarjetas a lo ancho, lista vertical y encabezado visible. Se observaron 4, 2 y 1 columnas según el ancho, y no hubo errores de JavaScript. No se leyeron ni escribieron datos reales para la prueba visual.
 - La nota anterior de que Chromium no estaba instalado fue incorrecta: `/usr/bin/chromium` y Playwright sí están disponibles. El script general de `npm test` omite ciertas pruebas visuales, pero se pudo hacer una revisión directa con el navegador del entorno.
+- Despliegue: commit `008cbe5` quedó en `origin/master`; Vercel reportó el despliegue de producción `READY` y alias actualizado. El HTML público contiene el encabezado y la regla corregida.
 - Pruebas: `npm test` y `git diff --check` pasan. No se realizaron escrituras ni consultas a Supabase; ningún dato cambió.
 - No se tocó Fudo, Lama, caja, recetas, lotes ni stock. No se accedió a Café del Desierto / Llamita Stock.
 
