@@ -1,5 +1,17 @@
 # Bitácora de Codex
 
+## 2026-10-13 — Preflight: agregar producto maestro de Bodega a un área
+
+- Estado: **PREFLIGHT COMPLETADO; IMPLEMENTACIÓN DETENIDA POR PIEZA FALTANTE**.
+- Entorno: repositorio `leoalejoleo1537/llamita-plus`, rama `work`, fast-forward limpio a `origin/master` antes de revisar; Supabase `llamita-plus` (`iuryhsjucblmebdogewa`). No se accedió a Café del Desierto / Llamita Stock.
+- Las RPC `producto_area_configuracion_guardar` y `producto_area_preferencia_guardar` validan autorización `puede_editar` por servidor. Para áreas se debe usar la primera: permite reactivar/crear la configuración producto–área–sección y guardar mínimo/máximo. La tabla solo admite productos de `plaza`; no contiene cantidades.
+- `stock_leer_areas` y `producto_area_preferencia_leer` obtienen la ubicación y saldo del ledger. El actual flujo “Agregar producto existente” busca solo filas locales de `DATA` (`plaza`), no el catálogo maestro de Bodega. Guardar una configuración no escribe movimientos, lotes ni existencias.
+- `producto_enlace` es el puente requerido entre IDs de Bodega y Local 1. Hay 513 filas, 276 IDs maestros distintos y 513 IDs locales distintos: un producto de Bodega puede tener varios destinos locales. Por ello no se puede escoger un destino usando solo nombre ni tomar el primer enlace; cada par debe mostrarse y confirmarse explícitamente.
+- El catálogo `productos` no tiene columnas de marca o formato; sí contiene nombre, rubro, tipo y unidad. La búsqueda puede normalizar tildes y comparar tokens/singular-plural en los campos existentes, pero marca/formato solo podrán mostrarse si forman parte del nombre o si se aprueba un modelo/catálogo que los suministre.
+- Pieza faltante: cuando el producto maestro no tiene enlace a `plaza`, no existe un flujo backend protegido dedicado que cree una representación local enlazada y la asigne al área. `producto_area_asignacion` y `stock_leer_areas` requieren el producto local de `plaza`. La RPC legacy `crear_producto_enlazado` crea filas por destino y enlaces, admite también `angamos`, no aplica la autorización S1 de B3.2a y no garantiza que el usuario haya confirmado el par correcto; no se debe conectar al nuevo flujo como solución directa.
+- Diseño recomendado para la siguiente subfase: RPC de búsqueda de maestros con resultados de enlaces explícitos y ubicación/saldo; RPC protegida y acotada para crear el maestro en `central` cuando no haya candidato y crear su contraparte enlazada de `plaza` únicamente tras confirmación; usar `producto_area_configuracion_guardar` para sección/mínimo/máximo. Todo en un flujo idempotente y sin stock ni lotes. Antes de implementarlo debe confirmarse que una fila local enlazada es la representación técnica permitida del producto maestro único.
+- No se modificó código, SQL, esquema, datos, permisos, interfaz ni despliegues. No se ejecutaron pruebas de escritura. La bitácora es el único archivo de documentación actualizado en esta ejecución.
+
 
 ## 2026-10-12 — Decisión aprobada: producto maestro único y configuración por área
 
