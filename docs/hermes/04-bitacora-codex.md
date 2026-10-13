@@ -1,5 +1,18 @@
 # Bitácora de Codex
 
+## 2026-10-13 — B2: interfaz histórica dentro de cada área y alta Bodega simplificada
+
+- Repositorio confirmado: `leoalejoleo1537/llamita-plus`; `origin` apunta a ese repositorio. Publicación solicitada únicamente a `origin/master`. No se accedió, consultó ni modificó Café del Desierto / Llamita Stock.
+- Inventario por áreas: se recuperó la jerarquía de uso histórico: píldoras derivadas del campo existente `tipo` → secciones físicas desplegables → filas de producto → ficha/modal. AM/PM continúa siendo orden visual. No se introdujeron categorías nuevas ni se migraron rubros/secciones históricas.
+- Las filas usan `stock_leer_areas` y sus cantidades del ledger. Los productos configurados sin saldo siguen visibles como “Configurado · sin existencias”; los saldos sin configuración quedan claramente marcados. El buscador y las píldoras limitan la lista al área elegida.
+- La ficha abierta desde un área muestra área, tipo, sección física, saldo del ledger, límites configurados y vencimientos cuando existen. Stock, mermas, lotes, Fudo y nombre/ficha maestra quedan fuera de edición en ese contexto. Guardar configuración solo llama `producto_area_configuracion_guardar`; si la fila es solo saldo físico o Sin asignar queda en solo lectura.
+- Se bloquearon los gestos legacy de swipe al navegar dentro de las áreas, para que no abran reparto ni merma. No se modificó la lógica comercial de esas funciones.
+- Alta desde Bodega simplificada: resultados y detalle no muestran IDs, factores ni IDs de fichas locales. Se muestra nombre, unidad, stock de Bodega, destino y configuración mínima del área. Si hay una sola representación ya enlazada se reutiliza automáticamente; varias representaciones enlazadas requieren selección; candidatos locales sin vínculo solo se presentan cuando son pertinentes y requieren confirmación. No se muestran ni reutilizan fichas ligadas a otro maestro. Si se crea una representación local, nace con saldo cero y la confirmación dice que las unidades llegarán al recibir reparto.
+- El agregado continúa usando `bodega_producto_area_agregar`; no crea stock, lotes, movimientos, transferencias, recetas ni enlaces Fudo. No hubo migraciones ni escrituras de base de datos.
+- Pruebas: `npm test` completado con exit 0; incluye la prueba estática nueva `pruebas/b2-interfaz-area-historica.mjs`, prueba vigente del flujo B1 y `pruebas/pantalla-sana.mjs`. `git diff --check` pasó. La prueba visual autenticada de escritorio/móvil no pudo ejecutarse: Chromium no está instalado en el entorno.
+- Archivos cambiados: `index.html`, `pruebas/b2-interfaz-area-historica.mjs`, `pruebas/b3-2a-3-asignacion-existente.mjs`, este registro, cola y mapa objetivo. No cambió esquema, RLS, permisos ni datos; Fudo, Lama, Bodega operativa, recetas, caja y stock permanecen intactos.
+- Siguiente nodo: **B3 — alta/configuración manual de productos demo**, pendiente de activación explícita. Carga inicial/ajustes, reparto/recepción y transferencias visuales no quedan habilitados por B2.
+
 ## 2026-10-13 — Revalidación de B1 publicado
 
 - B1 ya estaba implementado en `e7f0f40` y documentado como COMPLETADO; se comprobó que `origin/master` contiene también el mapa y la cola que dejan B2 como siguiente nodo pendiente. No se inició B2.

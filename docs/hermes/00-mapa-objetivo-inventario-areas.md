@@ -1,6 +1,6 @@
 # Mapa de objetivo — Inventario por áreas
 
-> Estado actualizado: 13 de octubre de 2026. B1 completado; B2 es el siguiente nodo y requiere activación explícita.
+> Estado actualizado: 13 de octubre de 2026. B1 y B2 completados; B3 es el siguiente nodo, pendiente de activación explícita.
 >
 > Este documento es el tablero de orientación del proyecto. No reemplaza la bitácora: resume qué ya existe, cuál es el siguiente frente y qué queda después.
 
@@ -32,8 +32,8 @@ INVENTARIO POR ÁREAS
 │
 ├── B. Catálogo operativo sin existencias                          [EN CURSO]
 │   ├── B1. Maestro Bodega → representación Local 1 enlazada      [x]
-│   ├── B2. Recuperar interfaz histórica dentro de cada área      [→ SIGUIENTE; PENDIENTE DE ACTIVACIÓN]
-│   └── B3. Alta/configuración manual de productos demo           [ ]
+│   ├── B2. Recuperar interfaz histórica dentro de cada área      [x]
+│   └── B3. Alta/configuración manual de productos demo           [→ SIGUIENTE; PENDIENTE DE ACTIVACIÓN]
 │
 ├── C. Operación física                                            [PENDIENTE]
 │   ├── C1. Ajuste de cantidad auditado                            [ ]
@@ -77,9 +77,9 @@ No habrá coincidencias automáticas ambiguas por nombre. Si no existe el produc
 
 Publicado en `master` en el commit `e7f0f40892ab2d190426ed4a07b4853890a3171c`. Las migraciones `20261013002913` y `20261013003415` están instaladas en Llamita Plus; las RPC de búsqueda y agregado fueron verificadas en el proyecto remoto. Codex reportó pruebas transaccionales, `npm test` y `git diff --check` satisfactorios. La prueba visual autenticada aún corresponde al usuario.
 
-## Siguiente nodo: B2 — Interfaz histórica dentro de un área (pendiente de activación)
+## Resultado completado: B2 — Interfaz histórica dentro de un área
 
-Al activar B2, la prioridad es recuperar y conectar la interfaz histórica existente, no diseñar otra interfaz:
+La prioridad fue recuperar y conectar la interfaz histórica existente, no diseñar otra interfaz:
 
 ```text
 Tarjeta de área → pantalla operativa del área
@@ -89,13 +89,13 @@ Tarjeta de área → pantalla operativa del área
                 → modal/ficha existente adaptada al ledger
 ```
 
-La pantalla debe mostrar tanto productos configurados sin saldo como saldos físicos aún sin configuración. Sus cantidades son de lectura hasta C1.
+La pantalla muestra tanto productos configurados sin saldo como saldos físicos aún sin configuración. Las cantidades son de lectura hasta C1. La ficha abierta desde un área conserva vencimientos y muestra su saldo del ledger; no permite editar stock, lotes, mermas, reparto ni Fudo. El gesto legacy de swipe queda desactivado en las áreas para no disparar esas acciones.
 
 ### Criterio de salida de B2
 
-Al entrar a Cafetería, una persona puede navegar el patrón histórico completo y abrir una ficha de producto desde una sección, aunque el saldo sea cero. B2 no debe reimplementar el motor de vinculación B1 ni reactivar ediciones legacy de stock.
+Al entrar a Cafetería, una persona puede navegar el patrón histórico completo y abrir una ficha de producto desde una sección, aunque el saldo sea cero. B2 no reimplementó el motor de vinculación B1 ni reactivó ediciones legacy de stock. El alta desde Bodega oculta IDs y detalles internos, reutiliza automáticamente la única representación enlazada y confirma explícitamente las alternativas reales; nunca muestra una ficha enlazada a otro maestro.
 
-## Después de B2: B3 — Onboarding demo
+## Siguiente nodo: B3 — Onboarding demo (pendiente de activación)
 
 La persona responsable de cada área configura manualmente su catálogo real:
 

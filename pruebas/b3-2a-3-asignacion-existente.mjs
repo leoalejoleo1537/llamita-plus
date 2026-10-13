@@ -16,13 +16,18 @@ check('cada área ofrece agregar el producto maestro de Bodega, no crear un prod
 check('la incorporación escribe vínculo y configuración mediante la RPC protegida',
   html.includes("sb.rpc('bodega_producto_area_agregar'")&&html.includes('function guardarProductoEnArea()'));
 check('la búsqueda consulta el catálogo maestro y tolera variaciones del lado servidor',
-  html.includes("sb.rpc('bodega_productos_area_buscar'")&&html.includes('Producto maestro · Bodega #'));
-check('el detalle presenta saldo de Bodega, representaciones y ubicaciones ledger locales',
-  html.includes('Stock disponible en Bodega:')&&html.includes('Representación en Local 1')&&html.includes('Sin saldo físico en Local 1'));
-check('las representaciones locales requieren selección explícita y admiten sección y límites',
-  html.includes('El sistema no selecciona por nombre')&&html.includes('area-producto-seccion')&&html.includes('area-producto-min')&&html.includes('area-producto-max'));
-check('una ficha local exacta duplicada no se crea aislada',
-  html.includes('Ya existe una ficha con ese nombre en Local 1')&&html.includes('Agregar producto de Bodega'));
+  html.includes("sb.rpc('bodega_productos_area_buscar'")&&html.includes('normNombre(q).length<2'));
+const flujoSimple=html.slice(html.indexOf('/* Presentación simplificada del alta'),html.indexOf('async function elegirRepresentacionBodega'));
+check('el flujo visible oculta IDs, factores y opciones irrelevantes',
+  flujoSimple.includes('Stock disponible en Bodega:')&&!flujoSimple.includes('ID de Bodega:')&&!flujoSimple.includes('factor ')&&!flujoSimple.includes('Local 1 #'));
+check('una única representación enlazada se reutiliza automáticamente',
+  html.includes("else if(reps.length===1){\n    BODEGA_AREA_REP_ID=String(reps[0].producto_plaza_id)"));
+check('si falta representación ofrece creación con saldo cero y sin mover stock',
+  flujoSimple.includes('representación vinculada en Local 1 con saldo cero')&&flujoSimple.includes('Agregarlo al área no mueve existencias.'));
+check('el detalle mantiene sección y límites por área con confirmación humana para candidatos',
+  flujoSimple.includes('Confirmar que corresponde al mismo producto')&&flujoSimple.includes('area-producto-seccion')&&flujoSimple.includes('area-producto-min')&&flujoSimple.includes('area-producto-max'));
+check('candidatos ya enlazados a otro maestro no se exponen',
+  html.slice(html.indexOf('function candidatasLocalesRelevantes'),html.indexOf('function renderDetalleProductoBodegaLegacy')).includes('if(r.vinculada_a_bodega_id!=null) return false'));
 check('el flujo no invoca transferencias, Fudo, lotes ni movimientos',
   !html.slice(html.indexOf('function guardarProductoEnArea()'),html.indexOf('function gestionarAreas()')).match(/stock_transferir|functions\.invoke|sb\.from\(['"](?:producto_lotes|stock_internal)/));
 check('el selector de área se alimenta solo del catálogo operativo',

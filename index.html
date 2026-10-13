@@ -445,6 +445,13 @@
   .area-assign-detail{margin-top:12px;padding:12px;border:1px solid var(--border);border-radius:11px;background:var(--card)}
   .area-assign-detail h3{margin:0 0 7px;font-size:14px}.area-assign-detail p{margin:4px 0;color:var(--muted);font-size:12px;line-height:1.4}
   .area-assign-detail .notice{color:var(--text);font-weight:700}
+  .area-tipo-pills{margin-top:2px}
+.area-ficha-resumen{display:grid;gap:7px;margin:8px 0 12px;padding:12px;border-radius:12px;background:var(--gray-bg)}
+.area-ficha-resumen[hidden]{display:none}
+  .area-ficha-resumen div{display:flex;justify-content:space-between;gap:12px;font-size:13px}
+  .area-ficha-resumen span{color:var(--muted)}.area-ficha-venc{display:block!important}
+  .area-ficha-venc .vencs{margin-top:5px}
+.area-unit{font-size:11px;color:var(--muted);min-width:18px}
   .area-aggregate{background:var(--gray-bg)}
   .area-list-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:2px 0 10px}
   .area-list-total{font-size:12px;color:var(--muted)}
@@ -456,7 +463,7 @@
   .area-read-sub{font-size:11px;color:var(--muted);margin-top:3px}
   .area-read-qty{font-size:15px;font-weight:800;white-space:nowrap}
   button.area-read-row{width:100%;border-left:0;border-right:0;border-top:0;color:var(--text);font:inherit;text-align:left;cursor:pointer}
-  .area-work-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 12px}
+  .area-work-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:0 0 12px}
   .area-work-metric{padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card)}
   .area-work-metric strong{display:block;font-size:20px;line-height:1.1}.area-work-metric span{display:block;margin-top:4px;color:var(--muted);font-size:11px}
   .area-config-note{display:inline-flex;align-items:center;margin-top:4px;padding:2px 7px;border-radius:999px;background:var(--gray-bg);color:var(--gray-fg);font-size:10px;font-weight:750}
@@ -3388,6 +3395,7 @@
       <button type="button" id="inv-limpiar" class="inv-limpiar">Limpiar</button>
     </div>
   </div>
+  <div class="tipos area-tipo-pills" id="areaTipoPills" aria-label="Filtrar por tipo de producto" style="display:none"></div>
   <!-- solo en Bodega: cuánto le falta a cada local. Ver .csedes en el estilo -->
   <div class="csedes" id="critSedes" style="display:none"></div>
   <div class="metrics" id="metrics">
@@ -3957,7 +3965,7 @@
       <small style="display:block;color:var(--muted);margin-top:6px">Se conserva como dato descriptivo. La sección física del área se elige abajo.</small>
       </div>
     </div>
-    <div class="field" style="text-align:center;margin-top:0">
+    <div class="field" id="m-stock-field" style="text-align:center;margin-top:0">
       <label style="text-align:center">Stock actual</label>
       <div class="stepper">
         <button type="button" id="m-menos">−</button>
@@ -3966,7 +3974,7 @@
       </div>
       <small id="m-stock-corte" style="display:none;color:var(--muted);margin-top:6px">Saldo de solo lectura: Bodega y Local 1 usan existencias por ubicación.</small>
     </div>
-      <div style="display:flex;gap:10px">
+      <div id="m-limits-fields" style="display:flex;gap:10px">
       <div class="field" style="flex:1"><label id="m-min-label">Stock mínimo</label><input type="number" step="0.5" min="0" id="m-min"></div>
       <div class="field" style="flex:1"><label id="m-max-label">Stock máximo</label><input type="number" step="0.5" min="0" id="m-max"></div>
     </div>
@@ -3976,7 +3984,7 @@
       <datalist id="lista-tipos"></datalist>
     </div>
     <div id="m-area-wrap" style="display:none">
-      <div class="field">
+      <div class="field" id="m-area-selector-wrap">
         <label>Área de esta ficha</label>
         <select id="m-area"></select>
         <small style="display:block;color:var(--muted);margin-top:6px">La cantidad pertenece al ledger del área; esta ficha solo guarda organización y límites.</small>
@@ -3987,6 +3995,7 @@
         <small style="display:block;color:var(--muted);margin-top:6px">AM/PM organiza visualmente el conteo. No divide ni mueve existencias.</small>
       </div>
       <div class="area-pref-box" id="m-area-fisica"><strong>Ubicación física actual</strong><span>Cargando saldo real…</span></div>
+      <div class="area-ficha-resumen" id="m-area-ficha-resumen" hidden></div>
     </div>
     <button type="button" class="btn-urg" id="m-urgente" style="display:none">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>
@@ -4310,6 +4319,7 @@ function htmlTarjetaArea(codigo){
 }
 function renderAreaPortada(){
   $('areaNav').style.display='none'; $('areaNote').style.display='none';
+  $('areaTipoPills').style.display='none'; $('areaTipoPills').innerHTML=''; $('tipos').style.display='';
   $('invFiltros').style.display='none'; $('metrics').style.display='none';
   $('critSedes').style.display='none'; $('metaPortada').style.display='none';
   $('btnNuevo').style.display='none'; $('inv-estado').style.display='none';
@@ -4331,8 +4341,50 @@ function renderAreaPortada(){
     </button>
   </div>`;
 }
+function renderAreaTipoPills(){
+  const box=$('areaTipoPills'), activo=SEDE==='plaza'&&areaActual!==null;
+  $('tipos').style.display=activo?'none':'';
+  box.style.display=activo?'flex':'none';
+  if(!activo){box.innerHTML='';return;}
+  const filas=AREA_ROWS.filter(r=>(areaActual===AREA_TODAS||r.area_codigo===areaActual)
+    &&(r.configurado||Number(r.cantidad)!==0));
+  const cuenta=new Map();
+  filas.forEach(r=>{const tipo=String(r.tipo||'').trim();if(!tipo)return;
+    if(!cuenta.has(tipo))cuenta.set(tipo,new Set());
+    cuenta.get(tipo).add(String(r.producto_id));
+  });
+  if(tipoSel&&!cuenta.has(tipoSel))tipoSel=null;
+  const total=new Set(filas.map(r=>String(r.producto_id))).size;
+  const boton=(valor,nombre,n)=>`<button type="button" class="tipo${(tipoSel||'')===valor?' on':''}" data-area-tipo="${esc(valor)}" aria-pressed="${(tipoSel||'')===valor}">${esc(nombre)} <span class="n">${n}</span></button>`;
+  box.innerHTML=boton('','Todos',total)+[...cuenta.entries()]
+    .sort((a,b)=>a[0].localeCompare(b[0],'es'))
+    .map(([tipo,ids])=>boton(tipo,tipo,ids.size)).join('');
+}
+function filaAreaHistorica(r){
+  const original=DATA.find(p=>String(p.id)===String(r.producto_id))||{};
+  const cantidad=Number(r.cantidad)||0;
+  const p={...original,id:Number(r.producto_id),producto:r.producto,rubro:r.rubro||'',tipo:r.tipo||'',
+    unidad:r.unidad||original.unidad||'',sede:'plaza',stock_actual:cantidad,
+    stock_min:r.stock_min,stock_max:r.stock_max,perecedero:original.perecedero,
+    vencimiento:original.vencimiento,urgente:original.urgente};
+  const estadoFila=estadoArea(r),cf=CFG[estadoFila];
+  const nota=r.configurado
+    ? (cantidad===0?'<span class="area-config-note">Configurado · sin existencias</span>':'')
+    : '<span class="area-config-note">Saldo físico sin configuración</span>';
+  return `<div class="row" data-row="${p.id}">
+    <div class="info" data-open="${p.id}" data-area-code="${esc(r.area_codigo)}">
+      <div class="name">${esc(p.producto)} ${esUrgente(p)?'<span class="pill pill-urg">Urgente</span>':''}</div>
+      ${vencsHTML(p)}
+      <div class="sub">${esc(p.tipo||'Sin tipo')} · mín ${fmt(r.stock_min)} · máx ${fmt(r.stock_max)}</div>
+      ${nota}
+    </div>
+    <div class="right"><span class="pill" style="background:${cf.bg};color:${cf.fg}">${cf.t}</span>
+      <input type="number" step="0.5" min="0" value="${cantidad}" disabled title="Saldo de solo lectura: ledger por ubicación" aria-label="Saldo de ${esc(p.producto)}"><small class="area-unit">${esc(p.unidad||'')}</small></div>
+  </div>`;
+}
 function renderAreaLista(){
   const global=areaActual===AREA_TODAS;
+  renderAreaTipoPills();
   $('areaNav').style.display='flex'; $('areaNav').innerHTML=`<button type="button" class="area-back" data-area-home>← Todas las áreas</button><span class="area-context">${global?'Lectura global · Local 1':esc(areaLabel(areaActual))}</span>${!global&&areaActual!=='sin_asignar'&&PERMISOS.puede_editar?`<span class="area-nav-actions"><button type="button" class="area-back" data-area-assign="${esc(areaActual)}">＋ Agregar producto de Bodega</button></span>`:''}`;
   $('invFiltros').style.display=''; $('metrics').style.display='none';
   $('critSedes').style.display='none'; $('metaPortada').style.display='none';
@@ -4380,19 +4432,18 @@ function renderAreaLista(){
   });
   const orden=[...grupos.values()].sort((a,b)=>(a.turno===b.turno?0:a.turno==='am'?-1:1)||(a.orden-b.orden)||a.nombre.localeCompare(b.nombre,'es'));
   const filtrando=!!q||!!tipoSel||!!filterState;
-  const fila=r=>{
-    const e=estadoArea(r),cf=CFG[e], configurado=r.configurado
-      ? (Number(r.cantidad)===0?'<span class="area-config-note">Configurado · sin existencias</span>':'')
-      : '<span class="area-config-note">Saldo sin configurar</span>';
-    return `<button type="button" class="area-read-row" data-open="${r.producto_id}" data-area-code="${esc(r.area_codigo)}"><div><div class="area-read-name">${esc(r.producto)}</div><div class="area-read-sub">${esc(r.tipo||r.rubro||'Sin grupo')} · mín ${r.stock_min==null?'—':fmt(Number(r.stock_min))} · máx ${r.stock_max==null?'—':fmt(Number(r.stock_max))}</div>${configurado}</div><div><span class="pill" style="background:${cf.bg};color:${cf.fg}">${cf.t}</span><div class="area-read-qty">${fmt(Number(r.cantidad)||0)}${r.unidad?' '+esc(r.unidad):''}</div></div></button>`;
-  };
   const seccion=g=>{
     const clave='area:'+areaActual+':'+g.nombre, abierta=filtrando||openSecs.has(clave);
-    return `<section class="area-physical-section"><button type="button" class="area-physical-head" data-sec="${esc(clave)}"><strong>${esc(g.nombre)}</strong><span>${g.rows.length} producto${g.rows.length===1?'':'s'} · ${fmt(g.rows.reduce((s,r)=>s+(Number(r.cantidad)||0),0))} unidades</span></button>${abierta?`<div class="area-physical-body">${g.rows.map(fila).join('')}</div>`:''}</section>`;
+    const criticos=g.rows.filter(r=>estadoArea(r)==='critico').length;
+    return `<div class="sec${abierta?' open':''}" data-secname="${esc(clave)}">
+      <div class="sec-head"><button type="button" class="sec-btn" data-sec="${esc(clave)}">
+        <span>${esc(g.nombre)}</span><span class="sec-tags">${criticos?`<span class="sec-crit">${criticos} crít.</span>`:''}<span class="sec-count">${g.rows.length}</span></span>
+      </button></div>${abierta?`<div class="sec-body">${g.rows.map(filaAreaHistorica).join('')}</div>`:''}
+    </div>`;
   };
   const bloque=(turno,label)=>{const gs=orden.filter(g=>g.turno===turno);return gs.length?`<div class="area-turn-label">${label}</div>${gs.map(seccion).join('')}`:''};
   const salida=tipoSel?orden.map(seccion).join(''):bloque('am','AM · organización visual')+bloque('pm','PM · organización visual');
-  listEl.innerHTML=`<div class="area-work-metrics"><div class="area-work-metric"><strong>${stats.productos}</strong><span>Productos visibles</span></div><div class="area-work-metric"><strong>${stats.criticos}</strong><span>Críticos</span></div><div class="area-work-metric"><strong>${stats.sobre}</strong><span>Sobre-stock</span></div><div class="area-work-metric"><strong>${porVencer}</strong><span>Por vencer en 7 días</span></div></div><div class="area-list-head"><span class="area-list-total">${stats.productosConSaldo} con saldo · ${fmt(stats.unidades)} unidades físicas · ${stats.sinDato} sin límites</span></div>${salida||'<div class="empty">No hay productos configurados o con saldo que coincidan.</div>'}`;
+  listEl.innerHTML=`<div class="area-work-metrics"><div class="area-work-metric"><strong>${stats.productos}</strong><span>Productos visibles</span></div><div class="area-work-metric"><strong>${stats.criticos}</strong><span>Críticos</span></div><div class="area-work-metric"><strong>${stats.sobre}</strong><span>Sobre-stock</span></div><div class="area-work-metric"><strong>${stats.sinDato}</strong><span>Sin dato</span></div><div class="area-work-metric"><strong>${porVencer}</strong><span>Por vencer en 7 días</span></div></div><div class="area-list-head"><span class="area-list-total">${stats.productosConSaldo} con saldo · ${fmt(stats.unidades)} unidades físicas</span></div>${salida||'<div class="empty">No hay productos configurados o con saldo que coincidan.</div>'}`;
 }
 
 /* Normaliza texto para buscar y comparar: sin tildes, sin mayúsculas y sin
@@ -12691,7 +12742,7 @@ function pintarProductosAsignables(){
   if(BODEGA_AREA_RESULTADOS===null){box.innerHTML='<div class="area-loading">Buscando en el catálogo maestro…</div>';return;}
   if(!BODEGA_AREA_RESULTADOS.length){box.innerHTML='<div class="area-loading">No hay productos maestros coincidentes. Si el producto no existe, primero créalo en Bodega y vuelve a esta área.</div>';return;}
   box.innerHTML=BODEGA_AREA_RESULTADOS.map(p=>`<button type="button" class="area-product-result${String(p.producto_bodega_id)===String(BODEGA_AREA_SELECCION?.producto_bodega_id)?' on':''}" data-bodega-producto="${p.producto_bodega_id}">
-    <span><strong>${esc(p.nombre_bodega)}</strong><span>Producto maestro · Bodega #${p.producto_bodega_id}${p.unidad?' · '+esc(p.unidad):''}${p.rubro?' · '+esc(p.rubro):''}</span></span>
+    <span><strong>${esc(p.nombre_bodega)}</strong><span>Producto maestro${p.unidad?' · '+esc(p.unidad):''}</span></span>
     <span class="saldo">Bodega: ${fmt(Number(p.stock_bodega)||0)} ${esc(p.unidad||'')}</span></button>`).join('');
 }
 function bodegaRepresentacionSeleccionada(){
@@ -12699,7 +12750,17 @@ function bodegaRepresentacionSeleccionada(){
     || BODEGA_AREA_SELECCION?.posibles_representaciones?.find(x=>String(x.producto_plaza_id)===String(BODEGA_AREA_REP_ID))
     || null;
 }
-function renderDetalleProductoBodega(){
+function candidatasLocalesRelevantes(p){
+  const nombre=normNombre(p.nombre_bodega), unidad=normNombre(p.unidad);
+  const tokens=new Set(nombre.split(' ').filter(t=>t.length>2));
+  return (p.posibles_representaciones||[]).filter(r=>{
+    if(r.vinculada_a_bodega_id!=null) return false;
+    if(unidad&&normNombre(r.unidad)&&unidad!==normNombre(r.unidad)) return false;
+    const otro=normNombre(r.nombre), compartidos=otro.split(' ').filter(t=>t.length>2&&tokens.has(t)).length;
+    return otro===nombre||(tokens.size>0&&compartidos/Math.max(tokens.size,1)>=0.5);
+  });
+}
+function renderDetalleProductoBodegaLegacy(){
   const p=BODEGA_AREA_SELECCION, detalle=$('area-producto-detalle');
   if(!p){detalle.hidden=true;$('area-producto-guardar').disabled=true;return;}
   detalle.hidden=false;
@@ -12737,15 +12798,54 @@ function renderDetalleProductoBodega(){
     ${posibles.length?`<div class="area-product-results" style="margin-top:8px"><strong>Posibles fichas existentes, sin enlazar</strong>${botonesPosibles}</div>`:''}
     ${!yaConfiguradoMaestro&&!reps.length&&!seleccionada&&!BODEGA_AREA_CREAR_REP?`<button type="button" class="area-back" data-bodega-crear-rep>${posibles.length?'Ninguna ficha coincide; crear representación enlazada en Local 1':'Crear representación enlazada en Local 1'} · saldo cero</button>`:''}
     ${BODEGA_AREA_CREAR_REP&&nombreExactoLocal?'<p class="notice">Ya existe una ficha local con el mismo nombre. Selecciónala arriba; no se permite crear un duplicado exacto.</p>':''}
-    ${puedeConfigurar?`<div class="field"><label for="area-producto-seccion">Sección física</label><select id="area-producto-seccion"><option value="">Sin sección</option>${BODEGA_AREA_SECCIONES.filter(s=>s.estado==='activa').map(s=>`<option value="${esc(s.id)}">${esc(s.nombre)} · ${esc(String(s.turno||'pm').toUpperCase())}</option>`).join('')}</select></div>
-      <div style="display:flex;gap:8px"><div class="field" style="flex:1"><label for="area-producto-min">Mínimo del área</label><input id="area-producto-min" type="number" min="0" step="0.01" placeholder="Sin mínimo"></div>
-      <div class="field" style="flex:1"><label for="area-producto-max">Máximo del área</label><input id="area-producto-max" type="number" min="0" step="0.01" placeholder="Sin máximo"></div></div>`:''}
+    ${puedeConfigurar?`<div class="field"><label for="area-producto-seccion-legacy">Sección física</label><select id="area-producto-seccion-legacy"><option value="">Sin sección</option>${BODEGA_AREA_SECCIONES.filter(s=>s.estado==='activa').map(s=>`<option value="${esc(s.id)}">${esc(s.nombre)} · ${esc(String(s.turno||'pm').toUpperCase())}</option>`).join('')}</select></div>
+      <div style="display:flex;gap:8px"><div class="field" style="flex:1"><label for="area-producto-min-legacy">Mínimo del área</label><input id="area-producto-min-legacy" type="number" min="0" step="0.01" placeholder="Sin mínimo"></div>
+      <div class="field" style="flex:1"><label for="area-producto-max-legacy">Máximo del área</label><input id="area-producto-max-legacy" type="number" min="0" step="0.01" placeholder="Sin máximo"></div></div>`:''}
     ${eleccion}<p class="notice">Este paso no mueve stock. No crea lotes, movimientos, recetas ni enlaces Fudo.</p>`;
   const ya=!!seleccionada?.configurada_en_area||yaConfiguradoMaestro;
   const exactoQueBloquea=BODEGA_AREA_CREAR_REP&&nombreExactoLocal;
   $('area-producto-guardar').disabled=!puedeConfigurar||ya||exactoQueBloquea;
   $('area-producto-guardar').textContent=ya?'Ya está agregado':'Confirmar producto';
 }
+/* Presentación simplificada del alta: los identificadores técnicos siguen
+   dentro de los atributos/RPC, pero no se exponen a quien está operando. */
+function renderDetalleProductoBodega(){
+  const p=BODEGA_AREA_SELECCION, detalle=$('area-producto-detalle');
+  if(!p){detalle.hidden=true;$('area-producto-guardar').disabled=true;return;}
+  detalle.hidden=false;
+  const reps=p.representaciones||[], posibles=p.posibles_representaciones||[];
+  const seleccionada=bodegaRepresentacionSeleccionada();
+  const nombre=normNombre(p.nombre_bodega), relevantes=candidatasLocalesRelevantes(p);
+  const bloqueada=posibles.some(r=>r.vinculada_a_bodega_id!=null&&normNombre(r.nombre)===nombre);
+  const yaConfigurado=!!p.ya_configurado_en_area;
+  const ya=!!seleccionada?.configurada_en_area||yaConfigurado;
+  const botones=(lista)=>lista.map((r,i)=>{
+    const ubicaciones=(r.ubicaciones||[]).filter(x=>Number(x.cantidad)!==0).map(x=>`${x.nombre} ${fmt(Number(x.cantidad)||0)}`).join(' · ');
+    const detalle=lista.length>1?`Opción ${i+1} · ${ubicaciones||'sin saldo físico en Local 1'}`:'Confirmar que corresponde al mismo producto';
+    return `<button type="button" class="area-product-result${String(r.producto_plaza_id)===String(BODEGA_AREA_REP_ID)?' on':''}" data-bodega-representacion="${r.producto_plaza_id}">
+      <span><strong>${esc(r.nombre)}</strong><span>${esc(r.unidad||p.unidad||'Unidad no indicada')} · ${esc(detalle)}</span></span></button>`;
+  }).join('');
+  let eleccion='';
+  if(yaConfigurado) eleccion=`<p class="notice">Este producto ya está agregado a ${esc(areaLabel(ASIGNAR_AREA_CODIGO))}. No se creará otra configuración.</p>`;
+  else if(reps.length>1&&!seleccionada) eleccion=`<div class="area-product-results"><strong>Elige la ficha vinculada que corresponde a Local 1:</strong>${botones(reps)}</div>`;
+  else if(seleccionada) eleccion=`<p class="notice">Se reutilizará la ficha de Local 1 ya vinculada.</p>`;
+  else if(relevantes.length) eleccion=`<div class="area-product-results"><strong>¿Ya existe este producto en Local 1?</strong>${botones(relevantes)}</div><button type="button" class="area-back" data-bodega-crear-rep>Crear una representación nueva</button>`;
+  else if(bloqueada) eleccion='<p class="notice">Una ficha local equivalente ya pertenece a otro producto maestro. No puede reutilizarse ni duplicarse hasta revisar ese vínculo.</p>';
+  else if(BODEGA_AREA_CREAR_REP) eleccion='<p class="notice">Se creará una representación vinculada en Local 1 con saldo cero. Las unidades llegarán cuando el área reciba un reparto.</p>';
+  else eleccion='<button type="button" class="area-back" data-bodega-crear-rep>Crear representación enlazada en Local 1</button>';
+  const puede=(!!seleccionada||BODEGA_AREA_CREAR_REP)&&!ya&&!bloqueada;
+  const campos=puede?`<div class="field"><label for="area-producto-seccion">Sección física</label><select id="area-producto-seccion"><option value="">Sin sección</option>${BODEGA_AREA_SECCIONES.filter(s=>s.estado==='activa').map(s=>`<option value="${esc(s.id)}">${esc(s.nombre)} · ${String(s.turno||'pm').toUpperCase()}</option>`).join('')}</select></div>
+    <div style="display:flex;gap:8px"><div class="field" style="flex:1"><label for="area-producto-min">Mínimo del área</label><input id="area-producto-min" type="number" min="0" step="0.01" placeholder="Sin mínimo"></div>
+    <div class="field" style="flex:1"><label for="area-producto-max">Máximo del área</label><input id="area-producto-max" type="number" min="0" step="0.01" placeholder="Sin máximo"></div></div>`:'';
+  detalle.innerHTML=`<h3>Producto maestro · ${esc(p.nombre_bodega)}</h3>
+    <p><strong>Unidad:</strong> ${esc(p.unidad||'No indicada')}</p>
+    <p><strong>Stock disponible en Bodega:</strong> ${fmt(Number(p.stock_bodega)||0)} ${esc(p.unidad||'')}</p>
+    <p><strong>Destino:</strong> ${esc(areaLabel(ASIGNAR_AREA_CODIGO))}</p>${eleccion}${campos}
+    <p class="notice">Agregarlo al área no mueve existencias.</p>`;
+  $('area-producto-guardar').disabled=!puede||ya;
+  $('area-producto-guardar').textContent=ya?'Ya está agregado':`Agregar a ${areaLabel(ASIGNAR_AREA_CODIGO)}`;
+}
+
 async function elegirRepresentacionBodega(id){
   BODEGA_AREA_REP_ID=String(id); BODEGA_AREA_CREAR_REP=false; renderDetalleProductoBodega();
 }
@@ -12761,6 +12861,16 @@ async function seleccionarProductoBodega(id){
   const {data,error}=await sb.rpc('area_secciones_listar',{p_area_id:areaId,p_incluir_archivadas:false});
   if(error){avisar(error.message||'No se pudieron cargar las secciones del área.');return;}
   BODEGA_AREA_SECCIONES=data||[];
+  const p=BODEGA_AREA_SELECCION, reps=p?.representaciones||[], posibles=p?.posibles_representaciones||[];
+  if(p?.configuracion_area?.producto_plaza_id){
+    BODEGA_AREA_REP_ID=String(p.configuracion_area.producto_plaza_id);
+  }else if(reps.length===1){
+    BODEGA_AREA_REP_ID=String(reps[0].producto_plaza_id);
+  }else if(reps.length===0){
+    const nombre=normNombre(p?.nombre_bodega), candidatas=candidatasLocalesRelevantes(p||{});
+    const mismoNombreOcupado=posibles.some(r=>r.vinculada_a_bodega_id!=null&&normNombre(r.nombre)===nombre);
+    BODEGA_AREA_CREAR_REP=candidatas.length===0&&!mismoNombreOcupado;
+  }
   renderDetalleProductoBodega();
 }
 async function buscarProductosBodega(){
@@ -12781,9 +12891,9 @@ function abrirAsignarProducto(codigo){
   ASIGNAR_AREA_CODIGO=codigo; BODEGA_AREA_RESULTADOS=[]; BODEGA_AREA_SELECCION=null;BODEGA_AREA_REP_ID=null;BODEGA_AREA_CREAR_REP=false;
   $('area-producto-titulo').textContent='Agregar producto de Bodega';
   $('area-producto-destino').textContent='Área de destino: '+areaLabel(codigo);
-  $('area-producto-explica').textContent='Selecciona y confirma el producto maestro de Bodega. El vínculo crea o reutiliza una representación de Local 1; no mueve stock.';
+  $('area-producto-explica').textContent='Elige el producto de Bodega que quieres organizar en esta área. Agregarlo no mueve stock.';
   $('area-producto-q').value=''; $('area-producto-detalle').hidden=true;
-  $('area-producto-guardar').textContent='Confirmar producto';$('area-producto-guardar').disabled=true;pintarProductosAsignables();
+  $('area-producto-guardar').textContent='Selecciona un producto';$('area-producto-guardar').disabled=true;pintarProductosAsignables();
   $('overlay-area-producto').classList.add('open');
   setTimeout(()=>$('area-producto-q').focus(),40);
 }
@@ -12795,7 +12905,7 @@ async function guardarProductoEnArea(){
   const minEl=$('area-producto-min'),maxEl=$('area-producto-max');
   const min=minEl?.value===''||!minEl?null:Number(minEl.value), max=maxEl?.value===''||!maxEl?null:Number(maxEl.value);
   if(min!==null&&(!Number.isFinite(min)||min<0)||max!==null&&(!Number.isFinite(max)||max<0)||min!==null&&max!==null&&max<min){avisar('Revisa los mínimos y máximos del área.');return;}
-  const btn=$('area-producto-guardar');btn.disabled=true;btn.textContent='Guardando vínculo…';
+  const btn=$('area-producto-guardar');btn.disabled=true;btn.textContent='Agregando producto…';
   const {data,error}=await conReintento(()=>sb.rpc('bodega_producto_area_agregar',{
     p_producto_bodega_id:p.producto_bodega_id,
     p_producto_plaza_id:BODEGA_AREA_CREAR_REP?null:Number(BODEGA_AREA_REP_ID),
@@ -12806,12 +12916,12 @@ async function guardarProductoEnArea(){
     p_es_principal:!AREA_ROWS.some(r=>String(r.producto_id)===String(BODEGA_AREA_REP_ID)&&r.es_principal),
     p_confirmar:true
   }));
-  btn.textContent='Confirmar producto';
+  btn.textContent=`Agregar a ${areaLabel(codigo)}`;
   if(error){btn.disabled=false;avisar(error.message||'No se pudo vincular el producto.');return;}
   if(data?.ya_configurado){cerrarAsignarProducto();avisar(`Este producto ya estaba agregado a ${areaLabel(codigo)}. No se creó otra configuración ni se movió stock.`);return;}
-  const nombre=p.nombre_bodega, idLocal=data?.producto_plaza_id;
+  const nombre=p.nombre_bodega;
   cerrarAsignarProducto(); await loadData();
-  avisar(`✓ ${nombre} quedó vinculado a ${areaLabel(codigo)} (Local 1 #${idLocal}).\n\nEste paso no movió stock ni creó lotes o movimientos.`);
+  avisar(`✓ ${nombre} quedó agregado a ${areaLabel(codigo)}.\n\nLa ficha queda con saldo cero; este paso no mueve existencias.`);
 }
 function gestionarAreas(){
   if(SEDE!=='plaza'||!PERMISOS.puede_ajustes)return;
@@ -12905,6 +13015,10 @@ document.querySelectorAll('.mcard').forEach(c=>c.addEventListener('click',()=>{
   render();
 }));
 $('tipos').addEventListener('change',e=>{tipoSel=e.target.value||null;render();});
+$('areaTipoPills').addEventListener('click',e=>{
+  const boton=e.target.closest('[data-area-tipo]');if(!boton)return;
+  tipoSel=boton.dataset.areaTipo||null;filterState=null;renderAreaTipoPills();render();
+});
 $('inv-estado').addEventListener('change',e=>{
   filterState=e.target.value||null;
   document.querySelectorAll('.mcard').forEach(x=>x.classList.toggle('sel',x.dataset.f===filterState));
@@ -13006,6 +13120,7 @@ function mandarAlReparto(id, lado){
    touch-action:pan-y — eso lo resuelve el CSS, no este código. */
 listEl.addEventListener('pointerdown', e=>{
   if(!e.isPrimary || e.button !== 0) return;      // solo el botón principal
+  if(SEDE==='plaza'&&areaActual!==null) return;   // las áreas son de lectura: no disparar reparto/merma legacy
   const row=e.target.closest('.row'); if(!row) return;
   // sobre un campo o un botón el gesto no aplica: ahí se escribe o se toca
   if(e.target.closest('input,select,textarea,button,a')) return;
@@ -13404,8 +13519,14 @@ function pintarUbicacionFisica(preferencia){
     : 'Sin saldo físico en ninguna ubicación.')+'</span>';
 }
 async function openModal(id){
-  modalProd=DATA.find(d=>d.id===id); if(!modalProd)return;
+  modalProd=DATA.find(d=>d.id===id)||((SEDE==='plaza'&&MODAL_AREA_ROW)?{
+    id:Number(id),producto:MODAL_AREA_ROW.producto,tipo:MODAL_AREA_ROW.tipo||'',rubro:MODAL_AREA_ROW.rubro||'',
+    unidad:MODAL_AREA_ROW.unidad||'',stock_actual:Number(MODAL_AREA_ROW.cantidad)||0,
+    stock_min:MODAL_AREA_ROW.stock_min,stock_max:MODAL_AREA_ROW.stock_max
+  }:null); if(!modalProd)return;
   if(SEDE!=='plaza')MODAL_AREA_ROW=null;
+  const fichaArea=SEDE==='plaza'&&!!MODAL_AREA_ROW;
+  const configArea=fichaArea&&!!MODAL_AREA_ROW.area_id&&!!MODAL_AREA_ROW.configurado;
   $('m-nombre').textContent=modalProd.producto;
   $('m-producto').value=modalProd.producto??'';
   /* La sección actual del producto se agrega aunque ya no exista en la lista:
@@ -13414,20 +13535,21 @@ async function openModal(id){
   const secs=[...new Set([...seccionesDeLaSede(), modalProd.rubro].filter(Boolean))];
   $('m-seccion').innerHTML=secs.map(s=>`<option${s===modalProd.rubro?' selected':''}>${esc(s)}</option>`).join('');
   $('m-stock').value=SEDE==='plaza'&&MODAL_AREA_ROW?Number(MODAL_AREA_ROW.cantidad)||0:(modalProd.stock_actual??'');
+  $('m-stock-field').style.display=fichaArea?'none':'';
   const stockCortado=SEDE==='central'||SEDE==='plaza';
   $('m-stock').disabled=stockCortado;
   $('m-stock').title=stockCortado?'Saldo de solo lectura: existencias por ubicación':'';
   $('m-menos').disabled=stockCortado; $('m-mas').disabled=stockCortado;
   $('m-stock-corte').style.display=stockCortado?'block':'none';
   $('m-perec').disabled=stockCortado; $('m-venc-single').disabled=stockCortado;
-  const configArea=SEDE==='plaza'&&MODAL_AREA_ROW&&MODAL_AREA_ROW.area_id;
   $('m-min').value=configArea?(MODAL_AREA_ROW.stock_min??''):(modalProd.stock_min??'');
   $('m-max').value=configArea?(MODAL_AREA_ROW.stock_max??''):(modalProd.stock_max??'');
+  $('m-limits-fields').style.display=configArea?'flex':'none';
   $('m-min-label').textContent=configArea?'Mínimo en esta área':'Stock mínimo';
   $('m-max-label').textContent=configArea?'Máximo en esta área':'Stock máximo';
-  $('m-min').disabled=SEDE==='plaza'&&(!configArea||!PERMISOS.puede_editar);
-  $('m-max').disabled=SEDE==='plaza'&&(!configArea||!PERMISOS.puede_editar);
-  $('m-tipo-row').style.display = hasTipo ? '' : 'none';
+  $('m-min').disabled=SEDE==='plaza'&&(!configArea||!MODAL_AREA_ROW?.configurado||!PERMISOS.puede_editar);
+  $('m-max').disabled=SEDE==='plaza'&&(!configArea||!MODAL_AREA_ROW?.configurado||!PERMISOS.puede_editar);
+  $('m-tipo-row').style.display = hasTipo&&!fichaArea ? '' : 'none';
   if(hasTipo){
     $('m-tipo').value = modalProd.tipo ?? '';
     // se ofrecen los tipos que ya existen, para no inventar uno nuevo por una tilde
@@ -13435,13 +13557,23 @@ async function openModal(id){
     $('lista-tipos').innerHTML = tipos.map(t=>`<option value="${esc(t)}">`).join('');
   }
   $('m-area-wrap').style.display=SEDE==='plaza'?'block':'none';
+  $('m-area-selector-wrap').style.display=fichaArea?'none':'';
+  $('m-area-fisica').style.display=fichaArea?'none':'block';
+  $('m-area-ficha-resumen').hidden=!fichaArea;
+  $('m-area-ficha-resumen').style.display=fichaArea?'grid':'none';
+  $('m-area-ficha-resumen').innerHTML=fichaArea?`<div><span>Área</span><strong>${esc(MODAL_AREA_ROW.area_nombre||areaLabel(MODAL_AREA_ROW.area_codigo))}</strong></div>
+    <div><span>Tipo</span><strong>${esc(modalProd.tipo||'Sin tipo')}</strong></div>
+    <div><span>Sección física</span><strong>${esc(MODAL_AREA_ROW.seccion_nombre||'Sin sección')}</strong></div>
+    <div><span>Saldo físico</span><strong>${fmt(Number(MODAL_AREA_ROW.cantidad)||0)} ${esc(modalProd.unidad||'')}</strong></div>
+    ${configArea?`<div><span>Mínimo / máximo</span><strong>${MODAL_AREA_ROW.stock_min==null?'—':fmt(MODAL_AREA_ROW.stock_min)} / ${MODAL_AREA_ROW.stock_max==null?'—':fmt(MODAL_AREA_ROW.stock_max)}</strong></div>`:''}
+    <div class="area-ficha-venc"><span>Vencimientos</span>${vencsHTML(modalProd)||'<small>Sin vencimientos informados</small>'}</div>`:'';
   if(SEDE==='plaza'){
-    const areaId=configArea||'';
+    const areaId=fichaArea?String(MODAL_AREA_ROW.area_id||''):'';
     $('m-area').innerHTML=areaId
       ? `<option value="${esc(areaId)}">${esc(MODAL_AREA_ROW.area_nombre)}</option>`
       : '<option value="">Sin asignar</option>';
     $('m-area').disabled=true;
-    $('m-area-seccion-wrap').style.display=areaId?'block':'none';
+    $('m-area-seccion-wrap').style.display=configArea?'block':'none';
     $('m-area-seccion').disabled=true;
     $('m-area-seccion').innerHTML='<option>Cargando secciones…</option>';
     $('m-area-fisica').innerHTML='<strong>Ubicación física actual</strong><span>Cargando saldo real…</span>';
@@ -13462,17 +13594,17 @@ async function openModal(id){
         $('m-area-seccion').innerHTML='<option value="">No se pudieron leer las secciones</option>';
       }else{
         $('m-area-seccion').innerHTML=opcionesSeccionesAreaHTML(secciones.data,MODAL_AREA_ROW.seccion_id);
-        $('m-area-seccion').disabled=!PERMISOS.puede_editar;
+        $('m-area-seccion').disabled=!PERMISOS.puede_editar||!MODAL_AREA_ROW.configurado;
       }
     }
   }
-  $('m-perec-row').style.display = hasPerec ? 'flex' : 'none';
+  $('m-perec-row').style.display = hasPerec&&!fichaArea ? 'flex' : 'none';
   if(hasPerec) $('m-perec').checked = !!modalProd.perecedero;
-  $('m-urgente').style.display = hasUrgente ? 'flex' : 'none';
+  $('m-urgente').style.display = hasUrgente&&!fichaArea ? 'flex' : 'none';
   setUrgente(!!modalProd.urgente);
   /* Mermar solo en Bodega. La base lo vuelve a comprobar dentro de mermar(),
      así que esconder el botón es comodidad y no la única defensa. */
-  $('m-mermar').style.display = 'flex';   // en todas las sedes, ver pickSede
+  $('m-mermar').style.display = fichaArea?'none':'flex';   // en todas las sedes, ver pickSede
   setModoEdicion(modoEdicion);
   // Solo se ofrece el editor de VARIAS fechas si la tabla que las guarda
   // (producto_lotes) existe de verdad en la base. Si no, se cae al campo
@@ -13481,7 +13613,7 @@ async function openModal(id){
   const puedeLotes = hasLotes && esPerec(modalProd);
   const puedeSoloFecha = !hasLotes && hasVenc && esPerec(modalProd);
   const conVenc = puedeLotes || puedeSoloFecha;
-  $('m-venc-field').style.display = conVenc ? 'block' : 'none';
+  $('m-venc-field').style.display = conVenc&&!fichaArea ? 'block' : 'none';
   $('m-venc-label').textContent = puedeLotes ? 'Vencimientos' : 'Fecha de vencimiento';
   $('m-lotes').style.display = puedeLotes ? '' : 'none';
   $('btnAddLote').style.display = puedeLotes && !stockCortado ? '' : 'none';
@@ -13490,6 +13622,16 @@ async function openModal(id){
   $('m-venc-single').style.display = puedeSoloFecha ? '' : 'none';
   pintarLotes(puedeLotes ? lotesDe(modalProd.id) : []);
   if(puedeSoloFecha) $('m-venc-single').value = modalProd.vencimiento ?? '';
+  $('m-fudo').style.display=fichaArea?'none':(puedeEnFudo('ficha')?'':'none');
+  $('m-eliminar').style.display=fichaArea?'none':(modoEdicion&&PERMISOS.puede_editar?'':'none');
+  if(fichaArea){
+    $('m-edicion').style.display='none';
+    $('m-guardar').textContent=configArea?'Guardar organización':'Solo lectura';
+    $('m-guardar').disabled=!configArea||!PERMISOS.puede_editar;
+  }else{
+    $('m-guardar').textContent='Guardar';
+    $('m-guardar').disabled=false;
+  }
   $('overlay').classList.add('open');
 }
 
@@ -13578,6 +13720,22 @@ $('m-menos').addEventListener('click',()=>{const i=$('m-stock');i.value=Math.max
 $('m-mas').addEventListener('click',()=>{const i=$('m-stock');i.value=(+i.value||0)+1;});
 $('m-guardar').addEventListener('click',async()=>{
   if(!modalProd)return;
+  if(SEDE==='plaza'&&MODAL_AREA_ROW){
+    if(!MODAL_AREA_ROW.area_id||!MODAL_AREA_ROW.configurado||!PERMISOS.puede_editar){avisar('Esta ficha es de solo lectura.');return;}
+    const numArea=el=>el.value===''?null:Number(el.value);
+    const minArea=numArea($('m-min')),maxArea=numArea($('m-max'));
+    if(minArea!=null&&(!Number.isFinite(minArea)||minArea<0)||maxArea!=null&&(!Number.isFinite(maxArea)||maxArea<0)||minArea!=null&&maxArea!=null&&maxArea<minArea){
+      avisar('Revisa el mínimo y máximo del área.');return;
+    }
+    const boton=$('m-guardar');boton.disabled=true;boton.textContent='Guardando organización…';
+    const {error}=await conReintento(()=>sb.rpc('producto_area_configuracion_guardar',{
+      p_producto_id:modalProd.id,p_area_id:MODAL_AREA_ROW.area_id,
+      p_seccion_id:$('m-area-seccion').value||null,p_stock_min:minArea,p_stock_max:maxArea,
+      p_es_principal:!!MODAL_AREA_ROW.es_principal,p_sede:'plaza'
+    }));
+    if(error){boton.disabled=false;boton.textContent='Guardar organización';avisar(error.message||'No se pudo guardar la organización del área.');return;}
+    await loadData();closeModal();aviso('✓ Organización del área guardada. Ninguna existencia se movió.');return;
+  }
   const nombre=$('m-producto').value.replace(/\s+/g,' ').trim();
   if(!nombre){ avisar('El producto necesita un nombre.'); $('m-producto').focus(); return; }
   const rubroNuevo=$('m-seccion').value;
