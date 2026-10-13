@@ -1,5 +1,16 @@
 # Bitácora de Codex
 
+## 2026-10-13 — B2: refinamiento de filtros y alta desde Bodega
+
+- Se refinó la pantalla de trabajo dentro de cada área sin alterar la navegación general ni los datos del inventario. Las cuatro tarjetas son filtros en la misma lista: **Críticos** (bajo mínimo o saldo cero), **Sobre-stock** (sobre máximo), **Sin límites** (falta mínimo o máximo) y **Vencimientos** (con grupos separados para vencidos y próximos a vencer, ventana de 7 días).
+- Las tarjetas usan el ancho útil en cuatro columnas de escritorio, dos en tamaño intermedio y una en teléfono. El buscador, las píldoras históricas y la lista también ocupan el ancho del área de contenido; no se abren modales al pulsar los filtros.
+- El botón para agregar desde Bodega conserva el flujo de producto maestro. El formulario permite elegir una sección física existente; desde el panel lateral puede seleccionarse o, con permiso de Ajustes, crear una sección. El panel entra visualmente desde un costado. Las secciones siguen siendo clasificación operativa sin saldo propio.
+- Si no existe el producto en Bodega, **Crear nuevo producto** lleva a la creación del maestro solo en Bodega, oculta el enlace Fudo y retorna al área para confirmar la configuración. Si ya hay más de un maestro exacto, ninguno se elige automáticamente. Esta ruta no crea receta, stock, lote, movimiento ni transferencia.
+- Archivos de aplicación: `index.html`; prueba: `pruebas/b2-interfaz-area-historica.mjs`. Documentación de estado: cola y mapa de Inventario por Áreas. No se agregaron migraciones ni cambios de esquema, RLS o permisos; ningún dato operativo se modificó.
+- Verificación: `npm test` pasó; las pruebas estáticas validan las cuatro tarjetas, el diseño 4/2/1, la separación sección/categoría y uso de RPC protegidas. `git diff --check` pasó. No se pudo hacer revisión visual automatizada: Chromium no está instalado.
+- El ledger permanece como única fuente de cantidades; `stock_internal.existencias` no se modificó ni se invocó `stock_transferir`. Fudo, Lama, caja, ventas, Bodega operativa, recetas y lotes no se modificaron. No se accedió a Café del Desierto / Llamita Stock.
+- B3 permanece pendiente; no se activó carga inicial, ajuste, reparto, despacho ni recepción.
+
 ## 2026-10-13 — B2: interfaz histórica dentro de cada área y alta Bodega simplificada
 
 - Repositorio confirmado: `leoalejoleo1537/llamita-plus`; `origin` apunta a ese repositorio. Publicación solicitada únicamente a `origin/master`. No se accedió, consultó ni modificó Café del Desierto / Llamita Stock.

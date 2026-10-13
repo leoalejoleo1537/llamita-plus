@@ -3,7 +3,7 @@
 ## Estado del árbol de Inventario por Áreas — 2026-10-13
 
 - **B1 — Maestro de Bodega → representación Local 1:** COMPLETADO en el commit `e7f0f40892ab2d190426ed4a07b4853890a3171c`; las dos migraciones están instaladas y las RPC verificadas en Llamita Plus.
-- **B2 — Recuperar la interfaz histórica dentro de cada área:** COMPLETADO en esta ejecución. Se recuperaron grupos/píldoras de tipo, acordeones de sección, filas de inventario y ficha adaptada al ledger. El agregado desde Bodega quedó simplificado y sin IDs técnicos visibles.
+- **B2 — Recuperar la interfaz histórica dentro de cada área:** COMPLETADO y refinado en esta ejecución. Se recuperaron grupos/píldoras de tipo, acordeones de sección, filas de inventario y ficha adaptada al ledger; se añadieron cuatro filtros de estado responsivos y un panel de secciones dentro del flujo de agregado desde Bodega.
 - **Siguiente nodo: B3 — Alta/configuración manual de productos demo.** PENDIENTE de activación explícita; no comenzar automáticamente.
 - Resultado detallado de B1: entrada superior de `docs/hermes/04-bitacora-codex.md`. Mapa completo: `docs/hermes/00-mapa-objetivo-inventario-areas.md`.
 
@@ -16,6 +16,8 @@ Estado actual: **B1 y B2 COMPLETADOS (2026-10-13); B3 ES EL SIGUIENTE NODO, PEND
 - Datos: configurados con saldo cero aparecen explícitamente; las cantidades, vencimientos y estados se leen para Local 1 sin habilitar edición de `productos.stock_actual`. La ficha de área solo permite guardar sección y mínimos/máximos mediante la RPC protegida de configuración.
 - Seguridad operativa: se desactivaron los gestos legacy de reparto/merma mientras se navega por áreas. No se invocó `stock_transferir`.
 - Agregar desde Bodega: UI sin IDs/factores visibles; una única representación enlazada se reutiliza automáticamente, las alternativas realmente relevantes requieren confirmación, las fichas vinculadas a otro maestro no se ofrecen y una representación nueva se crea con saldo cero.
+- Estado: cuatro tarjetas-botón que filtran la lista actual: Críticos, Sobre-stock, Sin límites y Vencimientos; este último separa vencidos y próximos a vencer. Distribución responsive 4/2/1 columnas. El panel lateral reutiliza RPC protegidas de sección y no guarda cantidades.
+- Alta desde el área: si el maestro no existe, permite iniciar su creación solo en Bodega y regresar para configurar sección/área; no crea enlace Fudo, receta ni stock. Coincidencias exactas múltiples requieren selección humana.
 - Verificación: `npm test`, prueba estática B2 y `git diff --check` satisfactorios. Las pruebas visuales de navegador se omitieron porque el entorno no tiene Chromium.
 - No hubo cambios de esquema, migraciones, permisos o datos. B3 permanece pendiente y requiere activación explícita.
 

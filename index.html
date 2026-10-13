@@ -386,6 +386,7 @@
   }
   /* ---------- layout ---------- */
   .wrap{max-width:900px;margin:0 auto;padding:14px 16px 90px}
+  #view-inv.area-workspace-wide{width:auto;max-width:none;margin:0;padding:14px 22px 90px}
   .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
   input[type=text],select,input[type=date]{flex:1;min-width:150px;height:42px;padding:0 14px;border:1px solid var(--border);border-radius:10px;font-size:15px;background:var(--card);color:var(--text)}
   .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
@@ -433,7 +434,25 @@
   .area-manage{flex:0 0 auto;min-height:40px;padding:8px 12px;border:1px solid var(--border);border-radius:10px;
     background:var(--card);color:var(--orange-dark);font:inherit;font-size:12px;font-weight:800;cursor:pointer}
   .area-nav-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
-  .area-assign-modal{width:min(620px,94vw)}
+  .area-assign-modal{width:min(620px,94vw);max-width:620px}
+  .area-assign-modal.has-section-panel{width:min(940px,96vw);max-width:940px}
+  .area-assign-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:0;overflow:hidden}
+  .area-assign-main{min-width:0;transition:transform .22s ease,opacity .22s ease}
+  .area-section-side{display:none;min-width:0;max-height:min(76vh,720px);overflow:auto;border-left:1px solid var(--border);padding:0 0 0 18px}
+  .has-section-panel .area-assign-layout{grid-template-columns:minmax(0,1.1fr) minmax(260px,.9fr);gap:18px}
+  .has-section-panel .area-assign-main{transform:translateX(-12px);opacity:.82}
+  .has-section-panel .area-section-side{display:block;animation:area-panel-in .22s ease both}
+  @keyframes area-panel-in{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+  .area-section-side-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+  .area-section-side-head h3{margin:0;font-size:16px}
+  .area-section-side-list{display:grid;gap:6px;margin:10px 0 14px}
+  .area-section-choice{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:44px;padding:9px 11px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+  .area-section-choice[aria-pressed="true"]{border-color:var(--orange);box-shadow:0 0 0 1px var(--orange)}
+  .area-section-add{display:grid;gap:8px;padding-top:12px;border-top:1px solid var(--border)}
+  .area-section-add label{font-size:12px;font-weight:700}
+  .area-section-add button{min-height:42px}
+  .area-empty-create{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px;padding:10px 12px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+  .area-empty-create button{border:0;background:transparent;color:var(--orange-dark);font:inherit;font-weight:800;cursor:pointer;padding:8px 4px;white-space:nowrap}
   .area-assign-explain{padding:10px 12px;margin:0 0 12px;border-radius:11px;background:var(--gray-bg);
     color:var(--gray-fg);font-size:12px;line-height:1.45}
   .area-product-results{max-height:250px;overflow-y:auto;border:1px solid var(--border);border-radius:11px;background:var(--card)}
@@ -446,6 +465,7 @@
   .area-assign-detail h3{margin:0 0 7px;font-size:14px}.area-assign-detail p{margin:4px 0;color:var(--muted);font-size:12px;line-height:1.4}
   .area-assign-detail .notice{color:var(--text);font-weight:700}
   .area-tipo-pills{margin-top:2px}
+.area-tipo-pills{width:100%;flex-wrap:wrap;overflow:visible;}
 .area-ficha-resumen{display:grid;gap:7px;margin:8px 0 12px;padding:12px;border-radius:12px;background:var(--gray-bg)}
 .area-ficha-resumen[hidden]{display:none}
   .area-ficha-resumen div{display:flex;justify-content:space-between;gap:12px;font-size:13px}
@@ -463,9 +483,13 @@
   .area-read-sub{font-size:11px;color:var(--muted);margin-top:3px}
   .area-read-qty{font-size:15px;font-weight:800;white-space:nowrap}
   button.area-read-row{width:100%;border-left:0;border-right:0;border-top:0;color:var(--text);font:inherit;text-align:left;cursor:pointer}
-  .area-work-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:0 0 12px}
-  .area-work-metric{padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--card)}
-  .area-work-metric strong{display:block;font-size:20px;line-height:1.1}.area-work-metric span{display:block;margin-top:4px;color:var(--muted);font-size:11px}
+  .area-work-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 14px;width:100%}
+  .area-work-metric{display:flex;align-items:center;gap:12px;min-width:0;min-height:76px;padding:12px 14px;border:1px solid var(--border);border-radius:13px;background:var(--card);color:var(--text);font:inherit;text-align:left;cursor:pointer;box-shadow:var(--sombra);transition:box-shadow .15s ease,transform .12s ease}
+  .area-work-metric:active{transform:scale(.985)}
+  .area-work-metric[aria-pressed="true"]{box-shadow:0 0 0 2px var(--orange),var(--sombra)}
+  .area-work-metric strong{display:block;font-size:23px;line-height:1.1;flex:0 0 auto}.area-work-metric span{display:block;margin-top:2px;color:var(--muted);font-size:12px;font-weight:700}
+  .area-work-metric.crit strong{color:var(--red-fg)}.area-work-metric.sobre strong{color:var(--amber-fg)}.area-work-metric.venc strong{color:var(--red-fg)}
+  .area-expiry-group{margin:8px 0 4px;padding:8px 10px;border-radius:9px;background:var(--gray-bg);color:var(--gray-fg);font-size:11px;font-weight:800;letter-spacing:.02em}
   .area-config-note{display:inline-flex;align-items:center;margin-top:4px;padding:2px 7px;border-radius:999px;background:var(--gray-bg);color:var(--gray-fg);font-size:10px;font-weight:750}
   .area-physical-section{margin:0 0 9px;border:1px solid var(--border);border-radius:13px;background:var(--card);overflow:hidden;box-shadow:var(--sombra)}
   .area-physical-head{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:46px;padding:10px 12px;border:0;background:var(--sec-bg);color:var(--text);font:inherit;text-align:left;cursor:pointer}
@@ -494,7 +518,9 @@
   .area-admin-actions button{min-height:38px}
   .area-admin-row.archivada{opacity:.72}
   .area-admin-new{display:grid;grid-template-columns:minmax(0,1fr) 90px auto;gap:8px;align-items:end}
-  @media(max-width:700px){.area-cover{grid-template-columns:repeat(2,minmax(0,1fr))}.area-card{padding:12px}.area-cover-head{align-items:flex-start}.area-nav{align-items:flex-start;flex-wrap:wrap}.area-context{order:3;width:100%;text-align:left}.area-nav-actions{justify-content:flex-start}.area-work-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:960px){.area-work-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:700px){#view-inv.area-workspace-wide{padding:12px 14px calc(90px + env(safe-area-inset-bottom))}.area-cover{grid-template-columns:repeat(2,minmax(0,1fr))}.area-card{padding:12px}.area-cover-head{align-items:flex-start}.area-nav{align-items:flex-start;flex-wrap:wrap}.area-context{order:3;width:100%;text-align:left}.area-nav-actions{justify-content:flex-start}}
+  @media(max-width:620px){.area-work-metrics{grid-template-columns:1fr;gap:7px}.area-work-metric{min-height:64px}.area-assign-modal.has-section-panel{width:min(620px,96vw)}.has-section-panel .area-assign-layout{display:block;position:relative}.has-section-panel .area-assign-main{transform:translateX(-105%);opacity:0;pointer-events:none}.has-section-panel .area-section-side{position:absolute;inset:0 0 0 0;max-height:70vh;padding:0;border:0;background:var(--card)}.area-section-admin-row{grid-template-columns:1fr}}
   @media(max-width:620px){.area-admin-row,.area-admin-new,.area-section-admin-row{grid-template-columns:1fr}.area-admin-actions{justify-content:flex-start}.area-admin-row input,.area-admin-new input{width:100%;min-width:0}}
   @media(max-width:420px){.area-cover{grid-template-columns:1fr;gap:7px}.area-global-balances{grid-template-columns:1fr}.area-card-title{font-size:13px}.area-cover-head{display:grid}.area-manage{width:100%}.area-product-result{align-items:flex-start}.area-product-result .saldo{max-width:34%}}
 
@@ -3675,6 +3701,7 @@
      bodega. Sin esto el reparto no sabe a qué sumarle al llegar.
      Maqueta aprobada por Jhon: docs/propuesta-enlaces.html            -->
 <div class="wrap" id="view-enlaces" style="display:none">
+  <div id="area-bodega-return-note" class="area-assign-explain" hidden></div>
 
   <!-- Esta pantalla es SOLO para crear productos nuevos.
        Tuvo un rato una lista de "94 pendientes de enlazar" que nadie pidió:
@@ -4078,18 +4105,32 @@
 <!-- Vincula una ficha maestra de Bodega con Local 1 y la configura para el área. -->
 <div class="overlay" id="overlay-area-producto">
   <div class="modal area-assign-modal" role="dialog" aria-modal="true" aria-labelledby="area-producto-titulo">
-    <h2 id="area-producto-titulo">Agregar producto de Bodega</h2>
-    <p class="mr" id="area-producto-destino"></p>
-    <div class="area-assign-explain" id="area-producto-explica">Selecciona el producto maestro exacto. Este paso no mueve stock ni crea lotes o movimientos.</div>
-    <div class="field" style="margin-top:0">
-      <label>Buscar producto maestro</label>
-      <input type="search" id="area-producto-q" placeholder="Nombre o ID de Bodega" autocomplete="off">
-    </div>
-    <div class="area-product-results" id="area-producto-resultados" aria-live="polite"></div>
-    <div class="area-assign-detail" id="area-producto-detalle" hidden></div>
-    <div class="mbtns">
-      <button type="button" class="btn btn-outline" id="area-producto-cancelar">Cancelar</button>
-      <button type="button" class="btn btn-orange" id="area-producto-guardar" disabled>Confirmar producto</button>
+    <div class="area-assign-layout" id="area-assign-layout">
+      <div class="area-assign-main">
+        <h2 id="area-producto-titulo">Agregar producto de Bodega</h2>
+        <p class="mr" id="area-producto-destino"></p>
+        <div class="area-assign-explain" id="area-producto-explica">Selecciona el producto maestro exacto. Este paso no mueve stock ni crea lotes o movimientos.</div>
+        <div class="field" style="margin-top:0">
+          <label for="area-producto-q">Buscar producto maestro</label>
+          <input type="search" id="area-producto-q" placeholder="Buscar producto…" autocomplete="off">
+        </div>
+        <div class="area-product-results" id="area-producto-resultados" aria-live="polite"></div>
+        <div class="area-assign-detail" id="area-producto-detalle" hidden></div>
+        <div class="mbtns">
+          <button type="button" class="btn btn-outline" id="area-producto-cancelar">Cancelar</button>
+          <button type="button" class="btn btn-orange" id="area-producto-guardar" disabled>Agregar producto</button>
+        </div>
+      </div>
+      <aside class="area-section-side" id="area-section-side" aria-label="Secciones físicas del área">
+        <div class="area-section-side-head"><h3>Secciones de <span id="area-section-area-name"></span></h3><button type="button" class="area-back" data-area-section-close>Cerrar</button></div>
+        <p class="aj-nota">Elige dónde se guarda este producto dentro del área. Las secciones no contienen stock.</p>
+        <div class="area-section-side-list" id="area-section-side-list"></div>
+        <div class="area-section-add" id="area-section-add">
+          <label for="area-section-new-name">Agregar sección</label>
+          <input type="text" id="area-section-new-name" maxlength="80" placeholder="Ej: Refrigerador de leches">
+          <button type="button" class="btn btn-orange" data-area-section-create>Crear sección</button>
+        </div>
+      </aside>
     </div>
   </div>
 </div>
@@ -4185,6 +4226,7 @@ let AREA_LOADING = false;
 let areaActual = null;              // null=portada; '__todas__'=vista global; otro=ubicación plaza
 const AREA_TODAS = '__todas__';
 let filterState = null;
+let areaFilterCard = null;
 let hasVenc = false;      // true cuando exista la columna vencimiento en la tabla
 let hasPerec = false;     // true cuando exista la columna perecedero
 let hasUrgente = false;   // true cuando exista la columna urgente
@@ -4200,8 +4242,11 @@ let BODEGA_AREA_SELECCION = null;
 let BODEGA_AREA_REP_ID = null;
 let BODEGA_AREA_CREAR_REP = false;
 let BODEGA_AREA_SECCIONES = [];
+let BODEGA_AREA_SECCION_ID = '';
 let BODEGA_AREA_BUSQUEDA_SEQ = 0;
 let BODEGA_AREA_TIMER = null;
+let AREA_SECCION_PANEL_ABIERTO = false;
+let AREA_BODEGA_RETURN = null;
 let carrito = [];         // productos que llegaron, pendientes de registrar
 
 /* ¿este producto es perecedero? (usa la columna si existe; si no, la regla vieja de Sándwiches) */
@@ -4268,7 +4313,8 @@ function cambiarArea(codigo, producto=''){
   if(codigo!==null && codigo!==AREA_TODAS && !areasNavegacion().includes(codigo)) return;
   areaActual=codigo;
   qEl.value=producto;
-  filterState=null; tipoSel=null; openSecs.clear();
+  filterState=null; areaFilterCard=null; tipoSel=null; openSecs.clear();
+  $('view-inv').classList.toggle('area-workspace-wide',codigo!==null);
   document.querySelectorAll('.mcard').forEach(x=>x.classList.remove('sel'));
   renderTipos(); render(); tituloInventarioArea();
   window.scrollTo({top:0,behavior:'smooth'});
@@ -4276,20 +4322,37 @@ function cambiarArea(codigo, producto=''){
 function areaStats(codigo){
   const rows=AREA_ROWS.filter(r=>r.area_codigo===codigo), conSaldo=rows.filter(r=>Number(r.cantidad)>0);
   const configurados=rows.filter(r=>r.configurado);
-  const criticos=configurados.filter(r=>r.stock_min!=null&&Number(r.cantidad)<=Number(r.stock_min)).length;
+  const criticos=configurados.filter(r=>Number(r.cantidad)<=0||r.stock_min!=null&&Number(r.cantidad)<=Number(r.stock_min)).length;
   const sobre=configurados.filter(r=>r.stock_max!=null&&Number(r.cantidad)>Number(r.stock_max)).length;
-  const sinDato=configurados.filter(r=>r.stock_min==null&&r.stock_max==null).length;
+  const sinDato=configurados.filter(r=>r.stock_min==null||r.stock_max==null).length;
+  const vencimientos=new Set(rows.filter(r=>estadoVencimientoArea(r.producto_id)).map(r=>String(r.producto_id))).size;
   return {productos:new Set(rows.map(r=>r.producto_id)).size,
           productosConSaldo:new Set(conSaldo.map(r=>r.producto_id)).size,
-          unidades:rows.reduce((s,r)=>s+(Number(r.cantidad)||0),0),criticos,sobre,sinDato};
+          unidades:rows.reduce((s,r)=>s+(Number(r.cantidad)||0),0),criticos,sobre,sinDato,vencimientos};
 }
 function estadoArea(r){
-  if(!r.configurado||r.stock_min==null&&r.stock_max==null)return 'sindato';
   const cantidad=Number(r.cantidad)||0;
-  if(r.stock_min!=null&&cantidad<=Number(r.stock_min))return 'critico';
+  if(cantidad<=0||r.configurado&&r.stock_min!=null&&cantidad<=Number(r.stock_min))return 'critico';
   if(r.stock_max!=null&&cantidad>Number(r.stock_max))return 'sobre';
+  if(!r.configurado||r.stock_min==null||r.stock_max==null)return 'sindato';
   return 'ok';
 }
+function fechaEstadoArea(iso){
+  if(!iso)return null;
+  const hoy=new Date();hoy.setHours(0,0,0,0);
+  const fecha=new Date(String(iso).slice(0,10)+'T00:00:00');
+  if(Number.isNaN(fecha.getTime()))return null;
+  const dias=Math.floor((fecha-hoy)/86400000);
+  return dias<0?'vencido':dias<=7?'por_vencer':null;
+}
+function vencimientosProductoArea(productoId){
+  const lotes=lotesDe(productoId).filter(l=>l.vencimiento);
+  if(lotes.length)return lotes.map(l=>fechaEstadoArea(l.vencimiento)).filter(Boolean);
+  const producto=DATA.find(p=>String(p.id)===String(productoId));
+  return producto?.vencimiento?[fechaEstadoArea(producto.vencimiento)].filter(Boolean):[];
+}
+function estadoVencimientoArea(productoId){const estados=vencimientosProductoArea(productoId);return estados.includes('vencido')?'vencido':estados[0]||null;}
+function productoTieneVencimientoArea(productoId,estado){return vencimientosProductoArea(productoId).includes(estado);}
 async function cargarSeccionesArea(areaId,incluirArchivadas=false){
   if(!areaId)return [];
   const clave=areaId+'|'+(incluirArchivadas?'1':'0');
@@ -4300,6 +4363,46 @@ async function cargarSeccionesArea(areaId,incluirArchivadas=false){
 function opcionesSeccionesAreaHTML(filas,valor){
   return '<option value="">Sin sección</option>'+(filas||[]).filter(s=>s.estado==='activa').map(s=>
     `<option value="${esc(s.id)}"${String(valor||'')===String(s.id)?' selected':''}>${esc(s.nombre)} · ${String(s.turno||'pm').toUpperCase()}</option>`).join('');
+}
+function pintarPanelSeccionesArea(){
+  const lista=$('area-section-side-list');if(!lista)return;
+  $('area-section-area-name').textContent=areaLabel(ASIGNAR_AREA_CODIGO);
+  const activas=BODEGA_AREA_SECCIONES.filter(s=>s.estado==='activa');
+  lista.innerHTML=activas.length?activas.map(s=>`<button type="button" class="area-section-choice" data-area-section-choice="${esc(s.id)}" aria-pressed="${String(s.id)===String(BODEGA_AREA_SECCION_ID)}"><span>${esc(s.nombre)}</span><span>${String(s.turno||'pm').toUpperCase()}</span></button>`).join(''):'<div class="area-loading">Todavía no hay secciones en esta área.</div>';
+  $('area-section-add').style.display=PERMISOS.puede_ajustes?'grid':'none';
+}
+function abrirPanelSeccionesArea(){
+  if(!ASIGNAR_AREA_CODIGO||!BODEGA_AREA_SELECCION)return;
+  AREA_SECCION_PANEL_ABIERTO=true;
+  $('area-assign-layout').closest('.area-assign-modal').classList.add('has-section-panel');
+  pintarPanelSeccionesArea();
+  $('area-section-side').querySelector('[data-area-section-close]').focus();
+}
+function cerrarPanelSeccionesArea(){
+  AREA_SECCION_PANEL_ABIERTO=false;
+  const modal=$('area-assign-layout')?.closest('.area-assign-modal');
+  modal?.classList.remove('has-section-panel');
+  if($('overlay-area-producto')?.classList.contains('open'))setTimeout(()=>$('area-producto-detalle')?.querySelector('[data-area-section-open]')?.focus(),0);
+}
+async function crearSeccionDesdeArea(){
+  if(!PERMISOS.puede_ajustes){avisar('Se necesita acceso a Ajustes para crear secciones.');return;}
+  const nombre=$('area-section-new-name').value.trim(),areaId=areaIdPorCodigo(ASIGNAR_AREA_CODIGO);
+  if(!nombre){$('area-section-new-name').focus();avisar('Escribe el nombre de la sección.');return;}
+  if(!areaId){avisar('El área ya no está activa. No se hizo ningún cambio.');return;}
+  const orden=BODEGA_AREA_SECCIONES.reduce((max,s)=>Math.max(max,Number(s.orden)||0),0)+10;
+  const btn=$('area-section-side').querySelector('[data-area-section-create]');
+  btn.disabled=true;btn.textContent='Creando…';
+  const {data,error}=await conReintento(()=>sb.rpc('area_seccion_crear',{
+    p_area_id:areaId,p_nombre:nombre,p_orden:orden,p_turno:'pm',p_codigo:null
+  }));
+  btn.disabled=false;btn.textContent='Crear sección';
+  if(error){avisar(/23505|duplicad|existe/i.test(error.message||'')?'Ya existe una sección con ese nombre en esta área.':(error.message||'No se pudo crear la sección.'));return;}
+  BODEGA_AREA_SECCION_ID=String(data||'');
+  const filas=await cargarSeccionesArea(areaId,false);
+  BODEGA_AREA_SECCIONES=filas;
+  $('area-section-new-name').value='';
+  renderDetalleProductoBodega();pintarPanelSeccionesArea();
+  aviso('✓ Sección agregada · no se movieron existencias');
 }
 function htmlTarjetaArea(codigo){
   const s=areaStats(codigo);
@@ -4318,6 +4421,7 @@ function htmlTarjetaArea(codigo){
   </article>`;
 }
 function renderAreaPortada(){
+  $('view-inv').classList.remove('area-workspace-wide');
   $('areaNav').style.display='none'; $('areaNote').style.display='none';
   $('areaTipoPills').style.display='none'; $('areaTipoPills').innerHTML=''; $('tipos').style.display='';
   $('invFiltros').style.display='none'; $('metrics').style.display='none';
@@ -4384,6 +4488,7 @@ function filaAreaHistorica(r){
 }
 function renderAreaLista(){
   const global=areaActual===AREA_TODAS;
+  $('view-inv').classList.add('area-workspace-wide');
   renderAreaTipoPills();
   $('areaNav').style.display='flex'; $('areaNav').innerHTML=`<button type="button" class="area-back" data-area-home>← Todas las áreas</button><span class="area-context">${global?'Lectura global · Local 1':esc(areaLabel(areaActual))}</span>${!global&&areaActual!=='sin_asignar'&&PERMISOS.puede_editar?`<span class="area-nav-actions"><button type="button" class="area-back" data-area-assign="${esc(areaActual)}">＋ Agregar producto de Bodega</button></span>`:''}`;
   $('invFiltros').style.display=''; $('metrics').style.display='none';
@@ -4416,13 +4521,19 @@ function renderAreaLista(){
     listEl.innerHTML=`<div class="area-list-head"><span class="area-list-total">${productos.length} productos · ${orden.length} ubicaciones</span></div>${salida||'<div class="empty">No hay productos que coincidan.</div>'}`;
     return;
   }
-  const rows=AREA_ROWS.filter(r=>r.area_codigo===areaActual && (r.configurado||Number(r.cantidad)!==0)
+  let rows=AREA_ROWS.filter(r=>r.area_codigo===areaActual && (r.configurado||Number(r.cantidad)!==0)
     &&(!q||normNombre(r.producto).includes(q))
     &&(!tipo||(r.tipo||'').trim()===tipo))
     .sort((a,b)=>a.producto.localeCompare(b.producto,'es',{sensitivity:'base'}));
+  rows=rows.filter(r=>{
+    if(!areaFilterCard)return true;
+    if(areaFilterCard==='criticos')return r.configurado&&(Number(r.cantidad)<=0||r.stock_min!=null&&Number(r.cantidad)<=Number(r.stock_min));
+    if(areaFilterCard==='sobre')return r.configurado&&r.stock_max!=null&&Number(r.cantidad)>Number(r.stock_max);
+    if(areaFilterCard==='sin_limites')return r.configurado&&(r.stock_min==null||r.stock_max==null);
+    if(areaFilterCard==='vencimientos')return !!estadoVencimientoArea(r.producto_id);
+    return true;
+  });
   const stats=areaStats(areaActual);
-  const hoy=new Date(); hoy.setHours(0,0,0,0); const limite=new Date(hoy); limite.setDate(limite.getDate()+7);
-  const porVencer=new Set(rows.filter(r=>lotesDe(r.producto_id).some(l=>{const d=new Date(l.vencimiento+'T00:00:00');return d>=hoy&&d<=limite;})).map(r=>r.producto_id)).size;
   const grupos=new Map();
   rows.forEach(r=>{
     const nombre=areaActual==='sin_asignar'?'Pendiente de distribución':r.configurado?(r.seccion_nombre||'Sin sección'):'Sin configurar';
@@ -4431,19 +4542,31 @@ function renderAreaLista(){
     grupos.get(key).rows.push(r);
   });
   const orden=[...grupos.values()].sort((a,b)=>(a.turno===b.turno?0:a.turno==='am'?-1:1)||(a.orden-b.orden)||a.nombre.localeCompare(b.nombre,'es'));
-  const filtrando=!!q||!!tipoSel||!!filterState;
+  const filtrando=!!q||!!tipoSel||!!filterState||!!areaFilterCard;
   const seccion=g=>{
     const clave='area:'+areaActual+':'+g.nombre, abierta=filtrando||openSecs.has(clave);
     const criticos=g.rows.filter(r=>estadoArea(r)==='critico').length;
+    const filasHTML=areaFilterCard==='vencimientos'
+      ? ['vencido','por_vencer'].map(estado=>{
+          const grupo=g.rows.filter(r=>productoTieneVencimientoArea(r.producto_id,estado));
+          return grupo.length?`<div class="area-expiry-group">${estado==='vencido'?'Vencidos':'Próximos a vencer · 7 días'}</div>${grupo.map(filaAreaHistorica).join('')}`:'';
+        }).join('')
+      : g.rows.map(filaAreaHistorica).join('');
     return `<div class="sec${abierta?' open':''}" data-secname="${esc(clave)}">
       <div class="sec-head"><button type="button" class="sec-btn" data-sec="${esc(clave)}">
         <span>${esc(g.nombre)}</span><span class="sec-tags">${criticos?`<span class="sec-crit">${criticos} crít.</span>`:''}<span class="sec-count">${g.rows.length}</span></span>
-      </button></div>${abierta?`<div class="sec-body">${g.rows.map(filaAreaHistorica).join('')}</div>`:''}
+      </button></div>${abierta?`<div class="sec-body">${filasHTML}</div>`:''}
     </div>`;
   };
   const bloque=(turno,label)=>{const gs=orden.filter(g=>g.turno===turno);return gs.length?`<div class="area-turn-label">${label}</div>${gs.map(seccion).join('')}`:''};
   const salida=tipoSel?orden.map(seccion).join(''):bloque('am','AM · organización visual')+bloque('pm','PM · organización visual');
-  listEl.innerHTML=`<div class="area-work-metrics"><div class="area-work-metric"><strong>${stats.productos}</strong><span>Productos visibles</span></div><div class="area-work-metric"><strong>${stats.criticos}</strong><span>Críticos</span></div><div class="area-work-metric"><strong>${stats.sobre}</strong><span>Sobre-stock</span></div><div class="area-work-metric"><strong>${stats.sinDato}</strong><span>Sin dato</span></div><div class="area-work-metric"><strong>${porVencer}</strong><span>Por vencer en 7 días</span></div></div><div class="area-list-head"><span class="area-list-total">${stats.productosConSaldo} con saldo · ${fmt(stats.unidades)} unidades físicas</span></div>${salida||'<div class="empty">No hay productos configurados o con saldo que coincidan.</div>'}`;
+  const mostrarTarjetas=!global&&areaActual!=='sin_asignar';
+  const tarjetas=mostrarTarjetas?`<div class="area-work-metrics" role="group" aria-label="Filtrar inventario por estado">
+    ${[['criticos','Críticos',stats.criticos,'crit'],['sobre','Sobre-stock',stats.sobre,'sobre'],['sin_limites','Sin límites',stats.sinDato,''],['vencimientos','Vencimientos',stats.vencimientos,'venc']].map(([id,label,n,clase])=>`<button type="button" class="area-work-metric ${clase}" data-area-state="${id}" aria-pressed="${areaFilterCard===id}"><strong>${n}</strong><span>${label}</span></button>`).join('')}
+  </div>`:'';
+  const filtrados=new Set(rows.map(r=>String(r.producto_id))).size;
+  const descripcionFiltro=areaFilterCard==='vencimientos'?'Productos vencidos o próximos a vencer':areaFilterCard==='sin_limites'?'Productos sin mínimo o máximo configurado':areaFilterCard==='criticos'?'Bajo el mínimo configurado o sin existencias':areaFilterCard==='sobre'?'Por encima del máximo configurado':'';
+  listEl.innerHTML=`${tarjetas}<div class="area-list-head"><span class="area-list-total">${descripcionFiltro?`${esc(descripcionFiltro)} · ${filtrados} productos · `:''}${stats.productosConSaldo} con saldo · ${fmt(stats.unidades)} unidades físicas</span></div>${salida||'<div class="empty">No hay productos que coincidan con este filtro.</div>'}`;
 }
 
 /* Normaliza texto para buscar y comparar: sin tildes, sin mayúsculas y sin
@@ -5222,7 +5345,8 @@ function pickSede(s){
     return;
   }
   SEDE = s;
-  AREA_ROWS=[]; AREAS_CATALOGO=[]; AREA_ERROR=null; AREA_LOADING=s==='plaza'; areaActual=null;
+  AREA_ROWS=[]; AREAS_CATALOGO=[]; AREA_ERROR=null; AREA_LOADING=s==='plaza'; areaActual=null;areaFilterCard=null;
+  $('view-inv').classList.remove('area-workspace-wide');
   /* Con el panel fijo el cajón nunca se abre, así que su nombre de sede hay
      que refrescarlo acá: es el momento en que deja de ser "—". */
   setTimeout(refrescarMenu, 0);
@@ -11836,6 +11960,11 @@ async function enlUnir(sede, sid, bid){
 }
 
 $('view-enlaces').addEventListener('click', e=>{
+  if(e.target.closest('[data-area-return-cancel]')){
+    const ctx=AREA_BODEGA_RETURN;
+    if(ctx){AREA_BODEGA_RETURN={...ctx,fase:'cancelar'};pickSede('plaza');LAMA_ATERRIZAR=false;}
+    return;
+  }
   const c = e.target.closest('[data-enlpend]');
   if(c){
     const k = c.dataset.enlpend;
@@ -11909,6 +12038,10 @@ const secDe = lista => [...new Set((lista||[]).map(p=>p.rubro).filter(Boolean))]
 let enlDest = {plaza:false};
 
 function prepararNuevo(){
+  $('area-bodega-return-note').hidden=true;
+  $('enl-n-fudo').closest('.chkrow').style.display='';
+  $('enl-destinos').style.pointerEvents='';
+  $('enl-n-min').closest('.field').parentElement.style.display='';
   $('enl-n-nombre').value=''; $('enl-n-min').value=''; $('enl-n-max').value='';
   $('enl-n-perec').checked=false; $('enl-dup').innerHTML='';
   $('enl-n-fudo').checked=false; $('enl-n-precio').value='';
@@ -11940,6 +12073,21 @@ function prepararNuevo(){
         <select data-enlrubro="${s}">${elegir}${secDe(SEDE_PROD[s]).map(r=>`<option>${esc(r)}</option>`).join('')}</select></div>
     </div>`).join('');
   pintarResumenNuevo();
+}
+function prepararNuevoBodegaDesdeArea(){
+  const ctx=AREA_BODEGA_RETURN;if(!ctx||ctx.fase!=='crear'||SEDE!=='central')return;
+  enlDest={central:true,plaza:false};
+  $('enl-n-fudo').checked=false;$('enl-n-fudo').closest('.chkrow').style.display='none';
+  $('enl-destinos').style.pointerEvents='none';
+  $('enl-n-min').closest('.field').parentElement.style.display='none';
+  $('enl-n-nombre').value=ctx.consulta;
+  $('enl-destinos').querySelectorAll('[data-enldest]').forEach(el=>{
+    const bodega=el.dataset.enldest==='central';el.style.display=bodega?'':'none';el.classList.toggle('on',bodega);
+  });
+  $('area-bodega-return-note').hidden=false;
+  $('area-bodega-return-note').innerHTML=`Crearás el producto maestro en Bodega. Después volverás a ${esc(areaLabel(ctx.areaCodigo))} para asignarle una sección. No se crearán receta ni enlace Fudo. <button type="button" class="area-back" data-area-return-cancel>Cancelar y volver</button>`;
+  pintarResumenNuevo();
+  setTimeout(buscarParecidos,0);
 }
 
 /* Al elegir la sección de bodega, se preselecciona la del mismo nombre en cada
@@ -12086,6 +12234,17 @@ $('enl-crear').addEventListener('click', async ()=>{
       sede: s,
       rubro: ($('enl-destinos').querySelector(`[data-enlrubro="${s}"]`)||{}).value || null }))];
   if(!destinos.length){ avisar('Elige dónde crearlo'); return; }
+  if(AREA_BODEGA_RETURN?.fase==='crear'){
+    const existentes=await sb.from('productos').select('id,producto').eq('sede','central').ilike('producto',nombre).limit(10);
+    if(existentes.error){avisar('No se pudo verificar si el producto ya existe en Bodega. No se creó nada; intenta de nuevo.');return;}
+    const iguales=(existentes.data||[]).filter(p=>normNombre(p.producto)===normNombre(nombre));
+    if(iguales.length){
+      AREA_BODEGA_RETURN={...AREA_BODEGA_RETURN,producto:nombre,fase:'volver',coincidencias:iguales.length};
+      $('area-bodega-return-note').hidden=true;
+      pickSede('plaza');LAMA_ATERRIZAR=false;
+      return;
+    }
+  }
   btn.disabled=true; btn.textContent='Creando…';
   const {data,error} = await sb.rpc('crear_producto_enlazado',{
     p_nombre: nombre,
@@ -12099,6 +12258,14 @@ $('enl-crear').addEventListener('click', async ()=>{
   if(error){ avisar(error.message || 'No se pudo crear. Revisa tu señal e inténtalo de nuevo.'); return; }
   const det = (data && data.detalle) || [];
   const lineas = det.map(d=>(SEDES[d.sede]?SEDES[d.sede].corto:d.sede)+': '+d.estado);
+
+  if(AREA_BODEGA_RETURN?.fase==='crear'&&enlDest.central&&!enlDest.plaza&&!$('enl-n-fudo').checked){
+    AREA_BODEGA_RETURN={...AREA_BODEGA_RETURN,producto:nombre,fase:'volver'};
+    $('area-bodega-return-note').hidden=true;
+    pickSede('plaza');
+    LAMA_ATERRIZAR=false;
+    return;
+  }
 
   /* Y si se marcó "se vende en Fudo", nace allá también, con su receta ya
      apuntando al producto del local. Es lo que pidió Jhon: que el enlace y
@@ -12340,6 +12507,7 @@ async function loadData(){
   cargarCriticos();
   if(sedeCarga==='plaza' && AREA_ERROR){ $('liveText').textContent='error leyendo áreas'; $('live').classList.add('off'); }
   else { $('liveText').textContent='en vivo'; $('live').classList.remove('off'); }
+  if(sedeCarga==='plaza')await completarAltaBodegaEnArea();
 }
 /* trae los lotes de vencimiento de los productos de la sede.
    Si la tabla todavía no existe en la base, la app sigue funcionando igual. */
@@ -12735,12 +12903,51 @@ function resumenFisicoProducto(id, ubicaciones=null){
 function cerrarAsignarProducto(){
   $('overlay-area-producto').classList.remove('open');
   ASIGNAR_AREA_CODIGO=null; BODEGA_AREA_RESULTADOS=[]; BODEGA_AREA_SELECCION=null;
-  BODEGA_AREA_REP_ID=null; BODEGA_AREA_CREAR_REP=false; BODEGA_AREA_SECCIONES=[];
+  BODEGA_AREA_REP_ID=null; BODEGA_AREA_CREAR_REP=false; BODEGA_AREA_SECCIONES=[];BODEGA_AREA_SECCION_ID='';
+  cerrarPanelSeccionesArea();
+}
+function crearProductoBodegaDesdeArea(){
+  if(SEDE!=='plaza'||!PERMISOS.puede_editar||!ASIGNAR_AREA_CODIGO)return;
+  AREA_BODEGA_RETURN={areaCodigo:ASIGNAR_AREA_CODIGO,consulta:$('area-producto-q').value.trim(),fase:'crear'};
+  cerrarAsignarProducto();
+  pickSede('central');
+  pickTab('enlaces');
+}
+function prepararAltaBodegaDesdeArea(){
+  const ctx=AREA_BODEGA_RETURN;if(!ctx||ctx.fase!=='crear'||SEDE!=='central')return;
+  enlDest={central:true,plaza:false};
+  $('enl-n-fudo').checked=false;$('enl-n-fudo').closest('.chkrow').style.display='none';
+  $('enl-n-nombre').value=ctx.consulta;
+  $('enl-destinos').querySelectorAll('[data-enldest]').forEach(el=>{
+    const esBodega=el.dataset.enldest==='central';el.style.display=esBodega?'':'none';el.classList.toggle('on',esBodega);
+  });
+  $('area-bodega-return-note').hidden=false;
+  $('area-bodega-return-note').innerHTML=`Crearás el producto maestro en Bodega. Después volverás a ${esc(areaLabel(ctx.areaCodigo))} para asignarle una sección. No se crearán receta ni enlace Fudo. <button type="button" class="area-back" data-area-return-cancel>Cancelar y volver</button>`;
+  pintarResumenNuevo();
+}
+async function completarAltaBodegaEnArea(){
+  const ctx=AREA_BODEGA_RETURN;if(!ctx||!['volver','cancelar'].includes(ctx.fase)||SEDE!=='plaza'||AREA_LOADING)return;
+  AREA_BODEGA_RETURN=null;
+  LAMA_ATERRIZAR=false;
+  cambiarArea(ctx.areaCodigo);
+  if(ctx.fase==='cancelar')return;
+  abrirAsignarProducto(ctx.areaCodigo);
+  $('area-producto-q').value=ctx.producto;
+  await buscarProductosBodega();
+  const exactos=(BODEGA_AREA_RESULTADOS||[]).filter(p=>normNombre(p.nombre_bodega)===normNombre(ctx.producto));
+  if(exactos.length===1){await seleccionarProductoBodega(exactos[0].producto_bodega_id);aviso('Producto maestro listo. Elige sección y confirma para agregarlo a '+areaLabel(ctx.areaCodigo)+'.');}
+  else if(exactos.length>1||ctx.coincidencias>1)avisar('Hay varios productos con ese nombre en Bodega. Confirma el producto maestro correcto; no se seleccionó ninguno automáticamente.');
+  else avisar('El producto se creó en Bodega, pero no apareció en la búsqueda al volver. Busca su nombre en esta área para agregarlo; no se crearon unidades.');
 }
 function pintarProductosAsignables(){
   const box=$('area-producto-resultados');
   if(BODEGA_AREA_RESULTADOS===null){box.innerHTML='<div class="area-loading">Buscando en el catálogo maestro…</div>';return;}
-  if(!BODEGA_AREA_RESULTADOS.length){box.innerHTML='<div class="area-loading">No hay productos maestros coincidentes. Si el producto no existe, primero créalo en Bodega y vuelve a esta área.</div>';return;}
+  if(!BODEGA_AREA_RESULTADOS.length){
+    const consulta=$('area-producto-q').value.trim();
+    if(!consulta){box.innerHTML='<div class="area-loading">Busca por nombre para encontrar productos de Bodega.</div>';return;}
+    if(normNombre(consulta).length<2){box.innerHTML='<div class="area-loading">Escribe al menos dos letras para buscar.</div>';return;}
+    box.innerHTML=`<div class="area-loading">No hay productos maestros coincidentes en Bodega.</div><div class="area-empty-create"><span>¿No existe todavía?</span><button type="button" data-area-create-bodega>Crear nuevo producto</button></div>`;return;
+  }
   box.innerHTML=BODEGA_AREA_RESULTADOS.map(p=>`<button type="button" class="area-product-result${String(p.producto_bodega_id)===String(BODEGA_AREA_SELECCION?.producto_bodega_id)?' on':''}" data-bodega-producto="${p.producto_bodega_id}">
     <span><strong>${esc(p.nombre_bodega)}</strong><span>Producto maestro${p.unidad?' · '+esc(p.unidad):''}</span></span>
     <span class="saldo">Bodega: ${fmt(Number(p.stock_bodega)||0)} ${esc(p.unidad||'')}</span></button>`).join('');
@@ -12834,7 +13041,8 @@ function renderDetalleProductoBodega(){
   else if(BODEGA_AREA_CREAR_REP) eleccion='<p class="notice">Se creará una representación vinculada en Local 1 con saldo cero. Las unidades llegarán cuando el área reciba un reparto.</p>';
   else eleccion='<button type="button" class="area-back" data-bodega-crear-rep>Crear representación enlazada en Local 1</button>';
   const puede=(!!seleccionada||BODEGA_AREA_CREAR_REP)&&!ya&&!bloqueada;
-  const campos=puede?`<div class="field"><label for="area-producto-seccion">Sección física</label><select id="area-producto-seccion"><option value="">Sin sección</option>${BODEGA_AREA_SECCIONES.filter(s=>s.estado==='activa').map(s=>`<option value="${esc(s.id)}">${esc(s.nombre)} · ${String(s.turno||'pm').toUpperCase()}</option>`).join('')}</select></div>
+  const seccionActual=BODEGA_AREA_SECCION_ID||p.configuracion_area?.seccion_id||'';
+  const campos=puede?`<div class="field"><label>Sección física</label><div style="display:flex;gap:8px;align-items:center"><select id="area-producto-seccion" style="min-width:0"><option value="">Sin sección</option>${BODEGA_AREA_SECCIONES.filter(s=>s.estado==='activa').map(s=>`<option value="${esc(s.id)}"${String(s.id)===String(seccionActual)?' selected':''}>${esc(s.nombre)}</option>`).join('')}</select>${PERMISOS.puede_ajustes?'<button type="button" class="area-back" data-area-section-open aria-expanded="false">Secciones</button>':''}</div></div>
     <div style="display:flex;gap:8px"><div class="field" style="flex:1"><label for="area-producto-min">Mínimo del área</label><input id="area-producto-min" type="number" min="0" step="0.01" placeholder="Sin mínimo"></div>
     <div class="field" style="flex:1"><label for="area-producto-max">Máximo del área</label><input id="area-producto-max" type="number" min="0" step="0.01" placeholder="Sin máximo"></div></div>`:'';
   detalle.innerHTML=`<h3>Producto maestro · ${esc(p.nombre_bodega)}</h3>
@@ -12854,7 +13062,7 @@ async function elegirCrearRepresentacionBodega(){
 }
 async function seleccionarProductoBodega(id){
   BODEGA_AREA_SELECCION=BODEGA_AREA_RESULTADOS.find(x=>String(x.producto_bodega_id)===String(id))||null;
-  BODEGA_AREA_REP_ID=null; BODEGA_AREA_CREAR_REP=false; renderDetalleProductoBodega(); pintarProductosAsignables();
+  BODEGA_AREA_REP_ID=null; BODEGA_AREA_CREAR_REP=false;BODEGA_AREA_SECCION_ID=''; renderDetalleProductoBodega(); pintarProductosAsignables();
   $('area-producto-guardar').disabled=true;
   if(!BODEGA_AREA_SELECCION)return;
   const areaId=areaIdPorCodigo(ASIGNAR_AREA_CODIGO);
@@ -12864,6 +13072,7 @@ async function seleccionarProductoBodega(id){
   const p=BODEGA_AREA_SELECCION, reps=p?.representaciones||[], posibles=p?.posibles_representaciones||[];
   if(p?.configuracion_area?.producto_plaza_id){
     BODEGA_AREA_REP_ID=String(p.configuracion_area.producto_plaza_id);
+    BODEGA_AREA_SECCION_ID=String(p.configuracion_area.seccion_id||'');
   }else if(reps.length===1){
     BODEGA_AREA_REP_ID=String(reps[0].producto_plaza_id);
   }else if(reps.length===0){
@@ -12888,7 +13097,8 @@ async function buscarProductosBodega(){
 function abrirAsignarProducto(codigo){
   if(SEDE!=='plaza'||!PERMISOS.puede_editar)return;
   if(codigo==='sin_asignar'||!areaIdPorCodigo(codigo)){avisar('Elige un área física activa de Local 1. Sin asignar no es un destino físico.');return;}
-  ASIGNAR_AREA_CODIGO=codigo; BODEGA_AREA_RESULTADOS=[]; BODEGA_AREA_SELECCION=null;BODEGA_AREA_REP_ID=null;BODEGA_AREA_CREAR_REP=false;
+  ASIGNAR_AREA_CODIGO=codigo; BODEGA_AREA_RESULTADOS=[]; BODEGA_AREA_SELECCION=null;BODEGA_AREA_REP_ID=null;BODEGA_AREA_CREAR_REP=false;BODEGA_AREA_SECCION_ID='';
+  cerrarPanelSeccionesArea();
   $('area-producto-titulo').textContent='Agregar producto de Bodega';
   $('area-producto-destino').textContent='Área de destino: '+areaLabel(codigo);
   $('area-producto-explica').textContent='Elige el producto de Bodega que quieres organizar en esta área. Agregarlo no mueve stock.';
@@ -12911,7 +13121,7 @@ async function guardarProductoEnArea(){
     p_producto_plaza_id:BODEGA_AREA_CREAR_REP?null:Number(BODEGA_AREA_REP_ID),
     p_crear_representacion:BODEGA_AREA_CREAR_REP,
     p_area_id:areaId,
-    p_seccion_id:$('area-producto-seccion')?.value||null,
+    p_seccion_id:$('area-producto-seccion')?.value||BODEGA_AREA_SECCION_ID||null,
     p_stock_min:min,p_stock_max:max,
     p_es_principal:!AREA_ROWS.some(r=>String(r.producto_id)===String(BODEGA_AREA_REP_ID)&&r.es_principal),
     p_confirmar:true
@@ -12933,6 +13143,8 @@ listEl.addEventListener('click',e=>{
   if(e.target.closest('[data-area-manage]')){gestionarAreas();return;}
   const asignar=e.target.closest('[data-area-assign]');
   if(asignar){abrirAsignarProducto(asignar.dataset.areaAssign);return;}
+  const estado=e.target.closest('[data-area-state]');
+  if(estado){areaFilterCard=areaFilterCard===estado.dataset.areaState?null:estado.dataset.areaState;render();return;}
   const area=e.target.closest('[data-area-open]');
   if(area){ cambiarArea(area.dataset.areaOpen,area.dataset.areaProduct||''); return; }
   const cop=e.target.closest('[data-copiar]');
@@ -12973,16 +13185,31 @@ $('area-producto-resultados').addEventListener('click',e=>{
   const rep=e.target.closest('[data-bodega-representacion]');
   if(rep){elegirRepresentacionBodega(rep.dataset.bodegaRepresentacion);return;}
   if(e.target.closest('[data-bodega-crear-rep]'))elegirCrearRepresentacionBodega();
+  if(e.target.closest('[data-area-create-bodega]'))crearProductoBodegaDesdeArea();
 });
 $('area-producto-detalle').addEventListener('click',e=>{
   const rep=e.target.closest('[data-bodega-representacion]');
   if(rep){elegirRepresentacionBodega(rep.dataset.bodegaRepresentacion);return;}
   if(e.target.closest('[data-bodega-crear-rep]'))elegirCrearRepresentacionBodega();
+  if(e.target.closest('[data-area-section-open]'))abrirPanelSeccionesArea();
+});
+$('area-producto-detalle').addEventListener('change',e=>{
+  if(e.target.id==='area-producto-seccion')BODEGA_AREA_SECCION_ID=e.target.value||'';
+});
+$('area-section-side').addEventListener('click',e=>{
+  if(e.target.closest('[data-area-section-close]')){cerrarPanelSeccionesArea();return;}
+  const elegir=e.target.closest('[data-area-section-choice]');
+  if(elegir){BODEGA_AREA_SECCION_ID=elegir.dataset.areaSectionChoice;renderDetalleProductoBodega();pintarPanelSeccionesArea();cerrarPanelSeccionesArea();return;}
+  if(e.target.closest('[data-area-section-create]'))crearSeccionDesdeArea();
+});
+$('area-section-side').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.id==='area-section-new-name'){e.preventDefault();crearSeccionDesdeArea();}
 });
 $('area-producto-cancelar').addEventListener('click',cerrarAsignarProducto);
 $('area-producto-guardar').addEventListener('click',guardarProductoEnArea);
 $('overlay-area-producto').addEventListener('click',e=>{if(e.target===$('overlay-area-producto'))cerrarAsignarProducto();});
 document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&AREA_SECCION_PANEL_ABIERTO){cerrarPanelSeccionesArea();return;}
   if(e.key==='Escape'&&$('overlay-area-producto').classList.contains('open'))cerrarAsignarProducto();
 });
 /* El buscador SIEMPRE busca en todo el inventario. Al tocarlo se sueltan los
@@ -12990,8 +13217,8 @@ document.addEventListener('keydown',e=>{
    zanahoria" quiere ver esa torta, no averiguar si además está en sobre-stock.
    El estado igual se lee en la píldora de color al lado del nombre. */
 function soltarFiltros(){
-  if(!filterState && !tipoSel) return false;
-  filterState=null; tipoSel=null;
+  if(!filterState && !tipoSel && !areaFilterCard) return false;
+  filterState=null; tipoSel=null;areaFilterCard=null;
   document.querySelectorAll('.mcard').forEach(x=>x.classList.remove('sel'));
   renderTipos();
   return true;
@@ -13000,7 +13227,7 @@ function soltarFiltros(){
    todas las secciones cerradas */
 function irAlInicio(){
   qEl.value='';
-  filterState=null; tipoSel=null;
+  filterState=null; tipoSel=null;areaFilterCard=null;
   document.querySelectorAll('.mcard').forEach(x=>x.classList.remove('sel'));
   renderTipos();
   openSecs.clear();
@@ -17692,7 +17919,7 @@ function pickTab(tab){
      elegir— y al volver a entrar aparecían solos. Un formulario que
      funciona en el segundo intento es de los errores más difíciles de
      reportar, y es justo el que describió Jhon. */
-  if(tab==='enlaces') loadEnlaces().then(prepararNuevo);
+  if(tab==='enlaces') loadEnlaces().then(()=>{prepararNuevo();prepararNuevoBodegaDesdeArea();});
   /* Lama se relee entera al entrar: entre una visita y otra pudo pasar de
      todo —otro garzón abrió mesas, cerró otras— y esta pantalla es la más
      dinámica de la app. Es barato: cuatro consultas chicas. */

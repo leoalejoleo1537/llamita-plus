@@ -91,6 +91,8 @@ Tarjeta de área → pantalla operativa del área
 
 La pantalla muestra tanto productos configurados sin saldo como saldos físicos aún sin configuración. Las cantidades son de lectura hasta C1. La ficha abierta desde un área conserva vencimientos y muestra su saldo del ledger; no permite editar stock, lotes, mermas, reparto ni Fudo. El gesto legacy de swipe queda desactivado en las áreas para no disparar esas acciones.
 
+La pantalla de área dispone de cuatro filtros de lista en la misma vista: Críticos (bajo mínimo o sin saldo), Sobre-stock (sobre máximo), Sin límites (mínimo o máximo faltante) y Vencimientos (vencidos y próximos a vencer separados). Se adaptan a 4/2/1 columnas según ancho. El flujo de agregado desde Bodega permite seleccionar o crear una sección física desde un panel lateral; las secciones no contienen cantidades.
+
 ### Criterio de salida de B2
 
 Al entrar a Cafetería, una persona puede navegar el patrón histórico completo y abrir una ficha de producto desde una sección, aunque el saldo sea cero. B2 no reimplementó el motor de vinculación B1 ni reactivó ediciones legacy de stock. El alta desde Bodega oculta IDs y detalles internos, reutiliza automáticamente la única representación enlazada y confirma explícitamente las alternativas reales; nunca muestra una ficha enlazada a otro maestro.

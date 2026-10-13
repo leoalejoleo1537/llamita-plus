@@ -30,4 +30,26 @@ check('La vista no reintroduce editor de stock, mermas, lotes ni Fudo en la fich
 check('El gesto legacy de reparto/merma no se activa sobre filas de Local 1',
   html.includes("if(SEDE==='plaza'&&areaActual!==null) return;   // las áreas son de lectura"));
 
+const estados=html.slice(html.indexOf('function areaStats('),html.indexOf('async function cargarSeccionesArea'))
+  +html.slice(html.indexOf('function renderAreaLista()'),html.indexOf('/* Normaliza texto para buscar'));
+check('La pantalla de área presenta exactamente cuatro tarjetas-botón que filtran en la misma lista',
+  (estados.match(/\['(criticos|sobre|sin_limites|vencimientos)'/g)||[]).length===4
+  &&estados.includes('data-area-state=')&&estados.includes('aria-pressed=')&&html.includes('areaFilterCard===estado.dataset.areaState'));
+check('Críticos incluye saldo cero; Sin límites detecta mínimo o máximo faltante; Vencimientos separa vencidos y próximos',
+  estados.includes('Number(r.cantidad)<=0')&&estados.includes('r.stock_min==null||r.stock_max==null')
+  &&estados.includes("estado==='vencido'?'Vencidos':'Próximos a vencer · 7 días'")
+  &&estados.includes('estadoVencimientoArea(r.producto_id)'));
+check('El inventario del área ocupa el ancho útil con 4/2/1 tarjetas según escritorio, intermedio y teléfono',
+  html.includes('#view-inv.area-workspace-wide{width:auto;max-width:none')
+  &&html.includes('.area-work-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))')
+  &&html.includes('@media(max-width:960px){.area-work-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}')
+  &&html.includes('@media(max-width:620px){.area-work-metrics{grid-template-columns:1fr'));
+check('El panel de secciones reutiliza lectura y RPC protegida de creación; no hace DML directo ni escribe stock',
+  html.includes("sb.rpc('area_seccion_crear'")&&html.includes("sb.rpc('area_secciones_listar'")
+  &&html.includes('p_turno:\'pm\'')&&!html.includes("sb.from('area_secciones').insert"));
+check('Producto nuevo inicia como maestro de Bodega sin Fudo/receta y vuelve al área para usar el flujo B1',
+  html.includes("p_destinos: destinos")&&html.includes('prepararNuevoBodegaDesdeArea')
+  &&html.includes("AREA_BODEGA_RETURN?.fase==='crear'")&&html.includes("sb.rpc('bodega_producto_area_agregar'")
+  &&html.includes("$('enl-n-fudo').checked=false;$('enl-n-fudo').closest('.chkrow').style.display='none'"));
+
 if(fallas.length){console.error(`Fallaron ${fallas.length} verificaciones B2.`);process.exit(1);}
