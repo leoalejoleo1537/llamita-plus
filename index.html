@@ -4066,21 +4066,21 @@
   </div>
 </div>
 
-<!-- Asigna una preferencia operativa a una ficha que ya existe. No mueve saldo. -->
+<!-- Vincula una ficha maestra de Bodega con Local 1 y la configura para el área. -->
 <div class="overlay" id="overlay-area-producto">
   <div class="modal area-assign-modal" role="dialog" aria-modal="true" aria-labelledby="area-producto-titulo">
-    <h2 id="area-producto-titulo">Asignar producto existente</h2>
+    <h2 id="area-producto-titulo">Agregar producto de Bodega</h2>
     <p class="mr" id="area-producto-destino"></p>
-    <div class="area-assign-explain" id="area-producto-explica">Asignar cambia dónde se organiza normalmente el producto. Las existencias físicas no se mueven.</div>
+    <div class="area-assign-explain" id="area-producto-explica">Selecciona el producto maestro exacto. Este paso no mueve stock ni crea lotes o movimientos.</div>
     <div class="field" style="margin-top:0">
-      <label>Buscar producto</label>
-      <input type="search" id="area-producto-q" placeholder="Nombre, ID, sección o categoría" autocomplete="off">
+      <label>Buscar producto maestro</label>
+      <input type="search" id="area-producto-q" placeholder="Nombre o ID de Bodega" autocomplete="off">
     </div>
     <div class="area-product-results" id="area-producto-resultados" aria-live="polite"></div>
     <div class="area-assign-detail" id="area-producto-detalle" hidden></div>
     <div class="mbtns">
       <button type="button" class="btn btn-outline" id="area-producto-cancelar">Cancelar</button>
-      <button type="button" class="btn btn-orange" id="area-producto-guardar" disabled>Asignar producto</button>
+      <button type="button" class="btn btn-orange" id="area-producto-guardar" disabled>Confirmar producto</button>
     </div>
   </div>
 </div>
@@ -4186,8 +4186,13 @@ let MODAL_AREA_ROW = null; // configuración/ubicación concreta desde la que se
 let AREA_SECCIONES = new Map();
 let NUEVO_AREA_ID = null;
 let ASIGNAR_AREA_CODIGO = null;
-let ASIGNAR_PRODUCTO_ID = null;
-let ASIGNAR_PREFERENCIA = null;
+let BODEGA_AREA_RESULTADOS = [];
+let BODEGA_AREA_SELECCION = null;
+let BODEGA_AREA_REP_ID = null;
+let BODEGA_AREA_CREAR_REP = false;
+let BODEGA_AREA_SECCIONES = [];
+let BODEGA_AREA_BUSQUEDA_SEQ = 0;
+let BODEGA_AREA_TIMER = null;
 let carrito = [];         // productos que llegaron, pendientes de registrar
 
 /* ¿este producto es perecedero? (usa la columna si existe; si no, la regla vieja de Sándwiches) */
@@ -4298,9 +4303,8 @@ function htmlTarjetaArea(codigo){
       <span class="area-card-units">${fmt(s.unidades)} <small>unidades</small></span>
       <span class="area-card-state">${s.criticos} críticos · ${s.sobre} sobre-stock · ${s.sinDato} sin límites</span>${extra}
     </button>
-    ${PERMISOS.puede_editar?`<div class="area-card-actions">
-      <button type="button" class="area-create" data-area-assign="${esc(codigo)}">＋ Agregar producto existente</button>
-      <button type="button" class="area-create" data-area-create="${esc(codigo)}">Crear producto nuevo</button>
+    ${PERMISOS.puede_editar&&codigo!=='sin_asignar'?`<div class="area-card-actions">
+      <button type="button" class="area-create" data-area-assign="${esc(codigo)}">＋ Agregar producto de Bodega</button>
     </div>`:''}
   </article>`;
 }
@@ -4329,7 +4333,7 @@ function renderAreaPortada(){
 }
 function renderAreaLista(){
   const global=areaActual===AREA_TODAS;
-  $('areaNav').style.display='flex'; $('areaNav').innerHTML=`<button type="button" class="area-back" data-area-home>← Todas las áreas</button><span class="area-context">${global?'Lectura global · Local 1':esc(areaLabel(areaActual))}</span>${!global&&PERMISOS.puede_editar?`<span class="area-nav-actions"><button type="button" class="area-back" data-area-assign="${esc(areaActual)}">＋ Agregar existente</button><button type="button" class="area-back" data-area-create="${esc(areaActual)}">Crear nuevo</button></span>`:''}`;
+  $('areaNav').style.display='flex'; $('areaNav').innerHTML=`<button type="button" class="area-back" data-area-home>← Todas las áreas</button><span class="area-context">${global?'Lectura global · Local 1':esc(areaLabel(areaActual))}</span>${!global&&areaActual!=='sin_asignar'&&PERMISOS.puede_editar?`<span class="area-nav-actions"><button type="button" class="area-back" data-area-assign="${esc(areaActual)}">＋ Agregar producto de Bodega</button></span>`:''}`;
   $('invFiltros').style.display=''; $('metrics').style.display='none';
   $('critSedes').style.display='none'; $('metaPortada').style.display='none';
   $('btnNuevo').style.display='none'; $('inv-estado').style.display='none';
@@ -12679,80 +12683,135 @@ function resumenFisicoProducto(id, ubicaciones=null){
 }
 function cerrarAsignarProducto(){
   $('overlay-area-producto').classList.remove('open');
-  ASIGNAR_AREA_CODIGO=null; ASIGNAR_PRODUCTO_ID=null; ASIGNAR_PREFERENCIA=null;
+  ASIGNAR_AREA_CODIGO=null; BODEGA_AREA_RESULTADOS=[]; BODEGA_AREA_SELECCION=null;
+  BODEGA_AREA_REP_ID=null; BODEGA_AREA_CREAR_REP=false; BODEGA_AREA_SECCIONES=[];
 }
 function pintarProductosAsignables(){
-  const q=normNombre($('area-producto-q').value);
-  const lista=DATA.filter(p=>{
-    if(!q)return true;
-    return normNombre([p.producto,p.id,p.rubro,p.tipo].filter(Boolean).join(' ')).includes(q);
-  }).slice(0,40);
-  $('area-producto-resultados').innerHTML=lista.length?lista.map(p=>{
-    const fisico=resumenFisicoProducto(p.id);
-    return `<button type="button" class="area-product-result${p.id===ASIGNAR_PRODUCTO_ID?' on':''}" data-area-producto="${p.id}">
-      <span><strong>${esc(p.producto)}</strong><span>ID ${p.id} · ${esc(p.rubro||'Sin sección')}${p.tipo?' · '+esc(p.tipo):''}</span></span>
-      <span class="saldo">${esc(fisico)}</span></button>`;
-  }).join(''):'<div class="area-loading">No hay productos coincidentes.</div>';
+  const box=$('area-producto-resultados');
+  if(BODEGA_AREA_RESULTADOS===null){box.innerHTML='<div class="area-loading">Buscando en el catálogo maestro…</div>';return;}
+  if(!BODEGA_AREA_RESULTADOS.length){box.innerHTML='<div class="area-loading">No hay productos maestros coincidentes. Si el producto no existe, primero créalo en Bodega y vuelve a esta área.</div>';return;}
+  box.innerHTML=BODEGA_AREA_RESULTADOS.map(p=>`<button type="button" class="area-product-result${String(p.producto_bodega_id)===String(BODEGA_AREA_SELECCION?.producto_bodega_id)?' on':''}" data-bodega-producto="${p.producto_bodega_id}">
+    <span><strong>${esc(p.nombre_bodega)}</strong><span>Producto maestro · Bodega #${p.producto_bodega_id}${p.unidad?' · '+esc(p.unidad):''}${p.rubro?' · '+esc(p.rubro):''}</span></span>
+    <span class="saldo">Bodega: ${fmt(Number(p.stock_bodega)||0)} ${esc(p.unidad||'')}</span></button>`).join('');
 }
-async function seleccionarProductoAsignacion(id){
-  const p=DATA.find(x=>x.id===id); if(!p)return;
-  ASIGNAR_PRODUCTO_ID=id; ASIGNAR_PREFERENCIA=null; pintarProductosAsignables();
-  const detalle=$('area-producto-detalle'); detalle.hidden=false;
-  detalle.innerHTML=`<h3>${esc(p.producto)}</h3><p>Cargando preferencia y saldo físico…</p>`;
-  $('area-producto-guardar').disabled=true;
-  const leida=await cargarPreferenciaProducto(id);
-  if(ASIGNAR_PRODUCTO_ID!==id)return;
-  if(leida.error){
-    detalle.innerHTML=`<h3>${esc(p.producto)}</h3><p>No se pudo consultar su preferencia. No se hizo ningún cambio.</p>`;
-    return;
+function bodegaRepresentacionSeleccionada(){
+  return BODEGA_AREA_SELECCION?.representaciones?.find(x=>String(x.producto_plaza_id)===String(BODEGA_AREA_REP_ID))
+    || BODEGA_AREA_SELECCION?.posibles_representaciones?.find(x=>String(x.producto_plaza_id)===String(BODEGA_AREA_REP_ID))
+    || null;
+}
+function renderDetalleProductoBodega(){
+  const p=BODEGA_AREA_SELECCION, detalle=$('area-producto-detalle');
+  if(!p){detalle.hidden=true;$('area-producto-guardar').disabled=true;return;}
+  detalle.hidden=false;
+  const reps=p.representaciones||[], posibles=p.posibles_representaciones||[];
+  const seleccionada=bodegaRepresentacionSeleccionada();
+  const yaConfiguradoMaestro=!!p.ya_configurado_en_area;
+  const configMaestro=p.configuracion_area;
+  const detalleUbicaciones=r=>Array.isArray(r.ubicaciones)&&r.ubicaciones.length?r.ubicaciones.map(x=>`${x.nombre} ${fmt(Number(x.cantidad)||0)}`).join(' · '):'Sin saldo físico en Local 1';
+  const botonesReps=reps.map(r=>`<button type="button" class="area-product-result${String(r.producto_plaza_id)===String(BODEGA_AREA_REP_ID)?' on':''}" data-bodega-representacion="${r.producto_plaza_id}">
+    <span><strong>Representación en Local 1 · #${r.producto_plaza_id}</strong><span>${esc(r.nombre)} · ${esc(r.unidad||p.unidad||'unidad no indicada')} · factor ${esc(r.factor)} · ${esc(detalleUbicaciones(r))}</span></span>
+    <span class="saldo">${fmt(Number(r.saldo)||0)} en Local 1</span></button>`).join('');
+  const botonesPosibles=posibles.map(r=>r.vinculada_a_bodega_id
+    ? `<div class="area-product-result" aria-disabled="true"><span><strong>Ficha parecida · Local 1 #${r.producto_plaza_id}</strong><span>${esc(r.nombre)} · ya enlazada a Bodega #${r.vinculada_a_bodega_id}; no se puede reutilizar para otro maestro.</span></span></div>`
+    : `<button type="button" class="area-product-result${String(r.producto_plaza_id)===String(BODEGA_AREA_REP_ID)?' on':''}" data-bodega-representacion="${r.producto_plaza_id}">
+      <span><strong>Posible representación · Local 1 #${r.producto_plaza_id}</strong><span>${esc(r.nombre)} · ${esc(r.unidad||'unidad no indicada')} · ${esc(detalleUbicaciones(r))} · confirma que sea el mismo producto.${r.configurada_en_area?' Ya está configurado en esta área.':''}</span></span>
+      <span class="saldo">${fmt(Number(r.saldo)||0)} en Local 1</span></button>`).join('');
+  const nombreExactoLocal=DATA.some(x=>normNombre(x.producto)===normNombre(p.nombre_bodega));
+  let eleccion='';
+  if(seleccionada){
+    eleccion=`<p><strong>Representación en Local 1:</strong> ${esc(seleccionada.nombre)} · #${seleccionada.producto_plaza_id}</p>
+      <p><strong>Saldo físico actual:</strong> ${fmt(Number(seleccionada.saldo)||0)} en Local 1. El saldo proviene del ledger.</p>
+      ${seleccionada.configurada_en_area?`<p class="notice">Este producto ya está agregado a ${esc(areaLabel(ASIGNAR_AREA_CODIGO))}. No se creará otra configuración.</p>`:''}`;
+  } else if(BODEGA_AREA_CREAR_REP){
+    eleccion=`<p class="notice">Se creará la representación vinculada en Local 1 con saldo cero. Confirma que ninguna ficha sugerida corresponde al producto maestro.</p>`;
+  } else {
+    eleccion=`<p>Elige exactamente qué ficha de Local 1 representa este producto maestro. El sistema no selecciona por nombre.</p>`;
   }
-  ASIGNAR_PREFERENCIA=leida.data;
-  const preferida=leida.data.area_nombre||'Sin asignar';
-  const fisico=resumenFisicoProducto(id,leida.data.ubicaciones);
-  detalle.innerHTML=`<h3>${esc(p.producto)}</h3>
-    <p><strong>Área preferida actual:</strong> ${esc(preferida)}</p>
-    <p><strong>Ubicación física actual:</strong> ${esc(fisico)}</p>
-    <p class="notice">Se asignará a ${esc(areaLabel(ASIGNAR_AREA_CODIGO))}. Las existencias no se moverán.</p>`;
-  $('area-producto-guardar').disabled=false;
+  const puedeConfigurar=(!!seleccionada||BODEGA_AREA_CREAR_REP)&&!yaConfiguradoMaestro;
+  detalle.innerHTML=`<h3>Producto maestro · ${esc(p.nombre_bodega)}</h3>
+    <p><strong>ID de Bodega:</strong> ${p.producto_bodega_id} · <strong>Unidad:</strong> ${esc(p.unidad||'No indicada')}</p>
+    <p><strong>Stock disponible en Bodega:</strong> ${fmt(Number(p.stock_bodega)||0)} ${esc(p.unidad||'')}</p>
+    <p><strong>Destino:</strong> ${esc(areaLabel(ASIGNAR_AREA_CODIGO))}</p>
+    ${yaConfiguradoMaestro?`<p class="notice">Este producto maestro ya está agregado a ${esc(areaLabel(ASIGNAR_AREA_CODIGO))} mediante Local 1 #${configMaestro?.producto_plaza_id||'—'}. No se creará otra configuración.</p>`:''}
+    <div class="area-product-results">${reps.length?`<strong>Representaciones ya enlazadas</strong>${botonesReps}`:'<p>No hay una representación ya enlazada en Local 1.</p>'}</div>
+    ${posibles.length?`<div class="area-product-results" style="margin-top:8px"><strong>Posibles fichas existentes, sin enlazar</strong>${botonesPosibles}</div>`:''}
+    ${!yaConfiguradoMaestro&&!reps.length&&!seleccionada&&!BODEGA_AREA_CREAR_REP?`<button type="button" class="area-back" data-bodega-crear-rep>${posibles.length?'Ninguna ficha coincide; crear representación enlazada en Local 1':'Crear representación enlazada en Local 1'} · saldo cero</button>`:''}
+    ${BODEGA_AREA_CREAR_REP&&nombreExactoLocal?'<p class="notice">Ya existe una ficha local con el mismo nombre. Selecciónala arriba; no se permite crear un duplicado exacto.</p>':''}
+    ${puedeConfigurar?`<div class="field"><label for="area-producto-seccion">Sección física</label><select id="area-producto-seccion"><option value="">Sin sección</option>${BODEGA_AREA_SECCIONES.filter(s=>s.estado==='activa').map(s=>`<option value="${esc(s.id)}">${esc(s.nombre)} · ${esc(String(s.turno||'pm').toUpperCase())}</option>`).join('')}</select></div>
+      <div style="display:flex;gap:8px"><div class="field" style="flex:1"><label for="area-producto-min">Mínimo del área</label><input id="area-producto-min" type="number" min="0" step="0.01" placeholder="Sin mínimo"></div>
+      <div class="field" style="flex:1"><label for="area-producto-max">Máximo del área</label><input id="area-producto-max" type="number" min="0" step="0.01" placeholder="Sin máximo"></div></div>`:''}
+    ${eleccion}<p class="notice">Este paso no mueve stock. No crea lotes, movimientos, recetas ni enlaces Fudo.</p>`;
+  const ya=!!seleccionada?.configurada_en_area||yaConfiguradoMaestro;
+  const exactoQueBloquea=BODEGA_AREA_CREAR_REP&&nombreExactoLocal;
+  $('area-producto-guardar').disabled=!puedeConfigurar||ya||exactoQueBloquea;
+  $('area-producto-guardar').textContent=ya?'Ya está agregado':'Confirmar producto';
 }
-function abrirAsignarProducto(codigo,productoId=null,duplicado=false){
+async function elegirRepresentacionBodega(id){
+  BODEGA_AREA_REP_ID=String(id); BODEGA_AREA_CREAR_REP=false; renderDetalleProductoBodega();
+}
+async function elegirCrearRepresentacionBodega(){
+  BODEGA_AREA_REP_ID=null; BODEGA_AREA_CREAR_REP=true; renderDetalleProductoBodega();
+}
+async function seleccionarProductoBodega(id){
+  BODEGA_AREA_SELECCION=BODEGA_AREA_RESULTADOS.find(x=>String(x.producto_bodega_id)===String(id))||null;
+  BODEGA_AREA_REP_ID=null; BODEGA_AREA_CREAR_REP=false; renderDetalleProductoBodega(); pintarProductosAsignables();
+  $('area-producto-guardar').disabled=true;
+  if(!BODEGA_AREA_SELECCION)return;
+  const areaId=areaIdPorCodigo(ASIGNAR_AREA_CODIGO);
+  const {data,error}=await sb.rpc('area_secciones_listar',{p_area_id:areaId,p_incluir_archivadas:false});
+  if(error){avisar(error.message||'No se pudieron cargar las secciones del área.');return;}
+  BODEGA_AREA_SECCIONES=data||[];
+  renderDetalleProductoBodega();
+}
+async function buscarProductosBodega(){
+  const q=$('area-producto-q').value.trim(), seq=++BODEGA_AREA_BUSQUEDA_SEQ;
+  BODEGA_AREA_SELECCION=null; BODEGA_AREA_REP_ID=null; BODEGA_AREA_CREAR_REP=false;
+  $('area-producto-detalle').hidden=true; $('area-producto-guardar').disabled=true;
+  if(normNombre(q).length<2){BODEGA_AREA_RESULTADOS=[];pintarProductosAsignables();return;}
+  BODEGA_AREA_RESULTADOS=null;pintarProductosAsignables();
+  const {data,error}=await sb.rpc('bodega_productos_area_buscar',{p_consulta:q,p_area_id:areaIdPorCodigo(ASIGNAR_AREA_CODIGO)});
+  if(seq!==BODEGA_AREA_BUSQUEDA_SEQ)return;
+  BODEGA_AREA_RESULTADOS=error?[]:(Array.isArray(data)?data:[]);
+  pintarProductosAsignables();
+  if(error){$('area-producto-resultados').innerHTML=`<div class="area-loading">No se pudo buscar en Bodega: ${esc(error.message||'Error de conexión')}</div>`;}
+}
+function abrirAsignarProducto(codigo){
   if(SEDE!=='plaza'||!PERMISOS.puede_editar)return;
-  const permitido=codigo==='sin_asignar'||!!areaIdPorCodigo(codigo);
-  if(!permitido){avisar('El área ya no está activa. Vuelve a cargar Inventario.');return;}
-  ASIGNAR_AREA_CODIGO=codigo; ASIGNAR_PRODUCTO_ID=null; ASIGNAR_PREFERENCIA=null;
-  $('area-producto-titulo').textContent=duplicado?'Este producto ya existe':'Asignar producto existente';
-  $('area-producto-destino').textContent='Área preferida de destino: '+areaLabel(codigo);
-  $('area-producto-explica').textContent=duplicado
-    ? 'Encontramos una ficha coincidente. Puedes usarla y asignarla al área; no se creará una copia ni se moverán existencias. Si es otro producto, vuelve y usa un nombre realmente distinto.'
-    : 'Asignar cambia dónde se organiza normalmente el producto. Mover existencias será una transferencia explícita en una fase posterior.';
-  $('area-producto-guardar').dataset.duplicado=duplicado?'1':'0';
-  $('area-producto-guardar').textContent=duplicado?'Usar producto existente':'Asignar producto';
+  if(codigo==='sin_asignar'||!areaIdPorCodigo(codigo)){avisar('Elige un área física activa de Local 1. Sin asignar no es un destino físico.');return;}
+  ASIGNAR_AREA_CODIGO=codigo; BODEGA_AREA_RESULTADOS=[]; BODEGA_AREA_SELECCION=null;BODEGA_AREA_REP_ID=null;BODEGA_AREA_CREAR_REP=false;
+  $('area-producto-titulo').textContent='Agregar producto de Bodega';
+  $('area-producto-destino').textContent='Área de destino: '+areaLabel(codigo);
+  $('area-producto-explica').textContent='Selecciona y confirma el producto maestro de Bodega. El vínculo crea o reutiliza una representación de Local 1; no mueve stock.';
   $('area-producto-q').value=''; $('area-producto-detalle').hidden=true;
-  $('area-producto-guardar').disabled=true; pintarProductosAsignables();
+  $('area-producto-guardar').textContent='Confirmar producto';$('area-producto-guardar').disabled=true;pintarProductosAsignables();
   $('overlay-area-producto').classList.add('open');
-  if(productoId){
-    const p=DATA.find(x=>x.id===productoId);
-    if(p)$('area-producto-q').value=p.producto;
-    pintarProductosAsignables(); seleccionarProductoAsignacion(productoId);
-  }else setTimeout(()=>$('area-producto-q').focus(),40);
+  setTimeout(()=>$('area-producto-q').focus(),40);
 }
 async function guardarProductoEnArea(){
-  const p=DATA.find(x=>x.id===ASIGNAR_PRODUCTO_ID); if(!p||!ASIGNAR_PREFERENCIA)return;
+  const p=BODEGA_AREA_SELECCION; if(!p||(!BODEGA_AREA_CREAR_REP&&!BODEGA_AREA_REP_ID))return;
   const codigo=ASIGNAR_AREA_CODIGO;
   const areaId=codigo==='sin_asignar'?null:areaIdPorCodigo(codigo);
   if(codigo!=='sin_asignar'&&!areaId){avisar('El área ya no está activa. No se hizo ningún cambio.');return;}
-  const btn=$('area-producto-guardar');btn.disabled=true;btn.textContent='Asignando…';
-  const {error}=await conReintento(()=>codigo==='sin_asignar'
-    ? sb.rpc('producto_area_preferencia_guardar',{p_producto_id:p.id,p_area_id:null,p_sede:'plaza'})
-    : sb.rpc('producto_area_configuracion_guardar',{
-        p_producto_id:p.id,p_area_id:areaId,p_seccion_id:null,p_stock_min:null,p_stock_max:null,
-        p_es_principal:!ASIGNAR_PREFERENCIA.area_id,p_sede:'plaza'
-      }));
-  btn.textContent=btn.dataset.duplicado==='1'?'Usar producto existente':'Asignar producto';
-  if(error){btn.disabled=false;avisar(error.message||'No se pudo asignar el producto.');return;}
-  const fisico=resumenFisicoProducto(p.id,ASIGNAR_PREFERENCIA.ubicaciones);
+  const minEl=$('area-producto-min'),maxEl=$('area-producto-max');
+  const min=minEl?.value===''||!minEl?null:Number(minEl.value), max=maxEl?.value===''||!maxEl?null:Number(maxEl.value);
+  if(min!==null&&(!Number.isFinite(min)||min<0)||max!==null&&(!Number.isFinite(max)||max<0)||min!==null&&max!==null&&max<min){avisar('Revisa los mínimos y máximos del área.');return;}
+  const btn=$('area-producto-guardar');btn.disabled=true;btn.textContent='Guardando vínculo…';
+  const {data,error}=await conReintento(()=>sb.rpc('bodega_producto_area_agregar',{
+    p_producto_bodega_id:p.producto_bodega_id,
+    p_producto_plaza_id:BODEGA_AREA_CREAR_REP?null:Number(BODEGA_AREA_REP_ID),
+    p_crear_representacion:BODEGA_AREA_CREAR_REP,
+    p_area_id:areaId,
+    p_seccion_id:$('area-producto-seccion')?.value||null,
+    p_stock_min:min,p_stock_max:max,
+    p_es_principal:!AREA_ROWS.some(r=>String(r.producto_id)===String(BODEGA_AREA_REP_ID)&&r.es_principal),
+    p_confirmar:true
+  }));
+  btn.textContent='Confirmar producto';
+  if(error){btn.disabled=false;avisar(error.message||'No se pudo vincular el producto.');return;}
+  if(data?.ya_configurado){cerrarAsignarProducto();avisar(`Este producto ya estaba agregado a ${areaLabel(codigo)}. No se creó otra configuración ni se movió stock.`);return;}
+  const nombre=p.nombre_bodega, idLocal=data?.producto_plaza_id;
   cerrarAsignarProducto(); await loadData();
-  avisar(`Producto asignado a ${areaLabel(codigo)}.\n\nLas existencias no se movieron.\nSaldo físico actual: ${fisico}.`);
+  avisar(`✓ ${nombre} quedó vinculado a ${areaLabel(codigo)} (Local 1 #${idLocal}).\n\nEste paso no movió stock ni creó lotes o movimientos.`);
 }
 function gestionarAreas(){
   if(SEDE!=='plaza'||!PERMISOS.puede_ajustes)return;
@@ -12764,8 +12823,6 @@ listEl.addEventListener('click',e=>{
   if(e.target.closest('[data-area-manage]')){gestionarAreas();return;}
   const asignar=e.target.closest('[data-area-assign]');
   if(asignar){abrirAsignarProducto(asignar.dataset.areaAssign);return;}
-  const crear=e.target.closest('[data-area-create]');
-  if(crear){ abrirNuevoProducto(crear.dataset.areaCreate); return; }
   const area=e.target.closest('[data-area-open]');
   if(area){ cambiarArea(area.dataset.areaOpen,area.dataset.areaProduct||''); return; }
   const cop=e.target.closest('[data-copiar]');
@@ -12795,12 +12852,23 @@ listEl.addEventListener('click',e=>{
 $('areaNav').addEventListener('click',e=>{
   const asignar=e.target.closest('[data-area-assign]');
   if(asignar){abrirAsignarProducto(asignar.dataset.areaAssign);return;}
-  const crear=e.target.closest('[data-area-create]');
-  if(crear){ abrirNuevoProducto(crear.dataset.areaCreate); return; }
   if(e.target.closest('[data-area-home]')) cambiarArea(null);
 });
-$('area-producto-q').addEventListener('input',()=>{ASIGNAR_PRODUCTO_ID=null;ASIGNAR_PREFERENCIA=null;$('area-producto-detalle').hidden=true;$('area-producto-guardar').disabled=true;pintarProductosAsignables();});
-$('area-producto-resultados').addEventListener('click',e=>{const b=e.target.closest('[data-area-producto]');if(b)seleccionarProductoAsignacion(+b.dataset.areaProducto);});
+$('area-producto-q').addEventListener('input',()=>{
+  clearTimeout(BODEGA_AREA_TIMER); BODEGA_AREA_TIMER=setTimeout(buscarProductosBodega,220);
+});
+$('area-producto-resultados').addEventListener('click',e=>{
+  const maestro=e.target.closest('[data-bodega-producto]');
+  if(maestro){seleccionarProductoBodega(maestro.dataset.bodegaProducto);return;}
+  const rep=e.target.closest('[data-bodega-representacion]');
+  if(rep){elegirRepresentacionBodega(rep.dataset.bodegaRepresentacion);return;}
+  if(e.target.closest('[data-bodega-crear-rep]'))elegirCrearRepresentacionBodega();
+});
+$('area-producto-detalle').addEventListener('click',e=>{
+  const rep=e.target.closest('[data-bodega-representacion]');
+  if(rep){elegirRepresentacionBodega(rep.dataset.bodegaRepresentacion);return;}
+  if(e.target.closest('[data-bodega-crear-rep]'))elegirCrearRepresentacionBodega();
+});
 $('area-producto-cancelar').addEventListener('click',cerrarAsignarProducto);
 $('area-producto-guardar').addEventListener('click',guardarProductoEnArea);
 $('overlay-area-producto').addEventListener('click',e=>{if(e.target===$('overlay-area-producto'))cerrarAsignarProducto();});
@@ -13717,10 +13785,8 @@ $('n-guardar').addEventListener('click', async()=>{
   if(!rubro){ avisar('Elige una sección.'); $('n-rubro').focus(); return; }
   const dup=DATA.find(d=>normNombre(d.producto)===normNombre(nombre));
   if(dup){
-    const areaId=$('n-area').value||null;
-    const destino=areaId ? (AREAS_CATALOGO.find(a=>a.id===areaId)?.codigo||'sin_asignar') : 'sin_asignar';
     closeNuevo();
-    abrirAsignarProducto(destino,dup.id,true);
+    avisar('Ya existe una ficha con ese nombre en Local 1. Para agregar un producto de Bodega, entra al área y usa “Agregar producto de Bodega”; no se creó una ficha aislada.');
     return;
   }
   const num=el=>el.value===''?null:+el.value;

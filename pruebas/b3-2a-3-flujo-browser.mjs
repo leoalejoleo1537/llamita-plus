@@ -38,6 +38,16 @@ await page.addInitScript(()=>{
     if(name==='permisos_mios')return wrap(permisos);
     if(name==='stock_leer_areas')return wrap(lectura);
     if(name==='areas_operativas_listar')return wrap(catalogo);
+    if(name==='area_secciones_listar')return wrap([]);
+    if(name==='bodega_productos_area_buscar')return wrap([{
+      producto_bodega_id:501,nombre_bodega:'Helado de vainilla',rubro:'Congelador',tipo:'Helados',unidad:'un',stock_bodega:7,
+      representaciones:[],posibles_representaciones:[]
+    }]);
+    if(name==='bodega_producto_area_agregar'){
+      window.__rpcWrites.push({name,args});
+      return wrap({producto_bodega_id:501,producto_plaza_id:99,area_id:args.p_area_id,
+        representacion_creada:true,vinculo_creado:true,ya_configurado:false,saldo_movido:false});
+    }
     if(name==='producto_area_preferencia_leer'){
       const area=prefs.get(+args.p_producto_id)||null;
       const cat=catalogo.find(a=>a.id===area);
@@ -71,36 +81,18 @@ await page.evaluate(()=>pickTab('inv'));
 await page.waitForSelector('[data-area-assign="heladeria"]');
 await page.click('[data-area-assign="heladeria"]');
 await page.fill('#area-producto-q','vainilla');
-await page.click('[data-area-producto="11"]');
+await page.click('[data-bodega-producto="501"]');
+await page.click('[data-bodega-crear-rep]');
 await page.waitForFunction(()=>document.getElementById('area-producto-guardar').disabled===false);
-await check('producto existente muestra preferencia y saldo físico',async()=>{
-  const t=await page.locator('#area-producto-detalle').innerText();return t.includes('Área preferida actual')&&t.includes('Sin asignar · 1')&&t.includes('no se moverán');
+await check('producto maestro muestra Bodega, representación local y ausencia de movimiento',async()=>{
+  const t=await page.locator('#area-producto-detalle').innerText();return t.includes('Producto maestro')&&t.includes('Bodega: 7')&&t.includes('saldo cero')&&t.includes('no mueve stock');
 });
 await page.click('#area-producto-guardar');
-await page.waitForFunction(()=>window.__rpcWrites.some(x=>x.name==='producto_area_preferencia_guardar'));
-await check('asigna por RPC a Heladería sin duplicar producto',async()=>page.evaluate(()=>{
-  const w=window.__rpcWrites;return w.filter(x=>x.name==='producto_area_preferencia_guardar').length===1&&
-    w.filter(x=>x.name==='producto_plaza_crear').length===0&&window.__prefs.get(11)==='area-heladeria';
-}));
-if(await page.locator('#overlay-ask.open').count())await page.click('#ask-ok');
-await page.evaluate(()=>abrirNuevoProducto('heladeria'));
-await check('Área operativa no mezcla categorías heredadas',async()=>{
-  const t=await page.locator('#n-area').innerText();return t.includes('Heladería')&&!t.includes('Limpieza')&&!t.includes('Vitrina')&&!t.includes('Sándwiches');
-});
-await page.fill('#n-nombre','Helado de vainilla');
-await page.click('#n-guardar');
-await page.waitForSelector('#overlay-area-producto.open');
-await check('duplicado ofrece usar la ficha coincidente',async()=>{
-  const t=await page.locator('#overlay-area-producto').innerText();return t.includes('Este producto ya existe')&&t.includes('Helado de vainilla')&&t.includes('Usar producto existente')&&t.includes('no se creará una copia');
-});
-await page.click('#area-producto-cancelar');
-await page.evaluate(()=>abrirNuevoProducto('heladeria'));
-await page.fill('#n-nombre','Paleta de menta sintética');
-await page.click('#n-guardar');
-await page.waitForFunction(()=>window.__rpcWrites.some(x=>x.name==='producto_plaza_crear'));
-await check('producto verdaderamente nuevo usa la RPC con área y saldo cero',async()=>page.evaluate(()=>{
-  const x=window.__rpcWrites.find(w=>w.name==='producto_plaza_crear');
-  return x?.args.p_area_id==='area-heladeria'&&!('p_stock_actual' in x.args);
+await page.waitForFunction(()=>window.__rpcWrites.some(x=>x.name==='bodega_producto_area_agregar'));
+await check('usa RPC del vínculo, exige confirmación y no modifica tablas desde el navegador',async()=>page.evaluate(()=>{
+  const w=window.__rpcWrites.find(x=>x.name==='bodega_producto_area_agregar');
+  return !!w&&w.args.p_producto_bodega_id===501&&w.args.p_crear_representacion&&w.args.p_confirmar&&
+    window.__tableWrites.length===0&&window.__fudoCalls.length===0;
 }));
 await page.evaluate(()=>{PERMISOS.puede_ajustes=false;PERMISOS.puede_editar=false;aplicarPermisos();pickTab('inv');render();});
 await check('usuario común no ve gestión ni asignación',async()=>

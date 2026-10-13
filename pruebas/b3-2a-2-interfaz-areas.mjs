@@ -12,7 +12,7 @@ check('la interfaz ya no contiene una lista fija AREA_ORDEN_UI',!html.includes('
 check('la navegación combina catálogo dinámico y lectura del ledger',html.includes("sb.rpc('areas_operativas_listar'")&&html.includes("sb.rpc('stock_leer_areas'"));
 check('Ajustes usa solo RPC protegidas para áreas',['area_operativa_crear','area_operativa_editar','area_operativa_archivar'].every(x=>html.includes(`sb.rpc('${x}'`)));
 check('las altas normales de plaza usan producto_plaza_crear',html.includes("sb.rpc('producto_plaza_crear'"));
-check('la preferencia usa lectura y escritura protegidas',html.includes("sb.rpc('producto_area_preferencia_leer'")&&html.includes("sb.rpc('producto_area_preferencia_guardar'"));
+check('la incorporación desde Bodega usa la RPC específica y protegida',html.includes("sb.rpc('bodega_productos_area_buscar'")&&html.includes("sb.rpc('bodega_producto_area_agregar'"));
 check('la interfaz distingue configuración y saldo físico',html.includes('La cantidad pertenece al ledger del área')&&html.includes('Ubicación física actual'));
 check('el lector SQL acepta cualquier área activa vinculada',migration.includes("u.area_id is not null and a.id is not null")&&!migration.includes("u.codigo in ('cocina_fria'"));
 check('la RPC de preferencia exige sesión/capacidad y queda solo para authenticated',migration.includes("exigir_capacidad_b3_2a('lectura')")&&migration.includes('grant execute on function public.producto_area_preferencia_leer(bigint,text)\n  to authenticated'));
