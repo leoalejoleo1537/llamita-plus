@@ -4232,6 +4232,8 @@ let AREA_ROWS = [];
 let AREAS_CATALOGO = [];
 let AREA_ERROR = null;
 let AREA_LOADING = false;
+let AREA_CARGADA = false;
+let AREA_SOLICITUD = 0;
 let areaActual = null;              // null=portada; '__todas__'=vista global; otro=ubicación plaza
 const AREA_TODAS = '__todas__';
 let AREA_PRIMERA_SECCION_ABIERTA = true;
@@ -4438,7 +4440,7 @@ function renderAreaPortada(){
   $('invFiltros').style.display='none'; $('metrics').style.display='none';
   $('critSedes').style.display='none'; $('metaPortada').style.display='none';
   $('btnNuevo').style.display='none'; $('inv-estado').style.display='none';
-  if(AREA_LOADING){ listEl.innerHTML='<div class="area-loading">Cargando existencias por ubicación…</div>'; return; }
+  if(AREA_LOADING&&!AREA_CARGADA){ listEl.innerHTML='<div class="area-loading">Cargando existencias por ubicación…</div>'; return; }
   if(AREA_ERROR){ listEl.innerHTML='<div class="empty">No se pudo leer el libro de existencias de Local 1. Vuelve a cargar para intentarlo otra vez.</div>'; return; }
   const codigos=areasNavegacion();
   const total=codigos.reduce((s,c)=>s+areaStats(c).unidades,0);
@@ -4512,7 +4514,7 @@ function renderAreaLista(){
   $('critSedes').style.display='none'; $('metaPortada').style.display='none';
   $('btnNuevo').style.display='none'; $('inv-estado').style.display='none';
   $('areaNote').style.display='none';
-  if(AREA_LOADING){ listEl.innerHTML='<div class="area-loading">Cargando existencias por ubicación…</div>'; return; }
+  if(AREA_LOADING&&!AREA_CARGADA){ listEl.innerHTML='<div class="area-loading">Cargando existencias por ubicación…</div>'; return; }
   if(AREA_ERROR){ listEl.innerHTML='<div class="empty">No se pudo leer el libro de existencias de Local 1. Vuelve a cargar para intentarlo otra vez.</div>'; return; }
   const q=normNombre(qEl.value), tipo=tipoSel;
   const porProducto=new Map();
@@ -5360,7 +5362,7 @@ function pickSede(s){
     return;
   }
   SEDE = s;
-  AREA_ROWS=[]; AREAS_CATALOGO=[]; AREA_ERROR=null; AREA_LOADING=s==='plaza'; areaActual=null;areaFilterCard=null;
+  AREA_ROWS=[]; AREAS_CATALOGO=[]; AREA_ERROR=null; AREA_LOADING=s==='plaza'; AREA_CARGADA=false; AREA_SOLICITUD++; areaActual=null;areaFilterCard=null;
   $('view-inv').classList.remove('area-workspace-wide');
   $('area-page-heading').hidden=true;
   /* Con el panel fijo el cajón nunca se abre, así que su nombre de sede hay
@@ -12481,11 +12483,12 @@ function render(){
 }
 async function loadData(){
   const sedeCarga=SEDE;
+  const solicitud=++AREA_SOLICITUD;
   const {data,error}=await sb.from('productos').select('*').eq('sede',SEDE).eq('activo','SÍ').order('producto');
-  if(SEDE!==sedeCarga) return;
+  if(SEDE!==sedeCarga||solicitud!==AREA_SOLICITUD) return;
   if(error){
     $('liveText').textContent='error de conexión';$('live').classList.add('off');console.error(error);
-    if(sedeCarga==='plaza'){ AREA_LOADING=false; AREA_ERROR=error; AREA_ROWS=[]; render(); }
+    if(sedeCarga==='plaza'){ AREA_LOADING=false; AREA_CARGADA=true; AREA_ERROR=error; AREA_ROWS=[]; render(); }
     return;
   }
   DATA=data;
@@ -12500,19 +12503,22 @@ async function loadData(){
   if(!hasTipo) tipoSel=null;
   else if(tipoSel && !DATA.some(p=>tipoDe(p)===tipoSel)) tipoSel=null;  // se quedó sin productos
   if(sedeCarga==='plaza'){
-    AREA_LOADING=true; AREA_ERROR=null;
-    render();
+    // Mantener visible la última lectura durante las sincronizaciones. El
+    // estado de carga solo reemplaza la lista al entrar por primera vez.
+    AREA_LOADING=!AREA_CARGADA; AREA_ERROR=null;
+    if(AREA_LOADING) render();
     const [lectura,catalogo]=await Promise.all([
       sb.rpc('stock_leer_areas'),
       sb.rpc('areas_operativas_listar',{p_sede:'plaza',p_incluir_archivadas:false})
     ]);
-    if(SEDE!==sedeCarga) return;
+    if(SEDE!==sedeCarga||solicitud!==AREA_SOLICITUD) return;
     AREA_LOADING=false;
+    AREA_CARGADA=true;
     AREA_ERROR=lectura.error||catalogo.error||null;
     AREA_ROWS=lectura.error?[]:(lectura.data||[]);
     AREAS_CATALOGO=catalogo.error?[]:(catalogo.data||[]);
   }else{
-    AREA_LOADING=false; AREA_ERROR=null; AREA_ROWS=[]; AREAS_CATALOGO=[];
+    AREA_LOADING=false; AREA_CARGADA=false; AREA_ERROR=null; AREA_ROWS=[]; AREAS_CATALOGO=[];
   }
   $('m-fudo').style.display = puedeEnFudo('ficha') ? '' : 'none';
   $('m-tipo-row').style.display = hasTipo ? '' : 'none';
