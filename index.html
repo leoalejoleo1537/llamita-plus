@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Inventario</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0F1E31">
@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Llamita">
 <!-- multi-sede: Cafe Mall Plaza + Parque Angamos + Bodega -->
 <!-- Versión FIJA a propósito. Con "@2" suelto la app tomaba la última 2.x que
@@ -5160,6 +5160,12 @@ function abrirMenuMovil(){
   $('mobileMenuTrigger').setAttribute('aria-expanded','true');
   $('mobileNavClose').focus();
 }
+function tabDisponibleEnMovil(original){
+  // La CSS del cajón oculta en móvil las rutas que ya viven en la barra
+  // inferior. Esa ocultación visual no debe confundirse con las rutas que
+  // permisos o sede desactivan mediante el atributo style.
+  return !!original && !original.hidden && original.style.display!=='none';
+}
 function sincronizarNavegacionMovil(){
   const nav=$('mobileBottom');
   const candidatos=SEDE==='central'
@@ -5168,7 +5174,7 @@ function sincronizarNavegacionMovil(){
   nav.replaceChildren();
   for(const ruta of candidatos){
     const original=document.querySelector(`.tab[data-tab="${ruta}"]`);
-    if(!original || getComputedStyle(original).display==='none' ||
+    if(!tabDisponibleEnMovil(original) ||
        (modoDemo() && !demoPermiteVista(ruta))) continue;
     const btn=document.createElement('button');
     btn.type='button'; btn.className='mobile-bottom-item'; btn.dataset.mobileTab=ruta;
@@ -5197,7 +5203,7 @@ $('mobileBottom').addEventListener('click',e=>{
   if(mas){abrirMenuMovil();return;}
   const btn=e.target.closest('[data-mobile-tab]'); if(!btn)return;
   const original=document.querySelector(`.tab[data-tab="${btn.dataset.mobileTab}"]`);
-  if(original && getComputedStyle(original).display!=='none') original.click();
+  if(tabDisponibleEnMovil(original)) original.click();
 });
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape' && document.body.classList.contains('mobile-menu-open')) cerrarMenu(true);
