@@ -413,7 +413,7 @@
   .area-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}
   .area-back{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:10px;
     min-height:38px;padding:7px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
-  .area-back:active,.area-card:active,.area-global-link:active{transform:scale(.985)}
+  .area-back:active,.area-global-link:active{transform:scale(.985)}
   .area-context{font-size:12px;color:var(--muted);text-align:right}
   .area-note{margin:0 0 12px;padding:10px 12px;background:var(--gray-bg);color:var(--gray-fg);
     border-radius:11px;font-size:12px;line-height:1.45}
@@ -421,29 +421,6 @@
   .area-page-heading h2{margin:0;color:var(--text);font-size:clamp(27px,3vw,36px);line-height:1.1;letter-spacing:-.025em}
   .area-page-heading p{margin:6px 0 0;color:var(--muted);font-size:14px;line-height:1.45}
   .area-page-heading[hidden]{display:none}
-  .area-cover{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-  .area-card{display:flex;flex-direction:column;align-items:stretch;gap:7px;text-align:left;min-width:0;
-    padding:15px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:15px;
-    box-shadow:var(--sombra);font:inherit;cursor:pointer;transition:transform .12s ease,box-shadow .15s ease}
-  article.area-card{cursor:default}
-  .area-card-open{display:flex;flex:1;flex-direction:column;align-items:stretch;gap:7px;text-align:left;
-    padding:0;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer}
-  .area-card:hover{box-shadow:0 8px 22px rgba(25,35,50,.08)}
-  .area-card-title{font-size:15px;font-weight:750;line-height:1.25}
-  .area-card-count{font-size:12px;color:var(--muted)}
-  .area-card-units{font-size:22px;font-weight:800;letter-spacing:-.02em}
-  .area-card-state{font-size:11px;color:var(--muted);padding-top:7px;border-top:1px solid var(--border)}
-  .area-card-extra{font-size:11px;color:var(--muted);line-height:1.4}
-  .area-create{margin-top:auto;border:0;background:transparent;color:var(--orange);font:inherit;
-    font-size:11px;font-weight:800;text-align:left;padding:3px 0;cursor:pointer}
-  .area-card-actions{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:auto;padding-top:3px}
-  .area-card-actions .area-create{margin-top:0;min-height:30px}
-  .area-cover-head{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;
-    padding:2px 2px 5px}
-  .area-cover-head strong{display:block;font-size:14px}
-  .area-cover-head span{display:block;margin-top:2px;color:var(--muted);font-size:11px;line-height:1.4}
-  .area-manage{flex:0 0 auto;min-height:40px;padding:8px 12px;border:1px solid var(--border);border-radius:10px;
-    background:var(--card);color:var(--orange-dark);font:inherit;font-size:12px;font-weight:800;cursor:pointer}
   .area-nav-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
   .area-assign-modal{width:min(620px,94vw);max-width:620px}
   .area-assign-modal.has-section-panel{width:min(940px,96vw);max-width:940px}
@@ -483,7 +460,6 @@
   .area-ficha-resumen span{color:var(--muted)}.area-ficha-venc{display:block!important}
   .area-ficha-venc .vencs{margin-top:5px}
 .area-unit{font-size:11px;color:var(--muted);min-width:18px}
-  .area-aggregate{background:var(--gray-bg)}
   .area-list-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:2px 0 10px}
   .area-list-total{font-size:12px;color:var(--muted)}
   .area-read-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 10px;
@@ -530,10 +506,10 @@
   .area-admin-row.archivada{opacity:.72}
   .area-admin-new{display:grid;grid-template-columns:minmax(0,1fr) 90px auto;gap:8px;align-items:end}
   @media(max-width:960px){.area-work-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
-  @media(max-width:700px){#view-inv.area-workspace-wide{padding:12px 14px calc(90px + env(safe-area-inset-bottom))}.area-cover{grid-template-columns:repeat(2,minmax(0,1fr))}.area-card{padding:12px}.area-cover-head{align-items:flex-start}.area-nav{align-items:flex-start;flex-wrap:wrap}.area-context{order:3;width:100%;text-align:left}.area-nav-actions{justify-content:flex-start}}
+  @media(max-width:700px){#view-inv.area-workspace-wide{padding:12px 14px calc(90px + env(safe-area-inset-bottom))}.area-nav{align-items:flex-start;flex-wrap:wrap}.area-context{order:3;width:100%;text-align:left}.area-nav-actions{justify-content:flex-start}}
   @media(max-width:620px){.area-work-metrics{grid-template-columns:1fr;gap:7px}.area-work-metric{min-height:64px}.area-assign-modal.has-section-panel{width:min(620px,96vw)}.has-section-panel .area-assign-layout{display:block;position:relative}.has-section-panel .area-assign-main{transform:translateX(-105%);opacity:0;pointer-events:none}.has-section-panel .area-section-side{position:absolute;inset:0 0 0 0;max-height:70vh;padding:0;border:0;background:var(--card)}.area-section-admin-row{grid-template-columns:1fr}}
   @media(max-width:620px){.area-admin-row,.area-admin-new,.area-section-admin-row{grid-template-columns:1fr}.area-admin-actions{justify-content:flex-start}.area-admin-row input,.area-admin-new input{width:100%;min-width:0}}
-  @media(max-width:420px){.area-cover{grid-template-columns:1fr;gap:7px}.area-global-balances{grid-template-columns:1fr}.area-card-title{font-size:13px}.area-cover-head{display:grid}.area-manage{width:100%}.area-product-result{align-items:flex-start}.area-product-result .saldo{max-width:34%}}
+  @media(max-width:420px){.area-global-balances{grid-template-columns:1fr}.area-product-result{align-items:flex-start}.area-product-result .saldo{max-width:34%}}
 
   /* ---- las tres sedes, vistas desde Bodega ----
      Adriana no cuenta en bodega para saber cómo está bodega: cuenta para
@@ -3054,6 +3030,7 @@
   ::placeholder{color:#9aa3ad}
 </style>
 <link rel="stylesheet" href="themes.css">
+<link rel="stylesheet" href="area-selection.css">
 </head>
 <body>
 
@@ -4240,6 +4217,12 @@ let AREA_SOLICITUD = 0;
 let areaActual = null;              // null=portada; '__todas__'=vista global; otro=ubicación plaza
 const AREA_TODAS = '__todas__';
 let AREA_PRIMERA_SECCION_ABIERTA = true;
+let areaPortadaTema = 'light';
+try { if(localStorage.getItem('llamita_areas_tema')==='dark') areaPortadaTema='dark'; } catch(_) {}
+function aparienciaPortada(activa){
+  document.body.classList.toggle('area-portada-activa',activa);
+  document.body.classList.toggle('area-portada-oscura',activa&&areaPortadaTema==='dark');
+}
 let filterState = null;
 let areaFilterCard = null;
 let hasVenc = false;      // true cuando exista la columna vencimiento en la tabla
@@ -4419,46 +4402,69 @@ async function crearSeccionDesdeArea(){
   renderDetalleProductoBodega();pintarPanelSeccionesArea();
   aviso('✓ Sección agregada · no se movieron existencias');
 }
+function dibujoAreaHTML(codigo){
+  // Trazos propios y discretos: las ilustraciones no representan datos ni estados.
+  const dibujos={
+    cafeteria:`<path d="M22 42c6-2 24-2 30 .2l-2 14c-.8 8-6 12-13 12h-3c-8 0-12-4-13-12z"/>
+      <path d="M52 47c12-3 16 2 14 9-1 6-7 9-15 7M18 70c14 4 31 4 42-1"/>
+      <path d="M31 37c-7-5-4-12 1-13 5-2 9 1 8 6-1 4-5 5-6 2M43 38c-3-5 0-8 3-11 4-4 1-8-3-8-4 0-6 4-3 6"/>
+      <path class="area-ink-accent" d="M56 39c4-2 8-1 10 2"/>`,
+    cocina_fria:`<path d="M20 33c-2-4 0-7 5-8l27-6 16 13-4 28-27 12-21-19z"/>
+      <path d="M21 34 40 47l26-14M40 47l-3 24M47 39c-4-10-1-16 7-18M46 40c7-3 11-2 15 3"/>
+      <path d="M52 25c0 8-3 14-9 18M18 55c6 2 10 6 11 12"/>
+      <path class="area-ink-accent" d="M60 66l5 5"/>`,
+    cocina_caliente:`<path d="M18 51c2 12 13 18 27 17 12-1 22-8 23-18-13 4-37 4-50 1z"/>
+      <path d="M16 49c13-4 42-4 54 0M67 54l11-3M26 43c-6-8-2-12 1-16 2-4 0-7-2-7M38 41c-5-7-3-11 1-14 4-4 3-8-1-10M51 41c-3-5-2-8 1-11 4-4 1-8-3-8"/>
+      <path class="area-ink-accent" d="M34 73c2-4 5-4 6 0 2-3 4-3 6 0"/>`,
+    barra:`<path d="M16 28c12-3 41-4 59-1-2 10-14 20-26 30l-7 19M20 32c10 6 39 6 51-1M27 77c9-2 22-2 32 0"/>
+      <path d="M50 57c-1 3-1 8-2 11M36 26c2-7 7-12 14-11 5 0 8 3 9 7M44 19c5-2 8-1 11 2"/>
+      <path class="area-ink-accent" d="M62 25c5-6 10-6 14-3"/>`,
+    heladeria:`<path d="M27 39c-7-5-6-14 1-19 5-4 12-3 16 1 5-7 15-6 19 1 3 5 2 11-2 16"/>
+      <path d="M25 40c11-3 29-4 41-1M29 44l14 31c1 2 4 2 5 0l14-32M35 53l23-7M40 63l13-4"/>
+      <path d="M37 28c-2-4 0-7 4-8M52 21c4 0 7 2 8 6"/>
+      <path class="area-ink-accent" d="M62 35c4-2 7-1 9 2"/>`
+  };
+  const trazo=dibujos[codigo];
+  return trazo?`<span class="area-portal-art area-portal-art--${esc(codigo.replace('cocina_',''))}" aria-hidden="true"><svg viewBox="0 0 92 92" fill="none" stroke="currentColor">${trazo}</svg></span>`:'';
+}
 function htmlTarjetaArea(codigo){
-  const s=areaStats(codigo);
-  const extra=codigo==='sin_asignar'
-    ? '<span class="area-card-extra">Stock pendiente de distribución a las áreas.</span>' : '';
-  return `<article class="area-card">
-    <button type="button" class="area-card-open" data-area-open="${esc(codigo)}">
-      <span class="area-card-title">${esc(areaLabel(codigo))}</span>
-      <span class="area-card-count">${s.productos} productos configurados o con saldo</span>
-      <span class="area-card-units">${fmt(s.unidades)} <small>unidades</small></span>
-      <span class="area-card-state">${s.criticos} críticos · ${s.sobre} sobre-stock · ${s.sinDato} sin límites</span>${extra}
-    </button>
-    ${PERMISOS.puede_editar&&codigo!=='sin_asignar'?`<div class="area-card-actions">
-      <button type="button" class="area-create" data-area-assign="${esc(codigo)}">＋ Agregar producto de Bodega</button>
-    </div>`:''}
-  </article>`;
+  const nombre=areaLabel(codigo);
+  return `<button type="button" class="area-portal-card" data-area-open="${esc(codigo)}" aria-label="Ingresar a ${esc(nombre)}">
+    <span class="area-portal-card-top"><span class="area-portal-card-name">${esc(nombre)}</span>${dibujoAreaHTML(codigo)}</span>
+    <span class="area-portal-card-reveal"><span class="area-portal-card-context">Ver inventario de ${esc(nombre)}.</span>
+      <span class="area-portal-card-enter">Ingresar <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11m-4-4 4 4-4 4"/></svg></span></span>
+  </button>`;
 }
 function renderAreaPortada(){
   $('view-inv').classList.remove('area-workspace-wide');
   $('area-page-heading').hidden=true;
+  aparienciaPortada(vistaActual==='inv');
   $('areaNav').style.display='none'; $('areaNote').style.display='none';
   $('areaTipoPills').style.display='none'; $('areaTipoPills').innerHTML=''; $('tipos').style.display='';
   $('invFiltros').style.display='none'; $('metrics').style.display='none';
   $('critSedes').style.display='none'; $('metaPortada').style.display='none';
   $('btnNuevo').style.display='none'; $('inv-estado').style.display='none';
-  if(AREA_LOADING&&!AREA_CARGADA){ listEl.innerHTML='<div class="area-loading">Cargando existencias por ubicación…</div>'; return; }
-  if(AREA_ERROR){ listEl.innerHTML='<div class="empty">No se pudo leer el libro de existencias de Local 1. Vuelve a cargar para intentarlo otra vez.</div>'; return; }
   const codigos=areasNavegacion();
-  const total=codigos.reduce((s,c)=>s+areaStats(c).unidades,0);
-  const productos=new Set(AREA_ROWS.filter(r=>r.configurado||Number(r.cantidad)!==0).map(r=>r.producto_id)).size;
   listEl.innerHTML=`<div class="area-cover" aria-label="Áreas de inventario">
-    <div class="area-cover-head"><div><strong>Ubicaciones físicas de Local 1</strong><span>Las categorías describen productos; estas áreas indican dónde se organiza el inventario.</span></div>
-      ${PERMISOS.puede_ajustes?'<button type="button" class="area-manage" data-area-manage>Gestionar áreas</button>':''}</div>
-    ${codigos.map(htmlTarjetaArea).join('')}
-    <button type="button" class="area-card area-aggregate" data-area-open="${AREA_TODAS}">
-      <span class="area-card-title">Todas las áreas</span>
-      <span class="area-card-count">${productos} productos configurados o con saldo</span>
-      <span class="area-card-units">${fmt(total)} <small>unidades</small></span>
-      <span class="area-card-state">Críticos · sin mínimos configurados</span>
-      <span class="area-card-extra">Vista agrupada con cantidades separadas por ubicación.</span>
-    </button>
+    <div class="area-portal-head">
+      <span class="area-portal-breadcrumb">Local 1 · Inventario · Áreas</span>
+      <span class="area-portal-head-actions">
+        ${PERMISOS.puede_ajustes?'<button type="button" class="area-manage" data-area-manage>Gestionar áreas</button>':''}
+        <button type="button" class="area-theme-toggle" data-area-theme-toggle aria-label="Activar modo ${areaPortadaTema==='dark'?'claro':'oscuro'}" aria-pressed="${areaPortadaTema==='dark'}">
+          <svg class="area-theme-moon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M19.5 16.8A8.5 8.5 0 0 1 7.2 4.5 8.5 8.5 0 1 0 19.5 16.8Z"/><path d="M18 4.5v4m-2-2h4"/></svg>
+          <svg class="area-theme-sun" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.5 1.5m11.2 11.2 1.5 1.5m0-14.2-1.5 1.5M6.4 17.6l-1.5 1.5"/></svg>
+          <span>${areaPortadaTema==='dark'?'Claro':'Oscuro'}</span>
+        </button>
+      </span>
+    </div>
+    <h2 class="area-portal-title">Elige un área</h2>
+    <p class="area-portal-subtitle">Entra al lugar donde vas a revisar el inventario.</p>
+    ${AREA_LOADING&&!AREA_CARGADA?'<div class="area-portal-loading" role="status">Cargando áreas…</div>':AREA_ERROR?'<div class="area-portal-error" role="alert"><strong>No pudimos cargar las áreas.</strong><p>Revisa tu conexión y vuelve a intentarlo.</p><button type="button" data-area-retry>Volver a intentar</button></div>':`
+      <div class="area-portal-grid">${codigos.filter(c=>c!=='sin_asignar').map(htmlTarjetaArea).join('')}</div>
+      <div class="area-portal-other"><h3>Otras vistas</h3><div class="area-portal-secondary">
+        <button type="button" class="area-secondary-view" data-area-open="${AREA_TODAS}"><strong>Todas las áreas</strong><span>Vista general del inventario.</span></button>
+        ${codigos.includes('sin_asignar')?'<button type="button" class="area-secondary-view" data-area-open="sin_asignar"><strong>Sin asignar</strong><span>Productos aún sin ubicación.</span></button>':''}
+      </div></div>`}
   </div>`;
 }
 function renderAreaTipoPills(){
@@ -4503,6 +4509,7 @@ function filaAreaHistorica(r){
   </div>`;
 }
 function renderAreaLista(){
+  aparienciaPortada(false);
   const global=areaActual===AREA_TODAS;
   $('view-inv').classList.add('area-workspace-wide');
   renderAreaTipoPills();
@@ -12441,6 +12448,7 @@ function render(){
     if(areaActual===null) renderAreaPortada(); else renderAreaLista();
     return;
   }
+  aparienciaPortada(false);
   $('areaNav').style.display='none'; $('areaNote').style.display='none';
   $('invFiltros').style.display=''; $('inv-estado').style.display=''; $('metrics').style.display='';
   $('inv-estado').value=filterState||'';
@@ -13178,6 +13186,14 @@ function gestionarAreas(){
 
 /* abrir/cerrar sección, o abrir ficha de producto */
 listEl.addEventListener('click',e=>{
+  if(e.target.closest('[data-area-theme-toggle]')){
+    areaPortadaTema=areaPortadaTema==='dark'?'light':'dark';
+    try { localStorage.setItem('llamita_areas_tema',areaPortadaTema); } catch(_) {}
+    renderAreaPortada();
+    listEl.querySelector('[data-area-theme-toggle]')?.focus({preventScroll:true});
+    return;
+  }
+  if(e.target.closest('[data-area-retry]')){loadData();return;}
   if(e.target.closest('[data-area-manage]')){gestionarAreas();return;}
   const asignar=e.target.closest('[data-area-assign]');
   if(asignar){abrirAsignarProducto(asignar.dataset.areaAssign);return;}
@@ -17947,6 +17963,7 @@ function pickTab(tab){
   /* El título es la sede y el subtítulo la pantalla: al revés de como estaba.
      Ver el comentario del <h1> en la barra. */
   vistaActual=tab;
+  if(tab!=='inv') aparienciaPortada(false);
   $('topTitle').textContent = etiquetaSedeUI(SEDE);
   $('topSede').textContent  = TITULOS[tab] || TITULOS.inv;
   if(tab==='mermas') loadMermas();

@@ -63,24 +63,68 @@ const check=async(name,fn)=>{try{const ok=await fn();if(!ok)failures.push(name);
 
 await page.click('.gate-btn[data-sede="plaza"]');
 await page.waitForSelector('[data-area-open="cafeteria"]');
-await check('portada agrega automáticamente Heladería, Sin asignar y Todas las áreas',async()=>
-  await page.locator('.area-card').count()===7);
-await check('áreas físicas empiezan en cero y no inventan críticos',async()=>{
+await check('portada muestra las áreas físicas y separa las vistas generales',async()=>
+  await page.locator('.area-portal-card').count()===5
+  && await page.locator('.area-secondary-view').count()===2);
+await check('portada evita cifras y alertas sin contexto',async()=>{
   const t=await page.locator('.area-cover').innerText();
   return ['Cocina fría','Cocina caliente','Barra','Cafetería','Heladería'].every(n=>t.includes(n))
-    && (t.match(/0 productos con saldo/g)||[]).length===5
-    && (t.match(/0 unidades/g)||[]).length===5
-    && t.includes('sin mínimos configurados');
+    && !t.includes('unidades')&&!t.includes('críticos')&&!t.includes('sin mínimos configurados');
 });
-await check('Sin asignar y Todas las áreas muestran unidades del libro',async()=>{
-  const sin=await page.locator('[data-area-open="sin_asignar"]').innerText();
-  const all=await page.locator('.area-card[data-area-open="__todas__"]').innerText();
-  return sin.includes('12 unidades')&&all.includes('17 unidades');
+await check('modo oscuro cambia la portada y conserva la elección',async()=>{
+  await page.click('[data-area-theme-toggle]');
+  const activo=await page.evaluate(()=>document.body.classList.contains('area-portada-oscura')
+    &&localStorage.getItem('llamita_areas_tema')==='dark');
+  await page.click('[data-area-theme-toggle]');
+  return activo&&await page.evaluate(()=>!document.body.classList.contains('area-portada-oscura'));
 });
+await check('el botón aparece al señalar la tarjeta y el dibujo no lleva texto funcional',async()=>{
+  const boton=page.locator('[data-area-open="cafeteria"] .area-portal-card-enter');
+  const reposo=await boton.evaluate(el=>getComputedStyle(el.parentElement).opacity);
+  await page.locator('[data-area-open="cafeteria"]').hover();
+  await page.waitForTimeout(250);
+  const visible=await boton.evaluate(el=>getComputedStyle(el.parentElement).opacity);
+  return reposo==='0'&&visible==='1'
+    &&await page.locator('[data-area-open="cafeteria"] .area-portal-art[aria-hidden="true"]').count()===1;
+});
+await page.setViewportSize({width:390,height:844});
+await page.waitForTimeout(250);
+await check('en teléfono hay una columna, acción visible y ningún desborde',async()=>page.evaluate(()=>{
+  const grid=document.querySelector('.area-portal-grid');
+  const card=document.querySelector('.area-portal-card');
+  const reveal=card.querySelector('.area-portal-card-reveal');
+  return getComputedStyle(grid).gridTemplateColumns.split(' ').length===1
+    &&getComputedStyle(reveal).opacity==='1'
+    &&document.documentElement.scrollWidth<=innerWidth;
+}));
+await page.setViewportSize({width:1280,height:900});
+await page.waitForTimeout(250);
+if(process.env.CAPTURE_AREAS_SCREENSHOT){
+  await page.setViewportSize({width:1600,height:900});
+  await page.locator('[data-area-open="cafeteria"]').hover();
+  await page.waitForTimeout(300);
+  await page.screenshot({path:'/tmp/llamita-areas-desktop.png',fullPage:true});
+  await page.click('[data-area-theme-toggle]');
+  await page.locator('[data-area-open="cafeteria"]').hover();
+  await page.waitForTimeout(300);
+  await page.screenshot({path:'/tmp/llamita-areas-desktop-dark.png',fullPage:true});
+  await page.click('[data-area-theme-toggle]');
+  await page.setViewportSize({width:390,height:844});
+  await page.waitForTimeout(350);
+  await page.screenshot({path:'/tmp/llamita-areas-mobile.png',fullPage:true});
+  await page.setViewportSize({width:1280,height:900});
+  await page.waitForTimeout(350);
+}
+await page.click('[data-area-open="sin_asignar"]');
+await check('Sin asignar conserva su lectura de saldos',async()=>{
+  const texto=await page.locator('#list').innerText();
+  return texto.includes('12 unidades físicas')&&texto.includes('2 con saldo');
+});
+await page.click('#areaNav [data-area-home]');
 
 await page.click('[data-area-open="cocina_fria"]');
 await check('un área sin saldo no muestra el catálogo de otras ubicaciones',async()=>
-  (await page.locator('#list').innerText()).includes('No hay productos que coincidan.')
+  (await page.locator('#list .area-read-row').count())===0
   && !(await page.locator('#list').innerText()).includes('Leche entera'));
 
 await page.click('#areaNav [data-area-home]');
@@ -89,12 +133,15 @@ await page.fill('#q','leche');
 await page.waitForTimeout(30);
 await check('buscar leche en Cafetería aísla la lectura a esa ubicación',async()=>{
   const t=await page.locator('#list').innerText();
+  const leche=page.locator('#list .row[data-row="1"]');
   return (await page.locator('#topSede').innerText())==='Inventario · Cafetería'
-    && t.includes('Leche entera')&&t.includes('3 L')&&!t.includes('Azúcar blanca')&&!t.includes('999');
+    && t.includes('Leche entera')&&(await leche.locator('input[type="number"]').inputValue())==='3'
+    &&(await leche.locator('.area-unit').innerText())==='L'
+    &&!t.includes('Azúcar blanca')&&!t.includes('999');
 });
 
 await page.click('#areaNav [data-area-home]');
-await page.click('.area-card[data-area-open="__todas__"]');
+await page.click('.area-secondary-view[data-area-open="__todas__"]');
 await check('vista global separa las cantidades por área',async()=>{
   const fila=page.locator('.area-global-product').filter({hasText:'Leche entera'});
   const t=await fila.innerText();
@@ -104,7 +151,7 @@ await page.locator('.area-global-link[data-area-open="cafeteria"][data-area-prod
 await check('desde global se abre el producto filtrado dentro de su área',async()=>
   (await page.locator('#topSede').innerText())==='Inventario · Cafetería'
   && (await page.locator('#q').inputValue())==='Leche entera'
-  && (await page.locator('#list').innerText()).includes('3 L'));
+  && (await page.locator('#list .row[data-row="1"] input[type="number"]').inputValue())==='3');
 await check('la navegación de áreas no escribe datos',async()=>
   (await page.evaluate(()=>window.__writes.length))===0);
 await check('la lectura usa la RPC del libro, no un RPC de escritura',async()=>
@@ -112,7 +159,8 @@ await check('la lectura usa la RPC del libro, no un RPC de escritura',async()=>
   && !(await page.evaluate(()=>window.__rpc.includes('stock_transferir'))));
 
 await page.evaluate(()=>pickSede('central'));
-await page.waitForSelector('#list .row');
+await page.waitForTimeout(1000);
+await page.locator('#list .sec-btn').first().click();
 await check('Bodega conserva la lista de Inventario y su saldo actual',async()=>
   (await page.locator('#list').innerText()).includes('Leche Bodega')
   && !(await page.locator('#areaNav').isVisible()));

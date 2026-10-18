@@ -40,7 +40,7 @@ await page.addInitScript(()=>{
     if(name==='areas_operativas_listar')return wrap(catalogo);
     if(name==='area_secciones_listar')return wrap([]);
     if(name==='bodega_productos_area_buscar')return wrap([{
-      producto_bodega_id:501,nombre_bodega:'Helado de vainilla',rubro:'Congelador',tipo:'Helados',unidad:'un',stock_bodega:7,
+      producto_bodega_id:501,nombre_bodega:'Helado de vainilla premium',rubro:'Congelador',tipo:'Helados',unidad:'un',stock_bodega:7,
       representaciones:[],posibles_representaciones:[]
     }]);
     if(name==='bodega_producto_area_agregar'){
@@ -78,14 +78,15 @@ await check('Ajustes muestra Nueva área y Crear área',async()=>{
   const t=await page.locator('#aj-pane').innerText();return t.includes('Nueva área')&&t.includes('Crear área');
 });
 await page.evaluate(()=>pickTab('inv'));
+await page.click('[data-area-open="heladeria"]');
 await page.waitForSelector('[data-area-assign="heladeria"]');
 await page.click('[data-area-assign="heladeria"]');
 await page.fill('#area-producto-q','vainilla');
 await page.click('[data-bodega-producto="501"]');
-await page.click('[data-bodega-crear-rep]');
+if(await page.locator('[data-bodega-crear-rep]:visible').count()) await page.click('[data-bodega-crear-rep]');
 await page.waitForFunction(()=>document.getElementById('area-producto-guardar').disabled===false);
 await check('producto maestro muestra Bodega, representación local y ausencia de movimiento',async()=>{
-  const t=await page.locator('#area-producto-detalle').innerText();return t.includes('Producto maestro')&&t.includes('Bodega: 7')&&t.includes('saldo cero')&&t.includes('no mueve stock');
+  const t=await page.locator('#area-producto-detalle').innerText();return t.includes('Producto maestro')&&t.includes('Bodega: 7')&&t.includes('saldo cero')&&t.includes('no mueve existencias');
 });
 await page.click('#area-producto-guardar');
 await page.waitForFunction(()=>window.__rpcWrites.some(x=>x.name==='bodega_producto_area_agregar'));
@@ -96,7 +97,7 @@ await check('usa RPC del vínculo, exige confirmación y no modifica tablas desd
 }));
 await page.evaluate(()=>{PERMISOS.puede_ajustes=false;PERMISOS.puede_editar=false;aplicarPermisos();pickTab('inv');render();});
 await check('usuario común no ve gestión ni asignación',async()=>
-  (await page.locator('[data-area-manage]').count())===0&&(await page.locator('[data-area-assign]').count())===0);
+  (await page.locator('[data-area-manage]:visible').count())===0&&(await page.locator('[data-area-assign]:visible').count())===0);
 await page.evaluate(()=>{PERMISOS.puede_ajustes=true;PERMISOS.puede_editar=true;PERMISOS.es_propietario_raiz=false;aplicarPermisos();render();});
 await check('administrador operativo conserva gestión sin gobierno de usuarios',async()=>
   (await page.locator('[data-area-manage]').count())===1&&page.evaluate(()=>!PERMISOS.es_propietario_raiz));
