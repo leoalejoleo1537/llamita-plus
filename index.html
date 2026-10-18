@@ -2,7 +2,10 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<!-- En iPhone la app debe respetar las zonas del sistema. `viewport-fit=cover`
+     metía la cabecera bajo la superficie translúcida de Safari y hacía que el
+     espacio inferior variara al mostrar u ocultar sus controles. -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Inventario</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0F1E31">

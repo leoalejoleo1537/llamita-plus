@@ -44,6 +44,8 @@ await page.waitForTimeout(150);
 const check=async(label,ok)=>{if(!await ok())throw Error(label);console.log('✓ '+label);};
 await check('móvil sin ancho reservado a la izquierda',async()=>
   page.evaluate(()=>getComputedStyle(document.body).paddingLeft==='0px'));
+await check('el viewport no dibuja bajo las barras translúcidas de iPhone',async()=>
+  page.evaluate(()=>!document.querySelector('meta[name="viewport"]').content.includes('viewport-fit=cover')));
 await check('Inventario, Reparto y Mermas visibles sin Más',async()=>
   page.evaluate(()=>{
     const rutas=[...document.querySelectorAll('#mobileBottom button:not([hidden])')]
@@ -91,6 +93,12 @@ const mermas=await medirBarra();
 await check('barra a idéntica altura al pasar por Inventario, Reparto y Mermas',async()=>
   [reparto,mermas].every(m=>Math.abs(m.top-inventario.top)<1 &&
     Math.abs(m.height-inventario.height)<1 && Math.abs(m.bottom-inventario.bottom)<1));
+await page.setViewportSize({width:390,height:775});
+const viewportReducido=await medirBarra();
+await page.setViewportSize({width:390,height:844});
+const viewportRestaurado=await medirBarra();
+await check('Safari puede cambiar el viewport sin cambiar la altura de la barra',async()=>
+  [inventario,viewportReducido,viewportRestaurado].every(m=>Math.abs(m.height-68)<1 && Math.abs(m.bottom)<1));
 await check('botones estables, anclados abajo y con destino activo',async()=>
   page.evaluate(()=>window.__m1BotonInventario===document.querySelector('[data-mobile-tab="inv"]') &&
     document.querySelector('[data-mobile-tab="mermas"]').getAttribute('aria-current')==='page' &&

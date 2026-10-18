@@ -218,7 +218,9 @@ body.navegacion-fija .top-actions{grid-column:3;grid-row:1;justify-self:end}
 /* M1: un solo menú, temporal en teléfono; el riel de escritorio no cambia. */
 .mobile-menu-trigger,.mobile-nav-heading,.mobile-bottom,.mobile-nav-scrim{display:none}
 @media(max-width:719px){
-  body.navegacion-fija{--mobile-bottom-height:68px;padding-left:0;padding-bottom:calc(var(--mobile-bottom-height) + env(safe-area-inset-bottom))}
+  /* Altura fija: Safari cambia su viewport visual al ocultar las barras del
+     navegador, pero eso no debe convertirse en altura extra de navegación. */
+  body.navegacion-fija{--mobile-bottom-height:68px;padding-left:0;padding-bottom:var(--mobile-bottom-height)}
   body.mobile-menu-open{overflow:hidden}
   body.navegacion-fija .topbar{position:relative;z-index:31;background:var(--card);filter:none;backdrop-filter:none;-webkit-backdrop-filter:none}
   .overlay,.overlay-blur,.burbuja-fondo{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
@@ -253,8 +255,8 @@ body.navegacion-fija .top-actions{grid-column:3;grid-row:1;justify-self:end}
   .drawer-appearance{margin-top:8px}
   .paleta-popover{z-index:82}
   .mobile-bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;align-items:flex-start;
-    height:calc(var(--mobile-bottom-height) + env(safe-area-inset-bottom));min-height:0;box-sizing:border-box;
-    padding:5px 8px calc(6px + env(safe-area-inset-bottom));
+    height:var(--mobile-bottom-height);min-height:var(--mobile-bottom-height);max-height:var(--mobile-bottom-height);box-sizing:border-box;
+    padding:5px 8px 6px;
     background:var(--card);border-top:1px solid var(--border);box-shadow:0 -2px 12px rgba(15,23,42,.06)}
   .mobile-bottom-item{flex:1 1 0;min-width:0;height:56px;min-height:0;box-sizing:border-box;display:flex;flex-direction:column;
     align-items:center;justify-content:center;gap:3px;padding:3px 1px;border:0;border-radius:14px;
