@@ -507,7 +507,7 @@
   .area-admin-new{display:grid;grid-template-columns:minmax(0,1fr) 90px auto;gap:8px;align-items:end}
   @media(max-width:960px){.area-work-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media(max-width:700px){#view-inv.area-workspace-wide{padding:12px 14px calc(90px + env(safe-area-inset-bottom))}.area-nav{align-items:flex-start;flex-wrap:wrap}.area-context{order:3;width:100%;text-align:left}.area-nav-actions{justify-content:flex-start}}
-  @media(max-width:620px){.area-work-metrics{grid-template-columns:1fr;gap:7px}.area-work-metric{min-height:64px}.area-assign-modal.has-section-panel{width:min(620px,96vw)}.has-section-panel .area-assign-layout{display:block;position:relative}.has-section-panel .area-assign-main{transform:translateX(-105%);opacity:0;pointer-events:none}.has-section-panel .area-section-side{position:absolute;inset:0 0 0 0;max-height:70vh;padding:0;border:0;background:var(--card)}.area-section-admin-row{grid-template-columns:1fr}}
+  @media(max-width:620px){.area-work-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.area-work-metric{min-height:64px}.area-assign-modal.has-section-panel{width:min(620px,96vw)}.has-section-panel .area-assign-layout{display:block;position:relative}.has-section-panel .area-assign-main{transform:translateX(-105%);opacity:0;pointer-events:none}.has-section-panel .area-section-side{position:absolute;inset:0 0 0 0;max-height:70vh;padding:0;border:0;background:var(--card)}.area-section-admin-row{grid-template-columns:1fr}}
   @media(max-width:620px){.area-admin-row,.area-admin-new,.area-section-admin-row{grid-template-columns:1fr}.area-admin-actions{justify-content:flex-start}.area-admin-row input,.area-admin-new input{width:100%;min-width:0}}
   @media(max-width:420px){.area-global-balances{grid-template-columns:1fr}.area-product-result{align-items:flex-start}.area-product-result .saldo{max-width:34%}}
 
@@ -3031,6 +3031,7 @@
 </style>
 <link rel="stylesheet" href="themes.css">
 <link rel="stylesheet" href="area-selection.css">
+<link rel="stylesheet" href="area-workspace.css">
 </head>
 <body>
 
@@ -4222,6 +4223,7 @@ try { if(localStorage.getItem('llamita_areas_tema')==='dark') areaPortadaTema='d
 function aparienciaPortada(activa){
   document.body.classList.toggle('area-portada-activa',activa);
   document.body.classList.toggle('area-portada-oscura',activa&&areaPortadaTema==='dark');
+  document.body.classList.toggle('area-workspace-active',activa&&areaActual!==null);
 }
 let filterState = null;
 let areaFilterCard = null;
@@ -4409,10 +4411,10 @@ function dibujoAreaHTML(codigo){
       <path d="M52 47c12-3 16 2 14 9-1 6-7 9-15 7M18 70c14 4 31 4 42-1"/>
       <path d="M31 37c-7-5-4-12 1-13 5-2 9 1 8 6-1 4-5 5-6 2M43 38c-3-5 0-8 3-11 4-4 1-8-3-8-4 0-6 4-3 6"/>
       <path class="area-ink-accent" d="M56 39c4-2 8-1 10 2"/>`,
-    cocina_fria:`<path d="M20 33c-2-4 0-7 5-8l27-6 16 13-4 28-27 12-21-19z"/>
-      <path d="M21 34 40 47l26-14M40 47l-3 24M47 39c-4-10-1-16 7-18M46 40c7-3 11-2 15 3"/>
-      <path d="M52 25c0 8-3 14-9 18M18 55c6 2 10 6 11 12"/>
-      <path class="area-ink-accent" d="M60 66l5 5"/>`,
+    cocina_fria:`<path d="M18 55c8 7 22 11 35 10 12-1 23-7 30-16M20 57c3 14 15 23 30 24 16 0 28-10 32-26"/>
+      <path d="M27 48c-3-10 3-18 12-21 3 10 0 18-7 23m10 1c-1-13 7-24 20-27 2 13-4 24-17 29m12 3c3-12 12-19 24-18-2 12-10 20-22 22"/>
+      <path d="M32 46c1 3 3 6 7 8m16-20c0 6-2 11-6 15m23-4c-4 4-8 7-13 9"/>
+      <path class="area-ink-accent" d="M76 22c2 3 4 4 7 5"/>`,
     cocina_caliente:`<path d="M18 51c2 12 13 18 27 17 12-1 22-8 23-18-13 4-37 4-50 1z"/>
       <path d="M16 49c13-4 42-4 54 0M67 54l11-3M26 43c-6-8-2-12 1-16 2-4 0-7-2-7M38 41c-5-7-3-11 1-14 4-4 3-8-1-10M51 41c-3-5-2-8 1-11 4-4 1-8-3-8"/>
       <path class="area-ink-accent" d="M34 73c2-4 5-4 6 0 2-3 4-3 6 0"/>`,
@@ -4424,8 +4426,10 @@ function dibujoAreaHTML(codigo){
       <path d="M37 28c-2-4 0-7 4-8M52 21c4 0 7 2 8 6"/>
       <path class="area-ink-accent" d="M62 35c4-2 7-1 9 2"/>`
   };
-  const trazo=dibujos[codigo];
-  return trazo?`<span class="area-portal-art area-portal-art--${esc(codigo.replace('cocina_',''))}" aria-hidden="true"><svg viewBox="0 0 92 92" fill="none" stroke="currentColor">${trazo}</svg></span>`:'';
+  const trazo=dibujos[codigo]||`<path d="M20 60c-3-16 5-31 21-35 14-4 27 3 33 16 5 13-2 27-15 32-15 6-32 0-39-13Z"/>
+    <path d="M27 55c8-9 16-11 24-8 9 4 14 11 23 15M38 32c-2 9 1 15 10 21m-16 10c8 1 15-3 19-10"/>
+    <path class="area-ink-accent" d="M72 29c3 2 5 5 6 8"/>`;
+  return `<span class="area-portal-art area-portal-art--${esc(codigo.replace('cocina_',''))}" aria-hidden="true"><svg viewBox="0 0 92 92" fill="none" stroke="currentColor">${trazo}</svg></span>`;
 }
 function htmlTarjetaArea(codigo){
   const nombre=areaLabel(codigo);
@@ -4439,7 +4443,7 @@ function renderAreaPortada(){
   $('view-inv').classList.remove('area-workspace-wide');
   $('area-page-heading').hidden=true;
   aparienciaPortada(vistaActual==='inv');
-  $('areaNav').style.display='none'; $('areaNote').style.display='none';
+  $('areaNav').style.display='none'; $('areaNav').innerHTML=''; $('areaNote').style.display='none';
   $('areaTipoPills').style.display='none'; $('areaTipoPills').innerHTML=''; $('tipos').style.display='';
   $('invFiltros').style.display='none'; $('metrics').style.display='none';
   $('critSedes').style.display='none'; $('metaPortada').style.display='none';
@@ -4509,16 +4513,16 @@ function filaAreaHistorica(r){
   </div>`;
 }
 function renderAreaLista(){
-  aparienciaPortada(false);
+  aparienciaPortada(vistaActual==='inv');
   const global=areaActual===AREA_TODAS;
   $('view-inv').classList.add('area-workspace-wide');
   renderAreaTipoPills();
-  $('areaNav').style.display='flex'; $('areaNav').innerHTML=`<button type="button" class="area-back" data-area-home>← Todas las áreas</button>${!global&&areaActual!=='sin_asignar'&&PERMISOS.puede_editar?`<span class="area-nav-actions"><button type="button" class="area-back" data-area-assign="${esc(areaActual)}">＋ Agregar producto de Bodega</button></span>`:''}`;
+  $('areaNav').style.display='flex'; $('areaNav').innerHTML=`<button type="button" class="area-back" data-area-home><span aria-hidden="true">←</span> Todas las áreas</button><span class="area-nav-actions">${!global&&areaActual!=='sin_asignar'&&PERMISOS.puede_editar?`<button type="button" class="area-back area-add-product" data-area-assign="${esc(areaActual)}"><span aria-hidden="true">＋</span> Agregar producto de Bodega</button>`:''}<button type="button" class="area-theme-toggle" data-area-theme-toggle aria-label="Activar modo ${areaPortadaTema==='dark'?'claro':'oscuro'}" aria-pressed="${areaPortadaTema==='dark'}"><svg class="area-theme-moon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M19.5 16.8A8.5 8.5 0 0 1 7.2 4.5 8.5 8.5 0 1 0 19.5 16.8Z"/><path d="M18 4.5v4m-2-2h4"/></svg><svg class="area-theme-sun" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.5 1.5m11.2 11.2 1.5 1.5m0-14.2-1.5 1.5M6.4 17.6l-1.5 1.5"/></svg><span>${areaPortadaTema==='dark'?'Claro':'Oscuro'}</span></button></span>`;
   const titulo=global?'Todas las áreas':areaLabel(areaActual);
   const bajada=global?'Vista agrupada de Local 1 · los saldos se muestran separados por ubicación.'
     :areaActual==='sin_asignar'?'Existencias pendientes de distribución · saldo físico leído del ledger.'
-    :'Cantidades físicas leídas del ledger · secciones y límites sirven para organizar y no mueven stock.';
-  $('area-page-heading').innerHTML=`<h2>${esc(titulo)}</h2><p>${esc(bajada)}</p>`;
+    :'Consulta los productos y cantidades de esta área.';
+  $('area-page-heading').innerHTML=`<div class="area-work-hero-copy"><span class="area-work-eyebrow">Inventario del área</span><h2>${esc(titulo)}</h2><p>${esc(bajada)}</p></div>${!global&&areaActual!=='sin_asignar'?dibujoAreaHTML(areaActual):''}`;
   $('area-page-heading').hidden=false;
   $('invFiltros').style.display=''; $('metrics').style.display='none';
   $('critSedes').style.display='none'; $('metaPortada').style.display='none';
@@ -4589,7 +4593,7 @@ function renderAreaLista(){
   const salida=tipoSel?orden.map(seccion).join(''):bloque('am','AM · organización visual')+bloque('pm','PM · organización visual');
   const mostrarTarjetas=!global&&areaActual!=='sin_asignar';
   const tarjetas=mostrarTarjetas?`<div class="area-work-metrics" role="group" aria-label="Filtrar inventario por estado">
-    ${[['criticos','Críticos',stats.criticos,'crit'],['sobre','Sobre-stock',stats.sobre,'sobre'],['sin_limites','Sin límites',stats.sinDato,''],['vencimientos','Vencimientos',stats.vencimientos,'venc']].map(([id,label,n,clase])=>`<button type="button" class="area-work-metric ${clase}" data-area-state="${id}" aria-pressed="${areaFilterCard===id}"><strong>${n}</strong><span>${label}</span></button>`).join('')}
+    ${[['criticos','Críticos',stats.criticos,'crit','Sin stock o bajo mínimo'],['sobre','Sobre-stock',stats.sobre,'sobre','Sobre el máximo'],['sin_limites','Sin límites',stats.sinDato,'','Revisar configuración'],['vencimientos','Vencimientos',stats.vencimientos,'venc','Vencidos o por vencer']].map(([id,label,n,clase,ayuda])=>`<button type="button" class="area-work-metric ${clase}" data-area-state="${id}" aria-pressed="${areaFilterCard===id}"><strong>${n}</strong><span class="area-work-metric-copy"><span>${label}</span><small>${ayuda}</small></span></button>`).join('')}
   </div>`:'';
   const filtrados=new Set(rows.map(r=>String(r.producto_id))).size;
   const descripcionFiltro=areaFilterCard==='vencimientos'?'Productos vencidos o próximos a vencer':areaFilterCard==='sin_limites'?'Productos sin mínimo o máximo configurado':areaFilterCard==='criticos'?'Bajo el mínimo configurado o sin existencias':areaFilterCard==='sobre'?'Por encima del máximo configurado':'';
@@ -13184,15 +13188,17 @@ function gestionarAreas(){
   ajActual='areas'; pickTab('ajustes');
 }
 
-/* abrir/cerrar sección, o abrir ficha de producto */
-listEl.addEventListener('click',e=>{
+/* El mismo control de apariencia acompaña al selector y al interior del área. */
+$('view-inv').addEventListener('click',e=>{
   if(e.target.closest('[data-area-theme-toggle]')){
     areaPortadaTema=areaPortadaTema==='dark'?'light':'dark';
     try { localStorage.setItem('llamita_areas_tema',areaPortadaTema); } catch(_) {}
-    renderAreaPortada();
-    listEl.querySelector('[data-area-theme-toggle]')?.focus({preventScroll:true});
-    return;
+    render();
+    $('view-inv').querySelector('[data-area-theme-toggle]')?.focus({preventScroll:true});
   }
+});
+/* abrir/cerrar sección, o abrir ficha de producto */
+listEl.addEventListener('click',e=>{
   if(e.target.closest('[data-area-retry]')){loadData();return;}
   if(e.target.closest('[data-area-manage]')){gestionarAreas();return;}
   const asignar=e.target.closest('[data-area-assign]');

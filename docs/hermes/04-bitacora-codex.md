@@ -1,5 +1,12 @@
 # Bitácora de Codex
 
+## 2026-10-19 — Identidad visual compartida en las áreas operativas
+
+- Se aplicó al interior de todas las áreas físicas el lenguaje visual aprobado para el selector: fondo claro, tarjetas suaves sin bordes gruesos, acento naranja `#F35B04`, trazos propios tipo lápiz y alternativa oscura persistente. La pantalla compartida cubre Cocina fría, Cocina caliente, Barra, Cafetería, Heladería y áreas futuras; `Sin asignar` y `Todas las áreas` conservan sus vistas especiales.
+- La jerarquía queda en una sola columna de trabajo: regreso y acción de Bodega, nombre y dibujo del área, búsqueda, grupos, cuatro filtros de estado y secciones con productos. En teléfono, los filtros se muestran en dos columnas y no hay desborde horizontal.
+- Es un cambio de presentación y textos de ayuda. Se conservan las mismas filas, cantidades del ledger, filtros, permisos y RPC. Secciones y límites siguen sin mover stock. No se modificaron tablas, migraciones, Fudo ni Lama–Stock.
+- Verificación local con Chromium y productos ficticios en memoria: navegación, filtrado por área, modo oscuro, escritorio y teléfono, flujo de agregar desde Bodega y ausencia de escrituras directas. Pasaron `pruebas/inventario-areas.mjs`, `pruebas/b2-interfaz-area-historica.mjs` y `pruebas/b3-2a-3-flujo-browser.mjs`. La suite general se detuvo en `pruebas/ajustes-navegacion.mjs`, que intenta pulsar una opción oculta del menú de Ajustes; queda como incidencia separada por verificar.
+
 ## 2026-10-13 — Corrección visual de B2 verificada con Chromium
 
 - La revisión de las capturas reales del usuario mostró que el resultado publicado no correspondía al diseño: una regla general de escritorio aplicaba dos columnas a `#list`, incluyendo encabezados y acordeones del área. Eso comprimía las tarjetas y mandaba las secciones a la segunda columna.

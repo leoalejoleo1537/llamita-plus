@@ -39,12 +39,12 @@ check('Críticos incluye saldo cero; Sin límites detecta mínimo o máximo falt
   estados.includes('Number(r.cantidad)<=0')&&estados.includes('r.stock_min==null||r.stock_max==null')
   &&estados.includes("estado==='vencido'?'Vencidos':'Próximos a vencer · 7 días'")
   &&estados.includes('estadoVencimientoArea(r.producto_id)'));
-check('El inventario del área ocupa el ancho útil con 4/2/1 tarjetas según escritorio, intermedio y teléfono',
+check('El inventario del área ocupa el ancho útil con 4/2/2 tarjetas según escritorio, intermedio y teléfono',
   html.includes('#view-inv.area-workspace-wide{width:auto;max-width:none')
   &&html.includes('body.pc-ancho #view-inv.area-workspace-wide #list{display:block;grid-template-columns:none;column-count:1}')
   &&html.includes('.area-work-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))')
   &&html.includes('@media(max-width:960px){.area-work-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}')
-  &&html.includes('@media(max-width:620px){.area-work-metrics{grid-template-columns:1fr'));
+  &&html.includes('@media(max-width:620px){.area-work-metrics{grid-template-columns:repeat(2,minmax(0,1fr))'));
 check('La vista de área tiene encabezado propio y un único flujo vertical para tarjetas y productos',
   html.includes('<div class="area-page-heading" id="area-page-heading" hidden></div>')
   &&html.includes("$('area-page-heading').innerHTML=")

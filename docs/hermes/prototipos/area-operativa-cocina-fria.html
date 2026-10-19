@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6fff8">
+  <title>Cocina fría · propuesta de interfaz</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f6fff8;
+      --surface: #fff;
+      --surface-soft: #f1f7f3;
+      --ink: #202421;
+      --muted: #777e79;
+      --quiet: #a1a8a3;
+      --accent: #f35b04;
+      --accent-soft: #fff0e7;
+      --line: rgba(32, 36, 33, .07);
+      --shadow: 0 5px 18px rgba(28, 36, 30, .055), 0 1px 3px rgba(28, 36, 30, .035);
+      --shadow-hover: 0 14px 28px rgba(28, 36, 30, .10), 0 4px 9px rgba(28, 36, 30, .06);
+      --nav: #222320;
+      --nav-muted: #b8bab6;
+      --danger: #bd3d48;
+      --danger-soft: #fff0f0;
+      --amber: #a7690b;
+      --amber-soft: #fff5df;
+      --success: #31805c;
+      --success-soft: #eaf6ef;
+      --radius: 18px;
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --paper: #181a18;
+      --surface: #222522;
+      --surface-soft: #2a2e2a;
+      --ink: #f1f3ef;
+      --muted: #b1b8b2;
+      --quiet: #858d86;
+      --accent: #ff762d;
+      --accent-soft: #40281b;
+      --line: rgba(245, 248, 243, .08);
+      --shadow: 0 5px 18px rgba(0, 0, 0, .18), 0 1px 3px rgba(0, 0, 0, .12);
+      --shadow-hover: 0 14px 28px rgba(0, 0, 0, .3), 0 4px 9px rgba(0, 0, 0, .2);
+      --nav: #111311;
+      --nav-muted: #a5aaa5;
+      --danger: #ff8087;
+      --danger-soft: #3a2426;
+      --amber: #f0bd67;
+      --amber-soft: #392e1c;
+      --success: #84c9a0;
+      --success-soft: #223429;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #ecefec; color: var(--ink); font: 15px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    .demo-bar { display: flex; align-items: center; justify-content: space-between; gap: 18px; min-height: 58px; padding: 10px 22px; color: #48504a; }
+    .demo-title { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+    .demo-title strong { color: #252925; }
+    .demo-note { color: #727a74; font-size: 12px; }
+    .demo-tools { display: flex; gap: 7px; align-items: center; }
+    .preview-switch { display: inline-flex; gap: 3px; padding: 3px; border-radius: 999px; background: #dfe5df; }
+    .preview-switch button, .theme-toggle { border: 0; border-radius: 999px; background: transparent; color: #59615a; padding: 8px 12px; font-size: 12px; cursor: pointer; }
+    .preview-switch button[aria-pressed="true"] { background: #fff; color: #252925; box-shadow: 0 1px 4px #1e2a201a; }
+    .theme-toggle { display: inline-flex; align-items: center; gap: 7px; background: #fff; box-shadow: 0 1px 4px #1e2a2010; }
+    .theme-toggle svg { width: 16px; height: 16px; }
+    .stage { min-height: calc(100vh - 58px); display: flex; justify-content: center; align-items: flex-start; padding: 0 12px 28px; }
+    .app-shell { position: relative; width: 100%; max-width: 1680px; height: calc(100vh - 78px); min-height: 650px; max-height: 1100px; overflow: hidden; border-radius: 17px; display: grid; grid-template-columns: 232px minmax(0, 1fr); background: var(--paper); box-shadow: 0 12px 38px rgba(20, 28, 21, .11); transition: width .32s ease, height .32s ease, border-radius .32s ease; }
+    .app-shell.is-phone { width: min(390px, 100%); height: min(844px, calc(100vh - 78px)); min-height: 610px; border-radius: 28px; display: block; }
+    .app-shell.is-phone .sidebar { display: none; }
+    .app-shell.is-phone .workspace { height: 100%; }
+    .app-shell.is-phone .crumbbar { flex-basis: 43px; font-size: 11px; }
+    .app-shell.is-phone .content-scroll { height: 0; padding-bottom: 70px; }
+    .app-shell.is-phone .content { padding: 17px 16px 24px; }
+    .app-shell.is-phone .page-actions { gap: 9px; }
+    .app-shell.is-phone .quiet-button, .app-shell.is-phone .primary-button { min-height: 39px; padding: 0 11px; gap: 7px; font-size: 11px; }
+    .app-shell.is-phone .primary-button { max-width: 185px; }
+    .app-shell.is-phone .hero { margin: 19px 0 17px; gap: 10px; }
+    .app-shell.is-phone h1 { font-size: 28px; }
+    .app-shell.is-phone .hero-copy p { max-width: 290px; font-size: 11px; }
+    .app-shell.is-phone .eyebrow { font-size: 9px; }
+    .app-shell.is-phone .area-sketch { width: 82px; height: 72px; }
+    .app-shell.is-phone .search-row { gap: 5px; margin-bottom: 13px; }
+    .app-shell.is-phone .searchbox { min-height: 45px; padding: 0 12px; }
+    .app-shell.is-phone .type-pills { margin-bottom: 14px; }
+    .app-shell.is-phone .pill { min-height: 31px; padding: 0 12px; font-size: 11px; }
+    .app-shell.is-phone .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin-bottom: 10px; }
+    .app-shell.is-phone .stat { min-height: 76px; gap: 10px; padding: 12px 13px; border-radius: 15px; }
+    .app-shell.is-phone .stat-number { font-size: 23px; }
+    .app-shell.is-phone .stat-label { font-size: 11px; }
+    .app-shell.is-phone .stat-caption { font-size: 9px; }
+    .app-shell.is-phone .stock-caption { margin-bottom: 16px; font-size: 10px; }
+    .app-shell.is-phone .group-head { min-height: 50px; padding: 0 12px; }
+    .app-shell.is-phone .group-name { font-size: 13px; }
+    .app-shell.is-phone .group-meta { gap: 6px; font-size: 10px; }
+    .app-shell.is-phone .product-wrap { padding: 0 6px 6px; }
+    .app-shell.is-phone .product { min-height: 75px; padding: 11px 10px; gap: 9px; }
+    .app-shell.is-phone .product-mark { width: 34px; height: 34px; border-radius: 10px; }
+    .app-shell.is-phone .product-name { font-size: 12px; }
+    .app-shell.is-phone .product-meta { font-size: 10px; }
+    .app-shell.is-phone .product-state { font-size: 9px; padding: 2px 6px; }
+    .app-shell.is-phone .product-trailing { gap: 6px; }
+    .app-shell.is-phone .status { padding: 5px 7px; font-size: 9px; }
+    .app-shell.is-phone .quantity { min-width: 42px; min-height: 36px; font-size: 13px; }
+    .app-shell.is-phone .sync-note { padding-top: 13px; font-size: 9px; }
+    .app-shell.is-phone .mobile-nav { position: absolute; z-index: 5; bottom: 0; left: 0; right: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; min-height: 63px; padding: 7px 8px 6px; background: var(--surface); box-shadow: 0 -5px 18px rgba(20, 28, 21, .06); }
+    .app-shell.is-phone .mobile-nav button { display: grid; place-items: center; align-content: center; gap: 3px; border: 0; border-radius: 12px; color: var(--muted); background: transparent; font-size: 9px; cursor: pointer; }
+    .app-shell.is-phone .mobile-nav button.active { color: var(--accent); background: var(--accent-soft); }
+    .app-shell.is-phone .mobile-nav svg { width: 19px; height: 19px; }
+    .sidebar { min-width: 0; background: var(--nav); color: #f4f5f2; display: flex; flex-direction: column; padding: 19px 12px 14px; }
+    .brand { height: 49px; display: flex; align-items: center; gap: 11px; padding: 0 12px 12px; font-weight: 750; letter-spacing: -.02em; }
+    .brand-mark { width: 26px; height: 26px; display: grid; place-items: center; color: var(--accent); }
+    .brand-mark svg { width: 25px; height: 25px; }
+    .nav-list { display: grid; gap: 4px; margin-top: 13px; }
+    .nav-link { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 43px; padding: 0 13px; color: #f1f2ef; text-decoration: none; border: 0; border-radius: 12px; background: transparent; text-align: left; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .18s, color .18s, transform .18s; }
+    .nav-link:hover { background: #ffffff12; transform: translateX(2px); }
+    .nav-link.active { background: #ffffff17; color: #fff; }
+    .nav-link.active .nav-icon { color: #ff9a67; }
+    .nav-icon { width: 18px; height: 18px; color: #d9ddd8; flex: 0 0 auto; }
+    .nav-label { margin: 24px 12px 7px; color: #9da39d; font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+    .nav-foot { margin-top: auto; }
+    .nav-foot .nav-label { margin-top: 12px; }
+    .profile { display: flex; align-items: center; gap: 10px; padding: 13px 10px 0; margin-top: 9px; border-top: 1px solid #ffffff1a; color: #eceeeb; font-size: 12px; }
+    .avatar { display: grid; place-items: center; width: 29px; height: 29px; border-radius: 50%; background: #ffffff19; color: #fff; font-size: 11px; font-weight: 700; }
+    .profile small { display: block; color: var(--nav-muted); font-size: 10px; }
+    .workspace { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+    .crumbbar { flex: 0 0 49px; display: flex; justify-content: center; align-items: center; border-bottom: 1px solid var(--line); background: var(--surface); color: var(--muted); font-size: 12px; }
+    .crumbbar strong { color: var(--ink); margin-right: 9px; }
+    .content-scroll { min-height: 0; overflow-y: auto; flex: 1; }
+    .content { width: min(100%, 1430px); margin: 0 auto; padding: 27px clamp(22px, 3.1vw, 48px) 25px; }
+    .page-actions { display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+    .quiet-button, .primary-button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 42px; padding: 0 15px; border: 0; border-radius: 12px; cursor: pointer; text-decoration: none; transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
+    .quiet-button { color: var(--muted); background: var(--surface); box-shadow: var(--shadow); }
+    .quiet-button:hover { transform: translateY(-2px); color: var(--ink); box-shadow: var(--shadow-hover); }
+    .quiet-button svg, .primary-button svg { width: 17px; height: 17px; }
+    .primary-button { color: #fff; background: var(--accent); font-weight: 650; box-shadow: 0 5px 12px color-mix(in srgb, var(--accent) 20%, transparent); }
+    .primary-button:hover { transform: translateY(-2px); box-shadow: 0 9px 17px color-mix(in srgb, var(--accent) 30%, transparent); }
+    .hero { display: flex; justify-content: space-between; align-items: center; gap: 26px; margin: 24px 0 22px; }
+    .hero-copy { min-width: 0; }
+    .eyebrow { margin: 0 0 5px; color: var(--muted); font-size: 11px; font-weight: 650; letter-spacing: .07em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(29px, 3vw, 39px); letter-spacing: -.055em; line-height: 1.08; }
+    .hero-copy p { margin: 9px 0 0; color: var(--muted); font-size: 13px; }
+    .area-sketch { width: 125px; height: 100px; flex: 0 0 auto; overflow: visible; }
+    .search-row { display: flex; gap: 12px; align-items: center; margin-bottom: 17px; }
+    .searchbox { flex: 1; display: flex; align-items: center; min-height: 49px; padding: 0 15px; gap: 11px; border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); transition: box-shadow .2s ease; }
+    .searchbox:focus-within { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent), var(--shadow); }
+    .searchbox svg { width: 19px; height: 19px; color: var(--muted); flex: 0 0 auto; }
+    .searchbox input { min-width: 0; width: 100%; border: 0; outline: 0; color: var(--ink); background: transparent; }
+    .searchbox input::placeholder { color: var(--quiet); }
+    .clear-search { display: none; border: 0; border-radius: 9px; padding: 7px 9px; color: var(--muted); background: transparent; cursor: pointer; font-size: 12px; }
+    .clear-search:hover { color: var(--accent); background: var(--accent-soft); }
+    .clear-search.visible { display: block; }
+    .type-pills { display: flex; flex-wrap: wrap; gap: 7px; margin: 0 0 19px; }
+    .pill { min-height: 33px; padding: 0 14px; border: 0; border-radius: 999px; color: var(--muted); background: var(--surface); box-shadow: var(--shadow); cursor: pointer; font-size: 12px; font-weight: 600; transition: color .18s, background .18s, transform .18s; }
+    .pill:hover { transform: translateY(-1px); color: var(--ink); }
+    .pill.active { color: #fff; background: var(--ink); box-shadow: none; }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; margin-bottom: 13px; }
+    .stat { min-height: 89px; display: flex; align-items: center; gap: 13px; padding: 16px 17px; border: 0; border-radius: 17px; text-align: left; background: var(--surface); box-shadow: var(--shadow); cursor: pointer; transition: transform .2s ease, box-shadow .2s ease, background .2s ease; }
+    .stat:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+    .stat[aria-pressed="true"] { background: var(--surface-soft); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent), var(--shadow); }
+    .stat-number { color: var(--ink); font-size: 26px; font-weight: 760; line-height: 1; letter-spacing: -.045em; }
+    .stat-label { color: var(--muted); font-size: 12px; font-weight: 620; }
+    .stat-caption { display: block; margin-top: 4px; color: var(--quiet); font-size: 10px; }
+    .stat[data-filter="critical"] .stat-number { color: var(--danger); }
+    .stat[data-filter="overstock"] .stat-number { color: var(--amber); }
+    .stat[data-filter="expiry"] .stat-number { color: var(--danger); }
+    .stock-caption { margin: 0 2px 21px; color: var(--muted); font-size: 11px; }
+    .section-label { margin: 0 0 8px 3px; color: var(--quiet); font-size: 10px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; }
+    .group { overflow: hidden; border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
+    .group-head { display: flex; align-items: center; gap: 12px; min-height: 55px; width: 100%; padding: 0 17px; border: 0; background: transparent; text-align: left; cursor: pointer; }
+    .group-chevron { width: 17px; height: 17px; color: var(--muted); transform: rotate(90deg); transition: transform .2s; }
+    .group-head[aria-expanded="false"] .group-chevron { transform: rotate(0deg); }
+    .group-name { font-weight: 680; font-size: 14px; }
+    .group-meta { display: inline-flex; align-items: center; gap: 9px; margin-left: auto; color: var(--muted); font-size: 11px; }
+    .group-warning { padding: 5px 9px; border-radius: 999px; color: var(--danger); background: var(--danger-soft); font-size: 10px; font-weight: 700; }
+    .product-wrap { padding: 0 9px 9px; }
+    .product { display: flex; align-items: center; gap: 15px; min-height: 91px; padding: 15px 17px; border-radius: 13px; background: var(--surface-soft); cursor: pointer; transition: background .18s ease, transform .18s ease; }
+    .product:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--surface-soft) 82%, var(--accent-soft)); }
+    .product-mark { width: 39px; height: 39px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 12px; color: var(--accent); background: var(--accent-soft); }
+    .product-mark svg { width: 22px; height: 22px; }
+    .product-info { min-width: 0; }
+    .product-name { display: block; color: var(--ink); font-size: 14px; font-weight: 680; }
+    .product-meta { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .product-state { display: inline-flex; margin-top: 6px; padding: 3px 8px; border-radius: 999px; color: var(--muted); background: var(--surface); font-size: 10px; }
+    .product-trailing { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+    .status { padding: 6px 9px; border-radius: 999px; color: var(--danger); background: var(--danger-soft); font-size: 10px; font-weight: 700; }
+    .quantity { min-width: 63px; min-height: 42px; display: grid; place-items: center; border-radius: 12px; color: var(--ink); background: var(--surface); font-size: 15px; font-weight: 700; }
+    .empty-state { display: none; padding: 26px 18px; color: var(--muted); text-align: center; font-size: 13px; }
+    .empty-state strong { display: block; margin-bottom: 4px; color: var(--ink); }
+    .sync-note { display: flex; justify-content: center; gap: 7px; align-items: center; padding: 16px 0 4px; color: var(--quiet); font-size: 10px; }
+    .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+    .mobile-nav { display: none; }
+    .toast { position: fixed; z-index: 20; left: 50%; bottom: 23px; transform: translate(-50%, 15px); opacity: 0; pointer-events: none; padding: 12px 17px; max-width: calc(100vw - 32px); border-radius: 13px; color: #fff; background: #262a26; box-shadow: 0 8px 24px #0003; font-size: 12px; transition: .2s ease; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .dialog-backdrop { position: fixed; z-index: 30; inset: 0; display: grid; place-items: center; padding: 18px; background: #10141073; }
+    .dialog-backdrop[hidden] { display: none; }
+    .dialog { position: relative; width: min(100%, 420px); padding: 25px; border-radius: 22px; color: var(--ink); background: var(--surface); box-shadow: 0 22px 70px #0003; }
+    .dialog h2 { margin: 0; font-size: 19px; letter-spacing: -.025em; }
+    .dialog p { color: var(--muted); font-size: 13px; }
+    .dialog-close { position: absolute; right: 13px; top: 13px; width: 34px; height: 34px; border: 0; border-radius: 50%; color: var(--muted); background: var(--surface-soft); cursor: pointer; }
+    .dialog-action { display: flex; justify-content: flex-end; margin-top: 19px; }
+    button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 58%, transparent); outline-offset: 3px; }
+    @media (max-width: 1100px) {
+      .app-shell { grid-template-columns: 208px minmax(0, 1fr); }
+      .content { padding-left: 28px; padding-right: 28px; }
+      .stats { gap: 9px; }
+      .stat { padding: 14px 12px; }
+    }
+    @media (max-width: 760px) {
+      body { background: var(--paper); }
+      .demo-bar { min-height: 52px; padding: 7px 11px; }
+      .demo-note, .demo-title span { display: none; }
+      .demo-title { font-size: 11px; }
+      .demo-tools { gap: 5px; }
+      .preview-switch button, .theme-toggle { padding: 7px 9px; font-size: 11px; }
+      .stage { min-height: calc(100dvh - 52px); padding: 0; }
+      .app-shell { width: 100%; height: calc(100dvh - 52px); min-height: 580px; max-height: none; border-radius: 0; display: block; box-shadow: none; }
+      .sidebar { display: none; }
+      .workspace { height: 100%; }
+      .crumbbar { flex-basis: 43px; font-size: 11px; }
+      .content-scroll { height: 0; padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
+      .content { padding: 17px 16px 24px; }
+      .page-actions { gap: 9px; }
+      .quiet-button, .primary-button { min-height: 39px; padding: 0 11px; gap: 7px; font-size: 11px; }
+      .primary-button { max-width: 185px; }
+      .hero { margin: 19px 0 17px; gap: 10px; }
+      h1 { font-size: 28px; }
+      .hero-copy p { max-width: 290px; font-size: 11px; }
+      .eyebrow { font-size: 9px; }
+      .area-sketch { width: 82px; height: 72px; }
+      .search-row { gap: 5px; margin-bottom: 13px; }
+      .searchbox { min-height: 45px; padding: 0 12px; }
+      .clear-search { padding-left: 6px; padding-right: 6px; }
+      .type-pills { margin-bottom: 14px; }
+      .pill { min-height: 31px; padding: 0 12px; font-size: 11px; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin-bottom: 10px; }
+      .stat { min-height: 76px; gap: 10px; padding: 12px 13px; border-radius: 15px; }
+      .stat-number { font-size: 23px; }
+      .stat-label { font-size: 11px; }
+      .stat-caption { font-size: 9px; }
+      .stock-caption { margin-bottom: 16px; font-size: 10px; }
+      .group-head { min-height: 50px; padding: 0 12px; }
+      .group-name { font-size: 13px; }
+      .group-meta { gap: 6px; font-size: 10px; }
+      .product-wrap { padding: 0 6px 6px; }
+      .product { min-height: 75px; padding: 11px 10px; gap: 9px; }
+      .product-mark { width: 34px; height: 34px; border-radius: 10px; }
+      .product-name { font-size: 12px; }
+      .product-meta { font-size: 10px; }
+      .product-state { font-size: 9px; padding: 2px 6px; }
+      .product-trailing { gap: 6px; }
+      .status { padding: 5px 7px; font-size: 9px; }
+      .quantity { min-width: 42px; min-height: 36px; font-size: 13px; }
+      .sync-note { padding-top: 13px; font-size: 9px; }
+      .mobile-nav { position: absolute; z-index: 5; bottom: 0; left: 0; right: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; min-height: calc(63px + env(safe-area-inset-bottom)); padding: 7px 8px calc(6px + env(safe-area-inset-bottom)); background: var(--surface); box-shadow: 0 -5px 18px rgba(20, 28, 21, .06); }
+      .mobile-nav button { display: grid; place-items: center; align-content: center; gap: 3px; border: 0; border-radius: 12px; color: var(--muted); background: transparent; font-size: 9px; cursor: pointer; }
+      .mobile-nav button.active { color: var(--accent); background: var(--accent-soft); }
+      .mobile-nav svg { width: 19px; height: 19px; }
+      .app-shell.is-phone { width: min(390px, 100%); height: min(844px, calc(100dvh - 70px)); min-height: 610px; border-radius: 28px; box-shadow: 0 18px 55px #171e1830; }
+      .app-shell.is-phone .content-scroll { padding-bottom: 65px; }
+    }
+    @media (max-width: 390px) {
+      .demo-bar { gap: 7px; }
+      .preview-switch button { padding-inline: 7px; }
+      .theme-toggle { padding-inline: 8px; }
+      .primary-button { max-width: 161px; }
+      .area-sketch { width: 68px; }
+      .product-mark { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="demo-bar">
+    <div class="demo-title"><strong>Propuesta · Interior de área</strong><span>Plantilla común para todas las áreas</span><span class="demo-note">Datos ficticios; no conectado a la aplicación.</span></div>
+    <div class="demo-tools">
+      <div class="preview-switch" role="group" aria-label="Tamaño de vista">
+        <button type="button" data-preview="desktop" aria-pressed="true">Escritorio</button>
+        <button type="button" data-preview="phone" aria-pressed="false">Teléfono</button>
+      </div>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Activar modo oscuro">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5 8.7 8.7 0 1 0 20.5 15.5Z"/></svg>
+        <span>Modo oscuro</span>
+      </button>
+    </div>
+  </header>
+  <main class="stage">
+    <div class="app-shell" id="appShell">
+      <aside class="sidebar" aria-label="Navegación principal">
+        <div class="brand"><span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16.5 16 7l11 9.5v9H5z"/><path d="M13 25.5v-7h6v7"/><path d="M3 14.5 16 3l5 4.4"/></svg>
+        </span><span>Llamita Plus</span></div>
+        <nav class="nav-list">
+          <button class="nav-link" type="button" data-demo="Mesas"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h16M6 10v8m12-8v8M8 6h8v4M4 18h16"/></svg>Mesas</button>
+          <button class="nav-link" type="button" data-demo="Arqueo"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>Arqueo</button>
+          <button class="nav-link" type="button" data-demo="Movimientos"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v14H5zM8 9h8M8 13h8M8 17h5"/></svg>Movimientos</button>
+          <button class="nav-link active" type="button" aria-current="page"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="M3 8v9l9 5 9-5V8M12 13v9"/></svg>Inventario</button>
+          <button class="nav-link" type="button" data-demo="Reparto"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6h12v11h-12zM14.5 10h4l3 3v4h-7M6 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm12 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/></svg>Reparto <span style="margin-left:auto;padding:2px 7px;border-radius:99px;background:#f35b04;color:white;font-size:10px">2</span></button>
+          <button class="nav-link" type="button" data-demo="Recetas"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18H5zM8 7h8M8 11h8M8 15h5"/></svg>Recetas</button>
+          <button class="nav-link" type="button" data-demo="Mermas"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6 6 6 4-4 6 9"/><path d="M15 17h5v-5"/></svg>Mermas</button>
+        </nav>
+        <div class="nav-foot">
+          <div class="nav-label">Atajos</div>
+          <button class="nav-link" type="button" data-demo="Historial"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 2.7-6.4L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>Historial</button>
+          <button class="nav-link" type="button" data-demo="Ajustes"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.2.9-1.2 2.1-1.4-.6a8 8 0 0 1-1.5.9l-.2 1.5h-2.5l-.3-1.5a8 8 0 0 1-1.5-.9l-1.4.6-1.2-2.1 1.2-.9a7 7 0 0 1 0-1.8l-1.2-.9 1.2-2.1 1.4.6a8 8 0 0 1 1.5-.9l.3-1.5h2.5l.2 1.5a8 8 0 0 1 1.5.9l1.4-.6 1.2 2.1-1.2.9a7 7 0 0 1 0 1.7Z" transform="translate(-2 -1)"/></svg>Ajustes</button>
+          <div class="profile"><span class="avatar">L</span><span>Local 1<small>Sesión de muestra</small></span></div>
+        </div>
+      </aside>
+      <section class="workspace">
+        <div class="crumbbar"><strong>Local 1</strong><span>· &nbsp;Inventario&nbsp; · &nbsp;Cocina fría</span></div>
+        <div class="content-scroll">
+          <div class="content">
+            <div class="page-actions">
+              <button class="quiet-button" id="backButton" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m14 5-7 7 7 7M7 12h13"/></svg>Todas las áreas</button>
+              <button class="primary-button" id="addProduct" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Agregar producto de Bodega</button>
+            </div>
+            <section class="hero" aria-labelledby="areaTitle">
+              <div class="hero-copy">
+                <p class="eyebrow">Inventario del área</p>
+                <h1 id="areaTitle">Cocina fría</h1>
+                <p>Cantidades físicas del área. Organiza tus productos y encuentra lo urgente.</p>
+              </div>
+              <svg class="area-sketch" viewBox="0 0 150 120" role="img" aria-label="Dibujo a lápiz de hojas frescas sobre un cuenco">
+                <path d="M24 55c-3-20 17-39 43-39 24 0 42 17 48 38-7 23-29 41-54 39-19-1-33-15-37-38Z" fill="var(--accent-soft)" opacity=".95"/>
+                <g fill="none" stroke="var(--ink)" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M37 70c10 10 25 15 40 14 14-1 25-7 34-18" stroke-width="2.6"/>
+                  <path d="M45 66c-5-12 1-25 12-30 4 11 3 20-4 27m9 4c-2-15 7-29 22-34 2 15-5 28-18 35m12 3c3-14 14-22 27-22-1 13-10 22-24 25" stroke-width="2.4"/>
+                  <path d="M50 85c14 7 34 8 48 1 7-3 13-8 17-14-3 18-17 30-37 32-18 2-35-5-43-19" stroke-width="2.2"/>
+                  <path d="M62 59c2 5 5 8 9 10m12-21c0 6-2 11-6 15m20 1c-3 4-7 7-12 9" stroke-width="1.55" opacity=".72"/>
+                  <path d="M39 45c-3-3-4-6-3-9m76 13c3-4 4-8 2-12" stroke-width="1.7"/>
+                  <path d="M28 76c-2-1-3-3-3-5m104 3c1-2 1-4 0-6" stroke-width="1.4" opacity=".6"/>
+                </g>
+                <path d="M117 29c2 3 4 5 7 6" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+            </section>
+            <div class="search-row">
+              <label class="searchbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.3 4.3"/></svg><input id="search" type="search" placeholder="Buscar producto…" autocomplete="off" aria-label="Buscar productos de Cocina fría"><button type="button" class="clear-search" id="clearSearch">Limpiar</button></label>
+            </div>
+            <div class="type-pills" aria-label="Filtrar por tipo de producto"><button class="pill active" type="button" aria-pressed="true">Todos <span>1</span></button></div>
+            <div class="stats" aria-label="Resumen del inventario">
+              <button class="stat" type="button" data-filter="critical" aria-pressed="false"><span class="stat-number">1</span><span><span class="stat-label">Críticos</span><small class="stat-caption">En o bajo el mínimo</small></span></button>
+              <button class="stat" type="button" data-filter="overstock" aria-pressed="false"><span class="stat-number">0</span><span><span class="stat-label">Sobre-stock</span><small class="stat-caption">Sobre el máximo</small></span></button>
+              <button class="stat" type="button" data-filter="nolimits" aria-pressed="false"><span class="stat-number">1</span><span><span class="stat-label">Sin límites</span><small class="stat-caption">Revisar configuración</small></span></button>
+              <button class="stat" type="button" data-filter="expiry" aria-pressed="false"><span class="stat-number">0</span><span><span class="stat-label">Vencimientos</span><small class="stat-caption">Vencen en 7 días</small></span></button>
+            </div>
+            <p class="stock-caption">0 con saldo · 0 unidades físicas registradas</p>
+            <p class="section-label">Organización visual · PM</p>
+            <section class="group" aria-label="Sección Sin sección">
+              <button class="group-head" id="groupToggle" type="button" aria-expanded="true" aria-controls="productList">
+                <svg class="group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                <span class="group-name">Sin sección</span>
+                <span class="group-meta"><span class="group-warning">1 crítico</span><strong>1</strong></span>
+              </button>
+              <div class="product-wrap" id="productList">
+                <article class="product" id="productRow" tabindex="0" role="button" aria-label="Abrir detalle de carne de res">
+                  <span class="product-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.3 13.5c-1.6-2.2-.3-5.6 3-7.2 3-1.4 7.9-.8 10 1.9 2 2.3 1.3 6.4-1.3 8.4-2.5 1.9-8.7 1.9-10.8-.1-.8-.8-1-1.9-.9-3Z"/><path d="M10 9.2c1.4-1 3.4-.8 4.5.5 1.2 1.4.6 3.4-.8 4.2-1.4.8-3.6.4-4.3-1-.7-1.3-.5-2.8.6-3.7Z"/><path d="M4.2 16.8c2.4 2 6 3 10 2.6"/></svg></span>
+                  <span class="product-info"><strong class="product-name">Carne de res</strong><small class="product-meta">Sin tipo · mín. — · máx. —</small><small class="product-state">Configurado · sin existencias</small></span>
+                  <span class="product-trailing"><span class="status">Crítico</span><span class="quantity">0</span></span>
+                </article>
+              </div>
+              <div class="empty-state" id="emptyState"><strong id="emptyTitle">No hay productos para mostrar</strong><span id="emptyText">Prueba con otra búsqueda o filtro.</span></div>
+            </section>
+            <div class="sync-note"><span class="sync-dot" aria-hidden="true"></span>Local 1 · vista de muestra</div>
+          </div>
+        </div>
+        <nav class="mobile-nav" aria-label="Navegación móvil">
+          <button type="button" data-demo="Inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10H3zM9 20v-7h6v7"/></svg>Inicio</button>
+          <button type="button" data-demo="Mesas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h16M6 10v8m12-8v8M8 6h8v4M4 18h16"/></svg>Mesas</button>
+          <button class="active" type="button" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="M3 8v9l9 5 9-5V8M12 13v9"/></svg>Inventario</button>
+          <button type="button" data-demo="Más opciones"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>Más</button>
+        </nav>
+      </section>
+    </div>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="dialog-backdrop" id="demoDialog" hidden>
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+      <button class="dialog-close" id="dialogClose" type="button" aria-label="Cerrar">×</button>
+      <p class="eyebrow">Vista de muestra</p><h2 id="dialogTitle">Agregar producto de Bodega</h2>
+      <p>Este prototipo enseña la apariencia del flujo. No busca productos ni modifica inventario.</p>
+      <div class="dialog-action"><button class="primary-button" id="dialogDone" type="button">Entendido</button></div>
+    </section>
+  </div>
+  <script>
+    const appShell = document.getElementById('appShell');
+    const toast = document.getElementById('toast');
+    let toastTimer;
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+    document.querySelectorAll('[data-preview]').forEach(button => button.addEventListener('click', () => {
+      const phone = button.dataset.preview === 'phone';
+      appShell.classList.toggle('is-phone', phone);
+      document.querySelectorAll('[data-preview]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+    }));
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', () => {
+      const dark = document.documentElement.dataset.theme !== 'dark';
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      themeToggle.setAttribute('aria-label', dark ? 'Activar modo claro' : 'Activar modo oscuro');
+      themeToggle.querySelector('span').textContent = dark ? 'Modo claro' : 'Modo oscuro';
+    });
+    document.querySelectorAll('[data-demo]').forEach(button => button.addEventListener('click', () => showToast(`${button.dataset.demo}: navegación ilustrativa.`)));
+    document.getElementById('backButton').addEventListener('click', () => showToast('Volvería a la selección de áreas.'));
+    const dialog = document.getElementById('demoDialog');
+    const closeDialog = () => { dialog.hidden = true; document.getElementById('addProduct').focus(); };
+    document.getElementById('addProduct').addEventListener('click', () => { dialog.hidden = false; document.getElementById('dialogDone').focus(); });
+    document.getElementById('dialogClose').addEventListener('click', closeDialog);
+    document.getElementById('dialogDone').addEventListener('click', closeDialog);
+    dialog.addEventListener('click', event => { if (event.target === dialog) closeDialog(); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape' && !dialog.hidden) closeDialog(); });
+    const search = document.getElementById('search');
+    const clearSearch = document.getElementById('clearSearch');
+    const product = document.getElementById('productRow');
+    const emptyState = document.getElementById('emptyState');
+    const productList = document.getElementById('productList');
+    let activeFilter = '';
+    function updateList() {
+      const query = search.value.trim().toLocaleLowerCase('es');
+      clearSearch.classList.toggle('visible', Boolean(query));
+      const matchesSearch = product.textContent.toLocaleLowerCase('es').includes(query);
+      const matchesFilter = !activeFilter || activeFilter === 'critical' || activeFilter === 'nolimits';
+      const visible = matchesSearch && matchesFilter;
+      product.hidden = !visible;
+      emptyState.style.display = visible ? 'none' : 'block';
+      document.getElementById('emptyTitle').textContent = query && !matchesSearch ? 'No encontramos ese producto' : 'No hay productos para este filtro';
+      document.getElementById('emptyText').textContent = query && !matchesSearch ? 'Revisa el nombre o intenta otra búsqueda.' : 'Prueba con otra tarjeta del resumen.';
+      if (!visible) productList.hidden = true;
+      else productList.hidden = document.getElementById('groupToggle').getAttribute('aria-expanded') !== 'true';
+    }
+    search.addEventListener('input', updateList);
+    clearSearch.addEventListener('click', () => { search.value = ''; updateList(); search.focus(); });
+    document.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => {
+      const selected = button.dataset.filter === activeFilter ? '' : button.dataset.filter;
+      activeFilter = selected;
+      document.querySelectorAll('[data-filter]').forEach(item => item.setAttribute('aria-pressed', String(item.dataset.filter === activeFilter)));
+      updateList();
+    }));
+    document.getElementById('groupToggle').addEventListener('click', event => {
+      const button = event.currentTarget;
+      const expanded = button.getAttribute('aria-expanded') !== 'true';
+      button.setAttribute('aria-expanded', String(expanded));
+      productList.hidden = !expanded || product.hidden;
+    });
+    function openProduct() { showToast('Ficha de producto · contenido ilustrativo.'); }
+    product.addEventListener('click', openProduct);
+    product.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openProduct(); } });
+  </script>
+</body>
+</html>
