@@ -120,14 +120,43 @@ await check('Sin asignar conserva su lectura de saldos',async()=>{
   const texto=await page.locator('#list').innerText();
   return texto.includes('12 unidades físicas')&&texto.includes('2 con saldo');
 });
-await page.click('#areaNav [data-area-home]');
+await page.click('#tabInv');
 
 await page.click('[data-area-open="cocina_fria"]');
+await check('el área muestra solo el nombre y oculta la barra redundante',async()=>page.evaluate(()=>
+  document.querySelector('#area-page-heading h2')?.textContent==='Cocina fría'
+  &&getComputedStyle(document.querySelector('.topbar')).display==='none'
+  &&!document.querySelector('[data-area-home]')
+  &&!document.querySelector('#area-page-heading').innerText.includes('Inventario del área')
+  &&!document.querySelector('#area-page-heading').innerText.includes('Cantidades físicas del área')
+  &&!document.querySelector('#list').innerText.includes('con saldo ·')));
+await page.click('.area-page-controls [data-area-theme-toggle]');
+await check('el modo oscuro se conserva dentro del área y no recupera la barra superior',async()=>page.evaluate(()=>
+  document.body.classList.contains('area-portada-oscura')
+  &&getComputedStyle(document.querySelector('.topbar')).display==='none'
+  &&document.querySelector('#mobileMenuTrigger')));
+await page.click('.area-page-controls [data-area-theme-toggle]');
 await check('un área sin saldo no muestra el catálogo de otras ubicaciones',async()=>
   (await page.locator('#list .area-read-row').count())===0
   && !(await page.locator('#list').innerText()).includes('Leche entera'));
+await page.evaluate(()=>{PERMISOS.puede_editar=true;renderAreaLista()});
+if(process.env.CAPTURE_AREAS_SCREENSHOT)await page.screenshot({path:'/tmp/llamita-area-interior-desktop.png',fullPage:true});
+await page.setViewportSize({width:390,height:844});
+await page.waitForTimeout(250);
+if(process.env.CAPTURE_AREAS_SCREENSHOT)await page.screenshot({path:'/tmp/llamita-area-interior-telefono.png'});
+await check('en móvil el menú sigue accesible y el botón flotante queda sobre la navegación',async()=>page.evaluate(()=>{
+  const fab=document.querySelector('.area-add-fab'),nav=document.querySelector('.mobile-bottom');
+  return getComputedStyle(document.querySelector('.topbar')).display==='none'
+    &&!document.body.classList.contains('mobile-menu-open')
+    &&getComputedStyle(document.querySelector('#mobileMenuTrigger')).display!=='none'
+    &&fab?.getAttribute('aria-label')==='Agregar producto de Bodega'
+    &&fab?.getBoundingClientRect().bottom<nav.getBoundingClientRect().top
+    &&document.documentElement.scrollWidth<=innerWidth;
+}));
+await page.setViewportSize({width:1280,height:900});
+await page.evaluate(()=>{PERMISOS.puede_editar=false;renderAreaLista()});
 
-await page.click('#areaNav [data-area-home]');
+await page.click('#tabInv');
 await page.click('[data-area-open="cafeteria"]');
 await page.fill('#q','leche');
 await page.waitForTimeout(30);
@@ -140,7 +169,7 @@ await check('buscar leche en Cafetería aísla la lectura a esa ubicación',asyn
     &&!t.includes('Azúcar blanca')&&!t.includes('999');
 });
 
-await page.click('#areaNav [data-area-home]');
+await page.evaluate(()=>cambiarArea(null));
 await page.click('.area-secondary-view[data-area-open="__todas__"]');
 await check('vista global separa las cantidades por área',async()=>{
   const fila=page.locator('.area-global-product').filter({hasText:'Leche entera'});

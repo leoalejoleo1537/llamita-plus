@@ -27,6 +27,10 @@ body.area-workspace-active.area-portada-oscura #view-inv.area-workspace-wide {
   --amber-fg: #f5c270;
 }
 
+/* En el trabajo dentro de un área, el nombre de la sede y la sección ya son
+   evidentes por el contexto. Recuperamos ese espacio para el inventario. */
+body.area-workspace-active .topbar { display: none; }
+
 body.area-workspace-active .area-nav {
   margin: 0 0 22px;
   min-height: 42px;
@@ -70,33 +74,29 @@ body.area-workspace-active .area-page-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  min-height: 104px;
-  margin: 0 0 21px;
+  gap: 16px;
+  min-height: 58px;
+  margin: 0 0 18px;
 }
 body.area-workspace-active .area-page-heading[hidden] { display: none; }
 body.area-workspace-active .area-work-hero-copy { min-width: 0; }
-body.area-workspace-active .area-work-eyebrow {
-  display: block;
-  margin-bottom: 6px;
-  color: var(--area-muted);
-  font-size: 11px;
-  font-weight: 650;
-  letter-spacing: .07em;
-  text-transform: uppercase;
-}
 body.area-workspace-active .area-page-heading h2 {
   color: var(--area-ink);
   font-size: clamp(29px,3vw,39px);
   font-weight: 720;
   letter-spacing: -.055em;
 }
-body.area-workspace-active .area-page-heading p {
-  max-width: 610px;
-  margin: 9px 0 0;
-  color: var(--area-muted);
-  font-size: 13px;
+body.area-workspace-active .area-page-controls { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+body.area-workspace-active .area-page-controls .area-theme-toggle {
+  width: 42px; min-width: 42px; height: 42px; min-height: 42px; padding: 8px; border-radius: 50%;
 }
+body.area-workspace-active .area-page-controls .area-theme-toggle span { display: none; }
+body.area-workspace-active .area-page-controls .area-theme-toggle svg { width: 20px; height: 20px; }
+body.area-workspace-active .area-page-controls .mobile-menu-trigger {
+  border: 0; border-radius: 50%; background: var(--area-card); color: var(--area-ink);
+  box-shadow: var(--area-shadow);
+}
+body.area-workspace-active .area-page-controls .mobile-menu-trigger:hover { box-shadow: var(--area-shadow-up); }
 body.area-workspace-active .area-page-heading .area-portal-art {
   width: 128px;
   height: 100px;
@@ -308,6 +308,28 @@ body.area-workspace-active #list .area-global-link {
   background: var(--area-soft);
 }
 body.area-workspace-active #list .area-global-link:hover { color: var(--area-action); }
+body.area-workspace-active .area-add-fab {
+  position: fixed; z-index: 46; right: calc(24px + env(safe-area-inset-right));
+  bottom: calc(var(--mobile-bottom-height, 0px) + 20px + env(safe-area-inset-bottom));
+  display: grid; width: 60px; height: 60px; place-items: center; padding: 0;
+  border: 0; border-radius: 50%; background: var(--area-action); color: #fff;
+  box-shadow: 0 8px 22px rgba(243,91,4,.25), 0 2px 6px rgba(25,32,28,.12);
+  cursor: pointer; transition: transform .2s ease, box-shadow .2s ease;
+}
+body.area-workspace-active .area-add-fab:hover,
+body.area-workspace-active .area-add-fab:focus-visible {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 11px 27px rgba(243,91,4,.32), 0 3px 9px rgba(25,32,28,.14);
+}
+body.area-workspace-active .area-add-fab svg { width: 27px; height: 27px; }
+body.area-workspace-active .area-add-fab-label {
+  position: absolute; right: calc(100% + 10px); top: 50%;
+  padding: 9px 12px; border-radius: 12px; background: var(--area-card); color: var(--area-ink);
+  box-shadow: var(--area-shadow); font-size: 12px; font-weight: 650; white-space: nowrap;
+  opacity: 0; transform: translate(5px,-50%); pointer-events: none; transition: opacity .16s ease,transform .16s ease;
+}
+body.area-workspace-active .area-add-fab:hover .area-add-fab-label,
+body.area-workspace-active .area-add-fab:focus-visible .area-add-fab-label { opacity: 1; transform: translate(0,-50%); }
 body.area-workspace-active .area-nav :is(button):focus-visible,
 body.area-workspace-active #list :is(button,.row .info):focus-visible,
 body.area-workspace-active .area-tipo-pills button:focus-visible {
@@ -327,13 +349,9 @@ body.area-workspace-active .area-tipo-pills button:focus-visible {
   body.area-workspace-active .area-nav-actions { width: 100%; justify-content: space-between; }
   body.area-workspace-active .area-nav .area-back,
   body.area-workspace-active .area-nav .area-theme-toggle { min-height: 40px; padding: 8px 11px; font-size: 11px; }
-  body.area-workspace-active .area-page-heading { min-height: 76px; margin-bottom: 18px; }
-  body.area-workspace-active .area-work-eyebrow { font-size: 9px; }
+  body.area-workspace-active .area-page-heading { min-height: 48px; margin-bottom: 15px; gap: 8px; }
   body.area-workspace-active .area-page-heading h2 { font-size: 28px; }
-  body.area-workspace-active .area-page-heading p { max-width: 290px; font-size: 11px; }
-  body.area-workspace-active .area-page-heading .area-portal-art { width: 78px; height: 72px; flex-basis: 78px; }
-  body.area-workspace-active .area-page-heading .area-portal-art::before { inset: 11px 3px 3px 8px; }
-  body.area-workspace-active .area-page-heading .area-portal-art svg { width: 68px; height: 68px; }
+  body.area-workspace-active .area-page-heading .area-portal-art { display: none; }
   body.area-workspace-active .inv-filtros { margin-bottom: 13px; }
   body.area-workspace-active .inv-busca { min-height: 45px; padding: 0 12px; }
   body.area-workspace-active .area-tipo-pills { margin-bottom: 14px; }
@@ -352,15 +370,12 @@ body.area-workspace-active .area-tipo-pills button:focus-visible {
   body.area-workspace-active #list .row .right { gap: 6px; }
   body.area-workspace-active #list .row .right .pill { padding: 5px 7px; font-size: 9px; }
   body.area-workspace-active #list .row .right input[type=number] { width: 44px; height: 36px; font-size: 13px; }
+  body.area-workspace-active .area-add-fab { right: 18px; width: 58px; height: 58px; }
 }
 @media (max-width: 390px) {
-  body.area-workspace-active .area-nav .area-theme-toggle { min-width: 42px; padding: 8px; }
-  body.area-workspace-active .area-nav .area-theme-toggle span { display: none; }
-  body.area-workspace-active .area-page-heading .area-portal-art { width: 65px; flex-basis: 65px; }
-  body.area-workspace-active .area-page-heading .area-portal-art svg { width: 60px; }
   body.area-workspace-active #list .row .right .pill { max-width: 72px; white-space: normal; text-align: center; }
 }
 @media (prefers-reduced-motion: reduce) {
-  body.area-workspace-active #view-inv :is(.area-work-metric,.area-back,.tipo,.row) { transition: none; }
+  body.area-workspace-active #view-inv :is(.area-work-metric,.area-back,.tipo,.row,.area-add-fab) { transition: none; }
   body.area-workspace-active #view-inv .sec-btn::before { transition: none; }
 }

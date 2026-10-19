@@ -1,5 +1,13 @@
 # Bitácora de Codex
 
+## 2026-10-19 — Limpieza de apariencia y navegación dentro del área
+
+- Se quitó del interior de cada área el texto auxiliar redundante, el resumen “con saldo / unidades físicas” y el botón “Todas las áreas”. El nombre del área queda arriba a la izquierda y se oculta la barra superior de sede y sección para recuperar espacio.
+- Para regresar al selector, se vuelve a tocar Inventario en el panel de navegación. En teléfono, el acceso al menú se conserva junto al título del área.
+- “Agregar producto de Bodega” ahora es un botón circular flotante abajo a la derecha. Conserva el permiso `puede_editar` y abre el flujo existente; la acción “Actualizar” sigue disponible en Atajos del panel.
+- Criterio de diseño: mostrar solo la información necesaria para orientarse y actuar; retirar textos que repiten la ubicación o el estado visible; priorizar el contenido útil y reservar una acción principal evidente.
+- Verificación con Chromium en escritorio y teléfono: título, ausencia de barra/textos redundantes, menú móvil, posición y etiqueta accesible del botón flotante, navegación de vuelta al selector, filtros, lectura por ubicación y flujo de Bodega. Las pruebas `pruebas/inventario-areas.mjs`, `pruebas/b2-interfaz-area-historica.mjs` y `pruebas/b3-2a-3-flujo-browser.mjs` pasan. El navegador de prueba usa datos ficticios; no se escribieron datos operativos.
+
 ## 2026-10-19 — Identidad visual compartida en las áreas operativas
 
 - Se aplicó al interior de todas las áreas físicas el lenguaje visual aprobado para el selector: fondo claro, tarjetas suaves sin bordes gruesos, acento naranja `#F35B04`, trazos propios tipo lápiz y alternativa oscura persistente. La pantalla compartida cubre Cocina fría, Cocina caliente, Barra, Cafetería, Heladería y áreas futuras; `Sin asignar` y `Todas las áreas` conservan sus vistas especiales.

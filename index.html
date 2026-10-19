@@ -4221,9 +4221,14 @@ let AREA_PRIMERA_SECCION_ABIERTA = true;
 let areaPortadaTema = 'light';
 try { if(localStorage.getItem('llamita_areas_tema')==='dark') areaPortadaTema='dark'; } catch(_) {}
 function aparienciaPortada(activa){
+  const espacioArea=activa&&areaActual!==null&&areaActual!==AREA_TODAS&&areaActual!=='sin_asignar';
+  if(!espacioArea){
+    const menu=$('mobileMenuTrigger'),topbar=document.querySelector('.topbar .inner');
+    if(menu&&topbar&&!topbar.contains(menu))topbar.insertBefore(menu,topbar.firstChild);
+  }
   document.body.classList.toggle('area-portada-activa',activa);
   document.body.classList.toggle('area-portada-oscura',activa&&areaPortadaTema==='dark');
-  document.body.classList.toggle('area-workspace-active',activa&&areaActual!==null);
+  document.body.classList.toggle('area-workspace-active',!!espacioArea);
 }
 let filterState = null;
 let areaFilterCard = null;
@@ -4517,12 +4522,11 @@ function renderAreaLista(){
   const global=areaActual===AREA_TODAS;
   $('view-inv').classList.add('area-workspace-wide');
   renderAreaTipoPills();
-  $('areaNav').style.display='flex'; $('areaNav').innerHTML=`<button type="button" class="area-back" data-area-home><span aria-hidden="true">←</span> Todas las áreas</button><span class="area-nav-actions">${!global&&areaActual!=='sin_asignar'&&PERMISOS.puede_editar?`<button type="button" class="area-back area-add-product" data-area-assign="${esc(areaActual)}"><span aria-hidden="true">＋</span> Agregar producto de Bodega</button>`:''}<button type="button" class="area-theme-toggle" data-area-theme-toggle aria-label="Activar modo ${areaPortadaTema==='dark'?'claro':'oscuro'}" aria-pressed="${areaPortadaTema==='dark'}"><svg class="area-theme-moon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M19.5 16.8A8.5 8.5 0 0 1 7.2 4.5 8.5 8.5 0 1 0 19.5 16.8Z"/><path d="M18 4.5v4m-2-2h4"/></svg><svg class="area-theme-sun" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.5 1.5m11.2 11.2 1.5 1.5m0-14.2-1.5 1.5M6.4 17.6l-1.5 1.5"/></svg><span>${areaPortadaTema==='dark'?'Claro':'Oscuro'}</span></button></span>`;
+  $('areaNav').style.display='none'; $('areaNav').innerHTML='';
   const titulo=global?'Todas las áreas':areaLabel(areaActual);
-  const bajada=global?'Vista agrupada de Local 1 · los saldos se muestran separados por ubicación.'
-    :areaActual==='sin_asignar'?'Existencias pendientes de distribución · saldo físico leído del ledger.'
-    :'Consulta los productos y cantidades de esta área.';
-  $('area-page-heading').innerHTML=`<div class="area-work-hero-copy"><span class="area-work-eyebrow">Inventario del área</span><h2>${esc(titulo)}</h2><p>${esc(bajada)}</p></div>${!global&&areaActual!=='sin_asignar'?dibujoAreaHTML(areaActual):''}`;
+  const menuMovil=$('mobileMenuTrigger');
+  $('area-page-heading').innerHTML=`<div class="area-work-hero-copy"><h2>${esc(titulo)}</h2></div><div class="area-page-controls"><span class="area-mobile-menu-slot"></span><button type="button" class="area-theme-toggle" data-area-theme-toggle aria-label="Activar modo ${areaPortadaTema==='dark'?'claro':'oscuro'}" aria-pressed="${areaPortadaTema==='dark'}"><svg class="area-theme-moon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M19.5 16.8A8.5 8.5 0 0 1 7.2 4.5 8.5 8.5 0 1 0 19.5 16.8Z"/><path d="M18 4.5v4m-2-2h4"/></svg><svg class="area-theme-sun" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.5 1.5m11.2 11.2 1.5 1.5m0-14.2-1.5 1.5M6.4 17.6l-1.5 1.5"/></svg><span>${areaPortadaTema==='dark'?'Claro':'Oscuro'}</span></button></div>${!global&&areaActual!=='sin_asignar'?dibujoAreaHTML(areaActual):''}`;
+  if(document.body.classList.contains('navegacion-fija'))document.querySelector('.area-mobile-menu-slot')?.append(menuMovil);
   $('area-page-heading').hidden=false;
   $('invFiltros').style.display=''; $('metrics').style.display='none';
   $('critSedes').style.display='none'; $('metaPortada').style.display='none';
@@ -4595,9 +4599,9 @@ function renderAreaLista(){
   const tarjetas=mostrarTarjetas?`<div class="area-work-metrics" role="group" aria-label="Filtrar inventario por estado">
     ${[['criticos','Críticos',stats.criticos,'crit','Sin stock o bajo mínimo'],['sobre','Sobre-stock',stats.sobre,'sobre','Sobre el máximo'],['sin_limites','Sin límites',stats.sinDato,'','Revisar configuración'],['vencimientos','Vencimientos',stats.vencimientos,'venc','Vencidos o por vencer']].map(([id,label,n,clase,ayuda])=>`<button type="button" class="area-work-metric ${clase}" data-area-state="${id}" aria-pressed="${areaFilterCard===id}"><strong>${n}</strong><span class="area-work-metric-copy"><span>${label}</span><small>${ayuda}</small></span></button>`).join('')}
   </div>`:'';
-  const filtrados=new Set(rows.map(r=>String(r.producto_id))).size;
-  const descripcionFiltro=areaFilterCard==='vencimientos'?'Productos vencidos o próximos a vencer':areaFilterCard==='sin_limites'?'Productos sin mínimo o máximo configurado':areaFilterCard==='criticos'?'Bajo el mínimo configurado o sin existencias':areaFilterCard==='sobre'?'Por encima del máximo configurado':'';
-  listEl.innerHTML=`${tarjetas}<div class="area-list-head"><span class="area-list-total">${descripcionFiltro?`${esc(descripcionFiltro)} · ${filtrados} productos · `:''}${stats.productosConSaldo} con saldo · ${fmt(stats.unidades)} unidades físicas</span></div>${salida||'<div class="empty">No hay productos que coincidan con este filtro.</div>'}`;
+  const resumen=areaActual==='sin_asignar'?`<div class="area-list-head"><span class="area-list-total">${stats.productosConSaldo} con saldo · ${fmt(stats.unidades)} unidades físicas</span></div>`:'';
+  const agregar=mostrarTarjetas&&PERMISOS.puede_editar?`<button type="button" class="area-add-fab" data-area-assign="${esc(areaActual)}" aria-label="Agregar producto de Bodega" title="Agregar producto de Bodega"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="area-add-fab-label">Agregar producto de Bodega</span></button>`:'';
+  listEl.innerHTML=`${tarjetas}${resumen}${salida||'<div class="empty">No hay productos que coincidan con este filtro.</div>'}${agregar}`;
 }
 
 /* Normaliza texto para buscar y comparar: sin tildes, sin mayúsculas y sin
@@ -17926,6 +17930,7 @@ aplicarNavegacionFija();
 
 function pickTab(tab){
   if(!SEDE)return;
+  if(tab==='inv'&&vistaActual==='inv'&&areaActual!==null){cambiarArea(null);return;}
   if(!sedeActiva(SEDE)){ showGate(); return; }
   if(tab==='aplaza' && !sedeActiva('angamos')) tab='inv';
   if(modoDemo() && !demoPermiteVista(tab)) tab='inv';
