@@ -74,6 +74,12 @@ for(const [ruta,titulo] of Object.entries({
   if(capturas)await page.screenshot({path:join(capturas,`${ruta}-escritorio.png`)});
 }
 await page.evaluate(()=>pickTab('lama'));
+await verificar(()=>page.evaluate(()=>{
+  const lateral=getComputedStyle(document.querySelector('.tabs'));
+  return getComputedStyle(document.body).backgroundColor==='rgb(246, 255, 248)' &&
+    lateral.backgroundColor==='rgb(255, 255, 255)' &&
+    getComputedStyle(document.querySelector('.tab.active')).color==='rgb(23, 23, 23)';
+}),'Mesas comparte el fondo hueso, lateral claro y texto del selector de áreas');
 await page.waitForSelector('#lama-mesas .lama-mesa');
 await page.locator('#lama-mesas .lama-mesa').first().click();
 await verificar(()=>page.evaluate(()=>document.querySelector('#lama-panel')?.textContent.includes('Mesa 1')),
@@ -83,6 +89,12 @@ await page.click('#uxThemeToggle');
 await verificar(()=>page.evaluate(()=>document.body.classList.contains('identidad-oscura') &&
   document.getElementById('uxThemeToggle').getAttribute('aria-pressed')==='true'),
   'modo oscuro aplicado y anunciado');
+await page.evaluate(()=>pickTab('lama'));
+await verificar(()=>page.evaluate(()=>{
+  const lateral=getComputedStyle(document.querySelector('.tabs'));
+  return getComputedStyle(document.body).backgroundColor==='rgb(16, 21, 18)' &&
+    lateral.backgroundColor==='rgb(12, 16, 14)';
+}),'Mesas comparte los tonos oscuros del selector de áreas');
 await page.evaluate(()=>pickTab('recetas'));
 await verificar(()=>page.evaluate(()=>document.body.classList.contains('identidad-oscura')),
   'modo oscuro persiste al navegar');

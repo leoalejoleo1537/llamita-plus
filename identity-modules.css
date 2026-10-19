@@ -33,6 +33,22 @@ body.identidad-oscura{
 html[data-paleta="lapiz"] body{background:var(--bg)}
 body.identidad-oscura input,body.identidad-oscura select,body.identidad-oscura textarea{color-scheme:dark}
 
+/* Mesas y el resto de módulos comparten la superficie y el riel del selector
+   de áreas/Inventario. Antes Mesas heredaba la paleta antigua de navegación
+   (riel carbón y fondo verdoso distinto), aunque sus tarjetas ya eran nuevas. */
+body.ux-module-active:not(.identidad-oscura){
+  --bg:#f6fff8;--card:#fff;--text:#171717;--muted:#686868;
+  --nav-surface:#fff;--nav-text:#171717;--nav-muted:#686868;--nav-active:#eaf4f4;
+  --nav-line:transparent;--orange:#f35b04;--orange-dark:#f35b04;
+  background:#f6fff8;color:#171717;
+}
+body.ux-module-active.identidad-oscura{
+  --bg:#101512;--card:#1b221e;--text:#f6fff8;--muted:#aab7af;
+  --nav-surface:#0c100e;--nav-text:#f6fff8;--nav-muted:#aab7af;--nav-active:#232c27;
+  --nav-line:transparent;--orange:#f35b04;--orange-dark:#f35b04;
+  background:#101512;color:#f6fff8;
+}
+
 /* El riel mantiene las mismas rutas, visibilidad por sede y permisos. */
 body.ux-module-active.navegacion-fija .tabs{
   background:var(--nav-surface);color:var(--nav-text);box-shadow:none;
@@ -47,7 +63,8 @@ body.ux-module-active.navegacion-fija .tab:hover,
 body.ux-module-active.navegacion-fija .drawer-item:hover{background:var(--nav-active);transform:translateX(2px)}
 body.ux-module-active.navegacion-fija .tab.active,
 body.ux-module-active.navegacion-fija .drawer-item.active{color:#fff}
-body.ux-module-active.navegacion-fija .tab.active svg{color:#ff965e}
+body.ux-module-active.navegacion-fija .tab.active{color:var(--text)}
+body.ux-module-active.navegacion-fija .tab.active svg{color:var(--orange)}
 body.ux-module-active.navegacion-fija .tab-carril{
   border-radius:12px;background:var(--nav-active);box-shadow:none;
 }
@@ -121,18 +138,19 @@ body.ux-module-active .empty{background:var(--card);border-radius:17px;box-shado
 /* Mesas: se conserva el plano real, las secciones, el tamaño elegido y el panel
    de al menos 540 px en escritorio. Solo cambian material y jerarquía. */
 #view-lama{
-  --bg:#f6fff8;--text:#202421;--muted:#66746b;--border:#e4ede7;
-  --linea:rgba(32,36,33,.09);--orange:#f35b04;--orange-dark:#c64a08;
+  --bg:#f6fff8;--card:#fff;--text:#171717;--muted:#686868;--border:#e4ede7;
+  --linea:rgba(32,36,33,.09);--orange:#f35b04;--orange-dark:#f35b04;
   --navy:#202421;--azul-bg:#eaf4f4;--azul-fg:#376a70;
   --mesa-ocu-bg:#fff0e7;--mesa-ocu-fg:#99400e;
-  --sombra:0 2px 5px rgba(26,40,30,.035),0 12px 30px -16px rgba(26,40,30,.16);
+  --sombra:0 3px 9px rgba(18,31,26,.05),0 16px 36px -8px rgba(18,31,26,.10);
 }
 body.identidad-oscura #view-lama{
-  --bg:#191e1b;--text:#f4f8f2;--muted:#b5c0b5;--border:#3a453c;
-  --linea:rgba(246,255,248,.1);--orange:#ff762d;--orange-dark:#db5914;
+  --bg:#101512;--card:#1b221e;--text:#f6fff8;--muted:#aab7af;--border:#3a453c;
+  --linea:rgba(246,255,248,.1);
   --navy:#f4f8f2;--azul-bg:#2b3e3e;--azul-fg:#a2ced0;
   --mesa-ocu-bg:#412d22;--mesa-ocu-fg:#ffb083;
-  --sombra:0 2px 5px rgba(0,0,0,.12),0 12px 30px -12px rgba(0,0,0,.32);
+  --orange:#f35b04;--orange-dark:#f35b04;
+  --sombra:0 4px 12px rgba(0,0,0,.14),0 18px 34px -8px rgba(0,0,0,.2);
 }
 #view-lama #lama-arq-banner:not(:empty){margin-bottom:12px}
 #view-lama .lama-plano,#view-lama .lama-panel{background:var(--card);border-radius:23px;box-shadow:var(--sombra);padding:18px;min-width:0}

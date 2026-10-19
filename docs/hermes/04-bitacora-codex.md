@@ -8,6 +8,13 @@
 - Verificación: Chromium con datos sintéticos en 1440×900 y 390×844; tres columnas, ficha sobre navegación, ausencia de solapamiento del botón flotante, Escape, navegación, ventanas existentes, modo oscuro, consola sin errores y sin desborde horizontal. Pasó `pruebas/identidad-modulos.mjs`. `pruebas/lama-mesas.mjs` sigue bloqueada antes de su flujo por el fixture histórico de permisos que no habilita la pestaña Mesas; esta limitación ya estaba registrada en la auditoría del 19 de octubre.
 - Publicado en `origin/master` como `5e8c05f93d5e8a41522e701e4fd71eabd79fe91d`. Vercel confirmó producción `READY` con ese mismo SHA y alias `llamita-plus.vercel.app`.
 
+## 2026-10-19 — Mesas: fondo y navegación alineados con Inventario
+
+- Se corrigió la diferencia visual entre Mesas e Inventario: fondo `#F6FFF8`, panel lateral blanco, texto de navegación oscuro y selección suave `#EAF4F4`; el acento vuelve al naranja de marca `#F35B04`. El modo oscuro ahora usa las mismas superficies de la identidad del selector de áreas (`#101512`, `#0C100E`, `#1B221E`, `#232C27`).
+- No se alteraron tarjetas, formas, movimientos, estructura, rutas ni comportamiento de Mesas. Solo se unificaron los tokens de página y navegación; flujos comerciales y permisos permanecen intactos.
+- Verificación Chromium, datos sintéticos: colores de página, riel y texto comprobados en claro/oscuro; suite `pruebas/identidad-modulos.mjs` completa, sin errores JavaScript ni desbordes en escritorio y teléfono. Capturas: selección de mesa en ambas resoluciones.
+- Publicación de este ajuste: pendiente.
+
 ## 2026-10-19 — Identidad visual v1 en módulos operativos
 
 - Estado: **IMPLEMENTADO Y VERIFICADO LOCALMENTE** en el commit `fc30a89`. Alcance: Mesas, Reparto, Arqueo, Movimientos de caja, Recetas, Historial, Bodega, Ajustes y Mermas. La publicación se realiza después de esta entrada y debe comprobarse contra el SHA servido por Vercel.
