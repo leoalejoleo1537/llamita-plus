@@ -13,7 +13,7 @@
 - Se corrigió la diferencia visual entre Mesas e Inventario: fondo `#F6FFF8`, panel lateral blanco, texto de navegación oscuro y selección suave `#EAF4F4`; el acento vuelve al naranja de marca `#F35B04`. El modo oscuro ahora usa las mismas superficies de la identidad del selector de áreas (`#101512`, `#0C100E`, `#1B221E`, `#232C27`).
 - No se alteraron tarjetas, formas, movimientos, estructura, rutas ni comportamiento de Mesas. Solo se unificaron los tokens de página y navegación; flujos comerciales y permisos permanecen intactos.
 - Verificación Chromium, datos sintéticos: colores de página, riel y texto comprobados en claro/oscuro; suite `pruebas/identidad-modulos.mjs` completa, sin errores JavaScript ni desbordes en escritorio y teléfono. Capturas: selección de mesa en ambas resoluciones.
-- Publicación de este ajuste: pendiente.
+- Publicado en `origin/master` como `7f57c0420969f13d5a8caa125e2361219504bfbe`; Vercel confirmó producción `READY` con ese SHA y alias `llamita-plus.vercel.app`.
 
 ## 2026-10-19 — Identidad visual v1 en módulos operativos
 
