@@ -1,4 +1,4 @@
-/* LA PANTALLA DE LOGIN — presentación sobria sin marca gráfica.
+/* LA PANTALLA DE LOGIN — presentación sobria con la marca oficial.
    node pruebas/login-screen.mjs
 
    Se prueba en teléfono y computador: una misma tarjeta centrada, sin logos
@@ -31,11 +31,17 @@ async function montar(){
     window.__clipboardText = null;
     Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async text=>{window.__clipboardText=text;}}});
     window.supabase = { createClient: () => ({
-      from(){ const a={select:()=>a,eq:()=>a,order:()=>a,limit:()=>a,in:()=>a,is:()=>a,not:()=>a,
+      from(nombre){
+        const filas=nombre==='sede_registro' ? [
+          {codigo:'plaza',nombre_visible:'Local 1',tipo:'local',estado:'activa'},
+          {codigo:'central',nombre_visible:'Bodega',tipo:'bodega',estado:'activa'}
+        ] : [];
+        const a={select:()=>a,eq:()=>a,order:()=>a,limit:()=>a,in:()=>a,is:()=>a,not:()=>a,
         or:()=>a,ilike:()=>a,gte:()=>a,lte:()=>a,neq:()=>a,
-        maybeSingle:()=>Promise.resolve({data:null,error:null}),
-        single:()=>Promise.resolve({data:null,error:null}),
-        then:f=>Promise.resolve({data:[],error:null,count:0}).then(f)}; return a; },
+        maybeSingle:()=>Promise.resolve({data:filas[0]||null,error:null}),
+        single:()=>Promise.resolve({data:filas[0]||null,error:null}),
+        then:f=>Promise.resolve({data:filas,error:null,count:filas.length}).then(f)}; return a;
+      },
       rpc:()=>Promise.resolve({data:null,error:null}),
       auth:{
         getSession: async () => ({data:{session:null}}),
@@ -152,8 +158,18 @@ await caso('en escritorio el panel QR abre y Escape lo cierra',async()=>{
   return ciclo&&vuelve&&ancho<=360&&!(await page.locator('#login-qr-overlay.open').count())
     &&await page.evaluate(()=>document.activeElement.id==='login-qr-open');
 });
-console.log('\nEL LOGO ORIGINAL, de vuelta:');
-await caso('el mosaico tiene azules y rojos de verdad, no es el de hojas verdes', async () => {
+console.log('\nEL ICONO TERRACOTA OFICIAL:');
+await caso('el login y los metadatos instalables usan el nuevo icono', async () => page.evaluate(()=>{
+  const loginMovil=document.querySelector('.login-logo-tel')?.getAttribute('src');
+  const loginEscritorio=document.querySelector('.login-visual-logo')?.getAttribute('src');
+  const favicon=document.querySelector('link[rel="icon"]')?.getAttribute('href');
+  const apple=document.querySelector('link[rel="apple-touch-icon"]')?.getAttribute('href');
+  return loginMovil==='icons/app-terracota-512.png'
+    &&loginEscritorio==='icons/app-terracota-512.png'
+    &&favicon==='icons/app-terracota-192.png'
+    &&apple==='icons/app-terracota-180.png';
+}));
+await caso('el asset contiene terracota y la espiral blanca', async () => {
   /* Se lee el pixel con Python/PIL, AFUERA del navegador: bajo `file://`
      Chromium marca cualquier imagen como "tainted" y no deja leer el canvas,
      sin importar que sea el mismo origen. Es más simple preguntarle al
@@ -161,18 +177,17 @@ await caso('el mosaico tiene azules y rojos de verdad, no es el de hojas verdes'
   const { execFileSync } = await import('node:child_process');
   const salida = execFileSync('python3', ['-c', `
 from PIL import Image
-im = Image.open(${JSON.stringify(join(raiz,'icons','icon-512.png'))}).convert('RGBA')
-blue=red=0
+im = Image.open(${JSON.stringify(join(raiz,'icons','app-terracota-512.png'))}).convert('RGB')
+terracota=blanco=0
 pixels=im.tobytes()
-for i in range(0,len(pixels),4):
-    r,g,b,a=pixels[i:i+4]
-    if a<160: continue
-    blue += b>r*1.25 and b>g*1.1
-    red += r>g*1.25 and r>b*1.25
-print(blue,red)
+for i in range(0,len(pixels),3):
+    r,g,b=pixels[i:i+3]
+    terracota += r>190 and 65<g<175 and b<100
+    blanco += r>242 and g>242 and b>242
+print(terracota,blanco)
 `]).toString().trim();
-  const [azules,rojos] = salida.split(' ').map(Number);
-  return azules>1000&&rojos>100 || `el asset ya no contiene el mosaico azul/rojo: ${salida}`;
+  const [terracota,blanco] = salida.split(' ').map(Number);
+  return terracota>50000&&blanco>10000 || `el asset no conserva terracota y blanco: ${salida}`;
 });
 
 
