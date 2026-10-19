@@ -1,5 +1,33 @@
 # Bitácora de Codex
 
+## 2026-10-19 — Identidad visual v1 en módulos operativos
+
+- Estado: **IMPLEMENTADO Y VERIFICADO LOCALMENTE** en el commit `fc30a89`. Alcance: Mesas, Reparto, Arqueo, Movimientos de caja, Recetas, Historial, Bodega, Ajustes y Mermas. La publicación se realiza después de esta entrada y debe comprobarse contra el SHA servido por Vercel.
+- Se incorporó una capa compartida `identity-modules.css` con la paleta Lápiz y papel (`#F6FFF8`, blanco, tinta y acento `#F35B04`), tarjetas suaves sin rebordes gruesos, espaciado y jerarquía comunes, riel oscuro, modo oscuro persistente y adaptación móvil. No se copiaron pantallas de prototipo: se vistieron los controles, filas y handlers reales.
+- Cada módulo tiene un solo título útil y un control claro/oscuro. Bodega agrupa Stock, Recibir, Enviar y Enlaces en una subnavegación que pulsa las pestañas existentes y conserva su visibilidad por sede. En teléfono se mantienen la cabecera y la navegación inferior requeridas para orientarse y volver.
+- Las ventanas existentes se presentan como hojas inferiores en teléfono. Escape, toque fuera y navegación por Tab invocan siempre los botones de cancelación originales; el foco entra al diálogo y vuelve al control que lo abrió. No se añadió ninguna vía de confirmación o guardado.
+- Mesas conserva salones, mesa seleccionada, caja y acciones existentes. El aviso de caja se movió fuera del riel estrecho del plano para que sea legible en teléfono. Mermas continúa en demostración/solo lectura; no se habilitó ninguna operación pausada en Bodega o Local 1.
+- Frontera técnica: no se modificaron arquitectura, esquema, migraciones, permisos, stock, ledger, Fudo, Lama–Stock ni reglas comerciales. No hay RPC, DML ni llamadas remotas nuevas. Las pruebas visuales usan una sesión y tablas sintéticas en memoria y no escriben datos operativos.
+
+### Auditoría visual de esta entrega
+
+| Prioridad | Pantalla y tamaño | Pasos | Esperado / observado antes | Resultado |
+| --- | --- | --- | --- | --- |
+| P1 | Mesas · 390×844 | Abrir Mesas con caja cerrada | Aviso y botón legibles; el aviso quedaba comprimido en el riel de 66 px | Resuelto: aviso a ancho completo |
+| P1 | Mesas · 390×844 | Seleccionar mesa y observar la acción flotante | La acción no debe tapar la navegación; se superponía con la barra inferior | Resuelto: queda por encima de la barra y safe area |
+| P2 | Mesas · 1440×900, oscuro | Activar oscuro y abrir una mesa | Toda la tarjeta debía cambiar; variables locales heredadas dejaban el interior claro | Resuelto: materiales oscuros coherentes |
+| P2 | Modales · 390×844 | Abrir Recetas/confirmación, usar Tab y Escape | Hoja móvil cerrable y foco recuperable; faltaba un tratamiento uniforme | Resuelto con cierre original, trampa de foco y retorno |
+| P3 | Arqueo · escritorio/teléfono | Entrar a Arqueo | Un solo título; aparecía un segundo encabezado redundante | Resuelto: se conserva únicamente el título principal |
+
+- Resultado abierto de la capa nueva: **0 defectos reproducibles** en la matriz automatizada y en la inspección de capturas. Se verificaron 1440×900 y 390×844, claro/oscuro, ausencia de desborde, navegación, permisos de Mesas, cuatro vistas de Bodega, formulario/cancelación de Arqueo, modal de Recetas, confirmación, clic exterior, Escape, Tab y consola JavaScript.
+- Pruebas que pasan: `pruebas/identidad-modulos.mjs`, `pruebas/pantalla-sana.mjs`, `pruebas/movil-navegacion.mjs`, `pruebas/inventario-areas.mjs`, `pruebas/b2-interfaz-area-historica.mjs`, `pruebas/b3-2a-2-interfaz-areas.mjs`, `pruebas/b3-2a-3-flujo-browser.mjs`, `pruebas/mermas.mjs` y `git diff --check`.
+
+### Incidencias anteriores, separadas de esta implementación
+
+- P3 · infraestructura de pruebas: `estetica-no-rompio-nada.mjs`, `pc-riel.mjs`, `ajustes-navegacion.mjs`, `telefono-y-bodega.mjs` y `lama-ancho.mjs` usan un fixture anterior a la RPC `permisos_mios`. Al ejecutarlos sobre el commit base limpio `b6aa251`, la app cae en Mesas o deja la ruta esperada oculta; por eso el clic/selector posterior falla. Esperado: el fixture debe devolver el contrato de permisos actual. Observado: la pantalla objetivo nunca se habilita. No reproduce un fallo de producción ni fue introducido por `fc30a89`.
+- P3 · infraestructura de pruebas: `recetas-en-pantalla.mjs` obtiene 23 comprobaciones correctas y 2 fallidas sobre el mismo `b6aa251` porque su cliente simulado no define `sb.rpc`. Esperado: cargar Recetas con el cliente vigente. Observado: el mock interrumpe la preparación de la vista. No se cambió el flujo real de Recetas.
+- Bloqueo concreto para Hermes/Codex: modernizar esos fixtures compartidos antes de volver a usar `npm test` como puerta única de publicación. La matriz pertinente y actual sí pasa; la deuda no bloquea esta entrega visual y no debe corregirse alterando permisos o lógica de aplicación.
+
 ## 2026-10-19 — Limpieza de apariencia y navegación dentro del área
 
 - Se quitó del interior de cada área el texto auxiliar redundante, el resumen “con saldo / unidades físicas” y el botón “Todas las áreas”. El nombre del área queda arriba a la izquierda y se oculta la barra superior de sede y sección para recuperar espacio.
