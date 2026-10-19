@@ -3866,6 +3866,8 @@
     </div>
     <div class="lama-panel" id="lama-panel"></div>
   </div>
+  <button type="button" id="lama-panel-scrim" class="lama-panel-scrim"
+    data-lamaacc="cerrar-panel" aria-label="Volver al plano de mesas" hidden></button>
   <!-- El + de abajo a la derecha: abre la mesa si esta libre, agrega
        productos si ya esta abierta. Y la carta, que en el telefono se abre
        a pantalla completa. Los dos los pinta el JS. -->
@@ -8838,6 +8840,31 @@ function lamaPintarPanel(){
   const teniaFoco = !!act && (act.id === 'lama-qp' ||
                               !!(act.closest && act.closest('#lama-qp-lista')));
   const m = LAMA_SEL ? lamaMesaDe(LAMA_SEL) : null;
+  const movil = window.matchMedia('(max-width: 719px)').matches;
+  const scrim = $('lama-panel-scrim');
+  if(movil && m){
+    /* La barra inferior varía unos píxeles entre navegador, PWA y zona segura.
+       Medir su borde superior evita que la ficha tape sus accesos. */
+    const nav = $('mobileBottom');
+    const navTop = nav?.getBoundingClientRect().top ?? (window.innerHeight - 68);
+    const bottomActual = Number.parseFloat(cont.style.getPropertyValue('--lama-sheet-bottom')) || 68;
+    const desborde = Math.max(0, cont.getBoundingClientRect().bottom - navTop);
+    const bordeFijo = Math.max(68, bottomActual + desborde);
+    cont.style.setProperty('--lama-sheet-bottom',`${bordeFijo}px`);
+    if(scrim) scrim.style.setProperty('--lama-scrim-bottom',`${bordeFijo}px`);
+    cont.setAttribute('role','dialog');
+    cont.setAttribute('aria-label',`Mesa ${m.numero}`);
+    if(LAMA_CARTA_ABIERTA || LAMA_PP || LAMA_COB || LAMA_ANU) cont.removeAttribute('aria-modal');
+    else cont.setAttribute('aria-modal','true');
+    if(scrim) scrim.hidden = false;
+  }else{
+    cont.style.removeProperty('--lama-sheet-bottom');
+    if(scrim) scrim.style.removeProperty('--lama-scrim-bottom');
+    cont.setAttribute('role','region');
+    cont.removeAttribute('aria-modal');
+    cont.removeAttribute('aria-label');
+    if(scrim) scrim.hidden = true;
+  }
   if(!m){
     cont.innerHTML = `<div class="lama-caja"><div class="lama-vacio">
       Toca una mesa para verla.</div></div>`;
@@ -9434,6 +9461,9 @@ async function lamaSeleccionar(mesaId){
   LAMA_ITEMS = []; LAMA_PAGOS_PAR = [];
   LAMA_ITEMS_CARGANDO = !!c;
   lamaPintar();
+  if(window.matchMedia('(max-width: 719px)').matches){
+    requestAnimationFrame(() => $('lama-panel')?.querySelector('[data-lamaacc="cerrar-panel"]')?.focus({preventScroll:true}));
+  }
   if(!c) return;
   /* En un `finally`: si la red se corta a mitad, el panel no puede quedarse
      diciendo "Cargando…" para siempre (la regla de `actualizarTodo`). */
@@ -11539,10 +11569,12 @@ $('view-lama').addEventListener('click', async e => {
     else if(a === 'a-destino')   { if(LAMA_ELEGIDOS.length){ LAMA_MODO = 'items'; lamaPintar(); } }
     else if(a === 'salir-mover')   lamaSalirDeMover();
     else if(a === 'cerrar-panel'){
+      const mesaCerrada = LAMA_SEL;
       LAMA_SEL = null; LAMA_PAPEL = null; LAMA_Q = '';
       LAMA_MENU = false; LAMA_MODO = null; LAMA_ELEGIDOS = [];
       LAMA_CARTA_ABIERTA = false; LAMA_DESC = null;
       lamaPintar();
+      requestAnimationFrame(() => document.querySelector(`[data-lamamesa="${mesaCerrada}"]`)?.focus({preventScroll:true}));
     }
     return;
   }
@@ -11592,7 +11624,10 @@ document.addEventListener('keydown', e => {
   if(LAMA_CARTA_ABIERTA){ lamaCerrarCarta(); return; }
   if(LAMA_DESC){ LAMA_DESC = null; lamaPintarPanel(); return; }
   if(LAMA_MENU){ LAMA_MENU = false; lamaPintarPanel(); return; }
-  if(LAMA_MODO){ lamaSalirDeMover(); }
+  if(LAMA_MODO){ lamaSalirDeMover(); return; }
+  if(LAMA_SEL && window.matchMedia('(max-width: 719px)').matches){
+    $('lama-panel')?.querySelector('[data-lamaacc="cerrar-panel"]')?.click();
+  }
 });
 
 /* Los campos de la caja del descuento del panel. Se anota el valor y NO se

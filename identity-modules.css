@@ -324,6 +324,68 @@ body.ux-module-active #view-inv:not(.area-workspace-wide) #list{display:block}
   }
   .overlay:not(.login-qr-overlay) .modal :where(.mbtns,.adm-pie){bottom:calc(-18px - env(safe-area-inset-bottom));padding-bottom:calc(10px + env(safe-area-inset-bottom))}
 }
+
+/* Mesas v2: el plano móvil conserva todo el ancho y el detalle sube como
+   hoja inferior al elegir mesa. Las páginas, secciones y handlers existentes
+   siguen siendo los dueños de los datos y de cada acción. */
+#view-lama .lama-mesa{
+  border-radius:18px;min-width:0;transition:transform .2s cubic-bezier(.2,.8,.2,1),
+    box-shadow .2s ease,background-color .2s ease,opacity .18s ease;
+}
+#view-lama .lama-mesa:hover{transform:translateY(-4px);box-shadow:0 12px 24px rgba(32,36,33,.12)}
+#view-lama .lama-mesa.sel{
+  background:var(--orange);color:#fff;
+  box-shadow:0 12px 26px rgba(243,91,4,.23),0 0 24px rgba(243,91,4,.12);
+}
+#view-lama .lama-mesa.sel::before{background:#fff;opacity:.9}
+#view-lama .lama-panel-scrim{display:none}
+@media(max-width:719px){
+  #view-lama .lama{grid-template-columns:minmax(0,1fr);gap:0}
+  #view-lama .lama-plano{padding:13px 12px;border-radius:22px}
+  #view-lama .lama-mesas{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;
+    max-height:none;overflow:visible;padding:4px 3px 10px}
+  #view-lama .lama-mesas.con-secciones{display:block}
+  #view-lama .lama-sec{padding:8px 7px;margin-bottom:10px;border-radius:16px}
+  #view-lama .lama-sec-cab{font-size:11px;padding:2px 4px 8px}
+  #view-lama .lama-rej{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+  #view-lama .lama-mesa{width:100%;aspect-ratio:1;padding:0;border-radius:18px;font-size:20px}
+  #view-lama .lama-mesa .n{font-size:20px}
+  #view-lama .lama-mesa.sel{transform:translateY(-3px)}
+  #view-lama .lama-panel{display:none}
+  #view-lama .lama.con-panel #lama-panel{
+    display:block;position:fixed;z-index:44;left:0;right:0;
+    bottom:calc(var(--lama-sheet-bottom,68px) + env(safe-area-inset-bottom));
+    max-height:min(72dvh,720px);overflow-y:auto;overscroll-behavior:contain;
+    padding:17px 16px calc(15px + env(safe-area-inset-bottom));
+    border-radius:25px 25px 0 0;box-shadow:0 -14px 42px rgba(25,35,28,.18);
+    animation:lama-panel-entra .22s cubic-bezier(.2,.8,.2,1) both;
+  }
+  #view-lama #lama-panel .lama-caja{background:transparent;box-shadow:none;border-radius:0}
+  #view-lama #lama-panel .lama-cab{padding:4px 2px 13px;background:transparent;border-radius:0}
+  #view-lama #lama-panel .lama-cab button{width:40px;height:40px;border:0;border-radius:50%;
+    background:var(--bg);color:var(--muted);font-size:17px}
+  #view-lama #lama-panel .lama-cab button:focus-visible{outline:0;
+    box-shadow:0 0 0 5px rgba(243,91,4,.18)}
+  #view-lama #lama-panel .lama-cuerpo{padding:8px 0 0}
+  #view-lama #lama-panel .lama-vacio{padding:20px 10px}
+  #view-lama .lama-panel-scrim:not([hidden]){display:block;position:fixed;z-index:34;
+    top:60px;left:0;right:0;bottom:calc(var(--lama-scrim-bottom,68px) + env(safe-area-inset-bottom));
+    width:100%;border:0;background:rgba(20,28,23,.34);backdrop-filter:blur(2px)}
+  #view-lama .lama.con-panel~#lama-fab{display:none}
+  #view-lama .lama-fab{bottom:calc(82px + env(safe-area-inset-bottom))}
+  body.identidad-oscura #view-lama .lama-panel-scrim:not([hidden]){background:rgba(0,0,0,.52)}
+  body.identidad-oscura #view-lama .lama-panel{box-shadow:0 -14px 42px rgba(0,0,0,.4)}
+  @keyframes lama-panel-entra{from{opacity:.6;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+}
+@media(max-width:359px){
+  #view-lama .lama-plano{padding:11px 8px}
+  #view-lama .lama-mesas,#view-lama .lama-rej{gap:7px}
+  #view-lama .lama-sec{padding:7px 5px}
+}
+@media(prefers-reduced-motion:reduce){
+  #view-lama .lama-mesa{transition:none}
+  #view-lama .lama.con-panel #lama-panel{animation:none}
+}
 @media(prefers-reduced-motion:reduce){
   .ux-theme-toggle,.ux-bodega-tabs button,body.ux-module-active :where(button,.sec-head,.hist-card,.rec-card){transition:none!important}
 }

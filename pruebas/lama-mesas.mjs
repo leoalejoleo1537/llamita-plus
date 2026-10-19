@@ -276,12 +276,21 @@ await caso('TODAS las mesas miden lo mismo, sin importar su estado', async () =>
   return (medidas.size === 1 && !cambio)
     || 'no miden igual: ' + JSON.stringify(r1) + (cambio ? ' · cambió al elegir otra: ' + cambio : '');
 });
-/* Jhon: "en el teléfono quiero que siempre las mesas estén apiladas a la
-   izquierda y a la derecha la información". Sostenerlo siempre evita que la
-   pantalla cambie de forma cada vez que se toca una mesa. */
-await caso('en el teléfono el riel está SIEMPRE, no solo con mesa elegida', async () => {
-  const cols = await page.evaluate(()=>getComputedStyle(document.querySelector('.lama')).gridTemplateColumns);
-  return /^\d/.test(cols) && cols.split(' ').length === 2 || 'no está partido: '+cols;
+/* Mesas v2: plano a todo el ancho y detalle como hoja inferior al seleccionar.
+   La navegación fija global de la app queda visible por debajo de la hoja. */
+await caso('en teléfono el plano usa tres columnas y el panel se abre como hoja', async () => {
+  await page.setViewportSize({width:390,height:844});
+  const cols = await page.evaluate(()=>getComputedStyle(document.querySelector('#lama-mesas')).gridTemplateColumns);
+  await page.click('[data-lamamesa="101"]'); await page.waitForTimeout(180);
+  const state = await page.evaluate(()=>({
+    panel:document.querySelector('#lama-panel').getBoundingClientRect(),
+    abierto:document.querySelector('#lama-panel').getAttribute('role')==='dialog',
+    scrim:!document.querySelector('#lama-panel-scrim').hidden,
+    nav:document.querySelector('#mobileBottom')?.getBoundingClientRect().top
+  }));
+  return (cols.split(' ').length===3 && state.abierto && state.scrim &&
+    state.panel.bottom<=state.nav+1)
+    || `columnas ${cols}; panel ${JSON.stringify(state)}`;
 });
 
 

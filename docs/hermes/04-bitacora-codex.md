@@ -1,5 +1,13 @@
 # Bitácora de Codex
 
+## 2026-10-19 — Mesas v2: plano a ancho completo y ficha inferior en teléfono
+
+- Se aplicó la propuesta aprobada al área real de Mesas. En escritorio se conservan el plano y la cuenta en paralelo; en teléfono el plano usa tres columnas y la mesa elegida abre una ficha inferior. El plano queda atenuado detrás, la ficha se ajusta por encima de la navegación fija y el botón flotante se oculta mientras la ficha está abierta.
+- La selección mantiene páginas/salones, secciones, formas y estados existentes. El detalle conserva las acciones y el contenido que ya dibujan `lamaPintarPanel`, la carta, la precuenta y el cobro; no se añaden acciones comerciales. Cerrar con el botón, tocar fuera o usar Escape devuelve al plano. El foco pasa al cierre al abrir la ficha y regresa a la mesa al cerrarla.
+- Se mantuvo la paleta Lápiz y papel, el naranja `#F35B04`, el modo oscuro, las superficies suaves y el movimiento sutil de las tarjetas. No se alteraron permisos, datos, esquema, ventas, caja, Fudo, Lama–Stock ni las reglas de stock.
+- Verificación: Chromium con datos sintéticos en 1440×900 y 390×844; tres columnas, ficha sobre navegación, ausencia de solapamiento del botón flotante, Escape, navegación, ventanas existentes, modo oscuro, consola sin errores y sin desborde horizontal. Pasó `pruebas/identidad-modulos.mjs`. `pruebas/lama-mesas.mjs` sigue bloqueada antes de su flujo por el fixture histórico de permisos que no habilita la pestaña Mesas; esta limitación ya estaba registrada en la auditoría del 19 de octubre.
+- Publicación en `origin/master` y verificación de Vercel: pendientes de esta entrega.
+
 ## 2026-10-19 — Identidad visual v1 en módulos operativos
 
 - Estado: **IMPLEMENTADO Y VERIFICADO LOCALMENTE** en el commit `fc30a89`. Alcance: Mesas, Reparto, Arqueo, Movimientos de caja, Recetas, Historial, Bodega, Ajustes y Mermas. La publicación se realiza después de esta entrada y debe comprobarse contra el SHA servido por Vercel.

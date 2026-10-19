@@ -78,6 +78,7 @@ await page.waitForSelector('#lama-mesas .lama-mesa');
 await page.locator('#lama-mesas .lama-mesa').first().click();
 await verificar(()=>page.evaluate(()=>document.querySelector('#lama-panel')?.textContent.includes('Mesa 1')),
   'Mesas abre su panel real sin crear una cuenta');
+if(capturas)await page.screenshot({path:join(capturas,'lama-mesa-seleccionada-escritorio.png')});
 await page.click('#uxThemeToggle');
 await verificar(()=>page.evaluate(()=>document.body.classList.contains('identidad-oscura') &&
   document.getElementById('uxThemeToggle').getAttribute('aria-pressed')==='true'),
@@ -98,11 +99,30 @@ await page.click('#uxThemeToggle');
 await page.setViewportSize({width:390,height:844});
 await page.waitForTimeout(260);
 await page.evaluate(()=>pickTab('lama'));
+await page.keyboard.press('Escape');
 await verificar(()=>page.evaluate(()=>{
-  const fab=document.querySelector('#lama-fab .lama-fab')?.getBoundingClientRect();
-  const nav=document.getElementById('mobileBottom').getBoundingClientRect();
-  return !!fab&&fab.bottom<nav.top-5;
-}),'la acción de Mesas no tapa la navegación inferior');
+  const cols=getComputedStyle(document.querySelector('#lama-mesas')).gridTemplateColumns;
+  return cols.split(' ').length===3;
+}),'Mesas en teléfono muestra el plano en tres columnas');
+await page.locator('#lama-mesas .lama-mesa').first().click();
+if(capturas)await page.screenshot({path:join(capturas,'lama-mesa-seleccionada-telefono.png')});
+await verificar(()=>page.evaluate(()=>{
+  return document.querySelector('#lama-panel').getAttribute('role')==='dialog' &&
+    !document.getElementById('lama-panel-scrim').hidden;
+}),'seleccionar una mesa abre su ficha inferior');
+await verificar(()=>page.evaluate(()=>{
+  const panel=document.querySelector('#lama-panel'),nav=document.getElementById('mobileBottom');
+  return panel.getBoundingClientRect().bottom<=nav.getBoundingClientRect().top+1;
+}),'la ficha queda por encima de la navegación inferior');
+await verificar(()=>page.evaluate(()=>!document.querySelector('#lama-fab .lama-fab')?.getClientRects().length),
+  'la ficha evita que el botón flotante se superponga al detalle');
+await page.keyboard.press('Escape');
+await verificar(()=>page.evaluate(()=>document.getElementById('lama-panel-scrim').hidden),
+  'Escape cierra la ficha y devuelve el plano');
+await page.locator('#lama-mesas .lama-mesa').first().click();
+await page.locator('#lama-panel-scrim').click();
+await verificar(()=>page.evaluate(()=>document.getElementById('lama-panel-scrim').hidden),
+  'tocar fuera de la ficha también la cierra');
 for(const ruta of ['lama','arqueo','movcaja','reparto','recetas','hist','mermas','ajustes']){
   await page.evaluate(r=>pickTab(r),ruta);
   await page.waitForTimeout(220);
