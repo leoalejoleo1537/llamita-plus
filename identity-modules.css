@@ -1,0 +1,329 @@
+/* Identidad Lápiz y papel · capa de presentación de los módulos existentes.
+   Los datos, eventos, permisos y reglas de stock permanecen en index.html. */
+html[data-paleta="lapiz"]{
+  --navy:#202421;--navy2:#303731;--orange:#f35b04;--orange-dark:#c64a08;
+  --bg:#f6fff8;--card:#fff;--border:#e4ede7;--text:#202421;--muted:#66746b;
+  --green:#3e8664;--green-bg:#eaf4f0;--green-fg:#286b4b;
+  --amber:#b17b2d;--amber-bg:#fff4df;--amber-fg:#855714;
+  --red:#be4651;--red-bg:#fff0f1;--red-fg:#a4313d;
+  --gray-bg:#edf4ef;--gray-fg:#5f6d64;--azul-bg:#eaf4f4;--azul-fg:#376a70;
+  --sec-bg:#fff0e7;--sec-tx:#99400e;--sec-line:#f7c9af;--sec-filo:#f35b04;
+  --linea:rgba(32,36,33,.09);
+  --sombra:0 2px 5px rgba(26,40,30,.035),0 12px 30px -16px rgba(26,40,30,.16);
+  --nav-surface:#202421;--nav-text:#f6fff8;--nav-muted:#b4c0b6;--nav-active:#363d37;
+  --accent-soft:#f35b04;--nav-line:rgba(255,255,255,.11);--chart-track:#e9f1eb;
+  --ux-soft:#eaf4f4;--ux-warm:#fff0e7;--ux-shadow-up:0 15px 32px rgba(25,38,28,.11),0 3px 8px rgba(25,38,28,.045);
+}
+body.identidad-oscura{
+  color-scheme:dark;
+  --navy:#f4f8f2;--navy2:#d6e0d6;--orange:#ff762d;--orange-dark:#db5914;
+  --bg:#191e1b;--card:#242a25;--border:#3a453c;--text:#f4f8f2;--muted:#b5c0b5;
+  --green:#83cba0;--green-bg:#263a2d;--green-fg:#9ad9af;
+  --amber:#eac079;--amber-bg:#41351f;--amber-fg:#f1cf93;
+  --red:#ef8e96;--red-bg:#452a2e;--red-fg:#ff9ca5;
+  --gray-bg:#303932;--gray-fg:#bac7ba;--azul-bg:#2b3e3e;--azul-fg:#a2ced0;
+  --sec-bg:#412d22;--sec-tx:#ffb083;--sec-line:#76503a;--sec-filo:#ff762d;
+  --linea:rgba(246,255,248,.1);
+  --sombra:0 2px 5px rgba(0,0,0,.12),0 12px 30px -12px rgba(0,0,0,.32);
+  --nav-surface:#111612;--nav-text:#f4f8f2;--nav-muted:#aebbae;--nav-active:#2d362f;
+  --accent-soft:#ff762d;--nav-line:rgba(255,255,255,.12);--chart-track:#354037;
+  --ux-soft:#2e3931;--ux-warm:#432f23;--ux-shadow-up:0 18px 35px rgba(0,0,0,.32),0 3px 8px rgba(0,0,0,.18);
+  background:var(--bg);color:var(--text);
+}
+html[data-paleta="lapiz"] body{background:var(--bg)}
+body.identidad-oscura input,body.identidad-oscura select,body.identidad-oscura textarea{color-scheme:dark}
+
+/* El riel mantiene las mismas rutas, visibilidad por sede y permisos. */
+body.ux-module-active.navegacion-fija .tabs{
+  background:var(--nav-surface);color:var(--nav-text);box-shadow:none;
+}
+body.ux-module-active.navegacion-fija .drawer{background:transparent;box-shadow:none}
+body.ux-module-active.navegacion-fija .tab,
+body.ux-module-active.navegacion-fija .drawer-item{
+  border:0;border-radius:12px;box-shadow:none;color:var(--nav-text);
+  transition:background .18s ease,transform .18s ease;
+}
+body.ux-module-active.navegacion-fija .tab:hover,
+body.ux-module-active.navegacion-fija .drawer-item:hover{background:var(--nav-active);transform:translateX(2px)}
+body.ux-module-active.navegacion-fija .tab.active,
+body.ux-module-active.navegacion-fija .drawer-item.active{color:#fff}
+body.ux-module-active.navegacion-fija .tab.active svg{color:#ff965e}
+body.ux-module-active.navegacion-fija .tab-carril{
+  border-radius:12px;background:var(--nav-active);box-shadow:none;
+}
+body.ux-module-active .mobile-bottom{background:var(--card);border:0;box-shadow:0 -7px 20px rgba(20,31,23,.07)}
+body.ux-module-active .mobile-bottom-item.active{background:var(--sec-bg);color:var(--orange-dark)}
+body.identidad-oscura.ux-module-active .mobile-bottom-item.active{color:var(--sec-tx)}
+body.ux-module-active .topbar{box-shadow:none;border-bottom:1px solid var(--border)}
+@media(min-width:720px){
+  body.ux-module-active .topbar{display:none}
+}
+
+/* Título y selector de Bodega: una sola jerarquía, sin barra duplicada. */
+.ux-module-head[hidden],.ux-bodega-tabs[hidden],.ux-module-location[hidden]{display:none!important}
+.ux-module-head{
+  width:min(100%,1640px);margin:0 auto;padding:28px clamp(20px,3vw,46px) 7px;
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:13px;align-items:center;
+}
+.ux-module-heading{min-width:0;display:flex;align-items:baseline;gap:15px;flex-wrap:wrap}
+.ux-module-heading h1{
+  margin:0;color:var(--text);font-size:clamp(29px,3vw,42px);font-weight:760;
+  line-height:1.08;letter-spacing:-.05em;
+}
+.ux-module-location{color:var(--muted);font-size:12px;font-weight:650}
+.ux-theme-toggle{
+  width:42px;height:42px;display:grid;place-items:center;border:0;border-radius:50%;
+  background:var(--card);color:var(--text);box-shadow:var(--sombra);cursor:pointer;
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+.ux-theme-toggle:hover{transform:translateY(-2px);box-shadow:var(--ux-shadow-up)}
+.ux-theme-toggle svg{grid-area:1/1;width:19px;height:19px}
+.ux-theme-toggle .ux-sun,body.identidad-oscura .ux-theme-toggle .ux-moon{display:none}
+body.identidad-oscura .ux-theme-toggle .ux-sun{display:block}
+.ux-bodega-tabs{grid-column:1/-1;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:8px 0 5px}
+.ux-bodega-tabs::-webkit-scrollbar{display:none}
+.ux-bodega-tabs button{
+  flex:0 0 auto;min-height:40px;padding:0 17px;border:0;border-radius:999px;
+  background:var(--card);color:var(--muted);box-shadow:var(--sombra);
+  font:inherit;font-size:13px;font-weight:690;cursor:pointer;transition:background .17s,transform .17s;
+}
+.ux-bodega-tabs button:hover{transform:translateY(-2px)}
+.ux-bodega-tabs button.active{background:var(--text);color:var(--card)}
+.ux-bodega-tabs button[hidden]{display:none}
+
+/* Espaciado y materiales compartidos: controles ligeros, tarjetas sin reborde. */
+body.ux-module-active .wrap{max-width:1640px;padding:16px clamp(20px,3vw,46px) 95px}
+body.ux-module-active .btn{border-radius:12px;font-family:inherit;font-size:14px;font-weight:730}
+body.ux-module-active .btn-orange{background:var(--orange-dark);color:#fff;box-shadow:0 9px 17px -10px rgba(199,72,5,.52)}
+body.ux-module-active .btn-orange:hover{filter:brightness(1.07);transform:translateY(-1px)}
+body.ux-module-active .btn-outline,body.ux-module-active .btn-gris{
+  border:0;background:var(--card);color:var(--text);box-shadow:var(--sombra);
+}
+body.ux-module-active :where(.sec-head,.rep-fila,.cerr-cab,.hist-card,.hrow,.rec-card,.rec-est,.rec-barra,.arqp-tarj,.arqp-tabla,.movcaja-form,.movcaja-fila,.enl-caja,.enl-desde-fila,.enl-pend-fila,.enl-dest){
+  background:var(--card);border:0;border-radius:18px;box-shadow:var(--sombra);
+}
+body.ux-module-active :where(.sec-head,.hist-card,.rec-card,.rec-barra,.arqp-fila,.enl-cand):hover{
+  box-shadow:var(--ux-shadow-up);
+}
+body.ux-module-active :where(.sec-head,.hist-card,.rec-card,.rec-barra,.arqp-fila,.enl-cand){
+  transition:box-shadow .18s ease,transform .18s ease,background .18s ease;
+}
+body.ux-module-active :where(.sec-head,.hist-card,.rec-card,.rec-barra,.enl-cand):active{transform:scale(.993)}
+body.ux-module-active :where(input[type=text],input[type=search],input[type=number],input[type=date],input[type=datetime-local],select,textarea){
+  background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:12px;
+}
+body.ux-module-active :where(input,textarea)::placeholder{color:var(--muted);opacity:.77}
+body.ux-module-active :where(button,input,select,textarea):focus-visible{
+  outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--orange) 30%,transparent),var(--sombra);
+}
+body.ux-module-active .empty{background:var(--card);border-radius:17px;box-shadow:var(--sombra);margin:8px 0}
+
+/* Mesas: se conserva el plano real, las secciones, el tamaño elegido y el panel
+   de al menos 540 px en escritorio. Solo cambian material y jerarquía. */
+#view-lama{
+  --bg:#f6fff8;--text:#202421;--muted:#66746b;--border:#e4ede7;
+  --linea:rgba(32,36,33,.09);--orange:#f35b04;--orange-dark:#c64a08;
+  --navy:#202421;--azul-bg:#eaf4f4;--azul-fg:#376a70;
+  --mesa-ocu-bg:#fff0e7;--mesa-ocu-fg:#99400e;
+  --sombra:0 2px 5px rgba(26,40,30,.035),0 12px 30px -16px rgba(26,40,30,.16);
+}
+body.identidad-oscura #view-lama{
+  --bg:#191e1b;--text:#f4f8f2;--muted:#b5c0b5;--border:#3a453c;
+  --linea:rgba(246,255,248,.1);--orange:#ff762d;--orange-dark:#db5914;
+  --navy:#f4f8f2;--azul-bg:#2b3e3e;--azul-fg:#a2ced0;
+  --mesa-ocu-bg:#412d22;--mesa-ocu-fg:#ffb083;
+  --sombra:0 2px 5px rgba(0,0,0,.12),0 12px 30px -12px rgba(0,0,0,.32);
+}
+#view-lama #lama-arq-banner:not(:empty){margin-bottom:12px}
+#view-lama .lama-plano,#view-lama .lama-panel{background:var(--card);border-radius:23px;box-shadow:var(--sombra);padding:18px;min-width:0}
+#view-lama .lama-panel{align-self:stretch}
+#view-lama .lama-salones button{background:var(--bg);box-shadow:none;color:var(--muted);min-height:37px}
+#view-lama .lama-salones button.on{background:var(--text);color:var(--card)}
+#view-lama .lama-sec{background:var(--bg);color:var(--text)}
+#view-lama .lama-sec-cab{color:var(--muted)}
+#view-lama .lama-mesa{box-shadow:none;position:relative;font-weight:750}
+#view-lama .lama-mesa.libre{background:var(--green-bg);color:var(--green-fg)}
+#view-lama .lama-mesa.ocupada{background:var(--ux-warm);color:var(--sec-tx)}
+#view-lama .lama-mesa.cobrando{background:var(--azul-bg);color:var(--azul-fg)}
+#view-lama .lama-mesa.sel,#view-lama .lama-mesa.viva{
+  background:var(--card);color:var(--text);
+  box-shadow:0 9px 22px rgba(48,40,30,.18);
+  transform:translateY(-3px);
+}
+#view-lama .lama-mesa.sel::before{content:"";position:absolute;top:8px;left:9px;width:6px;height:6px;border-radius:50%;background:var(--orange)}
+#view-lama .lama-caja{box-shadow:none;background:transparent}
+#view-lama .lama-cab,#view-lama .lama-cab.libre,#view-lama .lama-cab.cobrando{
+  background:var(--bg);color:var(--muted);border-radius:16px;
+}
+#view-lama .lama-cab .tit b{font-size:18px}
+#view-lama .lama-cuerpo{padding:18px 2px}
+#view-lama .lama-mesas>.empty{width:100%;box-shadow:none;background:transparent}
+#view-lama .lama-acc .btn{min-height:46px}
+#view-lama .lama-banda{border-radius:14px;background:var(--amber-bg);color:var(--amber-fg)}
+#view-lama .lama-arq-av,#view-lama .lama-arq-pill{border-radius:14px;box-shadow:var(--sombra)}
+
+/* Reparto y las dos tareas de Bodega: una acción visible y filas legibles. */
+#view-reparto #sec-armar .sec-head{box-shadow:inset 4px 0 0 var(--orange),var(--sombra)}
+#view-reparto #sec-armar .sec-body{padding:14px 4px 9px}
+#view-reparto #sec-armar .mas-fab{width:29px;height:29px;box-shadow:none}
+#view-reparto #sec-armar .sec-btn{font-size:17px}
+#view-reparto .rep-fila{padding:15px 17px;gap:10px}
+#view-reparto .rep-bt{border:0;background:var(--bg);color:var(--text);border-radius:11px}
+#view-reparto .rep-bt.si{background:var(--green-bg);color:var(--green-fg)}
+#view-reparto .rep-bt.no{background:var(--red-bg);color:var(--red-fg)}
+#view-reparto .rep-cant{background:var(--bg);border-color:var(--border)}
+#view-reparto .cerr-cab{padding:14px 17px}
+#view-reparto .cerr-body{background:var(--card);border:0;box-shadow:var(--sombra)}
+#view-reparto .sec-btn,#view-repcentral .sec-btn{font-size:15px}
+#view-repcentral .repc-dest button.on{background:var(--text);color:var(--card)}
+#view-repcentral .repc-cajas .sec-head{background:var(--card)}
+#view-repcentral .rf-caja{min-height:0}
+#view-enlaces .enl-cab{background:var(--card);color:var(--text);font-size:13px}
+#view-enlaces .enl-dest.on,#view-enlaces .enl-pend-fila.abierta{
+  border:0;background:var(--ux-warm);box-shadow:var(--ux-shadow-up);
+}
+
+/* Arqueo conserva la distinción fundamental del modo ciego y su detalle. */
+#view-arqueo .arqp-barra h2{display:none}
+#view-arqueo .arqp-tarj{min-height:78px;padding:16px}
+#view-arqueo .arqp-tarj .v{font-size:21px;letter-spacing:-.03em}
+#view-arqueo .arqp-tabla{border-radius:18px}
+#view-arqueo .arqp-fila.arqp-th{background:var(--bg);color:var(--muted)}
+#view-arqueo .arqp-fila.sel{background:var(--sec-bg);box-shadow:var(--ux-shadow-up)}
+#view-arqueo .arqp-der{background:var(--card);box-shadow:var(--sombra)}
+#view-arqueo .arqd{background:var(--card);box-shadow:none}
+#view-arqueo .arqd-cab{background:var(--card);color:var(--text);border-bottom:1px solid var(--border)}
+#view-arqueo .arqd-cab h3{text-transform:none;letter-spacing:-.02em}
+#view-arqueo .arqd-ico{background:var(--bg);color:var(--text)}
+#view-arqueo .arqd-sec{background:var(--bg);color:var(--text);text-transform:none;letter-spacing:0}
+#view-arqueo .arqd-fechas,#view-arqueo .arqd-total{background:var(--bg);color:var(--text)}
+#view-arqueo .arqd-dato-campo input,#view-arqueo .arqd-tr input{background:var(--bg)}
+#view-movcaja .movcaja-form{padding:21px;max-width:790px}
+#view-movcaja .movcaja-form h3{font-size:19px;letter-spacing:-.025em}
+#view-movcaja .movcaja-fila{padding:15px 18px}
+#view-movcaja .movcaja-cerrada{background:var(--amber-bg);color:var(--amber-fg)}
+
+/* Recetas, Historial y Bodega reutilizan exactamente las filas y handlers. */
+#view-recetas .rec-modos{margin-bottom:18px}
+#view-recetas .rec-modo{flex:0 0 auto;min-height:39px;padding:0 17px;border:0;border-radius:999px;box-shadow:var(--sombra)}
+#view-recetas .rec-modo.active{background:var(--text);color:var(--card)}
+#view-recetas #rec-combos>.busca{max-width:720px}
+#view-recetas #rec-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+#view-recetas .rec-card{min-height:128px;margin:0;padding:19px;overflow-wrap:anywhere}
+#view-recetas .rec-card .rn{font-size:16px}
+#view-recetas .rec-est{padding:18px;text-align:left}
+#view-recetas .rec-est .n{font-size:26px}
+#view-recetas .rec-cta{width:auto}
+#view-hist #hist-home{max-width:1080px}
+#view-hist #btnGuardarHoy{width:auto;margin-bottom:8px}
+#view-hist #hist-home>p{max-width:540px;line-height:1.5}
+#view-hist #hist-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+#view-hist .hist-card{display:flex;align-items:flex-start;gap:10px;flex-direction:column;min-height:108px;padding:19px;margin:0;text-align:left}
+#view-hist .hist-card .f{font-size:18px}
+#view-hist #hist-detail>div:first-child{flex-wrap:wrap}
+body.ux-module-active #view-inv:not(.area-workspace-wide) .mcard{background:var(--card);box-shadow:var(--sombra);border-radius:16px}
+body.ux-module-active #view-inv:not(.area-workspace-wide) .sec-head{box-shadow:var(--sombra)}
+body.ux-module-active #view-inv:not(.area-workspace-wide) .sec-head:hover{box-shadow:var(--ux-shadow-up)}
+body.ux-module-active #view-inv:not(.area-workspace-wide) .inv-busca{border:0;border-radius:14px;box-shadow:var(--sombra)}
+body.ux-module-active #view-inv:not(.area-workspace-wide) #list{display:block}
+
+/* Ajustes: índice discreto y panel contextual, sin permisos nuevos. */
+#view-ajustes .aj-volver{background:var(--card);color:var(--text);box-shadow:var(--sombra);border:0}
+#view-ajustes .aj{gap:20px}
+#view-ajustes .aj-rail{background:var(--card);border-radius:20px;box-shadow:var(--sombra);padding:10px}
+#view-ajustes .aj-it{border-radius:12px}
+#view-ajustes .aj-it.on{background:var(--sec-bg);color:var(--text)}
+#view-ajustes .aj-it.on svg{color:var(--orange)}
+#view-ajustes .aj-cab .ico{background:var(--sec-bg);color:var(--orange)}
+#view-ajustes .aj-caja,#view-ajustes .aj-fila,#view-ajustes .aj-par{background:var(--card);border:0;border-radius:18px;box-shadow:var(--sombra)}
+#view-ajustes .aj-atajo,#view-ajustes .aj-dia{background:var(--bg);border-radius:12px}
+#view-ajustes .aj-atajo:hover,#view-ajustes .aj-dia:hover{background:var(--ux-soft)}
+
+/* Mermas: el prototipo no habilita una operación pausada. Solo lectura. */
+#view-mermas .mermas-title{display:none}
+#view-mermas .mermas-head{align-items:center;margin-bottom:17px}
+#view-mermas .mermas-controls{margin-left:auto}
+#view-mermas .mermas-kpis{gap:12px}
+#view-mermas .mermas-kpi,#view-mermas .mermas-panel,#view-mermas #mermas-list{
+  background:var(--card);border:0;border-radius:19px;box-shadow:var(--sombra);
+}
+#view-mermas .mermas-kpi{padding:17px}
+#view-mermas .mermas-kpi-label,#view-mermas .mermas-kpi-note,
+#view-mermas .mermas-cat-label,#view-mermas .mermas-motive-name{color:var(--muted)}
+#view-mermas .mermas-kpi-value{color:var(--text);font-size:25px}
+#view-mermas .mermas-demo{background:var(--amber-bg);color:var(--amber-fg)}
+#view-mermas .mermas-panel h2,#view-mermas .mermas-table-title h2{color:var(--text);font-size:16px}
+#view-mermas .mermas-cat-bar,#view-mermas .mermas-motive-fill{background:var(--orange)}
+#view-mermas .mermas-cat-column:hover .mermas-cat-bar,
+#view-mermas .mermas-cat-column:focus-visible .mermas-cat-bar,
+#view-mermas .mermas-cat-column.is-active .mermas-cat-bar{background:var(--orange-dark)}
+#view-mermas .mermas-cat-value,#view-mermas .mermas-motive-value,
+#view-mermas .mermas-motive-value strong,#view-mermas .mermas-table .mermas-qty{color:var(--text)}
+#view-mermas .mermas-tooltip{background:var(--card);border:0;color:var(--text);box-shadow:var(--ux-shadow-up)}
+#view-mermas .mermas-tooltip strong{color:var(--text)}
+#view-mermas .mermas-motive-track{background:var(--bg)}
+#view-mermas .mermas-table th{background:var(--bg);color:var(--muted)}
+#view-mermas .mermas-table td{color:var(--text);border-color:var(--border)}
+#view-mermas .mermas-table tbody tr:hover{background:var(--bg)}
+#view-mermas .mermas-reason{background:var(--ux-soft);color:var(--text)}
+#view-mermas .mermas-page button{background:var(--card);color:var(--text);border:0;box-shadow:var(--sombra)}
+
+/* Ventanas existentes: en móvil son hojas inferiores con acción al alcance.
+   Se evita cambiar sus IDs, formularios y handlers de confirmación. */
+.overlay:not(.login-qr-overlay){background:rgba(17,24,18,.47)}
+.overlay:not(.login-qr-overlay) .modal{
+  background:var(--card);color:var(--text);border:0;border-radius:22px;
+  box-shadow:0 24px 70px rgba(11,25,14,.22);
+}
+.overlay:not(.login-qr-overlay) .modal h2{color:var(--text);font-weight:750;letter-spacing:-.025em}
+.overlay:not(.login-qr-overlay) .modal .mr{border-color:var(--border);line-height:1.45}
+.overlay:not(.login-qr-overlay) .modal :where(input,select,textarea){
+  background:var(--bg);color:var(--text);border-color:var(--border);
+}
+.overlay:not(.login-qr-overlay) .modal :where(.mbtns,.adm-pie){
+  position:sticky;bottom:-20px;z-index:2;background:var(--card);padding:12px 0 1px;
+}
+.overlay:not(.login-qr-overlay) .modal .btn-outline{border:0;background:var(--bg);color:var(--text)}
+.overlay:not(.login-qr-overlay) .modal .btn-orange{background:var(--orange-dark);color:#fff}
+.overlay:not(.login-qr-overlay) .modal .adm-x{background:var(--bg);color:var(--text)}
+
+@media(max-width:1079px){
+  body.ux-module-active.navegacion-fija .tab:hover,
+  body.ux-module-active.navegacion-fija .drawer-item:hover{transform:none}
+}
+@media(max-width:719px){
+  .ux-module-head{padding:17px 16px 3px;gap:8px}
+  .ux-module-heading h1{font-size:29px}
+  .ux-module-location{font-size:11px}
+  .ux-theme-toggle{width:40px;height:40px}
+  .ux-bodega-tabs{padding:8px 0 6px;gap:5px}
+  .ux-bodega-tabs button{min-height:37px;padding:0 13px;font-size:12px}
+  body.ux-module-active .wrap{padding:12px 16px calc(92px + env(safe-area-inset-bottom))}
+  body.ux-module-active #view-arqueo{padding-right:16px;padding-left:16px}
+  #view-lama .lama-plano{padding:9px 6px}
+  #view-lama .lama-panel{padding:9px}
+  #view-lama .lama-cuerpo{padding:12px 3px}
+  #view-lama .lama-fab{bottom:calc(78px + env(safe-area-inset-bottom))}
+  #view-recetas #rec-list,#view-hist #hist-list{grid-template-columns:1fr}
+  #view-movcaja .movcaja-form{padding:16px}
+  #view-mermas .mermas-controls{margin-left:0;width:100%}
+  #view-mermas .mermas-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  #view-mermas .mermas-kpi{padding:13px}
+  #view-mermas .mermas-kpi-value{font-size:22px}
+  #view-ajustes .aj{gap:11px}
+  #view-ajustes .aj-rail{border-radius:14px;padding:7px}
+  .overlay:not(.login-qr-overlay){align-items:flex-end;padding:0}
+  .overlay:not(.login-qr-overlay) .modal{
+    width:100%;max-width:100%;max-height:min(88dvh,920px);
+    padding:22px 18px calc(18px + env(safe-area-inset-bottom));
+    border-radius:24px 24px 0 0;
+  }
+  .overlay:not(.login-qr-overlay) .modal::before{
+    content:"";display:block;width:38px;height:4px;margin:-8px auto 15px;
+    border-radius:99px;background:var(--border);
+  }
+  .overlay:not(.login-qr-overlay) .modal :where(.mbtns,.adm-pie){bottom:calc(-18px - env(safe-area-inset-bottom));padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+}
+@media(prefers-reduced-motion:reduce){
+  .ux-theme-toggle,.ux-bodega-tabs button,body.ux-module-active :where(button,.sec-head,.hist-card,.rec-card){transition:none!important}
+}

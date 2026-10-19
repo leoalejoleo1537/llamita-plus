@@ -32,7 +32,7 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="vendor/qrcode-generator/qrcode.js"></script>
 <script src="vendor/qrcode-generator/qrcode_UTF8.js"></script>
-<script>try{const p=localStorage.getItem('llamita_paleta');if(['grafito','cian','marino','esmeralda','violeta','arena'].includes(p))document.documentElement.dataset.paleta=p;}catch{}</script>
+<script>try{const p=localStorage.getItem('llamita_paleta');document.documentElement.dataset.paleta=['lapiz','grafito','cian','marino','esmeralda','violeta','arena'].includes(p)?p:'lapiz';}catch{document.documentElement.dataset.paleta='lapiz';}</script>
 <style>
   /* Los colores se centralizan en themes.css; aquí quedan las medidas base. */
   :root{--riel:260px;--r-card:20px;--r-sec:18px}
@@ -3032,6 +3032,7 @@
 <link rel="stylesheet" href="themes.css">
 <link rel="stylesheet" href="area-selection.css">
 <link rel="stylesheet" href="area-workspace.css">
+<link rel="stylesheet" href="identity-modules.css">
 </head>
 <body>
 
@@ -3240,6 +3241,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 3a9 9 0 0 0 0 18h2a2 2 0 0 0 2-2c0-.9-.5-1.3-.5-2.1a2 2 0 0 1 2-2H20"></path><circle cx="7.5" cy="10" r="1"></circle><circle cx="10" cy="6.8" r="1"></circle><circle cx="16" cy="7.5" r="1"></circle></svg><span class="nav-label">Apariencia</span></button>
     <div class="paleta-popover" id="paleta-popover" hidden aria-label="Elegir paleta">
       <div class="paleta-titulo">Paleta de color</div>
+      <button type="button" class="paleta-opcion" data-paleta="lapiz"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>Lápiz y papel</button>
       <button type="button" class="paleta-opcion" data-paleta="grafito"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>Grafito y azul eléctrico</button>
       <button type="button" class="paleta-opcion" data-paleta="cian"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>Pizarra y cian</button>
       <button type="button" class="paleta-opcion" data-paleta="marino"><span class="paleta-muestra" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>Azul marino ejecutivo</button>
@@ -3263,6 +3265,21 @@
   <span id="motorAvisoTxt"></span>
   <span class="cuando" id="motorAvisoCuando"></span>
 </div>
+
+<!-- Cabecera visual compartida; cada botón reutiliza una pestaña existente. -->
+<header class="ux-module-head" id="uxModuleHead" hidden>
+  <div class="ux-module-heading"><h1 id="uxModuleTitle">—</h1><span class="ux-module-location" id="uxModuleLocation"></span></div>
+  <button type="button" class="ux-theme-toggle" id="uxThemeToggle" aria-label="Activar modo oscuro" aria-pressed="false" title="Cambiar modo claro u oscuro">
+    <svg class="ux-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.5 16.8A8.5 8.5 0 0 1 7.2 4.5 8.5 8.5 0 1 0 19.5 16.8Z"/><path d="M18 4.5v4m-2-2h4"/></svg>
+    <svg class="ux-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.5 1.5m11.2 11.2 1.5 1.5m0-14.2-1.5 1.5M6.4 17.6l-1.5 1.5"/></svg>
+  </button>
+  <nav class="ux-bodega-tabs" id="uxBodegaTabs" aria-label="Secciones de Bodega" hidden>
+    <button type="button" data-ux-tab="inv">Stock</button>
+    <button type="button" data-ux-tab="recepcion">Recibir</button>
+    <button type="button" data-ux-tab="envios">Enviar</button>
+    <button type="button" data-ux-tab="enlaces">Enlaces</button>
+  </nav>
+</header>
 
 <!-- ================= MENÚ LATERAL ================= -->
 
@@ -3829,13 +3846,11 @@
      pregunta personas, cliente, garzón y un comentario de mesa. Ninguna se
      mira después. Acá abrir una mesa es UN toque. -->
 <div class="wrap" id="view-lama" style="display:none">
+  <!-- El estado de caja ocupa todo el ancho; en teléfono el plano es un riel
+       estrecho y allí el aviso y su botón quedaban ilegibles. -->
+  <div id="lama-arq-banner"></div>
   <div class="lama">
     <div class="lama-plano">
-      <!-- F6 · el aviso de la caja del turno (§0.7, la maqueta aprobada el
-           2026-09-21). Va ANTES de los salones: es lo primero que hay que
-           saber al entrar a Mesas, en las dos direcciones — "no está
-           abierta" y "está abierta, tocá para ver el turno". -->
-      <div id="lama-arq-banner"></div>
       <div class="lama-salones" id="lama-salones"></div>
       <!-- ACÁ ESTABA LA TUERCA DEL TAMAÑO DE LAS MESAS, y se mudó el
            2026-09-04 a Ajustes -> Mesas. El área de ventas es para vender:
@@ -4227,6 +4242,7 @@ function aparienciaPortada(activa){
   }
   document.body.classList.toggle('area-portada-activa',activa);
   document.body.classList.toggle('area-portada-oscura',activa&&areaPortadaTema==='dark');
+  document.body.classList.toggle('identidad-oscura',areaPortadaTema==='dark');
   document.body.classList.toggle('area-workspace-active',!!espacioArea);
 }
 let filterState = null;
@@ -5237,7 +5253,7 @@ function cerrarPaleta(){
   $('paleta-trigger').setAttribute('aria-expanded','false');
 }
 function marcarPaleta(){
-  const actual=document.documentElement.dataset.paleta || 'grafito';
+  const actual=document.documentElement.dataset.paleta || 'lapiz';
   document.querySelectorAll('.paleta-opcion').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.paleta===actual)));
 }
 $('paleta-trigger').addEventListener('click',()=>{
@@ -5383,6 +5399,41 @@ function cerrarDetalle(){
 /* El buscador de cada vista queda SIEMPRE visible: esconderlo tras una lupa
    sumaba toques y en una pantalla tan blanca ni se notaba que había aparecido. */
 let vistaActual = 'inv';
+const UX_TITULOS={lama:'Mesas',arqueo:'Arqueo',movcaja:'Movimientos de caja',reparto:'Reparto',hist:'Historial',recetas:'Recetas',mermas:'Mermas',ajustes:'Ajustes'};
+function sincronizarIdentidadUI(){
+  const bodega=SEDE==='central'&&['inv','recepcion','envios','enlaces'].includes(vistaActual);
+  const titulo=bodega?'Bodega':UX_TITULOS[vistaActual];
+  const visible=!!SEDE&&!!titulo;
+  $('uxModuleHead').hidden=!visible;
+  document.body.classList.toggle('ux-module-active',visible);
+  document.body.classList.toggle('identidad-oscura',areaPortadaTema==='dark');
+  if(!visible)return;
+  $('uxModuleTitle').textContent=titulo;
+  $('uxModuleLocation').textContent=bodega?'':etiquetaSedeUI(SEDE);
+  $('uxModuleLocation').hidden=bodega;
+  const oscuro=areaPortadaTema==='dark',toggle=$('uxThemeToggle');
+  toggle.setAttribute('aria-pressed',String(oscuro));
+  toggle.setAttribute('aria-label',oscuro?'Activar modo claro':'Activar modo oscuro');
+  $('uxBodegaTabs').hidden=!bodega;
+  if(bodega) $('uxBodegaTabs').querySelectorAll('[data-ux-tab]').forEach(b=>{
+    const ruta=b.dataset.uxTab,original=document.querySelector(`.tab[data-tab="${ruta}"]`);
+    b.hidden=!original||original.style.display==='none';
+    b.classList.toggle('active',ruta===vistaActual);
+    if(ruta===vistaActual)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
+  });
+}
+$('uxThemeToggle').addEventListener('click',()=>{
+  areaPortadaTema=areaPortadaTema==='dark'?'light':'dark';
+  try{localStorage.setItem('llamita_areas_tema',areaPortadaTema);}catch(_){}
+  aparienciaPortada(vistaActual==='inv'&&SEDE==='plaza');
+  sincronizarIdentidadUI();
+  $('uxThemeToggle').focus({preventScroll:true});
+});
+$('uxBodegaTabs').addEventListener('click',e=>{
+  const b=e.target.closest('[data-ux-tab]');if(!b||b.hidden||SEDE!=='central')return;
+  const original=document.querySelector(`.tab[data-tab="${b.dataset.uxTab}"]`);
+  if(original&&original.style.display!=='none')original.click();
+});
 
 /* ---------------- selección de sede ---------------- */
 function pickSede(s){
@@ -5476,11 +5527,13 @@ function pickSede(s){
   loadRepartos();
   revisarMotor();          // si el motor está caído, se ve al entrar
   subscribeRealtime();
+  sincronizarIdentidadUI();
   if(presChannel){ try{ presChannel.track({nombre:NOMBRE, sede:SEDE}); }catch(e){} }  // avisa en qué sede estoy
 }
 function showGate(){
   if(channel){ sb.removeChannel(channel); channel=null; }
   SEDE=null;
+  sincronizarIdentidadUI();
   $('gate').classList.remove('hidden');
   $('liveText').textContent='—';
   cargarRegistroSedes();
@@ -18022,6 +18075,7 @@ function pickTab(tab){
     loadRecetas();
   }
   sincronizarNavegacionMovil();
+  sincronizarIdentidadUI();
 }
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
   cerrarMenu();
@@ -19187,6 +19241,68 @@ function subscribeRealtime(){
       }
     });
 }
+
+/* Escape y clic fuera invocan los cierres existentes: nunca ocultan una ventana
+   saltándose la limpieza de formularios ni una confirmación comercial. */
+const UX_CIERRES_MODAL={
+  'overlay-admin':'adm-cerrar','overlay-fudo':'fudo-cancelar',
+  'overlay-empuje':'empuje-cerrar','overlay-fperm':'fperm-x',
+  'overlay-ask':'ask-no','overlay-buscar':'bus-cancelar',
+  'overlay-recibir':'rec-cancelar','overlay-receta':'receta-cancelar',
+  'overlay':'m-cancelar','overlay-nuevo':'n-cancelar',
+  'overlay-area-producto':'area-producto-cancelar'
+};
+const UX_RETORNO_FOCO=new WeakMap();
+const uxFocosDialogo=ov=>[...ov.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')]
+  .filter(el=>el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden');
+for(const [id,cierre] of Object.entries(UX_CIERRES_MODAL)){
+  const ov=$(id),modal=ov?.querySelector('.modal');
+  if(!modal)continue;
+  modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');
+  const titulo=modal.querySelector('h2');
+  if(titulo){if(!titulo.id)titulo.id=`${id}-titulo`;modal.setAttribute('aria-labelledby',titulo.id);}
+  new MutationObserver(()=>{
+    if(ov.classList.contains('open')){
+      if(!ov.contains(document.activeElement))UX_RETORNO_FOCO.set(ov,document.activeElement);
+      requestAnimationFrame(()=>{
+        if(ov.classList.contains('open')&&!ov.contains(document.activeElement))
+          (($(cierre)?.getClientRects().length&&$(cierre))||uxFocosDialogo(ov)[0])?.focus({preventScroll:true});
+      });
+    }else{
+      const anterior=UX_RETORNO_FOCO.get(ov);
+      if(anterior?.isConnected&&anterior.getClientRects().length)anterior.focus({preventScroll:true});
+      UX_RETORNO_FOCO.delete(ov);
+    }
+  }).observe(ov,{attributes:true,attributeFilter:['class']});
+}
+function uxCerrarModal(overlay){
+  const boton=UX_CIERRES_MODAL[overlay?.id];
+  if(!boton)return false;
+  $(boton)?.click();
+  return true;
+}
+document.addEventListener('click',e=>{
+  if(e.target.matches?.('.overlay.open'))uxCerrarModal(e.target);
+});
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape'||AREA_SECCION_PANEL_ABIERTO)return;
+  const abiertas=[...document.querySelectorAll('.overlay.open')];
+  if(!abiertas.length)return;
+  abiertas.sort((a,b)=>(Number.parseInt(getComputedStyle(a).zIndex,10)||0)-(Number.parseInt(getComputedStyle(b).zIndex,10)||0));
+  if(uxCerrarModal(abiertas.at(-1)))e.preventDefault();
+},true);
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Tab')return;
+  const abiertas=[...document.querySelectorAll('.overlay.open')].filter(ov=>UX_CIERRES_MODAL[ov.id]);
+  if(!abiertas.length)return;
+  abiertas.sort((a,b)=>(Number.parseInt(getComputedStyle(a).zIndex,10)||0)-(Number.parseInt(getComputedStyle(b).zIndex,10)||0));
+  const ov=abiertas.at(-1),focos=uxFocosDialogo(ov);
+  if(!focos.length)return;
+  const actual=document.activeElement,i=focos.indexOf(actual);
+  if(i<0||(!e.shiftKey&&i===focos.length-1)||(e.shiftKey&&i===0)){
+    e.preventDefault();(e.shiftKey?focos.at(-1):focos[0]).focus();
+  }
+},true);
 
 /* al abrir: primero inicio de sesión (o sesión guardada); luego se elige sede */
 initAuth();
