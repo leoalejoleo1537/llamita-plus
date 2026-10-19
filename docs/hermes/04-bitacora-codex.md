@@ -7,7 +7,7 @@
 - Se retiraron del lateral el selector/botón de Apariencia, el bloque de presencia “En línea” y los nombres de usuario. Se conserva el botón de cierre de sesión. La barra inferior y la navegación existente se mantienen.
 - La visibilidad sigue respetando exactamente los permisos de cuenta y las rutas de cada sede: por ejemplo, Mesas, Arqueo y Movimientos siguen sujetos a `puede_lama`; Recetas no aparece en Bodega. No se amplió acceso ni se cambiaron reglas comerciales.
 - Verificación Chromium: `pruebas/movil-navegacion.mjs` prueba apertura desde teléfono de cada ruta permitida, ancho máximo del cajón, permisos, Bodega, navegación inferior y riel de 208 px. `pruebas/identidad-modulos.mjs` compara el ancho en Inventario y todos los módulos y comprueba ventanas, oscuro y ausencia de desbordes en 390×844 y 1440×900.
-- Publicación de esta entrega: pendiente.
+- Publicado en `origin/master` como `a5cd01ce49eda188136849c3414fafa2e84bf9e2`; Vercel confirmó producción `READY` con ese SHA y alias `llamita-plus.vercel.app`.
 
 ## 2026-10-19 — Mesas v2: plano a ancho completo y ficha inferior en teléfono
 
