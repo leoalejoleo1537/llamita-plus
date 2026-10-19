@@ -78,6 +78,31 @@ for(const [ruta,titulo] of Object.entries({
     `${ruta}: riel conserva el mismo ancho que Inventario`);
   if(capturas)await page.screenshot({path:join(capturas,`${ruta}-escritorio.png`)});
 }
+await page.evaluate(()=>pickTab('movcaja'));
+await page.waitForTimeout(180);
+await page.evaluate(()=>{
+  LAMA_ARQ={id:901,sede:'plaza',estado:'abierta',abierto_at:new Date().toISOString()};
+  MOVCAJA_LISTA=[{id:1,tipo:'egreso',monto:12500,nota:'Compra de hielo',creado_por:'Prueba',created_at:new Date().toISOString()}];
+  movCajaPintarForm();movCajaPintarLista();
+});
+await verificar(()=>page.evaluate(()=>!!document.querySelector('[data-movcaja="nuevo"]')&&
+  document.querySelector('#view-movcaja .movcaja-lista-head')?.textContent.includes('Historial')),
+  'Movimientos muestra una acción permanente y el historial rediseñado');
+await page.click('[data-movcaja="nuevo"]');
+await verificar(()=>page.evaluate(()=>document.querySelector('#movcaja-overlay [role="dialog"]')?.getAttribute('aria-modal')==='true'&&
+  document.activeElement?.id==='movcaja-monto'),'Nuevo movimiento abre el formulario y lleva el foco al monto');
+await verificar(()=>page.evaluate(()=>['egreso','ingreso'].every(tipo=>
+  !!document.querySelector(`[data-movcaja-tipo="${tipo}"]`))),'el formulario conserva ingreso y egreso');
+if(capturas)await page.screenshot({path:join(capturas,'movimientos-modal-escritorio.png')});
+await page.click('#movcaja-overlay .movcaja-x');
+await verificar(()=>page.evaluate(()=>!document.getElementById('movcaja-overlay')),
+  'Cancelar cierra sin escribir un movimiento');
+await verificar(()=>page.evaluate(()=>{
+  const s=document.createElement('span');s.className='repc-bod';s.textContent='bodega: 8';
+  const caja=document.createElement('div');caja.style.background='var(--card)';caja.append(s);document.body.append(caja);
+  const color=getComputedStyle(s).color,fondo=getComputedStyle(caja).backgroundColor;
+  caja.remove();return color!==fondo&&color==='rgb(153, 64, 14)';
+}),'el texto de stock de Bodega usa tinta legible, no el color del fondo');
 await page.evaluate(()=>pickTab('lama'));
 await verificar(()=>page.evaluate(()=>{
   const lateral=getComputedStyle(document.querySelector('.tabs'));
@@ -147,6 +172,23 @@ for(const ruta of ['lama','arqueo','movcaja','reparto','recetas','hist','mermas'
     `${ruta}: sin desborde horizontal en teléfono`);
   if(capturas)await page.screenshot({path:join(capturas,`${ruta}-telefono.png`)});
 }
+await page.evaluate(()=>pickTab('movcaja'));
+await page.waitForTimeout(180);
+await page.evaluate(()=>{
+  LAMA_ARQ={id:902,sede:'plaza',estado:'abierta',abierto_at:new Date().toISOString()};
+  movCajaPintarForm();movCajaPintarLista();
+});
+await page.click('[data-movcaja="nuevo"]');
+await page.waitForTimeout(240);
+await verificar(()=>page.evaluate(()=>{
+  const dialog=document.querySelector('#movcaja-overlay .movcaja-dialog');
+  return !!dialog&&Math.abs(dialog.getBoundingClientRect().bottom-innerHeight)<1&&
+    document.documentElement.scrollWidth<=innerWidth+2;
+}),'Nuevo movimiento es una hoja inferior sin desborde en teléfono');
+if(capturas)await page.screenshot({path:join(capturas,'movimientos-modal-telefono.png')});
+await page.keyboard.press('Escape');
+await verificar(()=>page.evaluate(()=>!document.getElementById('movcaja-overlay')),
+  'Escape cierra Nuevo movimiento sin guardar');
 await page.evaluate(()=>pickTab('arqueo'));
 await page.locator('#view-arqueo [data-arqp="nuevo"]').first().click();
 await verificar(()=>page.evaluate(()=>!!document.querySelector('#arqd-monto')),
@@ -176,6 +218,8 @@ await verificar(()=>page.evaluate(()=>document.activeElement?.id==='btnNuevaRece
 await page.evaluate(()=>pickTab('reparto'));
 await verificar(()=>page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),
   'Reparto sin desborde horizontal en teléfono');
+await verificar(()=>page.evaluate(()=>!renderRepartoResults.toString().includes('tl-pista')),
+  'buscar en Reparto no agrega el texto auxiliar encima de los resultados');
 await page.evaluate(()=>{preguntar('¿Continuar?','Prueba visual','Sí').then(v=>window.__uxRespuesta=v);});
 await verificar(()=>page.evaluate(()=>document.getElementById('overlay-ask').classList.contains('open') &&
   getComputedStyle(document.getElementById('overlay-ask')).alignItems==='flex-end'),

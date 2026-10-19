@@ -216,10 +216,61 @@ body.identidad-oscura #view-lama{
 #view-arqueo .arqd-sec{background:var(--bg);color:var(--text);text-transform:none;letter-spacing:0}
 #view-arqueo .arqd-fechas,#view-arqueo .arqd-total{background:var(--bg);color:var(--text)}
 #view-arqueo .arqd-dato-campo input,#view-arqueo .arqd-tr input{background:var(--bg)}
-#view-movcaja .movcaja-form{padding:21px;max-width:790px}
-#view-movcaja .movcaja-form h3{font-size:19px;letter-spacing:-.025em}
-#view-movcaja .movcaja-fila{padding:15px 18px}
-#view-movcaja .movcaja-cerrada{background:var(--amber-bg);color:var(--amber-fg)}
+#view-movcaja{max-width:1120px}
+#view-movcaja .movcaja-barra{display:flex;align-items:center;justify-content:space-between;gap:16px;
+  margin-bottom:18px;padding:15px 17px;background:var(--card);border-radius:18px;box-shadow:var(--sombra)}
+#view-movcaja .movcaja-estado{display:flex;align-items:center;gap:11px;min-width:0;color:var(--text)}
+#view-movcaja .movcaja-estado>span{width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:var(--green)}
+#view-movcaja .movcaja-estado b{display:block;font-size:14px}
+#view-movcaja .movcaja-estado small{display:block;margin-top:2px;color:var(--muted);font-size:12px}
+#view-movcaja .movcaja-nuevo{min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  padding:0 17px;border:0;border-radius:999px;background:var(--orange);color:#fff;font:inherit;font-size:14px;font-weight:750;
+  cursor:pointer;box-shadow:0 11px 22px -13px rgba(243,91,4,.72);transition:transform .18s ease,box-shadow .18s ease}
+#view-movcaja .movcaja-nuevo:hover{transform:translateY(-2px);box-shadow:0 14px 25px -12px rgba(243,91,4,.62)}
+#view-movcaja .movcaja-nuevo:active{transform:scale(.97)}
+#view-movcaja .movcaja-nuevo svg{width:18px;height:18px}
+#view-movcaja .movcaja-historial{padding:20px;background:var(--card);border-radius:22px;box-shadow:var(--sombra)}
+#view-movcaja .movcaja-lista-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:13px}
+#view-movcaja .movcaja-lista-head h2{margin:0;color:var(--text);font-size:19px;letter-spacing:-.025em}
+#view-movcaja .movcaja-lista-head span{color:var(--muted);font-size:12px;font-weight:650}
+#view-movcaja .movcaja-filas{overflow:hidden;border-radius:15px;background:var(--bg)}
+#view-movcaja .movcaja-fila{min-height:68px;margin:0;padding:12px 15px;background:transparent;border-radius:0;box-shadow:none}
+#view-movcaja .movcaja-fila+.movcaja-fila{border-top:1px solid var(--linea)}
+#view-movcaja .movcaja-signo{width:34px;height:34px;display:grid;place-items:center;flex:0 0 34px;border-radius:50%;
+  font-size:18px;font-weight:780;background:var(--red-bg);color:var(--red-fg)}
+#view-movcaja .movcaja-signo.ingreso{background:var(--green-bg);color:var(--green-fg)}
+#view-movcaja .movcaja-vacio{min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:13px;color:var(--muted);font-size:13px}
+#view-movcaja .movcaja-vacio svg{width:74px;height:74px;opacity:.44}
+#view-movcaja .movcaja-cerrada{display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:15px 17px;border-radius:17px;background:var(--amber-bg);color:var(--amber-fg);box-shadow:none}
+#view-movcaja .movcaja-cerrada .btn{flex:0 0 auto;min-height:40px;height:40px;background:color-mix(in srgb,var(--amber-bg) 76%,var(--card));color:var(--amber-fg);box-shadow:none}
+
+#view-movcaja .movcaja-overlay{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:24px}
+#view-movcaja .movcaja-scrim{position:absolute;inset:0;border:0;background:rgba(20,28,23,.38);backdrop-filter:blur(5px);cursor:default}
+#view-movcaja .movcaja-dialog{position:relative;z-index:1;width:min(100%,525px);padding:26px;border-radius:25px;
+  background:var(--card);color:var(--text);box-shadow:0 28px 70px rgba(20,28,23,.25);animation:movcaja-entra .2s cubic-bezier(.2,.8,.2,1) both}
+#view-movcaja .movcaja-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+#view-movcaja .movcaja-dialog-head h2{margin:0;font-size:25px;letter-spacing:-.035em}
+#view-movcaja .movcaja-x{width:40px;height:40px;border:0;border-radius:50%;background:var(--bg);color:var(--muted);
+  font:inherit;font-size:24px;line-height:1;cursor:pointer}
+#view-movcaja .movcaja-campo{display:block;margin:0 0 17px}
+#view-movcaja .movcaja-label{display:block;margin:0 0 7px;color:var(--muted);font-size:13px;font-weight:700}
+#view-movcaja .movcaja-campo>input{width:100%;height:54px;padding:0 15px;font-size:16px}
+#view-movcaja .movcaja-tipos{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:4px;border-radius:14px;background:var(--bg)}
+#view-movcaja .movcaja-tipos button{min-height:44px;border:0;border-radius:11px;background:transparent;color:var(--muted);
+  font:inherit;font-size:14px;font-weight:730;cursor:pointer;transition:background .16s,color .16s,box-shadow .16s}
+#view-movcaja .movcaja-tipos button.on{background:var(--card);color:var(--text);box-shadow:var(--sombra)}
+#view-movcaja .movcaja-monto{height:58px;display:flex;align-items:center;gap:8px;padding:0 16px;border:1px solid var(--border);
+  border-radius:14px;background:var(--card);color:var(--muted);font-size:23px;font-weight:730}
+#view-movcaja .movcaja-monto:focus-within{box-shadow:0 0 0 3px color-mix(in srgb,var(--orange) 30%,transparent);border-color:transparent}
+#view-movcaja .movcaja-monto input{min-width:0;width:100%;height:100%;padding:0;border:0;outline:0;background:transparent;
+  color:var(--text);font:inherit;font-size:22px;font-weight:760}
+#view-movcaja .movcaja-monto input:focus-visible{outline:0;box-shadow:none}
+#view-movcaja .movcaja-acciones{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:25px}
+#view-movcaja .movcaja-acciones .btn{width:100%;height:54px;border-radius:13px}
+body.identidad-oscura #view-movcaja .movcaja-scrim{background:rgba(0,0,0,.58)}
+@keyframes movcaja-entra{from{opacity:.55;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
 
 /* Recetas, Historial y Bodega reutilizan exactamente las filas y handlers. */
 #view-recetas .rec-modos{margin-bottom:18px}
@@ -323,7 +374,23 @@ body.ux-module-active #view-inv:not(.area-workspace-wide) #list{display:block}
   #view-lama .lama-cuerpo{padding:12px 3px}
   #view-lama .lama-fab{bottom:calc(78px + env(safe-area-inset-bottom))}
   #view-recetas #rec-list,#view-hist #hist-list{grid-template-columns:1fr}
-  #view-movcaja .movcaja-form{padding:16px}
+  #view-movcaja .movcaja-barra{padding:13px 14px;margin-bottom:12px}
+  #view-movcaja .movcaja-estado small{display:none}
+  #view-movcaja .movcaja-nuevo{width:44px;height:44px;min-height:44px;padding:0;border-radius:50%}
+  #view-movcaja .movcaja-nuevo span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+  #view-movcaja .movcaja-historial{padding:15px 12px;border-radius:19px}
+  #view-movcaja .movcaja-fila{padding:11px 9px;gap:9px}
+  #view-movcaja .movcaja-fila .v{font-size:14px}
+  #view-movcaja .movcaja-cerrada{align-items:flex-start;flex-direction:column}
+  #view-movcaja .movcaja-overlay{align-items:end;padding:0}
+  #view-movcaja .movcaja-dialog{width:100%;max-height:88dvh;overflow-y:auto;padding:22px 18px calc(18px + env(safe-area-inset-bottom));
+    border-radius:25px 25px 0 0;animation-name:movcaja-entra-movil}
+  #view-movcaja .movcaja-dialog::before{content:"";display:block;width:38px;height:4px;margin:-9px auto 15px;
+    border-radius:99px;background:var(--border)}
+  #view-movcaja .movcaja-dialog-head{margin-bottom:17px}
+  #view-movcaja .movcaja-dialog-head h2{font-size:22px}
+  #view-movcaja .movcaja-acciones{position:sticky;bottom:calc(-18px - env(safe-area-inset-bottom));
+    margin:22px -2px 0;padding:12px 2px calc(2px + env(safe-area-inset-bottom));background:var(--card)}
   #view-mermas .mermas-controls{margin-left:0;width:100%}
   #view-mermas .mermas-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
   #view-mermas .mermas-kpi{padding:13px}
@@ -342,6 +409,7 @@ body.ux-module-active #view-inv:not(.area-workspace-wide) #list{display:block}
   }
   .overlay:not(.login-qr-overlay) .modal :where(.mbtns,.adm-pie){bottom:calc(-18px - env(safe-area-inset-bottom));padding-bottom:calc(10px + env(safe-area-inset-bottom))}
 }
+@keyframes movcaja-entra-movil{from{opacity:.7;transform:translateY(22px)}to{opacity:1;transform:none}}
 
 /* Mesas v2: el plano móvil conserva todo el ancho y el detalle sube como
    hoja inferior al elegir mesa. Las páginas, secciones y handlers existentes
@@ -401,6 +469,7 @@ body.ux-module-active #view-inv:not(.area-workspace-wide) #list{display:block}
   #view-lama .lama-sec{padding:7px 5px}
 }
 @media(prefers-reduced-motion:reduce){
+  #view-movcaja .movcaja-dialog,#view-movcaja .movcaja-nuevo{animation:none;transition:none}
   #view-lama .lama-mesa{transition:none}
   #view-lama .lama.con-panel #lama-panel{animation:none}
 }

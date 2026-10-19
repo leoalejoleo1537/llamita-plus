@@ -842,7 +842,7 @@
   .dual button[data-a="proveedor"].on{background:var(--amber-bg);color:var(--amber-fg)}
   .cart-nolace{flex:0 0 auto;font-size:11px;font-weight:800;color:var(--red-fg);
     background:var(--red-bg);border-radius:999px;padding:4px 9px}
-  .repc-bod{display:block;font-size:11.5px;font-weight:700;margin-top:2px;color:var(--sec-bg)}
+  .repc-bod{display:block;font-size:11.5px;font-weight:700;margin-top:2px;color:var(--sec-tx)}
   .repc-bod.poco{color:var(--amber-fg)}
   .repc-bod.nada{color:var(--red-fg)}
 
@@ -865,7 +865,7 @@
              border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--gray-fg)}
   .repc-cab2 .cn2{color:var(--red-fg);font-weight:800}
   .repc-cab2 .lupa{margin-left:auto;border:none;background:none;font:inherit;font-size:12px;
-                   font-weight:700;color:var(--sec-bg);cursor:pointer;padding:2px 4px}
+                   font-weight:700;color:var(--sec-tx);cursor:pointer;padding:2px 4px}
   .repc-vacia{font-size:13.5px;color:var(--muted);padding:14px 4px;text-align:center}
   .repc-tot{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:9px;
             border-top:1px solid var(--border);font-size:13px;font-weight:700}
@@ -878,7 +878,7 @@
      nunca es la única puerta. */
   .enl-manual{margin-top:9px;padding-top:9px;border-top:1px dashed var(--border)}
   .enl-manual-toggle{border:none;background:none;font:inherit;font-size:13px;font-weight:700;
-                     color:var(--sec-bg);cursor:pointer;padding:4px 2px}
+                     color:var(--sec-tx);cursor:pointer;padding:4px 2px}
   .enl-manual-busca{margin-top:8px}
   .enl-manual-busca input{width:100%;height:40px;padding:0 12px;border:1px solid var(--border);
        border-radius:9px;font-size:14px;background:var(--card);color:var(--text);font-family:inherit}
@@ -8459,6 +8459,8 @@ function arqPagEngancharUnaVez(){
    ================================================================ */
 let MOVCAJA_LISTA = [];
 let MOVCAJA_NUEVO = {tipo:'egreso', monto:'', nota:''};
+let MOVCAJA_FORM_ABIERTO = false;
+let MOVCAJA_ULTIMO_FOCO = null;
 
 async function movCajaCargar(){
   const form = $('movcaja-form'), lista = $('movcaja-lista');
@@ -8482,42 +8484,72 @@ async function movCajaCargar(){
 function movCajaPintarForm(){
   const cont = $('movcaja-form'); if(!cont) return;
   if(!LAMA_ARQ){
+    MOVCAJA_FORM_ABIERTO = false;
     cont.innerHTML = `<div class="movcaja-cerrada">
-      <span>No hay una caja abierta en esta sede — abrila desde Mesas para poder anotar un movimiento.</span>
+      <span>No hay una caja abierta en esta sede.</span>
+      <button type="button" class="btn btn-gris" data-movcaja="arqueo">Ir a Arqueo</button>
     </div>`;
     return;
   }
   const m = MOVCAJA_NUEVO;
-  cont.innerHTML = `<div class="movcaja-form">
-    <h3>Anotar un movimiento</h3>
-    <div class="fila2">
-      <div class="arq-campo"><label>Tipo</label>
-        <select id="movcaja-tipo">
-          <option value="egreso"${m.tipo==='egreso'?' selected':''}>Egreso — sale plata</option>
-          <option value="ingreso"${m.tipo==='ingreso'?' selected':''}>Ingreso — entra plata</option>
-        </select></div>
-      <div class="arq-campo"><label>Monto</label>
-        <input type="number" inputmode="decimal" id="movcaja-monto" placeholder="$ 0" value="${esc(m.monto)}"></div>
+  cont.innerHTML = `<div class="movcaja-barra">
+      <div class="movcaja-estado"><span aria-hidden="true"></span><div><b>Caja abierta</b><small>Los movimientos quedan en este turno.</small></div></div>
+      <button type="button" class="movcaja-nuevo" data-movcaja="nuevo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        <span>Nuevo movimiento</span>
+      </button>
     </div>
-    <div class="arq-campo"><label>Nota</label>
-      <input type="text" id="movcaja-nota" placeholder="Para qué es" value="${esc(m.nota)}"></div>
-    <div class="arq-btns"><button type="button" class="btn btn-orange" style="flex:1" data-movcaja="guardar">Guardar</button></div>
-  </div>`;
+    ${MOVCAJA_FORM_ABIERTO ? `<div class="movcaja-overlay open" id="movcaja-overlay">
+      <button type="button" class="movcaja-scrim" data-movcaja="cancelar" aria-label="Cerrar sin guardar"></button>
+      <section class="movcaja-dialog" role="dialog" aria-modal="true" aria-labelledby="movcaja-titulo">
+        <div class="movcaja-dialog-head">
+          <h2 id="movcaja-titulo">Nuevo movimiento</h2>
+          <button type="button" class="movcaja-x" data-movcaja="cancelar" aria-label="Cerrar">×</button>
+        </div>
+        <div class="movcaja-campo">
+          <span class="movcaja-label">Tipo</span>
+          <div class="movcaja-tipos" role="group" aria-label="Tipo de movimiento">
+            <button type="button" data-movcaja-tipo="egreso" class="${m.tipo==='egreso'?'on':''}" aria-pressed="${m.tipo==='egreso'}">Egreso</button>
+            <button type="button" data-movcaja-tipo="ingreso" class="${m.tipo==='ingreso'?'on':''}" aria-pressed="${m.tipo==='ingreso'}">Ingreso</button>
+          </div>
+        </div>
+        <label class="movcaja-campo" for="movcaja-monto">
+          <span class="movcaja-label">Monto</span>
+          <span class="movcaja-monto"><span aria-hidden="true">$</span><input type="number" inputmode="decimal" min="0" step="1" id="movcaja-monto" placeholder="0" value="${esc(m.monto)}"></span>
+        </label>
+        <label class="movcaja-campo" for="movcaja-nota">
+          <span class="movcaja-label">Detalle</span>
+          <input type="text" id="movcaja-nota" placeholder="Ej. compra de hielo" value="${esc(m.nota)}" autocomplete="off">
+        </label>
+        <div class="movcaja-acciones">
+          <button type="button" class="btn btn-gris" data-movcaja="cancelar">Cancelar</button>
+          <button type="button" class="btn btn-orange" data-movcaja="guardar">Guardar</button>
+        </div>
+      </section>
+    </div>` : ''}`;
 }
 
 function movCajaPintarLista(){
   const cont = $('movcaja-lista'); if(!cont) return;
   if(!MOVCAJA_LISTA.length){
-    cont.innerHTML = '<div class="arqpag-vacio">Todavía no hay ningún movimiento anotado.</div>';
+    cont.innerHTML = `<section class="movcaja-historial">
+      <div class="movcaja-lista-head"><h2>Historial</h2><span>0 movimientos</span></div>
+      <div class="movcaja-vacio"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 16h30v38H17z"/><path d="M23 11h18v10H23zM24 31h16M24 39h11M24 47h8"/><path d="M44 34v12m-6-6h12"/></svg><span>Sin movimientos todavía</span></div>
+    </section>`;
     return;
   }
-  cont.innerHTML = MOVCAJA_LISTA.map(m => {
+  const filas = MOVCAJA_LISTA.map(m => {
     const fecha = new Date(m.created_at).toLocaleString('es-CL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
     return `<div class="movcaja-fila">
+      <span class="movcaja-signo ${m.tipo}" aria-hidden="true">${m.tipo==='ingreso'?'+':'−'}</span>
       <div class="n"><b>${esc(m.nota)}</b><span>${fecha}${m.creado_por ? ' · '+esc(m.creado_por) : ''}</span></div>
       <div class="v ${m.tipo}">${m.tipo==='ingreso'?'+ ':'− '}${plata(m.monto)}</div>
     </div>`;
   }).join('');
+  cont.innerHTML = `<section class="movcaja-historial">
+    <div class="movcaja-lista-head"><h2>Historial</h2><span>${MOVCAJA_LISTA.length} movimiento${MOVCAJA_LISTA.length===1?'':'s'}</span></div>
+    <div class="movcaja-filas">${filas}</div>
+  </section>`;
 }
 
 async function movCajaGuardar(){
@@ -8531,8 +8563,23 @@ async function movCajaGuardar(){
     p_nota: m.nota.trim(), p_quien: NOMBRE});
   if(!r) return;
   MOVCAJA_NUEVO = {tipo:'egreso', monto:'', nota:''};
+  MOVCAJA_FORM_ABIERTO = false;
   aviso('✓ Anotado');
   await movCajaCargar();
+}
+
+function movCajaAbrir(){
+  if(!LAMA_ARQ){ pickTab('arqueo'); return; }
+  MOVCAJA_ULTIMO_FOCO = document.activeElement;
+  MOVCAJA_FORM_ABIERTO = true;
+  movCajaPintarForm();
+  requestAnimationFrame(()=>$('movcaja-monto')?.focus());
+}
+
+function movCajaCerrar(){
+  MOVCAJA_FORM_ABIERTO = false;
+  movCajaPintarForm();
+  if(MOVCAJA_ULTIMO_FOCO?.isConnected) MOVCAJA_ULTIMO_FOCO.focus({preventScroll:true});
 }
 
 function movCajaEngancharUnaVez(){
@@ -8540,14 +8587,19 @@ function movCajaEngancharUnaVez(){
   if(!form || form.dataset.enganchado) return;
   form.dataset.enganchado = '1';
   form.addEventListener('click', e => {
+    if(e.target.closest('[data-movcaja="nuevo"]')){ movCajaAbrir(); return; }
+    if(e.target.closest('[data-movcaja="cancelar"]')){ movCajaCerrar(); return; }
+    if(e.target.closest('[data-movcaja="arqueo"]')){ pickTab('arqueo'); return; }
+    const tipo=e.target.closest('[data-movcaja-tipo]');
+    if(tipo){ MOVCAJA_NUEVO.tipo=tipo.dataset.movcajaTipo; movCajaPintarForm(); requestAnimationFrame(()=>$('movcaja-monto')?.focus()); return; }
     if(e.target.closest('[data-movcaja="guardar"]')) movCajaGuardar();
   });
   form.addEventListener('input', e => {
     if(e.target.id === 'movcaja-monto') MOVCAJA_NUEVO.monto = e.target.value;
     if(e.target.id === 'movcaja-nota')  MOVCAJA_NUEVO.nota  = e.target.value;
   });
-  form.addEventListener('change', e => {
-    if(e.target.id === 'movcaja-tipo') MOVCAJA_NUEVO.tipo = e.target.value;
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'&&MOVCAJA_FORM_ABIERTO&&vistaActual==='movcaja') movCajaCerrar();
   });
 }
 
@@ -14898,14 +14950,12 @@ function renderRepartoResults(){
   if(!q){ $('reparto-results').innerHTML=''; return; }
   const enCarrito = new Set(carrito.map(c=>c.id));
   const halla = DATA.filter(p=>normNombre(p.producto).includes(q) && !enCarrito.has(p.id));
-  const {quedan, fuera} = soloCongelador(halla, DATA);
+  const {quedan} = soloCongelador(halla, DATA);
   const rows = quedan.slice(0,15);
-  /* Si se quitó alguno, se dice cuál y por qué: un producto que se busca y
-     no aparece manda a la gente a crearlo de nuevo. */
-  const aviso = fuera.length
-    ? `<div class="tl-pista">${fuera.map(f=>esc(f.p.producto)+' entra por <b>'+esc(f.h.producto)+'</b>').join(' · ')}</div>`
-    : '';
-  $('reparto-results').innerHTML = aviso + rows.map(p=>{
+  /* La regla de entrada por congelador sigue vigente, pero el buscador no
+     imprime una explicación grande encima de los resultados: solo ofrece
+     directamente el producto correcto. */
+  $('reparto-results').innerHTML = rows.map(p=>{
     const {hay, t, cf} = infoReparto(p);
     // el número va en la píldora de color: cuánto hay y cómo está, de un vistazo
     return `
@@ -18024,6 +18074,7 @@ function pickTab(tab){
      con el nombre viejo, se manda a la de recibir en vez de dejar la
      pantalla en blanco. */
   if(tab==='reparto' && SEDE==='central') tab='recepcion';
+  if(tab!=='movcaja') MOVCAJA_FORM_ABIERTO=false;
   document.body.classList.toggle('vista-mermas',tab==='mermas');
   document.querySelectorAll('[data-accion]').forEach(b=>b.classList.toggle('active',b.dataset.accion===(tab==='hist'?'historial':tab)));
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));

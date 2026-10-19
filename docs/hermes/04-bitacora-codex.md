@@ -1,5 +1,61 @@
 # Bitácora de Codex
 
+## Guía visual del proyecto — Lápiz y papel
+
+Esta es la referencia visual consolidada para diseñar y vestir pantallas existentes. La identidad prioriza uso rápido y legible en una app de inventario, ventas y gestión para pequeñas empresas; la apariencia nunca debe cambiar datos, permisos ni reglas de operación.
+
+### Personalidad
+
+- Simple, fluida y rápida; cercana, juvenil y moderna; editable y adaptable.
+- Notion es una referencia de claridad y baja carga visual, no una plantilla que haya que copiar.
+- Voz humana, directa y amable. Usar el mínimo texto que permita entender la acción; no añadir títulos o instrucciones redundantes.
+
+### Paleta
+
+| Uso | Color | Regla |
+|---|---|---|
+| Fondo claro principal | `#F6FFF8` | Base limpia y ligeramente verdosa; evitar el blanco frío como fondo de toda la página. |
+| Superficie | `#FFFFFF` | Tarjetas, paneles y controles elevados. |
+| Tinte suave | `#EAF4F4` | Selección, agrupación o apoyo visual discreto. |
+| Verde niebla | `#CCE3DE` | Acento secundario en superficies o ilustración, sin competir con la acción. |
+| Verde salvia | `#A4C3B2` | Detalle secundario, nunca color dominante de pantalla. |
+| Tinta | `#171717` (o `#202421` en tokens compartidos) | Texto principal e iconos; contraste alto sobre superficies claras. |
+| Acción y énfasis | `#F35B04` | Acción primaria y señal puntual. Usarlo con moderación; no pintar paneles enteros. |
+
+En modo oscuro, conservar el mismo carácter con fondo `#101512`, panel lateral `#0C100E`, tarjetas `#1B221E`, selección `#232C27`, texto `#F6FFF8`, texto secundario `#AAB7AF` y el naranja de marca `#F35B04`. Los estados críticos/éxito conservan sus colores semánticos: no sustituirlos por el naranja.
+
+### Formas, superficies y movimiento
+
+- Tarjetas blancas de esquinas redondeadas y texto alineado a la izquierda. La jerarquía se construye con espacio, tipografía y superficie, no con marcos gruesos.
+- No usar rebordes negros ni contornos gruesos para indicar selección. Preferir elevación pequeña, sombra difusa, tinte cálido muy suave o un halo naranja tenue, con transición breve y sin saltos de layout.
+- Mantener separaciones generosas pero eficientes; reducir ruido y repetición. En teléfono priorizar controles táctiles cómodos sin desperdiciar ancho.
+- Las líneas divisorias, cuando sean imprescindibles para separar campos o datos, deben ser finas y de bajo contraste; no decorar cada tarjeta con borde.
+- Respetar `prefers-reduced-motion`; la respuesta visual debe ser sutil, no necesaria para entender el estado.
+
+### Dibujo e iconografía
+
+- Lenguaje “lápiz y papel”: trazo humano, sencillo, monocromo o de tinta, con irregularidad controlada. Dibujos cerca de cero: se usan solo si comunican algo mejor que un icono.
+- Evitar ilustraciones genéricas, emoji, clip-art, decoración abundante y símbolos ambiguos. Mantener pocos trazos, grosor coherente y lectura reconocible a tamaño móvil.
+- Los dibujos de áreas, el icono de Inicio/casa y el futuro logo pueden compartir esta familia; el logo/rostro final sigue pendiente de decisión.
+
+### Navegación compacta en teléfono — propuestas, aún no implementadas
+
+El cajón actual conserva las rutas y etiquetas accesibles y tiene ancho máximo de media pantalla. Para reducir su peso visual se recomiendan estas alternativas, sin ocultar módulos ni saltarse permisos:
+
+1. **Recomendada — barra inferior de cuatro accesos frecuentes + “Más”**: iconos lineales para Mesas, Inventario y las tareas elegidas; “Más” abre una hoja pequeña con el resto de las áreas en una cuadrícula de iconos. Etiquetas solo en el elemento activo o al mantener/enfocar; cada icono conserva nombre accesible. Es la opción más rápida y libera el cajón lateral.
+2. **Hoja inferior de áreas**: botón de menú abre una lámina corta con una cuadrícula de iconos y etiquetas breves. Familiar y fácil de descubrir; ocupa más alto mientras está abierta.
+3. **Riel angosto solo de iconos**: compacto, pero menos descubrible y más propenso a confusiones; usarlo solo con iconos inequívocos, `aria-label`, ayuda al enfocar y prueba con usuarios.
+
+La recomendación es prototipar la opción 1 antes de reemplazar la navegación; esta nota no cambia la navegación actual. La ruta Mesas ya aparece en el menú móvil para cuentas con `puede_lama` y sedes habilitadas. El permiso y las restricciones por sede siguen siendo la autoridad: no se habilita Mesas a cuentas no autorizadas desde CSS o por defecto.
+
+## 2026-10-19 — Movimientos de caja y correcciones de legibilidad
+
+- Movimientos de caja conserva la misma RPC `arqueo_movimiento`, el turno abierto y sus permisos, pero ahora presenta una acción permanente **Nuevo movimiento** y un historial ordenado. La creación abre una ventana centrada en escritorio y una hoja inferior en teléfono, con tipo, monto, detalle, Cancelar y Guardar. Si no hay caja abierta, la pantalla ofrece ir a Arqueo y no promete una operación imposible.
+- La ventana mantiene el borrador mientras se alterna entre ingreso y egreso, mueve el foco al monto, cierra con Cancelar o Escape y devuelve el foco a la acción original. Solo una confirmación válida usa la escritura existente; no se añadieron tablas, RPC ni reglas contables.
+- En la búsqueda de Reparto se retiró el texto auxiliar sobre la entrada por congelador. La regla operativa no cambió: el buscador sigue ofreciendo directamente el producto correcto.
+- Se corrigió una causa compartida de bajo contraste en Bodega/Enviar y Enlaces: tres controles usaban `--sec-bg` —un color de fondo— como tinta. Ahora usan `--sec-tx`, legible en claro y oscuro. La revisión de CSS no dejó otros textos usando tokens `*-bg`, salvo un estado seleccionado que lleva texto blanco explícito.
+- Verificación Chromium con datos sintéticos: escritorio 1440×900 y teléfono 390×844; creación visible, ventana, selector ingreso/egreso, foco, Cancelar, Escape, hoja inferior, ausencia de desborde, contraste de Bodega y consola sin errores. No se ejecutaron escrituras comerciales ni se cambiaron datos.
+
 ## 2026-10-19 — Navegación lateral unificada y menú móvil completo
 
 - Se igualó el riel fijo al de Inventario: 208 px en escritorio amplio y el mismo comportamiento adaptable en pantallas medianas. Módulos e Inventario comparten fondo, superficie, texto, estado activo y acento.

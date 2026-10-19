@@ -8,6 +8,8 @@
 
 ## 11. Bitácora (cambios importantes, lo más reciente arriba)
 
+- **2026-10-19** — **Movimientos de caja recupera su acción y adopta la identidad Lápiz y papel.** La página vuelve a ofrecer una acción permanente para crear un movimiento cuando hay caja abierta; la captura se hace en una ventana centrada en escritorio y hoja inferior en teléfono, y el historial usa filas compactas. Continúa escribiendo mediante `arqueo_movimiento`, sin una segunda lógica contable. Sin caja abierta ofrece ir a Arqueo. Se retiró el texto auxiliar de la búsqueda de Reparto sin cambiar la regla del congelador y se corrigieron textos casi invisibles de Bodega/Enviar y Enlaces que usaban un color de fondo como tinta. No se cambió stock, Fudo, permisos, esquema ni datos.
+
 - **2026-10-07** — **Propietario raíz y permisos protegidos.** Llamita Plus ya
   no permite que el navegador escriba directamente `app_permisos`. Una sola
   cuenta Auth, identificada por UUID y guardada en un esquema privado, gobierna
