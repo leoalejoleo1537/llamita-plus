@@ -6,7 +6,7 @@
 - La selección mantiene páginas/salones, secciones, formas y estados existentes. El detalle conserva las acciones y el contenido que ya dibujan `lamaPintarPanel`, la carta, la precuenta y el cobro; no se añaden acciones comerciales. Cerrar con el botón, tocar fuera o usar Escape devuelve al plano. El foco pasa al cierre al abrir la ficha y regresa a la mesa al cerrarla.
 - Se mantuvo la paleta Lápiz y papel, el naranja `#F35B04`, el modo oscuro, las superficies suaves y el movimiento sutil de las tarjetas. No se alteraron permisos, datos, esquema, ventas, caja, Fudo, Lama–Stock ni las reglas de stock.
 - Verificación: Chromium con datos sintéticos en 1440×900 y 390×844; tres columnas, ficha sobre navegación, ausencia de solapamiento del botón flotante, Escape, navegación, ventanas existentes, modo oscuro, consola sin errores y sin desborde horizontal. Pasó `pruebas/identidad-modulos.mjs`. `pruebas/lama-mesas.mjs` sigue bloqueada antes de su flujo por el fixture histórico de permisos que no habilita la pestaña Mesas; esta limitación ya estaba registrada en la auditoría del 19 de octubre.
-- Publicación en `origin/master` y verificación de Vercel: pendientes de esta entrega.
+- Publicado en `origin/master` como `5e8c05f93d5e8a41522e701e4fd71eabd79fe91d`. Vercel confirmó producción `READY` con ese mismo SHA y alias `llamita-plus.vercel.app`.
 
 ## 2026-10-19 — Identidad visual v1 en módulos operativos
 
