@@ -9,8 +9,8 @@
 <title>Inventario</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0F1E31">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/app-terracota-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="icons/app-terracota-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/espiral-terracota-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/espiral-terracota-180.png">
 <!-- Manrope: SOLO la usa Llamita Lama (§view-lama), para la dirección "terracota
      cálida" que trajo Jhon. El resto de la app se queda con la tipografía del
      sistema — cargar una fuente ajena a un sitio que casi no la usa no se
@@ -45,7 +45,7 @@
   .gate{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
   .gate.hidden{display:none}
   .gate-box{background:#fff;border-radius:18px;padding:40px 30px 30px;max-width:380px;width:100%;text-align:center;box-shadow:0 10px 45px rgba(15,30,49,.12)}
-  .gate-marca{display:block;width:104px;height:104px;object-fit:contain;margin:0 auto 14px}
+  .gate-marca{display:block;width:104px;height:104px;object-fit:cover;margin:0 auto 14px;border-radius:27%}
   .gate-sub{font-size:14.5px;color:var(--muted);margin:0 0 26px}
   .gate-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:17px 20px;margin-bottom:12px;border-radius:10px;border:1.5px solid var(--border);background:#fff;font-size:16.5px;font-weight:700;color:var(--text);cursor:pointer;transition:.15s;text-align:left}
   .gate-btn[hidden]{display:none}
@@ -71,7 +71,7 @@
   .login-logo-tel{display:none}
   .login-visual{display:flex;flex:1 1 46%;align-items:center;justify-content:center;
     padding:44px;background:var(--bg);border-left:1px solid var(--border)}
-  .login-visual-logo{display:block;width:min(100%,290px);height:auto;object-fit:contain}
+  .login-visual-logo{display:block;width:min(100%,290px);height:auto;object-fit:cover;border-radius:27%}
 
   /* Los campos con ícono. Un solo contenedor por campo, y el ícono adentro
      en vez de superpuesto a mano — así el foco y el error del borde se
@@ -3036,12 +3036,11 @@
 <body>
 
 <!-- ================= INICIO DE SESIÓN (obligatorio al abrir) =================
-     Una tarjeta centrada en escritorio y móvil, sin logo gráfico mientras
-     se define la identidad visual final. -->
+     Una tarjeta centrada en escritorio y móvil con la identidad oficial. -->
 <div class="gate top login-gate" id="login-gate">
   <div class="login-card">
     <div class="gate-box login-form">
-      <img class="gate-marca login-logo-tel" src="icons/app-terracota-512.png" width="512" height="512" alt="Llamita Plus" fetchpriority="high">
+      <img class="gate-marca login-logo-tel" src="icons/espiral-terracota-512.png" width="512" height="512" alt="Llamita Plus" fetchpriority="high">
       <h1 class="login-h1">Bienvenido</h1>
       <p class="login-sub">Ingresá a tu cuenta para continuar</p>
       <div class="gate-err" id="login-err"></div>
@@ -3073,7 +3072,7 @@
       <div class="gate-foot">¿Sin cuenta? Pídesela al administrador</div>
     </div>
     <div class="login-visual" aria-label="Marca Llamita Plus">
-      <img class="login-visual-logo" src="icons/app-terracota-512.png" width="512" height="512" alt="Llamita Plus" fetchpriority="high">
+      <img class="login-visual-logo" src="icons/espiral-terracota-512.png" width="512" height="512" alt="Llamita Plus" fetchpriority="high">
     </div>
   </div>
 </div>
@@ -3092,7 +3091,7 @@
 <!-- ================= SELECTOR DE SEDE (tras iniciar sesión) ================= -->
 <div class="gate" id="gate">
   <div class="gate-box">
-    <img class="gate-marca selector-marca" src="icons/icon-512.png" width="512" height="512" alt="Llamita Plus">
+    <img class="gate-marca selector-marca" src="icons/espiral-terracota-512.png" width="512" height="512" alt="Llamita Plus">
     <p class="gate-sub">Elige tu local para comenzar</p>
     <button class="gate-btn" data-sede="plaza">Local 1</button>
     <button class="gate-btn" data-sede="angamos" hidden>Local 2</button>

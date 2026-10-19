@@ -9,8 +9,8 @@
   "background_color": "#0F1E31",
   "theme_color": "#0F1E31",
   "icons": [
-    { "src": "icons/app-terracota-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icons/app-terracota-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "icons/app-terracota-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "icons/espiral-terracota-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/espiral-terracota-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/espiral-terracota-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

@@ -164,10 +164,12 @@ await caso('el login y los metadatos instalables usan el nuevo icono', async () 
   const loginEscritorio=document.querySelector('.login-visual-logo')?.getAttribute('src');
   const favicon=document.querySelector('link[rel="icon"]')?.getAttribute('href');
   const apple=document.querySelector('link[rel="apple-touch-icon"]')?.getAttribute('href');
-  return loginMovil==='icons/app-terracota-512.png'
-    &&loginEscritorio==='icons/app-terracota-512.png'
-    &&favicon==='icons/app-terracota-192.png'
-    &&apple==='icons/app-terracota-180.png';
+  const selector=document.querySelector('.selector-marca')?.getAttribute('src');
+  return loginMovil==='icons/espiral-terracota-512.png'
+    &&loginEscritorio==='icons/espiral-terracota-512.png'
+    &&selector==='icons/espiral-terracota-512.png'
+    &&favicon==='icons/espiral-terracota-192.png'
+    &&apple==='icons/espiral-terracota-180.png';
 }));
 await caso('el asset contiene terracota y la espiral blanca', async () => {
   /* Se lee el pixel con Python/PIL, AFUERA del navegador: bajo `file://`
@@ -177,17 +179,21 @@ await caso('el asset contiene terracota y la espiral blanca', async () => {
   const { execFileSync } = await import('node:child_process');
   const salida = execFileSync('python3', ['-c', `
 from PIL import Image
-im = Image.open(${JSON.stringify(join(raiz,'icons','app-terracota-512.png'))}).convert('RGB')
+im = Image.open(${JSON.stringify(join(raiz,'icons','espiral-terracota-512.png'))}).convert('RGB')
 terracota=blanco=0
 pixels=im.tobytes()
 for i in range(0,len(pixels),3):
     r,g,b=pixels[i:i+3]
     terracota += r>190 and 65<g<175 and b<100
     blanco += r>242 and g>242 and b>242
-print(terracota,blanco)
+esquinas=all(r>180 and g<170 and b<120 for r,g,b in (
+    im.getpixel((0,0)),im.getpixel((511,0)),im.getpixel((0,511)),im.getpixel((511,511))
+))
+print(terracota,blanco,int(esquinas))
 `]).toString().trim();
-  const [terracota,blanco] = salida.split(' ').map(Number);
-  return terracota>50000&&blanco>10000 || `el asset no conserva terracota y blanco: ${salida}`;
+  const [terracota,blanco,esquinas] = salida.split(' ').map(Number);
+  return terracota>150000&&blanco>10000&&esquinas===1
+    || `el asset no llena el lienzo con terracota o perdió la espiral: ${salida}`;
 });
 
 
