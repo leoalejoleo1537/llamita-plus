@@ -39,13 +39,13 @@ body.identidad-oscura input,body.identidad-oscura select,body.identidad-oscura t
 body.ux-module-active:not(.identidad-oscura){
   --bg:#f6fff8;--card:#fff;--text:#171717;--muted:#686868;
   --nav-surface:#fff;--nav-text:#171717;--nav-muted:#686868;--nav-active:#eaf4f4;
-  --nav-line:transparent;--orange:#f35b04;--orange-dark:#f35b04;
+  --nav-line:transparent;--orange:#f35b04;--orange-dark:#f35b04;--accent-soft:#f35b04;
   background:#f6fff8;color:#171717;
 }
 body.ux-module-active.identidad-oscura{
   --bg:#101512;--card:#1b221e;--text:#f6fff8;--muted:#aab7af;
   --nav-surface:#0c100e;--nav-text:#f6fff8;--nav-muted:#aab7af;--nav-active:#232c27;
-  --nav-line:transparent;--orange:#f35b04;--orange-dark:#f35b04;
+  --nav-line:transparent;--orange:#f35b04;--orange-dark:#f35b04;--accent-soft:#f35b04;
   background:#101512;color:#f6fff8;
 }
 
@@ -66,7 +66,7 @@ body.ux-module-active.navegacion-fija .drawer-item.active{color:#fff}
 body.ux-module-active.navegacion-fija .tab.active{color:var(--text)}
 body.ux-module-active.navegacion-fija .tab.active svg{color:var(--orange)}
 body.ux-module-active.navegacion-fija .tab-carril{
-  border-radius:12px;background:var(--nav-active);box-shadow:none;
+  border-radius:7px;background:var(--nav-active);box-shadow:inset 4px 0 0 var(--accent-soft);
 }
 body.ux-module-active .mobile-bottom{background:var(--card);border:0;box-shadow:0 -7px 20px rgba(20,31,23,.07)}
 body.ux-module-active .mobile-bottom-item.active{background:var(--sec-bg);color:var(--orange-dark)}

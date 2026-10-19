@@ -1,5 +1,14 @@
 # Bitácora de Codex
 
+## 2026-10-19 — Navegación lateral unificada y menú móvil completo
+
+- Se igualó el riel fijo al de Inventario: 208 px en escritorio amplio y el mismo comportamiento adaptable en pantallas medianas. Módulos e Inventario comparten fondo, superficie, texto, estado activo y acento.
+- En teléfono, el cajón se limita a la mitad del ancho disponible, aumenta la legibilidad de las etiquetas y permite abrir Mesas, Arqueo, Movimientos, Inventario, Reparto, Recetas y Mermas desde sus pestañas originales. Recibir/Enviar continúan disponibles en Bodega.
+- Se retiraron del lateral el selector/botón de Apariencia, el bloque de presencia “En línea” y los nombres de usuario. Se conserva el botón de cierre de sesión. La barra inferior y la navegación existente se mantienen.
+- La visibilidad sigue respetando exactamente los permisos de cuenta y las rutas de cada sede: por ejemplo, Mesas, Arqueo y Movimientos siguen sujetos a `puede_lama`; Recetas no aparece en Bodega. No se amplió acceso ni se cambiaron reglas comerciales.
+- Verificación Chromium: `pruebas/movil-navegacion.mjs` prueba apertura desde teléfono de cada ruta permitida, ancho máximo del cajón, permisos, Bodega, navegación inferior y riel de 208 px. `pruebas/identidad-modulos.mjs` compara el ancho en Inventario y todos los módulos y comprueba ventanas, oscuro y ausencia de desbordes en 390×844 y 1440×900.
+- Publicación de esta entrega: pendiente.
+
 ## 2026-10-19 — Mesas v2: plano a ancho completo y ficha inferior en teléfono
 
 - Se aplicó la propuesta aprobada al área real de Mesas. En escritorio se conservan el plano y la cuenta en paralelo; en teléfono el plano usa tres columnas y la mesa elegida abre una ficha inferior. El plano queda atenuado detrás, la ficha se ajusta por encima de la navegación fija y el botón flotante se oculta mientras la ficha está abierta.

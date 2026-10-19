@@ -78,6 +78,8 @@ html[data-paleta="arena"], .paleta-opcion[data-paleta="arena"]{
 .drawer-salir:hover{color:var(--nav-text)}
 .drawer .live{background:transparent;color:var(--nav-muted)}
 .drawer-appearance{position:relative;margin-top:auto;border-top:1px solid var(--nav-line);padding-top:7px}
+.drawer-online,#drawerOnlineLabel,.drawer-appearance,.drawer-user{display:none!important}
+.drawer-foot{justify-content:flex-end;border-top:0}
 .paleta-trigger{color:var(--nav-muted);font-size:12.5px;width:100%}
 .paleta-popover{position:fixed;width:302px;max-width:calc(100vw - 16px);z-index:75;
   padding:11px;background:var(--nav-surface);color:var(--nav-text);border:1px solid var(--nav-line);
@@ -98,7 +100,10 @@ html[data-paleta="arena"], .paleta-opcion[data-paleta="arena"]{
 .paleta-muestra i:nth-child(5){background:var(--amber)}
 .paleta-muestra i:nth-child(6){background:var(--red)}
 
-body.navegacion-fija{--riel:260px;padding-left:var(--riel)}
+/* Un ancho de riel único: el espacio de Inventario en el selector mide 208 px
+   en escritorio. El resto de pantallas usa esa misma medida para que la
+   navegación no cambie de tamaño al cambiar de módulo. */
+body.navegacion-fija{--riel:208px;padding-left:var(--riel)}
 body.navegacion-fija .tabs{position:fixed;inset:0 auto 0 0;width:var(--riel);height:100dvh;
   display:flex;flex-direction:column;padding:24px 12px 12px;overflow-y:auto;overflow-x:hidden;
   transform:none;background:var(--nav-surface);box-shadow:1px 0 0 var(--linea);scrollbar-width:thin}
@@ -215,7 +220,7 @@ body.navegacion-fija .top-actions{grid-column:3;grid-row:1;justify-self:end}
   .inv-limpiar{height:30px}
 }
 
-/* M1: un solo menú, temporal en teléfono; el riel de escritorio no cambia. */
+/* Un menú común: riel de escritorio compartido con Inventario y cajón compacto en teléfono. */
 .mobile-menu-trigger,.mobile-nav-heading,.mobile-bottom,.mobile-nav-scrim{display:none}
 @media(max-width:719px){
   /* Altura fija: Safari cambia su viewport visual al ocultar las barras del
@@ -236,23 +241,22 @@ body.navegacion-fija .top-actions{grid-column:3;grid-row:1;justify-self:end}
   body.navegacion-fija .tabs{z-index:79;width:min(320px,86vw);max-width:100%;padding:12px 14px calc(18px + env(safe-area-inset-bottom));
     transform:translateX(-105%);transition:transform .18s ease;box-shadow:none}
   body.mobile-menu-open.navegacion-fija .tabs{transform:translateX(0);box-shadow:12px 0 36px rgba(9,17,30,.22)}
-  body.navegacion-fija .tabs .tab[data-tab="inv"],
-  body.navegacion-fija .tabs .tab[data-tab="reparto"],
-  body.navegacion-fija .tabs .tab[data-tab="mermas"],
-  body.navegacion-fija .tabs .tab[data-tab="recepcion"],
-  body.navegacion-fija .tabs .tab[data-tab="envios"]{display:none!important}
-  .mobile-nav-heading{display:flex;align-items:center;justify-content:space-between;min-height:48px;
-    padding:0 5px 10px;margin-bottom:9px;border-bottom:1px solid var(--nav-line);font-weight:700;color:var(--nav-text)}
+  /* El cajón del teléfono es compacto, pero incluye también las rutas que
+     aparecen en la barra inferior. La visibilidad real sigue viniendo de los
+     permisos y de la sede en el atributo style del botón original. */
+  body.navegacion-fija .tabs{width:min(240px,50vw);padding:9px 9px calc(12px + env(safe-area-inset-bottom))}
+  .mobile-nav-heading{display:flex;align-items:center;justify-content:space-between;min-height:42px;
+    padding:0 3px 7px;margin:0 3px 7px;border-bottom:1px solid var(--nav-line);font-size:14px;font-weight:700;color:var(--nav-text)}
   .mobile-nav-heading button{width:44px;height:44px;border:0;border-radius:8px;background:transparent;
     color:var(--nav-text);font:inherit;font-size:28px;cursor:pointer}
-  body.navegacion-fija .tabs .inner{gap:3px}
+  body.navegacion-fija .tabs .inner{gap:2px}
   body.navegacion-fija .tab,body.navegacion-fija .drawer-item{flex-direction:row;justify-content:flex-start;
-    gap:12px;min-height:46px;padding:10px 13px;font-size:14px;line-height:1.25;text-align:left;white-space:normal}
-  body.navegacion-fija .drawer.en-riel{flex:0 0 auto;padding-top:10px}
-  .drawer-sec,.drawer-online,.drawer-user{display:block}
-  .drawer-foot{justify-content:space-between}
-  .drawer-salir{min-width:44px;min-height:44px}
-  .drawer-appearance{margin-top:8px}
+    gap:9px;min-height:42px;padding:8px 9px;font-size:14.5px;line-height:1.2;text-align:left;white-space:normal}
+  body.navegacion-fija .tab svg,body.navegacion-fija .drawer-item svg{width:18px;height:18px;flex-basis:18px}
+  body.navegacion-fija .drawer.en-riel{flex:0 0 auto;padding-top:7px}
+  .drawer-sec{display:block;padding:10px 9px 4px;font-size:10px;letter-spacing:.04em}
+  .drawer-foot{justify-content:flex-end;margin-top:auto;padding:5px 3px 0;border-top:0}
+  .drawer-salir{min-width:40px;min-height:40px}
   .paleta-popover{z-index:82}
   .mobile-bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;align-items:flex-start;
     height:var(--mobile-bottom-height);min-height:var(--mobile-bottom-height);max-height:var(--mobile-bottom-height);box-sizing:border-box;
@@ -268,6 +272,11 @@ body.navegacion-fija .top-actions{grid-column:3;grid-row:1;justify-self:end}
   .top-actions .sync-btn .onda{animation:none!important;opacity:0;box-shadow:none}
   .mobile-bottom-item:focus-visible,.mobile-menu-trigger:focus-visible,.mobile-nav-heading button:focus-visible{
     outline:2px solid var(--orange-dark);outline-offset:2px}
+}
+@media(min-width:1080px){
+  body.ux-module-active.navegacion-fija{--riel:208px}
+  body.ux-module-active.navegacion-fija .tabs{padding:24px 12px 12px}
+  body.ux-module-active.navegacion-fija .tab{min-height:40px;padding:9px 14px;font-size:12px}
 }
 @media(max-width:719px) and (prefers-reduced-motion:reduce){
   body.navegacion-fija .tabs{transition:none}

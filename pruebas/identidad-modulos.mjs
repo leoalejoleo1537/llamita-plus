@@ -61,6 +61,9 @@ const verificar=async(condicion,mensaje)=>{
 };
 await verificar(()=>page.evaluate(()=>document.documentElement.dataset.paleta==='lapiz'),
   'Lápiz y papel es la paleta inicial');
+await page.evaluate(()=>pickTab('inv'));
+await verificar(()=>page.evaluate(()=>Math.abs(document.querySelector('.tabs').getBoundingClientRect().width-208)<1),
+  'Inventario usa un riel de 208 px en escritorio');
 for(const [ruta,titulo] of Object.entries({
   lama:'Mesas',arqueo:'Arqueo',movcaja:'Movimientos de caja',reparto:'Reparto',
   recetas:'Recetas',hist:'Historial',mermas:'Mermas',ajustes:'Ajustes'
@@ -71,6 +74,8 @@ for(const [ruta,titulo] of Object.entries({
     document.getElementById('uxModuleTitle').textContent===t,titulo),`${ruta}: título visible`);
   await verificar(()=>page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),
     `${ruta}: sin desborde horizontal en escritorio`);
+  await verificar(()=>page.evaluate(()=>Math.abs(document.querySelector('.tabs').getBoundingClientRect().width-208)<1),
+    `${ruta}: riel conserva el mismo ancho que Inventario`);
   if(capturas)await page.screenshot({path:join(capturas,`${ruta}-escritorio.png`)});
 }
 await page.evaluate(()=>pickTab('lama'));

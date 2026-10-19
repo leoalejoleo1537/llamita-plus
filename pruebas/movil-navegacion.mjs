@@ -61,10 +61,20 @@ await check('menú abierto con foco y estado accesible',async()=>
   page.evaluate(()=>document.body.classList.contains('mobile-menu-open') &&
     document.activeElement.id==='mobileNavClose' &&
     document.getElementById('mobileMenuTrigger').getAttribute('aria-expanded')==='true'));
-await check('menú conserva Mesas y no duplica accesos inferiores',async()=>
-  page.evaluate(()=>getComputedStyle(document.getElementById('tabLama')).display!=='none' &&
-    ['inv','reparto','mermas'].every(ruta=>
-      getComputedStyle(document.querySelector(`.tab[data-tab="${ruta}"]`)).display==='none')));
+if(process.env.M1_MENU_SCREENSHOT)await page.screenshot({path:process.env.M1_MENU_SCREENSHOT});
+await check('el menú lateral compacto da acceso a todos los módulos permitidos',async()=>
+  page.evaluate(()=>['lama','arqueo','movcaja','inv','reparto','mermas','recetas'].every(ruta=>
+    getComputedStyle(document.querySelector(`.tab[data-tab="${ruta}"]`)).display!=='none')));
+await check('el menú móvil ocupa como máximo la mitad del ancho y conserva texto legible',async()=>
+  page.evaluate(()=>{
+    const panel=document.getElementById('mobileNav'),items=[...panel.querySelectorAll('.inner .tab')];
+    return panel.getBoundingClientRect().width<=innerWidth*.5+1 &&
+      items.filter(b=>getComputedStyle(b).display!=='none')
+        .every(b=>parseFloat(getComputedStyle(b).fontSize)>=14);
+  }));
+await check('Apariencia, presencia en línea y nombres de usuario se quitaron del lateral',async()=>
+  page.evaluate(()=>['.drawer-appearance','#drawerOnlineLabel','#drawerOnline','.drawer-user']
+    .every(sel=>getComputedStyle(document.querySelector(sel)).display==='none')));
 await page.keyboard.press('Escape');
 await check('Escape cierra y devuelve el foco',async()=>
   page.evaluate(()=>!document.body.classList.contains('mobile-menu-open') &&
@@ -73,6 +83,12 @@ await page.click('#mobileMenuTrigger');
 await page.click('#mobileNavScrim',{position:{x:380,y:200}});
 await check('toque fuera cierra el menú',async()=>
   page.evaluate(()=>!document.body.classList.contains('mobile-menu-open')));
+for(const ruta of ['lama','arqueo','movcaja','inv','reparto','mermas','recetas']){
+  await page.click('#mobileMenuTrigger');
+  await page.click(`#mobileNav .tab[data-tab="${ruta}"]`);
+  await check(`menú móvil abre ${ruta} por su ruta real`,async()=>page.evaluate(r=>
+    vistaActual===r && !document.body.classList.contains('mobile-menu-open'),ruta));
+}
 await page.click('[data-mobile-tab="inv"]');
 await check('barra inferior usa la ruta original',async()=>
   page.evaluate(()=>vistaActual==='inv' && document.querySelector('.tab[data-tab="inv"]').classList.contains('active')));
@@ -113,11 +129,9 @@ await check('en horizontal conserva la altura y controles táctiles',async()=>
   }));
 await page.setViewportSize({width:390,height:844});
 await page.evaluate(()=>{document.documentElement.dataset.paleta='esmeralda';});
-await check('barra utiliza el acento de la paleta elegida',async()=>
+await check('menú e identidad de los módulos conservan el naranja de marca',async()=>
   page.evaluate(()=>getComputedStyle(document.querySelector('.mobile-bottom-item.active')).color===
-    getComputedStyle(document.documentElement).getPropertyValue('--orange-dark').trim()
-      .replace(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i,(_,r,g,b)=>
-        `rgb(${parseInt(r,16)}, ${parseInt(g,16)}, ${parseInt(b,16)})`)));
+    'rgb(243, 91, 4)'));
 await page.evaluate(()=>{PERMISOS.puede_lama=false;aplicarPermisos();});
 await check('permiso retirado oculta Mesas en el menú',async()=>
   page.evaluate(()=>document.getElementById('tabLama').style.display==='none'));
@@ -129,14 +143,17 @@ await check('Bodega ofrece Recibir y Enviar, no Mesas',async()=>
   page.evaluate(()=>!!document.querySelector('[data-mobile-tab="recepcion"]:not([hidden])') &&
     !!document.querySelector('[data-mobile-tab="envios"]:not([hidden])') &&
     !document.querySelector('[data-mobile-tab="lama"]')));
-await check('Bodega no duplica Recibir ni Enviar en el menú móvil',async()=>
+await check('Bodega conserva Recibir y Enviar visibles también en el menú lateral',async()=>
   page.evaluate(()=>['recepcion','envios'].every(ruta=>
-    getComputedStyle(document.querySelector(`.tab[data-tab="${ruta}"]`)).display==='none')));
+    getComputedStyle(document.querySelector(`.tab[data-tab="${ruta}"]`)).display!=='none')));
 await page.setViewportSize({width:1280,height:800});
 await page.waitForTimeout(100);
 await check('escritorio conserva el riel y oculta la barra inferior',async()=>
   page.evaluate(()=>getComputedStyle(document.body).paddingLeft!=='0px' &&
     getComputedStyle(document.getElementById('mobileBottom')).display==='none' &&
     !document.getElementById('mobileNav').inert));
+await check('Bodega conserva el mismo ancho de riel que Inventario',async()=>
+  page.evaluate(()=>Math.abs(document.getElementById('mobileNav').getBoundingClientRect().width-208)<1 &&
+    Math.abs(parseFloat(getComputedStyle(document.body).paddingLeft)-208)<1));
 await check('sin errores JavaScript',async()=>{if(errors.length)console.error(errors);return errors.length===0;});
 await browser.close();
