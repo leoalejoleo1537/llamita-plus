@@ -132,10 +132,16 @@ await page.evaluate(()=>{document.documentElement.dataset.paleta='esmeralda';});
 await check('menú e identidad de los módulos conservan el naranja de marca',async()=>
   page.evaluate(()=>getComputedStyle(document.querySelector('.mobile-bottom-item.active')).color===
     'rgb(243, 91, 4)'));
+await page.evaluate(()=>{AJUSTES_VAL={'modo_demostracion|':true};PERMISOS.puede_lama=true;aplicarPermisos();pickTab('lama');});
+await check('usuario Lama conserva Mesas visible y navegable en modo demostración',async()=>
+  page.evaluate(()=>vistaActual==='lama' && getComputedStyle(document.getElementById('tabLama')).display!=='none'));
 await page.evaluate(()=>{PERMISOS.puede_lama=false;aplicarPermisos();});
 await check('permiso retirado oculta Mesas en el menú',async()=>
   page.evaluate(()=>document.getElementById('tabLama').style.display==='none'));
-await page.evaluate(()=>{AJUSTES_VAL={'modo_demostracion|':true};aplicarNavegacionDemo();});
+await page.evaluate(()=>{pickTab('lama');});
+await check('usuario sin permiso tampoco abre Mesas por ruta directa',async()=>
+  page.evaluate(()=>vistaActual!=='lama'));
+await page.evaluate(()=>{aplicarNavegacionDemo();});
 await check('modo demostración mantiene rutas permitidas',async()=>
   page.locator('#mobileBottom button:visible').count().then(n=>n===3));
 await page.evaluate(()=>{AJUSTES_VAL={};pickSede('central');});

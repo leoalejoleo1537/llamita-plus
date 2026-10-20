@@ -1,6 +1,6 @@
 # Mapa de objetivo — Inventario por áreas
 
-> Estado actualizado: 20 de octubre de 2026. B1 y B2 completados; B3 continúa pendiente. Las Fases 1, 2 y 3 del contrato operativo de stock están completadas; Fase 4 aún no está activa.
+> Estado actualizado: 20 de octubre de 2026. B1 y B2 completados; B3 continúa pendiente. Las Fases 1, 2, 3 y 4 del contrato operativo de stock están completadas; Fase 5 permanece pendiente y no activa.
 >
 > Este documento es el tablero de orientación del proyecto. No reemplaza la bitácora: resume qué ya existe, cuál es el siguiente frente y qué queda después.
 
@@ -40,7 +40,8 @@ INVENTARIO POR ÁREAS
 │   ├── C2. Reparto por destino y recepción por área               [x]
 │   └── C3. Urgencias manuales para reposición desde Bodega       [x]
 │
-├── D. Consumo por ventas                                          [PENDIENTE]
+├── D. Consumo por ventas                                          [EN CURSO]
+│   ├── D0. Lama directo: fuente, reserva y consumo ledger        [x]
 │   ├── D1. Lama: receta + área de producción                     [ ]
 │   ├── D2. Alertas de receta/área ambigua                         [ ]
 │   └── D3. Fudo como adaptador compatible                         [ ]
@@ -122,9 +123,13 @@ La migración `20261020003917_fase2_repartos_recepcion_areas` está instalada. L
 
 La Fase 3 quedó completada el 20 de octubre de 2026. La urgencia pertenece a una combinación producto–área, se marca y resuelve manualmente desde su ficha, incluye nota/actor/fecha y no cambia cantidades. Bodega ve las urgencias agrupadas por área y puede agregarlas al reparto conservando el destino correcto y el enlace explícito del producto. La migración instalada es `20261020102356_fase3_urgencias_producto_area`.
 
-## Siguiente nodo del contrato: Fase 4 — disponibilidad y reserva de stock en Lama
+## Completado: D0 — disponibilidad y reserva de stock directo en Lama
 
-PENDIENTE de activación específica. Debe mostrar disponibilidad vendible y resolver reservas, concurrencia, anulación e idempotencia sin comprometer el cierre comercial. B3 continúa siendo una tarea separada pendiente de activación.
+La Fase 4 quedó completada el 20 de octubre de 2026. Cada producto vendido directamente necesita una fuente explícita producto–área; el disponible es el saldo físico del ledger menos reservas activas. Confirmar comanda reserva atómicamente, cerrar consume una sola vez y anular libera o compensa. Una falla física inesperada no bloquea el cierre comercial: deja alerta auditable. Mesas es visible en teléfono para propietario raíz y cuentas con `puede_lama`; el permiso sigue siendo obligatorio.
+
+## Siguiente nodo del contrato: Fase 5 — recetas y combos multiárea
+
+PENDIENTE de activación específica. Debe resolver componentes, cantidades y ubicaciones autorizadas por receta sin inferir destinos ni descontar dos veces. B3 continúa siendo una tarea separada pendiente de activación.
 
 ## Invariantes: no romper
 

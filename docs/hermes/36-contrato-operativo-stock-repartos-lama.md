@@ -1,7 +1,7 @@
 # Contrato operativo — Ajustes, repartos y ventas por áreas
 
 **Fecha:** 19 de octubre de 2026  
-**Estado:** especificación aprobada; Fases 1, 2 y 3 completadas el 20 de octubre de 2026. Fase 4 continúa pendiente.
+**Estado:** especificación aprobada; Fases 1, 2, 3 y 4 completadas el 20 de octubre de 2026. Fase 5 continúa pendiente y no activa.
 **Repositorio:** `leoalejoleo1537/llamita-plus`  
 **Propósito:** convertir las decisiones conversadas en reglas que Codex pueda aplicar sin reinterpretar la operación de Brunetti.
 
@@ -260,6 +260,18 @@ La ficha del área permite marcar y resolver manualmente la urgencia; los produc
 ### Fase 4 — Lectura y validación de disponibilidad en Lama
 
 Mostrar stock disponible en selección de producto y bloquear adición/confirmación que exceda lo disponible. Resolver reserva/idempotencia/concurrencia y anulación, preservando cierre comercial independiente.
+
+#### Resultado técnico de Fase 4
+
+Completada e instalada con las migraciones `20261020112543_fase4_lama_reservas_stock` y `20261020113016_fase4_indices_fk`. Para productos directos, una configuración protegida vincula cada producto del catálogo de Mesas con una única configuración principal producto–área y su ubicación del ledger; no se infiere por nombre, no usa Bodega como origen y no altera recetas. La disponibilidad se calcula como saldo físico de esa ubicación menos reservas activas.
+
+`cuenta_confirmar` ahora reserva todas las líneas nuevas de forma atómica y rechaza toda la comanda si falta saldo o fuente. `item_anular` y `comanda_anular` liberan la reserva; si el consumo ya ocurrió, crean una entrada compensatoria auditable. Al cerrar la mesa, un trigger consume una sola vez las reservas mediante salidas FIFO del ledger. Si el motor físico falla inesperadamente, el cierre comercial continúa y queda una reserva en error más una alerta pendiente; nunca se fuerza un saldo negativo. Doble confirmación, cierre o anulación son idempotentes.
+
+Las tablas privadas de fuentes, auditoría, reservas, vínculos de movimiento y alertas tienen RLS forzada y no conceden DML a roles de aplicación. Las RPC públicas validan `auth.uid()` y `puede_lama`; la administración de fuentes exige además gobierno operativo. Mesas volvió a ser visible y navegable en teléfono para propietario raíz y cuentas con `puede_lama`, incluso en modo demostración, sin ampliar acceso a otras cuentas.
+
+La prueba SQL completa terminó con `ROLLBACK`: disponibilidad entre mesas, confirmación multilínea atómica, saldo insuficiente, fuente ausente, consumo, liberación, reversa, idempotencia, falla técnica recuperable, permisos y no negatividad. No quedaron fuentes, reservas ni alertas sintéticas. La línea base persistente permanece en 15.456 unidades proyectadas, 410 movimientos del ledger y cero eventos del motor Lama histórico. De los 321 productos activos del catálogo de Mesas, ninguno tenía fuente directa explícita al instalar la fase: los productos realmente directos deben configurarse en **Ajustes → Mesas**; productos preparados y combos permanecen para Fase 5.
+
+Fase 5 queda pendiente y no fue activada por este resultado.
 
 ### Fase 5 — Recetas multicomponente y consumo por ubicación
 

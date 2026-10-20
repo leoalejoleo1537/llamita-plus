@@ -8,7 +8,17 @@
 - **B3 — Alta/configuración manual de productos demo:** sigue PENDIENTE de activación explícita; no comenzar automáticamente.
 - Resultado detallado de B1: entrada superior de `docs/hermes/04-bitacora-codex.md`. Mapa completo: `docs/hermes/00-mapa-objetivo-inventario-areas.md`.
 
-Estado actual: **B1 y B2 completados; B3 pendiente de activación. Las Fases 1, 2 y 3 del contrato operativo de stock están COMPLETADAS. Fase 4 — disponibilidad y reserva de stock en Lama — queda PENDIENTE y no activa.** Local 1 conserva las lecturas del ledger, permite ajustar saldos mediante el motor auditado, recibe repartos dirigidos a cada área y prioriza manualmente reposición por producto/área. El frente móvil M2–M4 continúa pausado.
+Estado actual: **B1 y B2 completados; B3 pendiente de activación. Las Fases 1, 2, 3 y 4 del contrato operativo de stock están COMPLETADAS. Fase 5 — recetas y combos con ingredientes de una o varias áreas — queda PENDIENTE y no activa.** Local 1 conserva las lecturas del ledger, permite ajustar saldos mediante el motor auditado, recibe repartos dirigidos a cada área, prioriza reposición y reserva/consume productos directos desde Lama. El frente móvil M2–M4 continúa pausado salvo la restitución acotada del acceso a Mesas autorizada en Fase 4.
+
+### Contrato operativo — Fase 4: disponibilidad y reserva de stock directo en Lama
+
+- Estado: **COMPLETADA (2026-10-20)**. Fase 5 — recetas y combos multiárea — queda **PENDIENTE**, no activa.
+- Migraciones instaladas: `20261020112543_fase4_lama_reservas_stock` y `20261020113016_fase4_indices_fk`. El motor privado registra fuente directa, reservas, consumo/liberación, movimientos asociados y alertas con RLS forzada y sin DML del navegador.
+- La fuente de cada producto directo es explícita y apunta a una configuración principal producto–área. Disponibilidad = existencia del ledger en esa ubicación − reservas activas. Sin fuente o sin saldo, `cuenta_confirmar` rechaza toda la comanda; no se infiere otra área ni Bodega.
+- Confirmar reserva atómicamente; cerrar consume FIFO una sola vez; anular línea o comanda libera y una anulación posterior al consumo compensa en el ledger. Un fallo técnico de inventario permite el cierre comercial y genera alerta pendiente, sin saldo negativo.
+- UI: la carta muestra disponibilidad/fuente; **Ajustes → Mesas** permite configurar solo fuentes candidatas existentes; Mesas se ve y abre en móvil para raíz o `puede_lama`, incluso en demostración. Cuentas sin permiso siguen bloqueadas.
+- Al instalar, 0 de los 321 productos activos de Mesas tenían fuente directa configurada. Deben configurarse únicamente los productos realmente directos; preparados y combos permanecen para Fase 5.
+- Prueba SQL completa en `BEGIN … ROLLBACK`, prueba estática, suite completa, navegador móvil Chromium, grants/RLS/advisors y conteos pasaron. No quedaron reservas, fuentes o alertas sintéticas y el stock persistente permaneció en 15.456.
 
 ### Contrato operativo — Fase 3: urgencias manuales por área
 

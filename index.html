@@ -1500,6 +1500,27 @@
     width:100%;text-align:left;font-family:inherit}
   .lama-arq-pill b{color:var(--text)}
   .lama-arq-pill:active{transform:scale(.99)}
+  .lama-stock-alerta{display:flex;align-items:center;gap:10px;background:var(--red-bg);
+    color:var(--red-fg);border-radius:13px;padding:11px 14px;margin-bottom:12px;
+    font-size:13.5px;font-weight:750}
+  .lama-stock-alerta span{flex:1}
+  .lama-fuentes-resumen{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+  .lama-fuentes-resumen span{background:var(--sec-bg);border-radius:999px;
+    padding:6px 10px;font-size:12px;font-weight:750;color:var(--muted)}
+  .lama-fuentes-buscar{width:100%;border:1px solid var(--linea);background:var(--card);
+    color:var(--text);border-radius:11px;padding:10px 12px;font:inherit;margin-top:10px}
+  .lama-fuente-fila{display:grid;grid-template-columns:minmax(150px,1fr) minmax(220px,1.4fr) auto;
+    gap:9px;align-items:center;padding:10px 0;border-top:1px solid var(--linea)}
+  .lama-fuente-fila:first-child{border-top:0}
+  .lama-fuente-fila .dato{min-width:0}
+  .lama-fuente-fila .dato b,.lama-fuente-fila .dato span{display:block}
+  .lama-fuente-fila .dato b{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lama-fuente-fila .dato span{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .lama-fuente-fila select{min-width:0;width:100%;border:1px solid var(--linea);border-radius:9px;
+    background:var(--card);color:var(--text);padding:8px;font:inherit;font-size:12.5px}
+  .lama-fuente-fila button{border:0;border-radius:9px;background:var(--orange);color:#fff;
+    padding:8px 11px;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+  @media(max-width:719px){.lama-fuente-fila{grid-template-columns:1fr}.lama-fuente-fila button{width:100%}}
 
   /* Los campos y botones que comparten el arqueo nuevo y Movimientos. */
   .arq-campo{margin:0 0 13px}
@@ -1771,6 +1792,9 @@
   .lama-prod:active{transform:scale(.99)}
   .lama-prod .nm{flex:1;min-width:0;font-size:15px;font-weight:700;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lama-prod .nm small{display:block;margin-top:3px;color:var(--muted);font-size:11.5px;
+    font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lama-prod .nm small.sin-fuente{color:var(--red-fg)}
   .lama-prod .pr{flex:0 0 auto;font-size:14.5px;font-weight:800;color:var(--text);
     font-variant-numeric:tabular-nums}
   .lama-prod .mas{flex:0 0 auto;width:32px;height:32px;border-radius:50%;background:var(--bg);
@@ -2793,7 +2817,6 @@
      todo el ancho que se gana se lo lleva el contenido. Es lo mismo que ya
      hace `#view-lama`. */
   #view-ajustes{max-width:none;padding-left:18px;padding-right:18px}
-  body.demo-activo .tab[data-tab="lama"],
   body.demo-activo .tab[data-tab="arqueo"],
   body.demo-activo .tab[data-tab="movcaja"],
   body.demo-activo .tab[data-tab="recetas"],
@@ -3896,6 +3919,7 @@
      pregunta personas, cliente, garzón y un comentario de mesa. Ninguna se
      mira después. Acá abrir una mesa es UN toque. -->
 <div class="wrap" id="view-lama" style="display:none">
+  <div id="lama-stock-banner"></div>
   <!-- El estado de caja ocupa todo el ancho; en teléfono el plano es un riel
        estrecho y allí el aviso y su botón quedaban ilegibles. -->
   <div id="lama-arq-banner"></div>
@@ -4981,7 +5005,7 @@ function aplicarPermisos(){
      corre al final de pickSede—, y si se decidiera allá la pestaña no
      aparecería hasta cambiar de sede. */
   const tl = $('tabLama');
-  const hayLama = !!(PERMISOS.puede_lama && SEDE && SEDE !== 'central' && !modoDemo());
+  const hayLama = !!(PERMISOS.puede_lama && SEDE && SEDE !== 'central');
   if(tl) tl.style.display = hayLama ? '' : 'none';
   if(!hayLama && vistaActual === 'lama') pickTab('inv');
   /* Arqueo y Movimientos de caja son del mismo permiso que Mesas — cuadrar
@@ -7597,6 +7621,8 @@ let LAMA_EDITA   = false;   // ¿está puesto el modo edición del plano?
 let LAMA_SEL     = null;    // id de la mesa abierta en el panel
 let LAMA_PAPEL   = null;    // el texto de la última comanda o precuenta
 let LAMA_CARTA   = [];      // el catálogo vendible de esta sede
+let LAMA_DISP    = new Map(); // disponibilidad ledger menos reservas, por id de catálogo
+let LAMA_STOCK_ALERTAS = []; // cierres comerciales cuyo consumo requiere revisión
 let LAMA_Q       = '';      // lo escrito en el buscador de la carta completa
 let LAMA_QP      = '';      // y lo escrito en el buscador del panel de la mesa
 let LAMA_QP_IDX  = -1;      // la fila marcada con las flechas en esa lista (-1 = ninguna)
@@ -7684,6 +7710,30 @@ const lamaMioEmpieza = () => { LAMA_MIO++; };
 const lamaMioTermina = () => { LAMA_MIO--; LAMA_MIO_HASTA = Date.now() + 500; };
 const lamaEsEcoPropio = () => LAMA_MIO > 0 || Date.now() < LAMA_MIO_HASTA;
 
+function lamaAplicarDisponibilidad(){
+  for(const p of LAMA_CARTA){
+    const d=LAMA_DISP.get(String(p.fudo_product_id));
+    p.stock_estado=d?.estado_fuente||'sin_fuente';
+    p.stock_disponible=Number(d?.disponible||0);
+    p.stock_area=d?.area||null;
+  }
+}
+async function lamaCargarStock(){
+  if(SEDE!=='plaza'||!PERMISOS.puede_lama){LAMA_DISP=new Map();LAMA_STOCK_ALERTAS=[];return;}
+  const [d,a]=await Promise.all([
+    sb.rpc('lama_fuentes_directas_listar'),sb.rpc('lama_stock_alertas_listar')
+  ]);
+  if(!d.error)LAMA_DISP=new Map((d.data||[]).map(x=>[String(x.fudo_product_id),x]));
+  if(!a.error)LAMA_STOCK_ALERTAS=a.data||[];
+  lamaAplicarDisponibilidad();
+}
+
+function lamaPintarStockBanner(){
+  const caja=$('lama-stock-banner');if(!caja)return;
+  const n=LAMA_STOCK_ALERTAS.length;
+  caja.innerHTML=n?`<div class="lama-stock-alerta"><span>${n} cierre${n===1?'':'s'} con inventario pendiente de revisar. La caja sí quedó cerrada.</span></div>`:'';
+}
+
 async function lamaCargar(forzar){
   if(!SEDE || SEDE === 'central') return;
   if(!forzar && lamaEsEcoPropio()) return;   // es mi propio eco: ya lo pinté
@@ -7723,6 +7773,7 @@ async function lamaCargar(forzar){
       LAMA_CARTA = (pp.data || []).filter(p => p.nombre && +p.precio > 0);
       LAMA_CARTA_SEDE = SEDE;
     }
+    await lamaCargarStock();
     if(!LAMA_SALON) LAMA_SALON = (LAMA_MESAS[0] || {}).salon || 'Salón';
     /* La página elegida se recuerda mientras siga existiendo: si alguien la
        borra desde otro teléfono, se cae a la primera en vez de dejar el plano
@@ -8682,7 +8733,7 @@ function lamaPintar(){
   lamaArqEngancharUnaVez();
   lamaPintarPlano(); lamaPintarPanel(); lamaPintarFab();
   lamaPintarCarta(); lamaPintarPP();
-  lamaArqPintarBanner();
+  lamaArqPintarBanner(); lamaPintarStockBanner();
 }
 
 /* EL TAMAÑO DE LAS MESAS — lo elige quien mira, no el código.
@@ -9265,6 +9316,10 @@ function lamaCanasta(texto, boton){
    otra vez el mismo producto y confiar en que estaba sumando. */
 function lamaFilaCarta(p, puestos){
   const n = puestos[p.nombre] || 0;
+  const fuenteOk=p.stock_estado==='configurada';
+  const stockInfo=fuenteOk
+    ? `${fmt(p.stock_disponible)} disponibles · ${p.stock_area||'Local 1'}`
+    : 'Sin área de inventario para venta';
   /* EN 1, EL MENOS SE VUELVE UN BASURERO. Pedido de Jhon (2026-09-03): restar
      de 2 a 1 y restar de 1 a 0 se ven idénticos, y no son lo mismo — el
      segundo BORRA el producto del pedido. Un símbolo que no distingue entre
@@ -9277,7 +9332,7 @@ function lamaFilaCarta(p, puestos){
   const uno = n > 0 && lamaMenosBorra(p.nombre);
   return `<button type="button" class="lama-prod${n?' puesto':''}"
             data-lamaadd="${esc(p.fudo_product_id)}">
-    <span class="nm">${esc(p.nombre)}</span>
+    <span class="nm">${esc(p.nombre)}<small class="${fuenteOk?'':'sin-fuente'}">${esc(stockInfo)}</small></span>
     <span class="pr">${plata(p.precio)}</span>
     ${n ? `<span class="paso">
         <span class="${uno?'is-trash':''}" data-lamacartamenos="${esc(p.nombre)}"
@@ -9538,6 +9593,10 @@ async function lamaGuardarPP(){
   if(cantidad <= 0) return lamaQuitar(itemId);
   const limpio = comentario.trim() || null;
   if(cantidad === +it.cantidad && limpio === (it.comentario || null)) return;
+  if(it.estado === 'confirmado' && cantidad !== +it.cantidad){
+    avisar('La cantidad ya está reservada. Anula esta línea y agrega la cantidad correcta.');
+    return;
+  }
   /* Si ya salió a la cocina, se avisa: el papel se imprimió sin ese cambio. */
   if(it.estado === 'confirmado' && !await preguntar('Ya salió a la cocina',
       'El cambio queda guardado, pero la comanda ya se imprimió. Avísale a quien lo esté preparando.',
@@ -9830,6 +9889,7 @@ async function lamaConfirmar(){
   LAMA_PAPEL = lamaComandaTxt(lamaMesaDe(LAMA_SEL), cm);
   await lamaEncolar('comanda', LAMA_PAPEL, c.id);
   await lamaCargarItems(true);
+  await lamaCargarStock();
   lamaPintar();
   aviso('✓ Comanda #' + cm.numero);
 }
@@ -9914,10 +9974,13 @@ async function lamaCerrar(){
      no protege de nada. */
   const r = await lamaLlamar('cuenta_cerrar', {p_cuenta_id: c.id, p_quien: NOMBRE});
   if(!r) return;
+  await lamaCargarStock();
   LAMA_CUENTAS = LAMA_CUENTAS.filter(x => x.id !== c.id);
   LAMA_SEL = null; LAMA_PAPEL = null; LAMA_ITEMS = [];
   lamaPintar();
-  aviso('✓ Mesa ' + m.numero + ' cerrada');
+  aviso(LAMA_STOCK_ALERTAS.some(x=>+x.cuenta_id===+c.id)
+    ? 'Mesa cerrada · inventario pendiente de revisar'
+    : '✓ Mesa ' + m.numero + ' cerrada');
 }
 
 
@@ -10886,10 +10949,13 @@ async function lamaCobrarConfirmar(boton){
     /* Si la base se negó, se queda todo como está: el mensaje ya salió y la
        mesa NO se cierra. Nunca se cae al camino viejo desde acá. */
     if(!r){ boton.disabled = false; return; }
+    await lamaCargarStock();
     LAMA_CUENTAS = LAMA_CUENTAS.filter(x => x.id !== c.id);
     LAMA_COB = null; LAMA_SEL = null; LAMA_PAPEL = null; LAMA_ITEMS = [];
     lamaPintarCobro(); lamaPintar();
-    aviso('✓ Mesa ' + m.numero + ' cobrada · ' + plata(total));
+    aviso(LAMA_STOCK_ALERTAS.some(x=>+x.cuenta_id===+c.id)
+      ? 'Mesa cobrada · inventario pendiente de revisar'
+      : '✓ Mesa ' + m.numero + ' cobrada · ' + plata(total));
     return;
   }
 
@@ -10906,10 +10972,13 @@ async function lamaCobrarConfirmar(boton){
 
   const r2 = await lamaLlamar('cuenta_cerrar', {p_cuenta_id: c.id, p_quien: NOMBRE});
   if(!r2) return;
+  await lamaCargarStock();
   LAMA_CUENTAS = LAMA_CUENTAS.filter(x => x.id !== c.id);
   LAMA_COB = null; LAMA_SEL = null; LAMA_PAPEL = null; LAMA_ITEMS = [];
   lamaPintarCobro(); lamaPintar();
-  aviso('Mesa ' + m.numero + ' cerrada, sin el detalle del pago');
+  aviso(LAMA_STOCK_ALERTAS.some(x=>+x.cuenta_id===+c.id)
+    ? 'Mesa cerrada · inventario pendiente de revisar'
+    : 'Mesa ' + m.numero + ' cerrada, sin el detalle del pago');
 }
 
 /* ==================================================================
@@ -15764,6 +15833,51 @@ async function lamaImpPrueba(){
   await lamaImpCargar();
 }
 
+let LAMA_FUENTES_CFG=[];
+let LAMA_FUENTES_CAND=[];
+let LAMA_FUENTES_Q='';
+
+async function ajLamaFuentesCargar(){
+  const caja=$('aj-lama-stock');if(!caja)return;
+  caja.innerHTML='<div class="cfg-vacio">Cargando fuentes…</div>';
+  const [f,c]=await Promise.all([
+    sb.rpc('lama_fuentes_directas_listar'),sb.rpc('lama_fuentes_candidatas_listar')
+  ]);
+  if(f.error||c.error){
+    caja.innerHTML=`<div class="cfg-vacio">No se pudieron cargar las fuentes de inventario.<br><span style="font-size:12px">${esc((f.error||c.error)?.message||'')}</span></div>`;
+    return;
+  }
+  LAMA_FUENTES_CFG=f.data||[];LAMA_FUENTES_CAND=c.data||[];
+  ajLamaFuentesPintar();
+}
+
+function ajLamaFuentesPintar(){
+  const caja=$('aj-lama-stock');if(!caja)return;
+  const q=normNombre(LAMA_FUENTES_Q);
+  const lista=LAMA_FUENTES_CFG.filter(x=>!q||normNombre(x.nombre).includes(q)).slice(0,80);
+  const configuradas=LAMA_FUENTES_CFG.filter(x=>x.estado_fuente==='configurada').length;
+  const opciones=actual=>'<option value="">Sin fuente definida</option>'+LAMA_FUENTES_CAND.map(c=>
+    `<option value="${c.asignacion_id}"${String(c.asignacion_id)===String(actual)?' selected':''}>${esc(c.producto)} · ${esc(c.area)} · ${fmt(c.disponible)} disp.</option>`).join('');
+  caja.innerHTML=`<input class="lama-fuentes-buscar" id="lama-fuentes-q" placeholder="Buscar producto de Mesas…" value="${esc(LAMA_FUENTES_Q)}">
+    <div class="lama-fuentes-resumen"><span>${configuradas} configurados</span><span>${LAMA_FUENTES_CFG.length-configuradas} requieren fuente</span></div>
+    <div>${lista.length?lista.map(x=>`<div class="lama-fuente-fila" data-fudo="${esc(x.fudo_product_id)}">
+      <div class="dato"><b>${esc(x.nombre)}</b><span>${x.estado_fuente==='configurada'?esc(x.area)+' · '+fmt(x.disponible)+' disponibles':'No se puede confirmar hasta configurarlo'}</span></div>
+      <select aria-label="Fuente de ${esc(x.nombre)}">${opciones(x.asignacion_id)}</select>
+      <button type="button" data-lama-fuente-guardar="${esc(x.fudo_product_id)}">Guardar</button>
+    </div>`).join(''):'<div class="cfg-vacio">Nada con ese nombre.</div>'}</div>`;
+}
+
+async function ajLamaFuenteGuardar(fudoId,boton){
+  const fila=boton.closest('[data-fudo]');const valor=fila?.querySelector('select')?.value||null;
+  boton.disabled=true;
+  const r=await lamaLlamar('lama_fuente_directa_guardar',{
+    p_fudo_product_id:String(fudoId),p_asignacion_id:valor
+  });
+  if(!r){boton.disabled=false;return;}
+  await ajLamaFuentesCargar();await lamaCargarStock();
+  aviso(valor?'Fuente de inventario guardada':'Fuente de inventario quitada');
+}
+
 function ajMesasHTML(){
   return `<div class="aj-caja">
       <h3>Tamaño de las mesas</h3>
@@ -15774,6 +15888,11 @@ function ajMesasHTML(){
     <div class="aj-caja">
       <h3>Medios de pago, motivos y anulados</h3>
       <div id="lama-cfg"></div>
+    </div>
+    <div class="aj-caja">
+      <h3>Inventario para venta directa</h3>
+      <p class="aj-nota">Vincula cada producto vendido directamente con su producto y área principal. No se relaciona por nombre y no mueve stock.</p>
+      <div id="aj-lama-stock"></div>
     </div>`;
 }
 
@@ -15806,6 +15925,19 @@ function ajMesasMontar(){
      "Cargando…" que no se mueve. */
   LAMA_CFG_EDIT = null;
   lamaCfgTab(LAMA_CFG_TAB);
+  ajLamaFuentesCargar();
+  const fuentes=$('aj-lama-stock');
+  fuentes?.addEventListener('input',e=>{
+    if(e.target.id==='lama-fuentes-q'){
+      LAMA_FUENTES_Q=e.target.value;
+      const pos=e.target.selectionStart;ajLamaFuentesPintar();
+      requestAnimationFrame(()=>{const q=$('lama-fuentes-q');q?.focus();q?.setSelectionRange(pos,pos);});
+    }
+  });
+  fuentes?.addEventListener('click',e=>{
+    const b=e.target.closest('[data-lama-fuente-guardar]');
+    if(b)ajLamaFuenteGuardar(b.dataset.lamaFuenteGuardar,b);
+  });
 }
 
 
@@ -17572,13 +17704,14 @@ async function ajDeshacerFusion(id){
 let AJUSTES_VAL = null;
 /* La sede vacía de public.ajustes significa alcance global. Mientras llega la
    lectura se mantiene la navegación de inventario; después manda la base. */
-const DEMO_VISTAS = new Set(['inv','reparto','recepcion','envios','aplaza','hist','mermas','ajustes']);
+const DEMO_VISTAS = new Set(['inv','reparto','recepcion','envios','aplaza','hist','mermas','ajustes','lama']);
 function modoDemo(){ return AJUSTES_VAL === null || !!ajVal('modo_demostracion', '', false); }
 function demoPermiteVista(tab){
   if(!DEMO_VISTAS.has(tab)) return false;
   if(tab==='reparto') return SEDE !== 'central';
   if(tab==='recepcion' || tab==='envios') return SEDE === 'central';
   if(tab==='aplaza') return SEDE === 'angamos';
+  if(tab==='lama') return !!(PERMISOS.puede_lama && SEDE && SEDE!=='central');
   if(tab==='ajustes') return !!PERMISOS.puede_ajustes;
   return true;
 }
@@ -18414,6 +18547,8 @@ function pickTab(tab){
   if(tab==='inv'&&vistaActual==='inv'&&areaActual!==null){cambiarArea(null);return;}
   if(!sedeActiva(SEDE)){ showGate(); return; }
   if(tab==='aplaza' && !sedeActiva('angamos')) tab='inv';
+  if((tab==='lama'||tab==='arqueo'||tab==='movcaja')
+      && !(PERMISOS.puede_lama&&SEDE&&SEDE!=='central')) tab='inv';
   if(modoDemo() && !demoPermiteVista(tab)) tab='inv';
   /* En Bodega "Reparto" ya no existe como pestaña: son dos. Si algo llama
      con el nombre viejo, se manda a la de recibir en vez de dejar la
