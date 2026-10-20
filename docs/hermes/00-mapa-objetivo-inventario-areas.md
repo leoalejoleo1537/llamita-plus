@@ -1,6 +1,6 @@
 # Mapa de objetivo — Inventario por áreas
 
-> Estado actualizado: 13 de octubre de 2026. B1 y B2 completados; B3 es el siguiente nodo, pendiente de activación explícita.
+> Estado actualizado: 20 de octubre de 2026. B1 y B2 completados; B3 continúa pendiente. La Fase 1 del contrato operativo de stock está completada y Fase 2 aún no está activa.
 >
 > Este documento es el tablero de orientación del proyecto. No reemplaza la bitácora: resume qué ya existe, cuál es el siguiente frente y qué queda después.
 
@@ -35,9 +35,9 @@ INVENTARIO POR ÁREAS
 │   ├── B2. Recuperar interfaz histórica dentro de cada área      [x]
 │   └── B3. Alta/configuración manual de productos demo           [→ SIGUIENTE; PENDIENTE DE ACTIVACIÓN]
 │
-├── C. Operación física                                            [PENDIENTE]
-│   ├── C1. Ajuste de cantidad auditado                            [ ]
-│   ├── C2. Reparto: preparar → despachar → recibir               [ ]
+├── C. Operación física                                            [EN CURSO]
+│   ├── C1. Conteo y ajuste manual auditado                         [x]
+│   ├── C2. Reparto por destino y recepción por área               [→ SIGUIENTE; PENDIENTE DE ACTIVACIÓN]
 │   └── C3. Críticos, vencimientos y conteos por área             [ ]
 │
 ├── D. Consumo por ventas                                          [PENDIENTE]
@@ -89,7 +89,7 @@ Tarjeta de área → pantalla operativa del área
                 → modal/ficha existente adaptada al ledger
 ```
 
-La pantalla muestra tanto productos configurados sin saldo como saldos físicos aún sin configuración. Las cantidades son de lectura hasta C1. La ficha abierta desde un área conserva vencimientos y muestra su saldo del ledger; no permite editar stock, lotes, mermas, reparto ni Fudo. El gesto legacy de swipe queda desactivado en las áreas para no disparar esas acciones.
+La pantalla muestra tanto productos configurados sin saldo como saldos físicos aún sin configuración. El saldo visible procede del ledger; la ficha permite corregir el conteo por la RPC auditada de C1, pero no reabre la edición directa de `productos.stock_actual` ni habilita lotes legacy, mermas, reparto o Fudo. El gesto legacy de swipe sigue desactivado en las áreas.
 
 La pantalla de área dispone de cuatro filtros de lista en la misma vista: Críticos (bajo mínimo o sin saldo), Sobre-stock (sobre máximo), Sin límites (mínimo o máximo faltante) y Vencimientos (vencidos y próximos a vencer separados). Se adaptan a 4/2/1 columnas según ancho. El flujo de agregado desde Bodega permite seleccionar o crear una sección física desde un panel lateral; las secciones no contienen cantidades.
 
@@ -97,7 +97,7 @@ La pantalla de área dispone de cuatro filtros de lista en la misma vista: Crít
 
 Al entrar a Cafetería, una persona puede navegar el patrón histórico completo y abrir una ficha de producto desde una sección, aunque el saldo sea cero. B2 no reimplementó el motor de vinculación B1 ni reactivó ediciones legacy de stock. El alta desde Bodega oculta IDs y detalles internos, reutiliza automáticamente la única representación enlazada y confirma explícitamente las alternativas reales; nunca muestra una ficha enlazada a otro maestro.
 
-## Siguiente nodo: B3 — Onboarding demo (pendiente de activación)
+## B3 — Onboarding demo (pendiente de activación; tarea separada)
 
 La persona responsable de cada área configura manualmente su catálogo real:
 
@@ -107,6 +107,14 @@ La persona responsable de cada área configura manualmente su catálogo real:
 - no necesita clasificar todo el catálogo histórico por adelantado.
 
 La clasificación automática mediante Excel/IA queda **postergada**. No es necesaria para la demo.
+
+## Completado: C1 — conteo y ajuste manual auditado
+
+La Fase 1 del contrato 36 quedó completada el 20 de octubre de 2026. Desde la ficha se puede ingresar el saldo contado para Bodega central o para la ubicación de Local 1 abierta. Los productos con lotes muestran líneas por lote y vencimiento, además del bucket independiente **Sin lote / vencimiento no informado**. El servidor calcula los deltas, bloquea producto/ubicación, guarda la auditoría y actualiza el ledger; el trigger mantiene `productos.stock_actual` como proyección. La migración `20261020000825_fase1_ajustes_manual_ledger` está instalada. Los conteos SQL y demás evidencia están en la entrada más reciente de Bitácora.
+
+## Siguiente nodo del contrato: Fase 2 — recepción por área
+
+PENDIENTE de activación específica. Debe preparar repartos con un destino claro y cada área debe recibir sus propias líneas, registrando cantidad total, parcial o excedente sin dejar saldos negativos ni diferencias silenciosas. B3 continúa siendo una tarea separada pendiente de activación.
 
 ## Invariantes: no romper
 

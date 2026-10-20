@@ -1,14 +1,27 @@
 # Cola de trabajo de Codex
 
-## Estado del árbol de Inventario por Áreas — 2026-10-13
+## Estado del árbol de Inventario por Áreas — 2026-10-20
 
 - **B1 — Maestro de Bodega → representación Local 1:** COMPLETADO en el commit `e7f0f40892ab2d190426ed4a07b4853890a3171c`; las dos migraciones están instaladas y las RPC verificadas en Llamita Plus.
 - **B2 — Recuperar la interfaz histórica dentro de cada área:** COMPLETADO y refinado en esta ejecución. Se recuperaron grupos/píldoras de tipo, acordeones de sección, filas de inventario y ficha adaptada al ledger; se añadieron cuatro filtros de estado responsivos y un panel de secciones dentro del flujo de agregado desde Bodega.
 - **Corrección visual posterior:** la regla de dos columnas compartida estaba partiendo la lista del área. Se corrigió a flujo vertical, se agregó encabezado y apertura inicial de la primera sección, y se verificó en Chromium/Playwright sobre el despliegue de producción y en tres tamaños, con datos de presentación en memoria.
-- **Siguiente nodo: B3 — Alta/configuración manual de productos demo.** PENDIENTE de activación explícita; no comenzar automáticamente.
+- **B3 — Alta/configuración manual de productos demo:** sigue PENDIENTE de activación explícita; no comenzar automáticamente.
 - Resultado detallado de B1: entrada superior de `docs/hermes/04-bitacora-codex.md`. Mapa completo: `docs/hermes/00-mapa-objetivo-inventario-areas.md`.
 
-Estado actual: **B1 y B2 COMPLETADOS (2026-10-13); B3 ES EL SIGUIENTE NODO, PENDIENTE DE ACTIVACIÓN**. Local 1 ya dispone de una pantalla de inventario por área con cantidades exclusivamente desde el ledger. La carga inicial, ajustes auditados, reparto, despacho, recepción y transferencias visuales siguen **PENDIENTES** y no se activan automáticamente. El frente móvil M2–M4 continúa pausado.
+Estado actual: **B1 y B2 completados; B3 pendiente de activación. La Fase 1 del contrato operativo de stock está COMPLETADA; Fase 2 está PENDIENTE y no activa.** Local 1 conserva las lecturas del ledger y ahora permite ajustar saldos mediante el motor auditado. La carga inicial, repartos, despacho, recepción y transferencias visuales no se activan automáticamente. El frente móvil M2–M4 continúa pausado.
+
+### Contrato operativo — Fase 1: ajustes manuales auditados
+
+- Estado: **COMPLETADA (2026-10-20)**. Fase 2 — recepción por área — queda **PENDIENTE**, no activa.
+- Migración instalada en Llamita Plus: `20261020000825_fase1_ajustes_manual_ledger`.
+- Motor: `stock_ajuste_guardar` registra deltas de tipo `ajuste` por saldo contado; `stock_ajuste_desglose_leer` entrega saldos por ubicación y lote. Ambas RPC requieren sesión; la escritura además exige `puede_editar`.
+- La operación bloquea producto/ubicación, exige cantidades no negativas, acepta decimales, conserva referencias idempotentes y registra solicitudes sin delta. En productos lotificados separa lotes conocidos del bucket `Sin lote / vencimiento no informado`.
+- UI: la ficha/modal ofrece conteo en Bodega central y en cualquier ubicación abierta de Local 1 a quien tenga `puede_editar`. El campo legacy de saldo directo continúa deshabilitado. Los saldos se leen del ledger; `productos.stock_actual` permanece como proyección.
+- Rollback técnico: disponible solo mientras no existan ajustes persistentes; después corresponde una corrección nueva auditada, nunca borrar movimientos.
+- Verificación SQL `BEGIN … ROLLBACK`: ajustes positivo/negativo, lote conocido, sin lote, decimal, saldo negativo, referencia idempotente y distinta, conteo sin cambio, proyección, autorización y conteos fuera de alcance. Cero ajustes/movimientos sintéticos persistentes.
+- Conteos observados tras rollback: 1.438 productos; proyección `stock_actual` 15.438; ledger neto 9.316,70 y 408 movimientos; 42 lotes; 0 transferencias; 396 recetas; 15.357 movimientos locales Fudo; 0 eventos Lama; 2 movimientos de caja. Diferencias de proyección central/plaza: 0.
+- `npm test` fue ejecutado y terminó con error en la aserción preexistente y rígida de `pruebas/ajustes-navegacion.mjs`, que espera un cuerpo anterior de `pickTab`; el cambio de esta fase no toca esa función. La nueva prueba estática y `pruebas/pantalla-sana.mjs` pasan. Los casos visuales de navegador se omitieron porque no hay Chromium en el entorno.
+- No se ejecutó Fase 2 ni se modificaron Fudo, Lama, caja, recetas, repartos, transferencias ni Bodega legacy. Café del Desierto / Llamita Stock no fue consultado ni modificado.
 
 ### Tarea B2 — Recuperación de interfaz de inventario por área
 

@@ -19,13 +19,15 @@ const catalogo=areas.filter(x=>x!=='sin_asignar').map((codigo,i)=>({id:`area-${i
 const saldos={'1|cafeteria':3,'1|barra':2,'1|sin_asignar':5,'2|sin_asignar':7};
 const lectura=areas.flatMap((codigo,i)=>productos.filter(p=>p.sede==='plaza').map(p=>({
   area_codigo:codigo,area_nombre:nombres[codigo],area_orden:i,
+  area_id:codigo==='sin_asignar'?null:catalogo.find(a=>a.codigo===codigo)?.id||null,
+  ubicacion_id:`loc-${codigo}`,configurado:codigo==='cafeteria',es_principal:codigo==='cafeteria',
   producto_id:p.id,producto:p.producto,rubro:p.rubro,tipo:p.tipo,unidad:p.unidad,
   cantidad:saldos[`${p.id}|${codigo}`]||0,
 })));
 const permisos=[{correo:'lectura@test.invalid',nombre:'Lectura',puede_editar:true,puede_fudo:false,puede_ajustes:true,puede_lama:false}];
 const page=await browser.newPage();
 await page.addInitScript(({productos,permisos,lectura,catalogo})=>{
-  window.__writes=[];window.__rpc=[];
+  window.__writes=[];window.__rpc=[];window.__rpcArgs=[];
   const SES={user:{id:'b3-read-user',email:'lectura@test.invalid',user_metadata:{nombre:'Lectura'}}};
   const tables={productos,app_permisos:permisos,secciones:[],ajustes:[],metas:[],tareas:[],
     fudo_sync:[],producto_lotes:[],repartos:[],reparto_items:[],mermas:[],recetas:[],
@@ -45,7 +47,16 @@ await page.addInitScript(({productos,permisos,lectura,catalogo})=>{
   }
   window.supabase={createClient:()=>({
     from:query,
-    rpc:(name)=>{window.__rpc.push(name);return Promise.resolve({data:name==='stock_leer_areas'?lectura:name==='areas_operativas_listar'?catalogo:[],error:null});},
+    rpc:(name,args)=>{
+      window.__rpc.push(name);window.__rpcArgs.push({name,args});
+      if(name==='stock_ajuste_desglose_leer'){
+        const central=args?.p_ubicacion_id==null;
+        const cantidad=central?17:(args?.p_producto_id===1?3:0);
+        return Promise.resolve({data:{producto_id:args?.p_producto_id,sede:central?'central':'plaza',ubicacion_id:args?.p_ubicacion_id||'loc-bodega',tiene_lotes:false,saldo_total:cantidad,lotes:[{clave:'sin_lote',lote_id:null,vencimiento:null,etiqueta:'Stock físico',cantidad}]},error:null});
+      }
+      if(name==='stock_ajuste_guardar')return Promise.resolve({data:{repetido:false,lineas:[{diferencia:0.25}]},error:null});
+      return Promise.resolve({data:name==='stock_leer_areas'?lectura:name==='areas_operativas_listar'?catalogo:[],error:null});
+    },
     auth:{getSession:async()=>({data:{session:SES}}),getUser:async()=>({data:{user:SES.user}}),
       onAuthStateChange(cb){setTimeout(()=>cb&&cb('SIGNED_IN',SES),0);return {data:{subscription:{unsubscribe(){}}}};},
       signInWithPassword:async()=>({data:{session:SES},error:null}),signOut:async()=>({})},
@@ -168,6 +179,22 @@ await check('buscar leche en Cafetería aísla la lectura a esa ubicación',asyn
     &&(await leche.locator('.area-unit').innerText())==='L'
     &&!t.includes('Azúcar blanca')&&!t.includes('999');
 });
+await page.locator('#list .row[data-row="1"] [data-open]').click();
+await page.waitForSelector('#m-ajuste-panel:not([hidden])');
+await check('ficha de área ofrece conteo decimal con saldo y motivo inicial',async()=>
+  await page.locator('#m-ajuste-lineas').innerText().then(t=>t.includes('Saldo actual: 3'))
+  &&await page.locator('#m-ajuste-motivo').inputValue()==='Conteo/corrección manual'
+  &&await page.locator('#m-ajuste-lineas input').getAttribute('step')==='any'
+  &&await page.locator('#m-stock').isDisabled());
+await page.locator('#m-ajuste-lineas input[data-ajuste-clave="sin_lote"]').fill('3.25');
+await page.locator('#m-ajuste-guardar').click();
+await page.waitForSelector('#overlay:not(.open)');
+await check('guardar usa la RPC protegida con ubicación, decimal y no hace DML directo',async()=>{
+  const llamada=await page.evaluate(()=>window.__rpcArgs.findLast(x=>x.name==='stock_ajuste_guardar'));
+  return llamada?.args?.p_producto_id===1&&llamada.args.p_ubicacion_id==='loc-cafeteria'
+    &&llamada.args.p_conteos.sin_lote===3.25
+    &&await page.evaluate(()=>window.__writes.length===0);
+});
 
 await page.evaluate(()=>cambiarArea(null));
 await page.click('.area-secondary-view[data-area-open="__todas__"]');
@@ -193,6 +220,12 @@ await page.locator('#list .sec-btn').first().click();
 await check('Bodega conserva la lista de Inventario y su saldo actual',async()=>
   (await page.locator('#list').innerText()).includes('Leche Bodega')
   && !(await page.locator('#areaNav').isVisible()));
+await page.locator('#list [data-open="3"]').click();
+await page.waitForSelector('#m-ajuste-panel:not([hidden])');
+await check('Bodega muestra su conteo del ledger y mantiene bloqueado el campo legacy',async()=>
+  (await page.locator('#m-ajuste-lineas').innerText()).includes('Saldo actual: 17')
+  &&await page.locator('#m-stock').isDisabled()
+  &&(await page.evaluate(()=>window.__rpcArgs.findLast(x=>x.name==='stock_ajuste_desglose_leer').args.p_ubicacion_id))===null);
 await check('sin errores de JavaScript en navegador',async()=>errors.length===0||errors.join('; '));
 
 await browser.close();

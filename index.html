@@ -458,6 +458,22 @@
 .area-ficha-resumen[hidden]{display:none}
   .area-ficha-resumen div{display:flex;justify-content:space-between;gap:12px;font-size:13px}
   .area-ficha-resumen span{color:var(--muted)}.area-ficha-venc{display:block!important}
+.stock-adjustment{margin:12px 0;padding:13px;border-radius:13px;background:var(--card);box-shadow:var(--sombra);border:1px solid var(--border)}
+.stock-adjustment[hidden]{display:none}
+.stock-adjustment-head{margin:0 0 4px;font-size:15px;font-weight:800;color:var(--text)}
+.stock-adjustment-help{margin:0 0 10px;font-size:12px;color:var(--muted);line-height:1.4}
+.stock-adjustment-caption{display:grid;grid-template-columns:minmax(0,1fr) minmax(88px,120px);gap:10px;padding:0 0 4px;color:var(--muted);font-size:10px;font-weight:750}
+.stock-adjustment-caption span:last-child{text-align:right}
+.stock-adjustment-lines{display:grid;gap:8px}
+.stock-adjustment-line{display:grid;grid-template-columns:minmax(0,1fr) minmax(88px,120px);align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border)}
+.stock-adjustment-line:first-child{border-top:0}
+.stock-adjustment-line label{min-width:0;font-size:12px;font-weight:700;color:var(--text)}
+.stock-adjustment-line small{display:block;margin-top:3px;color:var(--muted);font-size:11px;font-weight:500}
+.stock-adjustment-line input{width:100%;min-height:42px;padding:8px 10px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font:inherit;text-align:right}
+.stock-adjustment-reason{margin:10px 0 0}
+.stock-adjustment-reason input{width:100%;min-height:42px}
+.stock-adjustment-save{width:100%;min-height:44px;margin-top:10px;background:var(--orange);color:#fff}
+.stock-adjustment-status{min-height:16px;margin:7px 0 0;color:var(--muted);font-size:11px}
   .area-ficha-venc .vencs{margin-top:5px}
 .area-unit{font-size:11px;color:var(--muted);min-width:18px}
   .area-list-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:2px 0 10px}
@@ -4030,6 +4046,15 @@
       <div class="area-pref-box" id="m-area-fisica"><strong>Ubicación física actual</strong><span>Cargando saldo real…</span></div>
       <div class="area-ficha-resumen" id="m-area-ficha-resumen" hidden></div>
     </div>
+    <section class="stock-adjustment" id="m-ajuste-panel" hidden aria-labelledby="m-ajuste-title">
+      <h3 class="stock-adjustment-head" id="m-ajuste-title">Stock contado</h3>
+      <p class="stock-adjustment-help" id="m-ajuste-resumen">Ingresa la cantidad física. La diferencia quedará registrada en el libro de existencias.</p>
+      <div class="stock-adjustment-caption"><span>Lote / saldo actual</span><span>Stock contado</span></div>
+      <div class="stock-adjustment-lines" id="m-ajuste-lineas"><div class="area-loading">Cargando saldo actual…</div></div>
+      <div class="field stock-adjustment-reason"><label for="m-ajuste-motivo">Motivo</label><input id="m-ajuste-motivo" maxlength="240" value="Conteo/corrección manual" autocomplete="off"></div>
+      <button type="button" class="btn btn-orange stock-adjustment-save" id="m-ajuste-guardar" disabled>Guardar conteo</button>
+      <p class="stock-adjustment-status" id="m-ajuste-estado" role="status" aria-live="polite"></p>
+    </section>
     <button type="button" class="btn-urg" id="m-urgente" style="display:none">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>
       <span id="m-urgente-txt">Marcar urgente</span>
@@ -4258,6 +4283,9 @@ let modalProd = null;
 let MODAL_AREA_ROW = null; // configuración/ubicación concreta desde la que se abrió la ficha
 let AREA_SECCIONES = new Map();
 let NUEVO_AREA_ID = null;
+let AJUSTE_UI_SOLICITUD = 0;
+let AJUSTE_UI_REFERENCIA = null;
+let AJUSTE_UI_FIRMA = null;
 let ASIGNAR_AREA_CODIGO = null;
 let BODEGA_AREA_RESULTADOS = [];
 let BODEGA_AREA_SELECCION = null;
@@ -13947,6 +13975,29 @@ function pintarUbicacionFisica(preferencia){
     ? filas.map(x=>`${esc(x.nombre)} · ${fmt(Number(x.cantidad)||0)}`).join('<br>')
     : 'Sin saldo físico en ninguna ubicación.')+'</span>';
 }
+function pintarLineasAjuste(desglose){
+  const lineas=Array.isArray(desglose?.lotes)?desglose.lotes:[];
+  $('m-ajuste-resumen').textContent=`Saldo físico actual: ${fmt(Number(desglose?.saldo_total)||0)}${modalProd?.unidad?' '+modalProd.unidad:''}. Ingresa el conteo real; la diferencia se audita en el libro.`;
+  $('m-ajuste-lineas').innerHTML=lineas.length?lineas.map(l=>{
+    const clave=String(l.clave??(l.lote_id==null?'sin_lote':l.lote_id));
+    return `<div class="stock-adjustment-line"><label for="m-ajuste-${esc(clave)}">${esc(l.etiqueta||'Stock físico')}<small>Saldo actual: ${fmt(Number(l.cantidad)||0)}${esc(modalProd?.unidad?' '+modalProd.unidad:'')}</small></label><input id="m-ajuste-${esc(clave)}" type="number" min="0" step="any" inputmode="decimal" value="${esc(String(l.cantidad??0))}" data-ajuste-clave="${esc(clave)}" aria-label="Stock contado · ${esc(l.etiqueta||'Stock físico')}"></div>`;
+  }).join(''):'<div class="area-loading">No hay líneas de stock para contar.</div>';
+  $('m-ajuste-guardar').disabled=!PERMISOS.puede_editar||!lineas.length;
+  $('m-ajuste-estado').textContent='';
+}
+async function cargarDesgloseAjuste(productoId,ubicacionId){
+  const solicitud=++AJUSTE_UI_SOLICITUD;
+  AJUSTE_UI_REFERENCIA=null; AJUSTE_UI_FIRMA=null;
+  $('m-ajuste-panel').hidden=true;
+  $('m-ajuste-lineas').innerHTML='<div class="area-loading">Cargando saldo actual…</div>';
+  $('m-ajuste-motivo').value='Conteo/corrección manual';
+  $('m-ajuste-guardar').disabled=true;
+  const {data,error}=await sb.rpc('stock_ajuste_desglose_leer',{p_producto_id:productoId,p_ubicacion_id:ubicacionId||null});
+  if(solicitud!==AJUSTE_UI_SOLICITUD||!modalProd||modalProd.id!==productoId)return;
+  if(error){$('m-ajuste-lineas').innerHTML='<div class="area-loading">No se pudo leer el desglose de existencias.</div>'; $('m-ajuste-panel').hidden=false; $('m-ajuste-estado').textContent=error.message||'Error al leer existencias.';return;}
+  pintarLineasAjuste(data);
+  $('m-ajuste-panel').hidden=false;
+}
 async function openModal(id){
   modalProd=DATA.find(d=>d.id===id)||((SEDE==='plaza'&&MODAL_AREA_ROW)?{
     id:Number(id),producto:MODAL_AREA_ROW.producto,tipo:MODAL_AREA_ROW.tipo||'',rubro:MODAL_AREA_ROW.rubro||'',
@@ -14061,6 +14112,11 @@ async function openModal(id){
     $('m-guardar').textContent='Guardar';
     $('m-guardar').disabled=false;
   }
+  const ajusteUbicacion=fichaArea?MODAL_AREA_ROW?.ubicacion_id:null;
+  const puedeAjustar=!!PERMISOS.puede_editar&&(SEDE==='central'||(SEDE==='plaza'&&fichaArea&&!!ajusteUbicacion));
+  $('m-ajuste-panel').hidden=!puedeAjustar;
+  $('m-ajuste-panel').style.display=puedeAjustar?'':'none';
+  if(puedeAjustar) void cargarDesgloseAjuste(modalProd.id,ajusteUbicacion);
   $('overlay').classList.add('open');
 }
 
@@ -14228,6 +14284,37 @@ $('m-guardar').addEventListener('click',async()=>{
   if(SEDE==='plaza') await loadData(); else { metrics(); renderTipos(); render(); }
   closeModal();
   if(SEDE==='plaza') aviso('✓ Ficha del área guardada · ninguna existencia se movió');
+});
+$('m-ajuste-guardar').addEventListener('click',async()=>{
+  if(!modalProd||!PERMISOS.puede_editar)return;
+  const inputs=[...$('m-ajuste-lineas').querySelectorAll('[data-ajuste-clave]')];
+  if(!inputs.length){avisar('No hay cantidades para guardar.');return;}
+  const conteos={};
+  for(const input of inputs){
+    const cantidad=input.value===''?NaN:Number(input.value);
+    if(!Number.isFinite(cantidad)||cantidad<0){avisar('Cada stock contado debe ser un número igual o mayor que cero.');input.focus();return;}
+    conteos[input.dataset.ajusteClave]=cantidad;
+  }
+  const motivo=$('m-ajuste-motivo').value.trim();
+  if(!motivo){avisar('Escribe un motivo breve para el ajuste.');$('m-ajuste-motivo').focus();return;}
+  const ubicacion=SEDE==='plaza'?MODAL_AREA_ROW?.ubicacion_id:null;
+  const firma=JSON.stringify({producto:modalProd.id,ubicacion:ubicacion||null,motivo,conteos:Object.fromEntries(Object.entries(conteos).sort(([a],[b])=>a.localeCompare(b)))});
+  if(!AJUSTE_UI_REFERENCIA||AJUSTE_UI_FIRMA!==firma){
+    if(!crypto?.randomUUID){avisar('Este navegador no puede generar una referencia segura para el ajuste.');return;}
+    AJUSTE_UI_REFERENCIA=crypto.randomUUID(); AJUSTE_UI_FIRMA=firma;
+  }
+  const boton=$('m-ajuste-guardar'),referencia=AJUSTE_UI_REFERENCIA,productoId=modalProd.id;
+  boton.disabled=true;boton.textContent='Guardando…';$('m-ajuste-estado').textContent='Registrando el conteo en el libro…';
+  const {data,error}=await conReintento(()=>sb.rpc('stock_ajuste_guardar',{
+    p_referencia:referencia,p_producto_id:productoId,p_ubicacion_id:ubicacion||null,
+    p_conteos:conteos,p_motivo:motivo
+  }));
+  boton.textContent='Guardar conteo';
+  if(error){boton.disabled=false;$('m-ajuste-estado').textContent='';avisar(error.message||'No se pudo guardar el conteo.');return;}
+  await loadData();
+  closeModal();
+  const cambios=Array.isArray(data?.lineas)?data.lineas.filter(x=>Number(x.diferencia)!==0).length:0;
+  aviso(cambios?`✓ Conteo guardado · ${cambios} ajuste${cambios===1?'':'s'} auditado${cambios===1?'':'s'}`:'✓ Conteo registrado · sin diferencia de stock');
 });
 /* Reemplaza los lotes del producto por los del modal. El trigger de la base
    recalcula el stock del producto sumando las cantidades.

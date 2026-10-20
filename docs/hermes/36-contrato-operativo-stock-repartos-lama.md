@@ -1,7 +1,7 @@
 # Contrato operativo — Ajustes, repartos y ventas por áreas
 
 **Fecha:** 19 de octubre de 2026  
-**Estado:** especificación de producto y reglas operativas aprobadas por Alejo; implementación pendiente de dividir en fases.  
+**Estado:** especificación aprobada; Fase 1 completada el 20 de octubre de 2026. Fase 2 continúa pendiente.
 **Repositorio:** `leoalejoleo1537/llamita-plus`  
 **Propósito:** convertir las decisiones conversadas en reglas que Codex pueda aplicar sin reinterpretar la operación de Brunetti.
 
@@ -221,6 +221,21 @@ Entregable: matriz “acción → función → tabla/movimiento → efecto → i
 Crear el camino que permita ingresar el saldo físico contado directamente en el campo de stock y traducirlo a delta. Aplicarlo a Bodega y a todas las áreas, sin habilitar escritura directa al agregado. Incluir motivo rápido, actor, auditoría, no negatividad e idempotencia.
 
 No activar reparto ni venta hasta probar la base de ajustes en transacciones revertidas y con casos de cada ubicación.
+
+#### Decisiones de implementación aprobadas el 20 de octubre de 2026
+
+- Por ahora todas las cantidades aceptan decimales, incluso si `productos.unidad` está vacía. Ninguna ubicación ni lote puede quedar con saldo negativo.
+- En productos sin lotes, el conteo final se registra en la clave lógica `sin_lote`.
+- En productos con lotes se muestran y cuentan por separado los lotes conocidos, conservando vencimientos verificables. El stock físico no identificado se registra en un bucket del ledger con `lote_id = NULL`, visible como **Sin lote / vencimiento no informado**.
+- El detalle del saldo siempre se calcula desde `stock_internal.movimientos`/`stock_internal.existencias`. `producto_lotes.cantidad` no se utiliza como cantidad operativa.
+- Un encabezado de ajuste inmutable conserva la solicitud, actor, motivo, saldos contados, resultado y referencia, incluso cuando el conteo no cambia el saldo. Los deltas distintos de cero se guardan como movimientos `ajuste` inmutables.
+- La misma referencia y el mismo contenido devuelven el resultado anterior; reutilizarla con contenido distinto se rechaza. El motor bloquea transaccionalmente producto y ubicación y vuelve a calcular cada diferencia bajo el bloqueo.
+
+#### Resultado técnico de Fase 1
+
+Completada y publicada en `origin/master`. Migración instalada: `20261020000825_fase1_ajustes_manual_ledger`. RPC protegidas: `stock_ajuste_desglose_leer` y `stock_ajuste_guardar`. La ficha de producto permite el conteo desde Bodega central y desde ubicaciones de Local 1 cuando la cuenta tiene `puede_editar`. El campo legacy de `productos.stock_actual` permanece bloqueado; su proyección sigue siendo mantenida por el trigger del ledger. El detalle de pruebas y el estado de la suite local están en la entrada de Bitácora del 20 de octubre.
+
+Fase 2 — recepción por área, reservas, ventas, urgencias y recetas no quedan activadas por este resultado.
 
 ### Fase 2 — Recepción propia por área y liquidación inmediata de diferencias
 
