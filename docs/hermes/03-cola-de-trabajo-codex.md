@@ -8,7 +8,16 @@
 - **B3 — Alta/configuración manual de productos demo:** sigue PENDIENTE de activación explícita; no comenzar automáticamente.
 - Resultado detallado de B1: entrada superior de `docs/hermes/04-bitacora-codex.md`. Mapa completo: `docs/hermes/00-mapa-objetivo-inventario-areas.md`.
 
-Estado actual: **B1 y B2 completados; B3 pendiente de activación. Las Fases 1 y 2 del contrato operativo de stock están COMPLETADAS. Fase 3 — urgencias manuales — queda PENDIENTE y no activa.** Local 1 conserva las lecturas del ledger, permite ajustar saldos mediante el motor auditado y recibe repartos dirigidos a cada área. El frente móvil M2–M4 continúa pausado.
+Estado actual: **B1 y B2 completados; B3 pendiente de activación. Las Fases 1, 2 y 3 del contrato operativo de stock están COMPLETADAS. Fase 4 — disponibilidad y reserva de stock en Lama — queda PENDIENTE y no activa.** Local 1 conserva las lecturas del ledger, permite ajustar saldos mediante el motor auditado, recibe repartos dirigidos a cada área y prioriza manualmente reposición por producto/área. El frente móvil M2–M4 continúa pausado.
+
+### Contrato operativo — Fase 3: urgencias manuales por área
+
+- Estado: **COMPLETADA (2026-10-20)**. Fase 4 — disponibilidad y reserva de stock en Lama — queda **PENDIENTE**, no activa.
+- Migración instalada: `20261020102356_fase3_urgencias_producto_area`. La urgencia vive en `producto_area_asignacion`, una por producto y área, con nota, actor y fecha; no contiene ni modifica cantidades.
+- La ficha de producto del área permite marcar/quitar la prioridad y ordena los urgentes primero. Bodega los lista agrupados por destino y puede agregarlos al reparto sin perder el área elegida ni inferir productos por nombre.
+- RPC: `producto_area_urgencia_guardar` y `producto_area_urgencias_listar`, protegidas por sesión/capacidad S1, `search_path=''` y `EXECUTE` exclusivo de `authenticated`.
+- La diferencia 15.438 → 15.453 quedó explicada por un ajuste manual real de Fase 1 (0 → 15 en Cafetería). Una recepción real posterior de Fase 2 llevó la línea base actual a 15.456. Fase 3 no cambió stock.
+- Pruebas SQL revertidas, permisos, idempotencia, dos áreas, agrupación, suite completa y `git diff --check` satisfactorios. Conteos físicos y comerciales pre/post idénticos; 0 urgencias sintéticas persistentes.
 
 ### Contrato operativo — Fase 2: reparto Bodega → área
 

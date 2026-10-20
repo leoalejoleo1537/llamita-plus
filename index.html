@@ -2324,6 +2324,11 @@
   .f2-result select{max-width:230px}.f2-qty{width:94px!important;flex:0 0 94px}.f2-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
   .f2-empty{padding:14px;color:var(--muted);text-align:center}.f2-rep{padding:12px 14px;border-top:1px solid var(--border)}
   .f2-rep:first-child{border-top:0}.f2-rep-title{display:flex;justify-content:space-between;gap:10px;margin-bottom:6px}.f2-tag{font-size:11px;color:var(--muted)}
+  .f3-urgency-note{margin:12px 0 0}.f3-urgency-note input{border-color:color-mix(in srgb,var(--orange) 32%,var(--border))}
+  .f3-urgent-list{margin-top:14px;border-top:1px solid var(--border);padding-top:12px}.f3-urgent-list>h4{margin:0 0 4px;font-size:14px}
+  .f3-urgent-area{margin-top:10px}.f3-urgent-area-title{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+  .f3-urgent-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}.f3-urgent-row:last-child{border-bottom:0}
+  .f3-urgent-row .btn{flex:0 0 auto}.f3-date{font-size:11px;color:var(--muted)}
   @media(max-width:700px){.f2-grid{grid-template-columns:1fr}.f2-result{align-items:flex-start;flex-wrap:wrap}.f2-result select{max-width:none;width:100%}.f2-line{align-items:flex-start;flex-wrap:wrap}.f2-qty{margin-left:auto}.f2-head{align-items:flex-start}}
 
   /* El símbolo que asoma DETRÁS de la fila y crece con el gesto, como el
@@ -3639,6 +3644,7 @@
         <div class="field" style="margin:0"><label>Área destino</label><select id="f2-area"><option value="">Cargando áreas…</option></select></div>
         <div class="field" style="margin:0"><label>Buscar producto de Bodega</label><input id="f2-q" type="search" autocomplete="off" placeholder="Escribe al menos 2 caracteres"></div>
       </div>
+      <div id="f3-urgentes"></div>
       <div id="f2-resultados"></div>
       <div id="f2-carrito" style="display:none">
         <div class="cart-title" style="margin-top:12px">Lista antes de enviar</div>
@@ -4083,6 +4089,11 @@
       <button type="button" class="btn btn-orange stock-adjustment-save" id="m-ajuste-guardar" disabled>Guardar conteo</button>
       <p class="stock-adjustment-status" id="m-ajuste-estado" role="status" aria-live="polite"></p>
     </section>
+    <div class="field f3-urgency-note" id="m-urgente-nota-wrap" hidden>
+      <label for="m-urgente-nota">Nota de urgencia (opcional)</label>
+      <input id="m-urgente-nota" maxlength="240" autocomplete="off" placeholder="Ej: priorizar en el próximo reparto">
+      <small style="display:block;color:var(--muted);margin-top:6px">Es una prioridad manual de esta área. No cambia el stock.</small>
+    </div>
     <button type="button" class="btn-urg" id="m-urgente" style="display:none">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>
       <span id="m-urgente-txt">Marcar urgente</span>
@@ -4280,6 +4291,7 @@ let DATA = [];
    que las agrega desde el libro por ubicación y nunca desde stock_actual. */
 let AREA_ROWS = [];
 let AREAS_CATALOGO = [];
+let AREA_URGENCIAS = [];
 let AREA_ERROR = null;
 let AREA_LOADING = false;
 let AREA_CARGADA = false;
@@ -4576,14 +4588,14 @@ function filaAreaHistorica(r){
   const p={...original,id:Number(r.producto_id),producto:r.producto,rubro:r.rubro||'',tipo:r.tipo||'',
     unidad:r.unidad||original.unidad||'',sede:'plaza',stock_actual:cantidad,
     stock_min:r.stock_min,stock_max:r.stock_max,perecedero:original.perecedero,
-    vencimiento:original.vencimiento,urgente:original.urgente};
+    vencimiento:original.vencimiento,urgente:!!r.urgente_area};
   const estadoFila=estadoArea(r),cf=CFG[estadoFila];
   const nota=r.configurado
     ? (cantidad===0?'<span class="area-config-note">Configurado · sin existencias</span>':'')
     : '<span class="area-config-note">Saldo físico sin configuración</span>';
   return `<div class="row" data-row="${p.id}">
     <div class="info" data-open="${p.id}" data-area-code="${esc(r.area_codigo)}">
-      <div class="name">${esc(p.producto)} ${esUrgente(p)?'<span class="pill pill-urg">Urgente</span>':''}</div>
+      <div class="name">${esc(p.producto)} ${r.urgente_area?'<span class="pill pill-urg">Urgente</span>':''}</div>
       ${vencsHTML(p)}
       <div class="sub">${esc(p.tipo||'Sin tipo')} · mín ${fmt(r.stock_min)} · máx ${fmt(r.stock_max)}</div>
       ${nota}
@@ -4632,7 +4644,7 @@ function renderAreaLista(){
   let rows=AREA_ROWS.filter(r=>r.area_codigo===areaActual && (r.configurado||Number(r.cantidad)!==0)
     &&(!q||normNombre(r.producto).includes(q))
     &&(!tipo||(r.tipo||'').trim()===tipo))
-    .sort((a,b)=>a.producto.localeCompare(b.producto,'es',{sensitivity:'base'}));
+    .sort((a,b)=>(Number(!!b.urgente_area)-Number(!!a.urgente_area))||a.producto.localeCompare(b.producto,'es',{sensitivity:'base'}));
   rows=rows.filter(r=>{
     if(!areaFilterCard)return true;
     if(areaFilterCard==='criticos')return r.configurado&&(Number(r.cantidad)<=0||r.stock_min!=null&&Number(r.cantidad)<=Number(r.stock_min));
@@ -4649,7 +4661,7 @@ function renderAreaLista(){
     if(!grupos.has(key))grupos.set(key,{nombre,turno,orden:r.seccion_orden??2147483647,rows:[]});
     grupos.get(key).rows.push(r);
   });
-  const orden=[...grupos.values()].sort((a,b)=>(a.turno===b.turno?0:a.turno==='am'?-1:1)||(a.orden-b.orden)||a.nombre.localeCompare(b.nombre,'es'));
+  const orden=[...grupos.values()].sort((a,b)=>(Number(b.rows.some(r=>r.urgente_area))-Number(a.rows.some(r=>r.urgente_area)))||(a.turno===b.turno?0:a.turno==='am'?-1:1)||(a.orden-b.orden)||a.nombre.localeCompare(b.nombre,'es'));
   const filtrando=!!q||!!tipoSel||!!filterState||!!areaFilterCard;
   if(!filtrando&&AREA_PRIMERA_SECCION_ABIERTA&&orden.length){
     const primera=orden[0];openSecs.add('area:'+areaActual+':'+primera.nombre);AREA_PRIMERA_SECCION_ABIERTA=false;
@@ -5503,7 +5515,7 @@ function pickSede(s){
     return;
   }
   SEDE = s;
-  AREA_ROWS=[]; AREAS_CATALOGO=[]; AREA_ERROR=null; AREA_LOADING=s==='plaza'; AREA_CARGADA=false; AREA_SOLICITUD++; areaActual=null;areaFilterCard=null;
+  AREA_ROWS=[]; AREAS_CATALOGO=[]; AREA_URGENCIAS=[]; AREA_ERROR=null; AREA_LOADING=s==='plaza'; AREA_CARGADA=false; AREA_SOLICITUD++; areaActual=null;areaFilterCard=null;
   $('view-inv').classList.remove('area-workspace-wide');
   $('area-page-heading').hidden=true;
   /* Con el panel fijo el cajón nunca se abre, así que su nombre de sede hay
@@ -5514,7 +5526,7 @@ function pickSede(s){
   $('footText').textContent = etiquetaSedeUI(s) + ' · sincronizado en tiempo real';
   // reset estado/filtros
   DATA=[]; filterState=null; modalProd=null; carrito=[];
-  F2_CARRITO=[];F2_RESULTADOS=[];REPARTOS_AREA=[];REPARTOS_AREA_ID=null;F2_RECEPCION_REFS.clear();
+  F2_CARRITO=[];F2_CARRITO_AREA=null;F2_RESULTADOS=[];F3_URGENCIAS=[];REPARTOS_AREA=[];REPARTOS_AREA_ID=null;F2_RECEPCION_REFS.clear();
   /* los conteos de las otras sedes se descartan al cambiar de sede: si no, al
      volver a Bodega se verían un instante los números de la visita anterior */
   CRITICOS={}; CRIT_TOPE={};
@@ -12738,9 +12750,10 @@ async function loadData(){
     // estado de carga solo reemplaza la lista al entrar por primera vez.
     AREA_LOADING=!AREA_CARGADA; AREA_ERROR=null;
     if(AREA_LOADING) render();
-    const [lectura,catalogo]=await Promise.all([
+    const [lectura,catalogo,urgencias]=await Promise.all([
       sb.rpc('stock_leer_areas'),
-      sb.rpc('areas_operativas_listar',{p_sede:'plaza',p_incluir_archivadas:false})
+      sb.rpc('areas_operativas_listar',{p_sede:'plaza',p_incluir_archivadas:false}),
+      sb.rpc('producto_area_urgencias_listar',{p_area_id:null})
     ]);
     if(SEDE!==sedeCarga||solicitud!==AREA_SOLICITUD) return;
     AREA_LOADING=false;
@@ -12748,8 +12761,15 @@ async function loadData(){
     AREA_ERROR=lectura.error||catalogo.error||null;
     AREA_ROWS=lectura.error?[]:(lectura.data||[]);
     AREAS_CATALOGO=catalogo.error?[]:(catalogo.data||[]);
+    AREA_URGENCIAS=urgencias.error?[]:(urgencias.data||[]);
+    if(urgencias.error)console.warn('No se pudieron cargar las urgencias por área:',urgencias.error.message||urgencias.error);
+    const urgentes=new Map(AREA_URGENCIAS.map(u=>[String(u.area_id)+':'+String(u.producto_id),u]));
+    AREA_ROWS.forEach(r=>{
+      const u=urgentes.get(String(r.area_id)+':'+String(r.producto_id));
+      r.urgente_area=!!u;r.urgente_nota=u?.nota||null;r.urgente_desde=u?.desde||null;
+    });
   }else{
-    AREA_LOADING=false; AREA_CARGADA=false; AREA_ERROR=null; AREA_ROWS=[]; AREAS_CATALOGO=[];
+    AREA_LOADING=false; AREA_CARGADA=false; AREA_ERROR=null; AREA_ROWS=[]; AREAS_CATALOGO=[]; AREA_URGENCIAS=[];
   }
   $('m-fudo').style.display = puedeEnFudo('ficha') ? '' : 'none';
   $('m-tipo-row').style.display = hasTipo ? '' : 'none';
@@ -14113,8 +14133,10 @@ async function openModal(id){
   }
   $('m-perec-row').style.display = hasPerec&&!fichaArea ? 'flex' : 'none';
   if(hasPerec) $('m-perec').checked = !!modalProd.perecedero;
-  $('m-urgente').style.display = hasUrgente&&!fichaArea ? 'flex' : 'none';
-  setUrgente(!!modalProd.urgente);
+  $('m-urgente-nota-wrap').hidden=!configArea;
+  $('m-urgente-nota').value=configArea?(MODAL_AREA_ROW.urgente_nota||''):'';
+  $('m-urgente').style.display = fichaArea ? (configArea&&PERMISOS.puede_editar?'flex':'none') : (hasUrgente?'flex':'none');
+  setUrgente(configArea?!!MODAL_AREA_ROW.urgente_area:!!modalProd.urgente);
   /* Mermar solo en Bodega. La base lo vuelve a comprobar dentro de mermar(),
      así que esconder el botón es comodidad y no la única defensa. */
   $('m-mermar').style.display = fichaArea?'none':'flex';   // en todas las sedes, ver pickSede
@@ -14158,12 +14180,34 @@ let urgenteSel=false;
 function setUrgente(v){
   urgenteSel=!!v;
   $('m-urgente').classList.toggle('on',urgenteSel);
-  $('m-urgente-txt').textContent = urgenteSel ? 'Urgente' : 'Marcar urgente';
+  $('m-urgente-txt').textContent = urgenteSel ? (MODAL_AREA_ROW?'Quitar urgente':'Urgente') : 'Marcar urgente';
 }
 /* Marcar urgente se guarda SOLO, al toque: es un aviso para Adriana y no
    tiene por qué depender de que alguien se acuerde de apretar Guardar. */
 $('m-urgente').addEventListener('click',async()=>{
   if(!modalProd) return;
+  if(SEDE==='plaza'&&MODAL_AREA_ROW?.area_id){
+    const valor=!urgenteSel,boton=$('m-urgente');
+    boton.disabled=true;
+    const {data,error}=await sb.rpc('producto_area_urgencia_guardar',{
+      p_producto_id:modalProd.id,p_area_id:MODAL_AREA_ROW.area_id,p_urgente:valor,
+      p_nota:valor?($('m-urgente-nota').value.trim()||null):null
+    });
+    boton.disabled=false;
+    if(error){avisar(error.message||'No se pudo cambiar la urgencia.');return;}
+    MODAL_AREA_ROW.urgente_area=!!data?.urgente;
+    MODAL_AREA_ROW.urgente_nota=data?.nota||null;
+    MODAL_AREA_ROW.urgente_desde=data?.desde||null;
+    const clave=String(MODAL_AREA_ROW.area_id)+':'+String(modalProd.id);
+    AREA_URGENCIAS=AREA_URGENCIAS.filter(u=>String(u.area_id)+':'+String(u.producto_id)!==clave);
+    if(data?.urgente)AREA_URGENCIAS.push({area_id:MODAL_AREA_ROW.area_id,area_codigo:MODAL_AREA_ROW.area_codigo,
+      area_nombre:MODAL_AREA_ROW.area_nombre,producto_id:modalProd.id,producto:modalProd.producto,
+      stock_min:MODAL_AREA_ROW.stock_min,stock_max:MODAL_AREA_ROW.stock_max,saldo_area:MODAL_AREA_ROW.cantidad,
+      nota:data.nota,desde:data.desde});
+    setUrgente(!!data?.urgente);render();
+    aviso(data?.urgente?'✓ Producto marcado urgente en '+MODAL_AREA_ROW.area_nombre:'✓ Urgencia quitada de '+MODAL_AREA_ROW.area_nombre);
+    return;
+  }
   const id=modalProd.id, valor=!urgenteSel;
   setUrgente(valor);
   modalProd.urgente=valor;
@@ -14532,7 +14576,8 @@ $('n-guardar').addEventListener('click', async()=>{
 /* ---------------- Fase 2 · reparto Bodega -> área ----------------
    Este circuito usa solo RPC protegidas. Preparar crea el documento privado;
    recibir aplica el ledger completo en una única transacción. */
-let F2_AREAS=[],F2_RESULTADOS=[],F2_CARRITO=[],F2_BUSQUEDA_TIMER=null;
+let F2_AREAS=[],F2_RESULTADOS=[],F2_CARRITO=[],F2_CARRITO_AREA=null,F2_BUSQUEDA_TIMER=null;
+let F3_URGENCIAS=[];
 let REPARTOS_AREA=[],REPARTOS_AREA_CARGANDO=false,REPARTOS_AREA_ID=null;
 const F2_RECEPCION_REFS=new Map();
 
@@ -14544,6 +14589,39 @@ async function f2CargarAreas(){
   const anterior=sel.value;
   sel.innerHTML='<option value="">Elige un área</option>'+F2_AREAS.map(a=>`<option value="${esc(a.id)}">${esc(a.nombre)}</option>`).join('');
   if(F2_AREAS.some(a=>String(a.id)===anterior))sel.value=anterior;
+  await f3CargarUrgentes();
+}
+function f3Fecha(iso){
+  if(!iso)return 'Sin fecha';
+  return new Date(iso).toLocaleString('es-CL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+}
+function f3PintarUrgentes(){
+  const box=$('f3-urgentes');if(!box)return;
+  if(!F3_URGENCIAS.length){
+    box.innerHTML='<div class="f3-urgent-list"><h4>Urgentes por área</h4><div class="f2-empty">No hay productos marcados como urgentes.</div></div>';
+    return;
+  }
+  const grupos=new Map();
+  F3_URGENCIAS.forEach(u=>{
+    const key=String(u.area_id);
+    if(!grupos.has(key))grupos.set(key,{nombre:u.area_nombre,orden:Number(u.area_orden)||0,rows:[]});
+    grupos.get(key).rows.push(u);
+  });
+  const html=[...grupos.entries()].sort((a,b)=>(a[1].orden-b[1].orden)||a[1].nombre.localeCompare(b[1].nombre,'es')).map(([areaId,g])=>`<div class="f3-urgent-area" data-f3-area="${esc(areaId)}">
+    <div class="f3-urgent-area-title">${esc(g.nombre)}</div>
+    ${g.rows.map(u=>`<div class="f3-urgent-row">
+      <span class="f2-main"><b>${esc(u.producto)}</b><span class="f2-sub">Saldo del área ${fmt(Number(u.saldo_area)||0)} · mín ${u.stock_min==null?'—':fmt(Number(u.stock_min))} · máx ${u.stock_max==null?'—':fmt(Number(u.stock_max))}</span>${u.nota?`<span class="f2-sub">${esc(u.nota)}</span>`:''}<span class="f3-date">Marcado ${esc(f3Fecha(u.desde))}</span></span>
+      <button type="button" class="btn btn-outline btn-sm" data-f3-add="${esc(u.configuracion_id)}" ${Number(u.enlaces_bodega)===1?'':'disabled title="Requiere un único enlace explícito con Bodega"'}>Agregar</button>
+    </div>`).join('')}
+  </div>`).join('');
+  box.innerHTML=`<div class="f3-urgent-list"><h4>Urgentes por área</h4><div class="f2-sub">Prioridades manuales para preparar el reparto del destino correcto.</div>${html}</div>`;
+}
+async function f3CargarUrgentes(){
+  const box=$('f3-urgentes');if(!box)return;
+  box.innerHTML='<div class="f3-urgent-list"><h4>Urgentes por área</h4><div class="f2-empty">Cargando…</div></div>';
+  const {data,error}=await sb.rpc('producto_area_urgencias_listar',{p_area_id:null});
+  if(error){F3_URGENCIAS=[];box.innerHTML=`<div class="f3-urgent-list"><h4>Urgentes por área</h4><div class="f2-empty">${esc(error.message||'No se pudieron cargar las urgencias.')}</div></div>`;return;}
+  F3_URGENCIAS=data||[];f3PintarUrgentes();
 }
 function f2BucketTexto(b){return `${b.etiqueta} · disponible ${fmt(Number(b.cantidad)||0)}`;}
 function f2PintarResultados(){
@@ -14566,6 +14644,7 @@ async function f2Buscar(){
 }
 function f2PintarCarrito(){
   const box=$('f2-carrito');if(!box)return;
+  if(!F2_CARRITO.length)F2_CARRITO_AREA=null;
   box.style.display=F2_CARRITO.length?'block':'none';
   $('f2-lineas').innerHTML=F2_CARRITO.map((x,i)=>`<div class="f2-line">
     <div class="f2-main"><b>${esc(x.producto)}</b><div class="f2-sub">${esc(x.etiqueta)} · disponible ${fmt(x.disponible)}</div></div>
@@ -14574,16 +14653,46 @@ function f2PintarCarrito(){
   </div>`).join('');
 }
 $('f2-q').addEventListener('input',()=>{clearTimeout(F2_BUSQUEDA_TIMER);F2_BUSQUEDA_TIMER=setTimeout(f2Buscar,220);});
-$('f2-area').addEventListener('change',()=>{F2_RESULTADOS=[];$('f2-q').value='';$('f2-resultados').innerHTML='';});
+$('f2-area').addEventListener('change',e=>{
+  if(F2_CARRITO.length&&F2_CARRITO_AREA&&e.target.value!==F2_CARRITO_AREA){
+    e.target.value=F2_CARRITO_AREA;
+    aviso('Vacía la lista actual antes de cambiar el área destino.');
+    return;
+  }
+  F2_RESULTADOS=[];$('f2-q').value='';$('f2-resultados').innerHTML='';
+});
+function f2AgregarCandidato(p,b,area){
+  if(!p||!b||!area)return false;
+  if(F2_CARRITO.length&&F2_CARRITO_AREA&&F2_CARRITO_AREA!==area){
+    aviso('La lista ya pertenece a otra área. Envíala o vacíala antes de cambiar el destino.');return false;
+  }
+  if(F2_CARRITO.some(x=>x.producto_bodega_id===p.producto_bodega_id&&String(x.lote_id||'')===String(b.lote_id||''))){
+    aviso('Ese producto y lote ya están en la lista.');return false;
+  }
+  F2_CARRITO_AREA=area;
+  F2_CARRITO.push({producto_bodega_id:p.producto_bodega_id,producto_plaza_id:p.producto_plaza_id,
+    producto:p.producto,lote_id:b.lote_id??null,vencimiento:b.vencimiento||null,etiqueta:b.etiqueta,
+    disponible:Number(b.cantidad)||0,cantidad:1});
+  f2PintarCarrito();return true;
+}
 $('f2-resultados').addEventListener('click',e=>{
   const bt=e.target.closest('[data-f2-add]');if(!bt)return;
   const p=F2_RESULTADOS[+bt.dataset.f2Add],row=bt.closest('[data-f2-result]');if(!p||!row)return;
   const b=(p.buckets||[])[+row.querySelector('[data-f2-bucket]').value];if(!b)return;
-  if(F2_CARRITO.some(x=>x.producto_bodega_id===p.producto_bodega_id&&String(x.lote_id||'')===String(b.lote_id||''))){aviso('Ese producto y lote ya están en la lista.');return;}
-  F2_CARRITO.push({producto_bodega_id:p.producto_bodega_id,producto_plaza_id:p.producto_plaza_id,
-    producto:p.producto,lote_id:b.lote_id??null,vencimiento:b.vencimiento||null,etiqueta:b.etiqueta,
-    disponible:Number(b.cantidad)||0,cantidad:1});
-  f2PintarCarrito();
+  f2AgregarCandidato(p,b,$('f2-area').value);
+});
+$('f3-urgentes').addEventListener('click',async e=>{
+  const bt=e.target.closest('[data-f3-add]');if(!bt)return;
+  const urgente=F3_URGENCIAS.find(u=>String(u.configuracion_id)===bt.dataset.f3Add);if(!urgente)return;
+  const area=String(urgente.area_id);
+  if(F2_CARRITO.length&&F2_CARRITO_AREA&&F2_CARRITO_AREA!==area){aviso('La lista actual corresponde a otra área. Envíala o vacíala antes de agregar esta urgencia.');return;}
+  $('f2-area').value=area;$('f2-q').value=urgente.producto;bt.disabled=true;
+  await f2Buscar();bt.disabled=false;
+  const candidatos=F2_RESULTADOS.filter(p=>Number(p.producto_bodega_id)===Number(urgente.producto_bodega_id)&&Number(p.producto_plaza_id)===Number(urgente.producto_id));
+  if(candidatos.length!==1){aviso(candidatos.length?'Hay varios enlaces posibles. Elige el producto exacto en los resultados.':'No se encontró el enlace exacto de esta urgencia en Bodega.');return;}
+  const p=candidatos[0],conSaldo=(p.buckets||[]).filter(b=>Number(b.cantidad)>0),buckets=conSaldo.length?conSaldo:(p.buckets||[]);
+  if(buckets.length!==1){aviso('El producto tiene varios lotes. Elige el lote exacto en los resultados.');return;}
+  if(f2AgregarCandidato(p,buckets[0],area))aviso(`✓ ${urgente.producto} agregado al reparto de ${urgente.area_nombre}`);
 });
 $('f2-lineas').addEventListener('input',e=>{const x=e.target.closest('[data-f2-cant]');if(x)F2_CARRITO[+x.dataset.f2Cant].cantidad=Number(x.value);});
 $('f2-lineas').addEventListener('click',e=>{const x=e.target.closest('[data-f2-quitar]');if(!x)return;F2_CARRITO.splice(+x.dataset.f2Quitar,1);f2PintarCarrito();});
@@ -14591,6 +14700,7 @@ $('f2-enviar').addEventListener('click',async()=>{
   const area=$('f2-area').value,items=F2_CARRITO.map(x=>({producto_bodega_id:x.producto_bodega_id,
     producto_plaza_id:x.producto_plaza_id,lote_id:x.lote_id,cantidad:Number(x.cantidad)}));
   if(!area){avisar('Elige el área destino.');return;}
+  if(F2_CARRITO_AREA&&F2_CARRITO_AREA!==area){avisar('La lista pertenece a otra área destino.');return;}
   if(!items.length||items.some(x=>!Number.isFinite(x.cantidad)||x.cantidad<=0)){avisar('Revisa las cantidades del reparto.');return;}
   const bt=$('f2-enviar');bt.disabled=true;bt.textContent='Enviando…';
   const referencia=crypto.randomUUID();
@@ -14599,7 +14709,7 @@ $('f2-enviar').addEventListener('click',async()=>{
   bt.disabled=false;bt.textContent='Enviar al área';
   if(error){avisar(error.message||'No se pudo preparar el reparto.');return;}
   const destino=F2_AREAS.find(a=>String(a.id)===area)?.nombre||'el área';
-  F2_CARRITO=[];F2_RESULTADOS=[];$('f2-q').value='';$('f2-nombre').value='';$('f2-resultados').innerHTML='';f2PintarCarrito();
+  F2_CARRITO=[];F2_CARRITO_AREA=null;F2_RESULTADOS=[];$('f2-q').value='';$('f2-nombre').value='';$('f2-resultados').innerHTML='';f2PintarCarrito();
   aviso(`✓ Reparto enviado a ${destino} · todavía no movió stock`);
 });
 

@@ -48,6 +48,21 @@ El cajón actual conserva las rutas y etiquetas accesibles y tiene ancho máximo
 
 La recomendación es prototipar la opción 1 antes de reemplazar la navegación; esta nota no cambia la navegación actual. La ruta Mesas ya aparece en el menú móvil para cuentas con `puede_lama` y sedes habilitadas. El permiso y las restricciones por sede siguen siendo la autoridad: no se habilita Mesas a cuentas no autorizadas desde CSS o por defecto.
 
+## 2026-10-20 — Contrato operativo, Fase 3: urgencias manuales por área
+
+- Estado: **COMPLETADA**. Fase 4 — disponibilidad y reserva de stock en Lama — queda **PENDIENTE**, no activa.
+- Preflight de stock: la variación de 15.438 a 15.453 se explicó completamente por el ajuste manual real de Fase 1 con referencia `e6e6dc47…f646`, producto **Café grano 250 gr**, ubicación Cafetería, actor operativo autenticado `6c3f…d642`, motivo **Conteo/corrección manual**, saldo 0 → 15. No fue una prueba revertida. Después de Fase 2 hubo una recepción real separada que añadió 3 unidades al mismo producto; por ello la línea base previa y posterior de esta fase es 15.456.
+- Migración instalada: `20261020102356_fase3_urgencias_producto_area`. `producto_area_asignacion` incorpora prioridad manual, nota, actor y fecha. La configuración no contiene cantidades y la urgencia no se deriva automáticamente del saldo ni de mínimos/máximos.
+- RPC protegidas: `producto_area_urgencia_guardar` y `producto_area_urgencias_listar`. Ambas son `SECURITY DEFINER`, `search_path=''`, validan internamente autorización S1 y solo conceden `EXECUTE` a `authenticated`; `PUBLIC`, `anon` y `service_role` permanecen sin ejecución.
+- Interfaz de área: la ficha permite **Marcar urgente** / **Quitar urgente**, con nota opcional. La marca pertenece a la combinación producto–área; los urgentes aparecen primero y con distintivo visible. Marcar o quitar no mueve stock.
+- Interfaz de Bodega: **Urgentes por área** agrupa destinos activos y muestra producto, saldo real del área, mínimo/máximo, nota y fecha. **Agregar** fija el destino correcto y usa el enlace explícito Bodega → Local 1; si hay varios lotes exige selección humana. El carrito impide mezclar destinos.
+- Prueba SQL `sql/2026-10-fase3-pruebas-urgencias-area.sql`, íntegra en `BEGIN … ROLLBACK`: marcar/quitar, mismo producto en una y dos áreas, idempotencia, filtro por destino, propietario, administrador operativo con `puede_editar`, usuario común y anónimo. El fixture de segunda área fue transaccional y no dejó configuraciones ni urgencias persistentes.
+- Regresión: `npm test` completo, `pruebas/fase3-urgencias-area.mjs`, `pruebas/pantalla-sana.mjs` y `git diff --check` pasan. Los casos Playwright se omiten automáticamente porque Chromium no está instalado.
+- Conteos antes/después idénticos: 1.438 productos; stock proyectado 15.456; ledger neto 9.334,70 y 410 movimientos; 409 filas de existencias; 42 lotes; 0 transferencias; 1 reparto de área y 1 línea reales; 15.357 movimientos Fudo; 0 eventos Lama; 396 recetas; 2 movimientos de caja; 64 cuentas; 0 saldos negativos. Urgencias persistentes al cierre: 0.
+- Advisors ejecutados: las RPC nuevas no aparecen como anónimas ni con `search_path` mutable. Permanecen hallazgos globales anteriores; el índice parcial nuevo figura sin uso por no existir aún urgencias reales.
+- Rollback: `sql/2026-10-fase3-urgencias-area.rollback.sql` aborta si existe alguna urgencia activa; antes de uso elimina únicamente las dos RPC, el índice y las cuatro columnas añadidas.
+- No se modificaron Fudo, Lama, caja, ventas/POS, recetas, lotes, repartos, `stock_transferir`, Bodega legacy ni cantidades. No se accedió a Café del Desierto / Llamita Stock.
+
 ## 2026-10-20 — Contrato operativo, Fase 2: reparto Bodega → área
 
 - Estado: **COMPLETADA**. Fase 3 — urgencias manuales para priorizar reposición desde Bodega — queda **PENDIENTE**, no activa.

@@ -1,7 +1,7 @@
 # Contrato operativo — Ajustes, repartos y ventas por áreas
 
 **Fecha:** 19 de octubre de 2026  
-**Estado:** especificación aprobada; Fases 1 y 2 completadas el 20 de octubre de 2026. Fase 3 continúa pendiente.
+**Estado:** especificación aprobada; Fases 1, 2 y 3 completadas el 20 de octubre de 2026. Fase 4 continúa pendiente.
 **Repositorio:** `leoalejoleo1537/llamita-plus`  
 **Propósito:** convertir las decisiones conversadas en reglas que Codex pueda aplicar sin reinterpretar la operación de Brunetti.
 
@@ -250,6 +250,12 @@ Las RPC `reparto_area_catalogo_buscar`, `reparto_area_crear`, `repartos_area_lis
 ### Fase 3 — Urgencias y operación visible para Bodega
 
 Añadir bandera manual por producto/área, presentación prioritaria en el área y resumen consultable desde Bodega. No generar pedidos o movimientos automáticos.
+
+#### Resultado técnico de Fase 3
+
+Completada e instalada con la migración `20261020102356_fase3_urgencias_producto_area`. La urgencia se almacena en la configuración producto–área con nota, actor y fecha; marcarla o quitarla no cambia existencias ni depende de mínimos/máximos. Las RPC protegidas `producto_area_urgencia_guardar` y `producto_area_urgencias_listar` validan sesión y capacidad mediante S1, tienen `search_path=''` y solo pueden ser invocadas por `authenticated`.
+
+La ficha del área permite marcar y resolver manualmente la urgencia; los productos urgentes aparecen primero. En Bodega, el bloque **Urgentes por área** muestra saldo físico, límites y fecha, y agrega el producto al reparto con su destino fijado y enlace explícito al maestro. No se crean pedidos o movimientos automáticos. Las pruebas transaccionales terminaron con `ROLLBACK`; no quedaron urgencias sintéticas ni variaciones de stock. Fase 4 no queda activada por este resultado.
 
 ### Fase 4 — Lectura y validación de disponibilidad en Lama
 
