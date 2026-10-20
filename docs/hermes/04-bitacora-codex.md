@@ -48,6 +48,14 @@ El cajón actual conserva las rutas y etiquetas accesibles y tiene ancho máximo
 
 La recomendación es prototipar la opción 1 antes de reemplazar la navegación; esta nota no cambia la navegación actual. La ruta Mesas ya aparece en el menú móvil para cuentas con `puede_lama` y sedes habilitadas. El permiso y las restricciones por sede siguen siendo la autoridad: no se habilita Mesas a cuentas no autorizadas desde CSS o por defecto.
 
+## 2026-10-20 — P0: preflight Panel de productos y decisiones de Alejo
+
+- Preflight completado mediante lecturas sobre `7b8309d`, sin DML ni llamadas Fudo. Informe único: [37](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md).
+- Verificadas altas paralelas, maestro central/representaciones, recetas ligadas a Fudo, reserva directa F4 y dependencias de respaldo/purga. Las tres Edge Functions de catálogo no están desplegadas; la fuente local crear-producto genera receta automática y autoriza por correo: debe refactorizarse antes de cualquier reutilización.
+- Decisiones: catálogo comercial neutral; recetas siempre manuales; respaldo/purga ensayada conservando plano de mesas y configuración. Secuencia P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B.
+- P1 debe resolver edición única y coherencia de nombre/unidad/costo entre maestro y plaza. Se autoriza solo P1 después del commit documental; no se activa P2 ni Fudo.
+- No se accedió a Café del Desierto / Llamita Stock. Publicación exclusivamente documental en origin/master, comprobada con git diff --check.
+
 ## 2026-10-20 — Contrato operativo, Fase 4: disponibilidad y reservas Lama
 
 - Estado: **COMPLETADA**. Fase 5 — recetas y combos con ingredientes de una o varias áreas — queda **PENDIENTE**, no activa.

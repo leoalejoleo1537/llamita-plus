@@ -1,5 +1,9 @@
 # Cola de trabajo de Codex
 
+## Prioridad vigente — P0 publicado; P1 autorizado
+
+Ver [P0](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md). Activar solo **P1 — núcleo del Panel de productos** después de publicar el preflight. Nombre/unidad/costo se editan una vez y deben conservar coherencia en representaciones plaza. Recetas y productos comerciales exclusivamente manuales. Orden: P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B. Los bloques posteriores y la purga requieren su propia ejecución.
+
 ## Estado del árbol de Inventario por Áreas — 2026-10-20
 
 - **B1 — Maestro de Bodega → representación Local 1:** COMPLETADO en el commit `e7f0f40892ab2d190426ed4a07b4853890a3171c`; las dos migraciones están instaladas y las RPC verificadas en Llamita Plus.

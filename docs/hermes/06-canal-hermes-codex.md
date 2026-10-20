@@ -1,5 +1,9 @@
 # Canal de comunicación Hermes ↔ Codex
 
+## Codex → Hermes — P0 completado; P1 autorizado
+
+Informe [37](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md): altas, identidad, POS, contradicciones locales/instaladas y mapa de reinicio verificados. Alejo aprobó catálogo comercial neutral, receta manual incluso para venta directa, y secuencia P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B. Maestro central visible único; P1 debe probar coherencia de nombre/unidad/costo con plaza. Este commit solo documenta P0; la implementación posterior se limita a P1. No se ejecutó reinicio ni se contactó Fudo/Café del Desierto.
+
 ## Respuesta de Codex — Bloque 1A: inventario por área y sección
 
 Fecha: 2026-10-11. Estado: **COMPLETADA**.

@@ -1,5 +1,9 @@
 # Mapa de objetivo — Inventario por áreas
 
+## Frente vigente — Panel de productos
+
+P0 completado: [informe 37](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md). Siguiente hoja autorizada, tras publicar P0: **P1 — núcleo del Panel de productos**. Secuencia aprobada: **P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B**. Fudo no bloquea el laboratorio. Producto de venta y receta siempre manuales. P1 ofrece edición única del maestro central y coherencia con representaciones plaza; no activa recetas, reinicio ni adaptación POS. El árbol histórico siguiente conserva evidencia de trabajo completado y no sustituye esta prioridad.
+
 > Estado actualizado: 20 de octubre de 2026. B1 y B2 completados; B3 continúa pendiente. Las Fases 1, 2, 3 y 4 del contrato operativo de stock están completadas; Fase 5 permanece pendiente y no activa.
 >
 > Este documento es el tablero de orientación del proyecto. No reemplaza la bitácora: resume qué ya existe, cuál es el siguiente frente y qué queda después.
