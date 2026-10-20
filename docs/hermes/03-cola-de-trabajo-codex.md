@@ -8,7 +8,21 @@
 - **B3 — Alta/configuración manual de productos demo:** sigue PENDIENTE de activación explícita; no comenzar automáticamente.
 - Resultado detallado de B1: entrada superior de `docs/hermes/04-bitacora-codex.md`. Mapa completo: `docs/hermes/00-mapa-objetivo-inventario-areas.md`.
 
-Estado actual: **B1 y B2 completados; B3 pendiente de activación. La Fase 1 del contrato operativo de stock está COMPLETADA; Fase 2 está PENDIENTE y no activa.** Local 1 conserva las lecturas del ledger y ahora permite ajustar saldos mediante el motor auditado. La carga inicial, repartos, despacho, recepción y transferencias visuales no se activan automáticamente. El frente móvil M2–M4 continúa pausado.
+Estado actual: **B1 y B2 completados; B3 pendiente de activación. Las Fases 1 y 2 del contrato operativo de stock están COMPLETADAS. Fase 3 — urgencias manuales — queda PENDIENTE y no activa.** Local 1 conserva las lecturas del ledger, permite ajustar saldos mediante el motor auditado y recibe repartos dirigidos a cada área. El frente móvil M2–M4 continúa pausado.
+
+### Contrato operativo — Fase 2: reparto Bodega → área
+
+- Estado: **COMPLETADA (2026-10-20)**. Fase 3 — urgencias manuales para priorizar reposición desde Bodega — queda **PENDIENTE**, no activa.
+- Migración instalada en Llamita Plus: `20261020003917_fase2_repartos_recepcion_areas`.
+- Bodega prepara un documento para un área activa elegida dinámicamente. Preparar o enviar no cambia existencias. Cada área muestra únicamente su bandeja **Repartos por recibir** y cierra todas sus líneas en una sola confirmación.
+- La recepción usa el ledger: transfiere desde Bodega hasta el saldo disponible mediante el núcleo de `stock_transferir`; si la cantidad física recibida supera ese saldo, registra la diferencia con el ajuste auditado de Fase 1. Cero, parcial y excedente cierran el documento de inmediato.
+- Lotes conocidos conservan identidad y vencimiento; el stock no identificado usa el bucket **Sin lote / vencimiento no informado**. No se escribe directamente `productos.stock_actual` ni se reactivan `public.repartos`/`public.reparto_items`.
+- RPC protegidas: `reparto_area_catalogo_buscar`, `reparto_area_crear`, `repartos_area_listar` y `reparto_area_recibir`. Son `SECURITY DEFINER`, `search_path=''`, ejecutables solo por `authenticated` y validan sesión/capacidad internamente. Las tablas privadas tienen RLS forzada y DML cerrado.
+- Prueba SQL completa dentro de `BEGIN … ROLLBACK`: preparación sin stock, aislamiento por área, recepción exacta/parcial/cero/excedente, lote conocido/sin lote, idempotencia, fallo intermedio atómico, permisos y no negatividad. Cero repartos sintéticos persistentes.
+- Conteos posteriores: 1.438 productos; proyección 15.453; 409 movimientos ledger; 0 transferencias; 42 lotes; 396 recetas; 15.357 movimientos Fudo; 0 eventos Lama; 2 movimientos de caja; 64 cuentas; 0 saldos negativos. El incremento respecto del cierre de Fase 1 corresponde a un ajuste real previo y no a las pruebas revertidas de Fase 2.
+- `npm test` y `git diff --check` pasan. Los tests que requieren navegador se omiten porque Chromium no está instalado; la prueba estática específica de Fase 2 sí pasa.
+- Advisors: no señalan una apertura nueva en las RPC de Fase 2; persisten hallazgos globales anteriores. Rendimiento informa índices de claves foráneas todavía sin uso/cobertura en tablas nuevas, sin afectar la corrección ni la demo actual.
+- No se modificaron Fudo, Lama, caja, recetas, ventas/POS, lotes legacy ni el reparto legacy. Café del Desierto / Llamita Stock no fue consultado ni modificado.
 
 ### Contrato operativo — Fase 1: ajustes manuales auditados
 

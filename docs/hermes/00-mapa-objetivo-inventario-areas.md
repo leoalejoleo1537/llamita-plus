@@ -1,6 +1,6 @@
 # Mapa de objetivo — Inventario por áreas
 
-> Estado actualizado: 20 de octubre de 2026. B1 y B2 completados; B3 continúa pendiente. La Fase 1 del contrato operativo de stock está completada y Fase 2 aún no está activa.
+> Estado actualizado: 20 de octubre de 2026. B1 y B2 completados; B3 continúa pendiente. Las Fases 1 y 2 del contrato operativo de stock están completadas; Fase 3 aún no está activa.
 >
 > Este documento es el tablero de orientación del proyecto. No reemplaza la bitácora: resume qué ya existe, cuál es el siguiente frente y qué queda después.
 
@@ -37,8 +37,8 @@ INVENTARIO POR ÁREAS
 │
 ├── C. Operación física                                            [EN CURSO]
 │   ├── C1. Conteo y ajuste manual auditado                         [x]
-│   ├── C2. Reparto por destino y recepción por área               [→ SIGUIENTE; PENDIENTE DE ACTIVACIÓN]
-│   └── C3. Críticos, vencimientos y conteos por área             [ ]
+│   ├── C2. Reparto por destino y recepción por área               [x]
+│   └── C3. Urgencias manuales para reposición desde Bodega       [→ SIGUIENTE; PENDIENTE DE ACTIVACIÓN]
 │
 ├── D. Consumo por ventas                                          [PENDIENTE]
 │   ├── D1. Lama: receta + área de producción                     [ ]
@@ -112,9 +112,15 @@ La clasificación automática mediante Excel/IA queda **postergada**. No es nece
 
 La Fase 1 del contrato 36 quedó completada el 20 de octubre de 2026. Desde la ficha se puede ingresar el saldo contado para Bodega central o para la ubicación de Local 1 abierta. Los productos con lotes muestran líneas por lote y vencimiento, además del bucket independiente **Sin lote / vencimiento no informado**. El servidor calcula los deltas, bloquea producto/ubicación, guarda la auditoría y actualiza el ledger; el trigger mantiene `productos.stock_actual` como proyección. La migración `20261020000825_fase1_ajustes_manual_ledger` está instalada. Los conteos SQL y demás evidencia están en la entrada más reciente de Bitácora.
 
-## Siguiente nodo del contrato: Fase 2 — recepción por área
+## Completado: C2 — reparto y recepción por área
 
-PENDIENTE de activación específica. Debe preparar repartos con un destino claro y cada área debe recibir sus propias líneas, registrando cantidad total, parcial o excedente sin dejar saldos negativos ni diferencias silenciosas. B3 continúa siendo una tarea separada pendiente de activación.
+La Fase 2 quedó completada el 20 de octubre de 2026. Bodega puede preparar un documento para cualquier área activa sin mover stock. El área destino ve su propia bandeja y confirma todas las cantidades recibidas: exactas, parciales, cero o excedentes. Al confirmar se usa el ledger una sola vez; Bodega entrega hasta su saldo disponible y cualquier excedente físico se registra como ajuste auditado. El documento queda cerrado y no deja diferencias pendientes.
+
+La migración `20261020003917_fase2_repartos_recepcion_areas` está instalada. Las pruebas transaccionales terminaron con `ROLLBACK` y no dejaron repartos sintéticos.
+
+## Siguiente nodo del contrato: Fase 3 — urgencias manuales
+
+PENDIENTE de activación específica. Debe permitir marcar productos urgentes por área y priorizarlos para reposición desde Bodega, sin crear pedidos ni movimientos automáticos. B3 continúa siendo una tarea separada pendiente de activación.
 
 ## Invariantes: no romper
 

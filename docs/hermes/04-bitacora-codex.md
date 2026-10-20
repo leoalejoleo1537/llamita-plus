@@ -48,6 +48,23 @@ El cajón actual conserva las rutas y etiquetas accesibles y tiene ancho máximo
 
 La recomendación es prototipar la opción 1 antes de reemplazar la navegación; esta nota no cambia la navegación actual. La ruta Mesas ya aparece en el menú móvil para cuentas con `puede_lama` y sedes habilitadas. El permiso y las restricciones por sede siguen siendo la autoridad: no se habilita Mesas a cuentas no autorizadas desde CSS o por defecto.
 
+## 2026-10-20 — Contrato operativo, Fase 2: reparto Bodega → área
+
+- Estado: **COMPLETADA**. Fase 3 — urgencias manuales para priorizar reposición desde Bodega — queda **PENDIENTE**, no activa.
+- Entorno confirmado: repositorio `leoalejoleo1537/llamita-plus`, destino `origin/master`; Supabase Llamita Plus ref `iuryhsjucblmebdogewa`. No se accedió a Café del Desierto / Llamita Stock.
+- Migración instalada: `20261020003917_fase2_repartos_recepcion_areas`. Se añadieron los documentos privados e inmutables `stock_internal.repartos_area` y `stock_internal.repartos_area_items`, con RLS forzada, política de rechazo y sin grants directos para roles de aplicación. El reparto legacy permanece bloqueado e intacto.
+- Preparación: Bodega elige cualquier área activa de Local 1 desde el catálogo dinámico, busca una representación enlazada explícitamente y registra cantidades/lotes. `reparto_area_crear` crea solo el documento; no modifica stock, lotes, movimientos ni transferencias.
+- Recepción: la bandeja se muestra dentro de cada área y `repartos_area_listar` filtra por su `area_id`. `reparto_area_recibir` exige todas las líneas, acepta decimales y cero, bloquea documento/producto/ubicación y cierra atómicamente. Una misma referencia y contenido retorna el resultado previo; contenido distinto se rechaza.
+- Resultado físico: recepción exacta o parcial mueve únicamente lo recibido. Si el recibido supera lo preparado, el total físico recibido se acepta. El motor transfiere desde Bodega hasta su saldo disponible y registra el resto mediante `stock_ajuste_guardar`, vinculado a la línea; Bodega nunca queda negativa. Lotes conocidos conservan lote/vencimiento; lo desconocido permanece separado como **Sin lote / vencimiento no informado**.
+- RPC instaladas: `reparto_area_catalogo_buscar`, `reparto_area_crear`, `repartos_area_listar`, `reparto_area_recibir`. Las cuatro son `SECURITY DEFINER`, `search_path=''`, `EXECUTE` solo para `authenticated`, con validación interna mediante autorización S1. `anon` y `service_role` no pueden ejecutarlas.
+- Interfaz mínima: en Bodega, **Nuevo reparto**, selector dinámico de área, búsqueda, lote, cantidad y lista antes de enviar; dentro del área, **Repartos por recibir**, cantidades preparada/recibida y **Confirmar recepción**. No se rediseñaron Inventario, navegación ni móvil.
+- Prueba `sql/2026-10-fase2-pruebas-repartos-area.sql`, íntegra en `BEGIN … ROLLBACK`: preparar sin alterar existencias; aislamiento entre áreas; exacta, parcial, cero y excedente; lote conocido y bucket sin lote; referencia repetida; reutilización inválida; saldo insuficiente absorbido como ajuste; fallo forzado entre líneas con rollback total; usuario autorizado/no autorizado; anónimo; no negatividad y conteos fuera de alcance. Resultado final: cero repartos/ítems sintéticos persistentes.
+- Verificación local: `pruebas/fase2-repartos-area.mjs`, `pruebas/pantalla-sana.mjs`, `npm test` completo y `git diff --check` pasan. Las pruebas Playwright se omiten automáticamente porque Chromium no está instalado.
+- Conteos observados después del rollback: 1.438 productos; proyección agregada 15.453; 409 movimientos ledger; 0 transferencias; 42 lotes; 396 recetas; 15.357 movimientos Fudo; 0 eventos Lama; 2 movimientos de caja; 64 cuentas; 0 saldos negativos. Hay un ajuste persistente de Fase 1 previo a esta ejecución; Fase 2 no creó datos de negocio persistentes.
+- Advisors ejecutados. Las RPC nuevas no aparecen como ejecutables por anónimo ni con `search_path` mutable. Persisten avisos globales anteriores; rendimiento señala claves foráneas de las tablas nuevas sin índices dedicados, aceptable para volumen inicial y pendiente de medir antes de optimizar.
+- Rollback técnico: `sql/2026-10-fase2-repartos-area.rollback.sql` solo procede antes del primer reparto real. Con actividad real, aborta para no borrar auditoría y exige una compensación auditada.
+- No se modificaron Fudo, Lama, caja, recetas, ventas/POS, lotes legacy, Bodega legacy ni `public.repartos`/`public.reparto_items`. El núcleo `stock_internal.transferir_aplicar` se reutilizó sin cambiar su contrato.
+
 ## 2026-10-20 — Contrato operativo, Fase 1: conteo y ajuste auditado
 
 - Estado: **COMPLETADA**. Fase 2 — recepción por área — permanece **PENDIENTE**, no activa.

@@ -2315,6 +2315,16 @@
      gráfico de Excel. Fuerte durante el gesto, suave al quedar agregado. */
   .row.al-reparto{box-shadow:0 0 22px 2px color-mix(in srgb, var(--orange) 22%, transparent), 0 0 0 1px color-mix(in srgb, var(--orange) 14%, transparent)}
   .row.en-reparto{box-shadow:0 0 14px color-mix(in srgb, var(--orange) 16%, transparent)}
+  .f2-box{margin:0 0 14px;border:1px solid var(--border);border-radius:16px;background:var(--card);box-shadow:var(--sombra);overflow:hidden}
+  .f2-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border)}
+  .f2-head h3{margin:0;font-size:16px}.f2-head small{color:var(--muted)}
+  .f2-body{padding:14px 16px}.f2-grid{display:grid;grid-template-columns:minmax(180px,.7fr) minmax(240px,1.3fr);gap:10px}
+  .f2-result,.f2-line{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border)}
+  .f2-result:last-child,.f2-line:last-child{border-bottom:0}.f2-main{min-width:0;flex:1}.f2-main b{display:block}.f2-sub{font-size:12px;color:var(--muted);margin-top:2px}
+  .f2-result select{max-width:230px}.f2-qty{width:94px!important;flex:0 0 94px}.f2-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+  .f2-empty{padding:14px;color:var(--muted);text-align:center}.f2-rep{padding:12px 14px;border-top:1px solid var(--border)}
+  .f2-rep:first-child{border-top:0}.f2-rep-title{display:flex;justify-content:space-between;gap:10px;margin-bottom:6px}.f2-tag{font-size:11px;color:var(--muted)}
+  @media(max-width:700px){.f2-grid{grid-template-columns:1fr}.f2-result{align-items:flex-start;flex-wrap:wrap}.f2-result select{max-width:none;width:100%}.f2-line{align-items:flex-start;flex-wrap:wrap}.f2-qty{margin-left:auto}.f2-head{align-items:flex-start}}
 
   /* El símbolo que asoma DETRÁS de la fila y crece con el gesto, como el
      archivar de Gmail. Va fijo en la pantalla y por debajo de la fila, así
@@ -3428,6 +3438,7 @@
 <div class="wrap" id="view-inv">
   <div class="area-nav" id="areaNav" style="display:none"></div>
   <div class="area-page-heading" id="area-page-heading" hidden></div>
+  <div id="areaRepartos" style="display:none"></div>
   <div class="area-note" id="areaNote" style="display:none"></div>
   <div class="inv-filtros" id="invFiltros">
     <label class="inv-busca" for="q">
@@ -3620,6 +3631,23 @@
 </div>
 
 <div class="wrap" id="view-repcentral" style="display:none">
+
+  <section class="f2-box" id="f2-preparar">
+    <div class="f2-head"><div><h3>Nuevo reparto</h3><small>El stock se moverá cuando el área confirme lo recibido.</small></div></div>
+    <div class="f2-body">
+      <div class="f2-grid">
+        <div class="field" style="margin:0"><label>Área destino</label><select id="f2-area"><option value="">Cargando áreas…</option></select></div>
+        <div class="field" style="margin:0"><label>Buscar producto de Bodega</label><input id="f2-q" type="search" autocomplete="off" placeholder="Escribe al menos 2 caracteres"></div>
+      </div>
+      <div id="f2-resultados"></div>
+      <div id="f2-carrito" style="display:none">
+        <div class="cart-title" style="margin-top:12px">Lista antes de enviar</div>
+        <input id="f2-nombre" type="text" maxlength="80" placeholder="Nombre del reparto (opcional)">
+        <div id="f2-lineas"></div>
+        <div class="f2-actions"><button type="button" class="btn btn-orange" id="f2-enviar">Enviar al área</button></div>
+      </div>
+    </div>
+  </section>
 
   <!-- Salida y entrada son el mismo trabajo visto al revés, así que viven en la
        misma pestaña. Entra por SALIDA porque es lo que se hace todos los días. -->
@@ -4367,6 +4395,7 @@ function cambiarArea(codigo, producto=''){
   $('view-inv').classList.toggle('area-workspace-wide',codigo!==null);
   document.querySelectorAll('.mcard').forEach(x=>x.classList.remove('sel'));
   renderTipos(); render(); tituloInventarioArea();
+  if(areaRepartosActiva())cargarRepartosArea(codigo);else pintarRepartosArea();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function areaStats(codigo){
@@ -4494,6 +4523,7 @@ function renderAreaPortada(){
   $('area-page-heading').hidden=true;
   aparienciaPortada(vistaActual==='inv');
   $('areaNav').style.display='none'; $('areaNav').innerHTML=''; $('areaNote').style.display='none';
+  $('areaRepartos').style.display='none';$('areaRepartos').innerHTML='';
   $('areaTipoPills').style.display='none'; $('areaTipoPills').innerHTML=''; $('tipos').style.display='';
   $('invFiltros').style.display='none'; $('metrics').style.display='none';
   $('critSedes').style.display='none'; $('metaPortada').style.display='none';
@@ -4565,6 +4595,7 @@ function filaAreaHistorica(r){
 function renderAreaLista(){
   aparienciaPortada(vistaActual==='inv');
   const global=areaActual===AREA_TODAS;
+  pintarRepartosArea();
   $('view-inv').classList.add('area-workspace-wide');
   renderAreaTipoPills();
   $('areaNav').style.display='none'; $('areaNav').innerHTML='';
@@ -5483,6 +5514,7 @@ function pickSede(s){
   $('footText').textContent = etiquetaSedeUI(s) + ' · sincronizado en tiempo real';
   // reset estado/filtros
   DATA=[]; filterState=null; modalProd=null; carrito=[];
+  F2_CARRITO=[];F2_RESULTADOS=[];REPARTOS_AREA=[];REPARTOS_AREA_ID=null;F2_RECEPCION_REFS.clear();
   /* los conteos de las otras sedes se descartan al cambiar de sede: si no, al
      volver a Bodega se verían un instante los números de la visita anterior */
   CRITICOS={}; CRIT_TOPE={};
@@ -6455,14 +6487,14 @@ $('mermas-pagination').addEventListener('click',e=>{
    'plaza' | 'angamos' | 'fr:<nombre>'. Empieza en Plaza porque es la sede de
    más flujo y la que Adriana arma primero casi todos los días. */
 let repcDest = 'plaza';
-const repcEsLocal = () => SEDES_ENLACE.includes(repcDest) && sedeActiva(repcDest);
+const repcEsLocal = () => repcDest!=='plaza' && SEDES_ENLACE.includes(repcDest) && sedeActiva(repcDest);
 
 function repcPintarDest(){
   const bot = (val, txt, franq) =>
     `<button type="button" class="${franq?'franq ':''}${repcDest===val?'on':''}"
       data-repcdest="${esc(val)}">${esc(txt)}</button>`;
   $('repc-dest').innerHTML =
-    SEDES_ENLACE.filter(sedeActiva).map(s=>bot(s, SEDES[s].label)).join('')
+    SEDES_ENLACE.filter(s=>s!=='plaza'&&sedeActiva(s)).map(s=>bot(s, SEDES[s].label)).join('')
     + '<span class="repc-dsep"></span>'
     /* El nombre corto de la franquicia es lo que va entre paréntesis: "Urbano
        Café" y no "Mall EU Antofagasta (Urbano Café)". El largo no cabe en una
@@ -6843,6 +6875,7 @@ function repcAbrir(){
      el que leen frCrear() y la hoja impresa; lo que cambió es que ya no se
      toca a mano — lo mueve el selector de arriba. */
   frPintarSelector(); frCargarAbiertos();
+  if(repcDest==='plaza')repcDest=FRANQUICIAS.length?'fr:'+FRANQUICIAS[0]:(SEDES_ENLACE.find(s=>s!=='plaza'&&sedeActiva(s))||'');
   /* Un solo sitio decide qué se ve, y pinta lo que corresponda al destino. */
   repcPintarTodo();
 }
@@ -14496,6 +14529,121 @@ $('n-guardar').addEventListener('click', async()=>{
   } finally { btn.disabled=false; btn.textContent='Agregar'; }
 });
 
+/* ---------------- Fase 2 · reparto Bodega -> área ----------------
+   Este circuito usa solo RPC protegidas. Preparar crea el documento privado;
+   recibir aplica el ledger completo en una única transacción. */
+let F2_AREAS=[],F2_RESULTADOS=[],F2_CARRITO=[],F2_BUSQUEDA_TIMER=null;
+let REPARTOS_AREA=[],REPARTOS_AREA_CARGANDO=false,REPARTOS_AREA_ID=null;
+const F2_RECEPCION_REFS=new Map();
+
+async function f2CargarAreas(){
+  const sel=$('f2-area');if(!sel)return;
+  const {data,error}=await sb.rpc('areas_operativas_listar',{p_sede:'plaza',p_incluir_archivadas:false});
+  if(error){sel.innerHTML='<option value="">No se pudieron cargar las áreas</option>';return;}
+  F2_AREAS=(data||[]).filter(a=>a.estado==='activa'&&a.ubicacion_activa);
+  const anterior=sel.value;
+  sel.innerHTML='<option value="">Elige un área</option>'+F2_AREAS.map(a=>`<option value="${esc(a.id)}">${esc(a.nombre)}</option>`).join('');
+  if(F2_AREAS.some(a=>String(a.id)===anterior))sel.value=anterior;
+}
+function f2BucketTexto(b){return `${b.etiqueta} · disponible ${fmt(Number(b.cantidad)||0)}`;}
+function f2PintarResultados(){
+  const box=$('f2-resultados');if(!box)return;
+  if(!F2_RESULTADOS.length){box.innerHTML=$('f2-q').value.trim().length>=2?'<div class="f2-empty">No hay productos enlazados con ese nombre.</div>':'';return;}
+  box.innerHTML=F2_RESULTADOS.map((p,i)=>`<div class="f2-result" data-f2-result="${i}">
+    <div class="f2-main"><b>${esc(p.producto)}</b><div class="f2-sub">Bodega #${p.producto_bodega_id} · Local 1 #${p.producto_plaza_id}${p.configurado_en_area?' · configurado en el área':' · sin configuración en el área'}</div></div>
+    <select data-f2-bucket aria-label="Lote de ${esc(p.producto)}">${(p.buckets||[]).map((b,j)=>`<option value="${j}">${esc(f2BucketTexto(b))}</option>`).join('')}</select>
+    <button type="button" class="btn btn-outline btn-sm" data-f2-add="${i}">Agregar</button>
+  </div>`).join('');
+}
+async function f2Buscar(){
+  const q=$('f2-q').value.trim(),area=$('f2-area').value;
+  if(q.length<2){F2_RESULTADOS=[];f2PintarResultados();return;}
+  if(!area){$('f2-resultados').innerHTML='<div class="f2-empty">Elige primero el área destino.</div>';return;}
+  $('f2-resultados').innerHTML='<div class="f2-empty">Buscando en Bodega…</div>';
+  const {data,error}=await sb.rpc('reparto_area_catalogo_buscar',{p_area_id:area,p_consulta:q});
+  if(error){F2_RESULTADOS=[];$('f2-resultados').innerHTML=`<div class="f2-empty">${esc(error.message||'No se pudo buscar.')}</div>`;return;}
+  F2_RESULTADOS=data||[];f2PintarResultados();
+}
+function f2PintarCarrito(){
+  const box=$('f2-carrito');if(!box)return;
+  box.style.display=F2_CARRITO.length?'block':'none';
+  $('f2-lineas').innerHTML=F2_CARRITO.map((x,i)=>`<div class="f2-line">
+    <div class="f2-main"><b>${esc(x.producto)}</b><div class="f2-sub">${esc(x.etiqueta)} · disponible ${fmt(x.disponible)}</div></div>
+    <input class="f2-qty" type="number" min="0.000001" step="any" value="${x.cantidad}" data-f2-cant="${i}" aria-label="Cantidad de ${esc(x.producto)}">
+    <button type="button" class="btn btn-gris btn-sm" data-f2-quitar="${i}">Quitar</button>
+  </div>`).join('');
+}
+$('f2-q').addEventListener('input',()=>{clearTimeout(F2_BUSQUEDA_TIMER);F2_BUSQUEDA_TIMER=setTimeout(f2Buscar,220);});
+$('f2-area').addEventListener('change',()=>{F2_RESULTADOS=[];$('f2-q').value='';$('f2-resultados').innerHTML='';});
+$('f2-resultados').addEventListener('click',e=>{
+  const bt=e.target.closest('[data-f2-add]');if(!bt)return;
+  const p=F2_RESULTADOS[+bt.dataset.f2Add],row=bt.closest('[data-f2-result]');if(!p||!row)return;
+  const b=(p.buckets||[])[+row.querySelector('[data-f2-bucket]').value];if(!b)return;
+  if(F2_CARRITO.some(x=>x.producto_bodega_id===p.producto_bodega_id&&String(x.lote_id||'')===String(b.lote_id||''))){aviso('Ese producto y lote ya están en la lista.');return;}
+  F2_CARRITO.push({producto_bodega_id:p.producto_bodega_id,producto_plaza_id:p.producto_plaza_id,
+    producto:p.producto,lote_id:b.lote_id??null,vencimiento:b.vencimiento||null,etiqueta:b.etiqueta,
+    disponible:Number(b.cantidad)||0,cantidad:1});
+  f2PintarCarrito();
+});
+$('f2-lineas').addEventListener('input',e=>{const x=e.target.closest('[data-f2-cant]');if(x)F2_CARRITO[+x.dataset.f2Cant].cantidad=Number(x.value);});
+$('f2-lineas').addEventListener('click',e=>{const x=e.target.closest('[data-f2-quitar]');if(!x)return;F2_CARRITO.splice(+x.dataset.f2Quitar,1);f2PintarCarrito();});
+$('f2-enviar').addEventListener('click',async()=>{
+  const area=$('f2-area').value,items=F2_CARRITO.map(x=>({producto_bodega_id:x.producto_bodega_id,
+    producto_plaza_id:x.producto_plaza_id,lote_id:x.lote_id,cantidad:Number(x.cantidad)}));
+  if(!area){avisar('Elige el área destino.');return;}
+  if(!items.length||items.some(x=>!Number.isFinite(x.cantidad)||x.cantidad<=0)){avisar('Revisa las cantidades del reparto.');return;}
+  const bt=$('f2-enviar');bt.disabled=true;bt.textContent='Enviando…';
+  const referencia=crypto.randomUUID();
+  const {data,error}=await sb.rpc('reparto_area_crear',{p_referencia:referencia,p_area_id:area,
+    p_nombre:$('f2-nombre').value.trim()||null,p_items:items});
+  bt.disabled=false;bt.textContent='Enviar al área';
+  if(error){avisar(error.message||'No se pudo preparar el reparto.');return;}
+  const destino=F2_AREAS.find(a=>String(a.id)===area)?.nombre||'el área';
+  F2_CARRITO=[];F2_RESULTADOS=[];$('f2-q').value='';$('f2-nombre').value='';$('f2-resultados').innerHTML='';f2PintarCarrito();
+  aviso(`✓ Reparto enviado a ${destino} · todavía no movió stock`);
+});
+
+function areaRepartosActiva(){return SEDE==='plaza'&&areaActual&&areaActual!==AREA_TODAS&&areaActual!=='sin_asignar'&&!!areaIdPorCodigo(areaActual);}
+function pintarRepartosArea(){
+  const box=$('areaRepartos');if(!box)return;
+  if(!areaRepartosActiva()){box.style.display='none';box.innerHTML='';return;}
+  box.style.display='block';
+  if(REPARTOS_AREA_CARGANDO){box.innerHTML='<section class="f2-box"><div class="f2-head"><h3>Repartos por recibir</h3></div><div class="f2-empty">Cargando…</div></section>';return;}
+  const abiertos=REPARTOS_AREA.filter(r=>r.estado==='enviado'),cerrados=REPARTOS_AREA.filter(r=>r.estado==='recibido').slice(0,5);
+  box.innerHTML=`<section class="f2-box"><div class="f2-head"><div><h3>Repartos por recibir</h3><small>Solo envíos destinados a ${esc(areaLabel(areaActual))}.</small></div><span class="sec-count">${abiertos.length}</span></div>
+    <div>${abiertos.length?abiertos.map(r=>`<div class="f2-rep" data-f2-recibir="${r.id}">
+      <div class="f2-rep-title"><b>${esc(r.nombre||'Reparto de Bodega')}</b><span class="f2-tag">${new Date(r.creado_at).toLocaleString('es-CL')}</span></div>
+      ${(r.items||[]).map(i=>`<label class="f2-line"><span class="f2-main"><b>${esc(i.producto)}</b><span class="f2-sub">Preparado ${fmt(i.cantidad_preparada)}${i.lote_id?' · lote '+i.lote_id:''}${i.vencimiento?' · vence '+fmtCorta(i.vencimiento):' · Sin lote / vencimiento no informado'}</span></span><input class="f2-qty" type="number" min="0" step="any" value="${i.cantidad_preparada}" data-f2-recibida="${i.id}" aria-label="Cantidad recibida de ${esc(i.producto)}"></label>`).join('')}
+      <div class="f2-actions"><button type="button" class="btn btn-orange" data-f2-confirmar="${r.id}" ${PERMISOS.puede_editar?'':'disabled'}>Confirmar recepción</button></div>
+    </div>`).join(''):'<div class="f2-empty">No hay repartos pendientes para esta área.</div>'}</div>
+    ${cerrados.length?`<div class="f2-rep"><div class="f2-tag">RECIBIDOS RECIENTEMENTE</div>${cerrados.map(r=>`<div class="f2-line"><span class="f2-main"><b>${esc(r.nombre||'Reparto de Bodega')}</b><span class="f2-sub">${fmt(Number(r.resultado?.total_recibido)||0)} recibido · ${fmt(Number(r.resultado?.total_ajustado)||0)} como diferencia auditada</span></span><span class="f2-tag">Cerrado</span></div>`).join('')}</div>`:''}
+  </section>`;
+}
+async function cargarRepartosArea(codigo=areaActual){
+  const areaId=areaIdPorCodigo(codigo);if(!areaId){REPARTOS_AREA=[];REPARTOS_AREA_ID=null;pintarRepartosArea();return;}
+  REPARTOS_AREA_CARGANDO=true;REPARTOS_AREA_ID=areaId;pintarRepartosArea();
+  const {data,error}=await sb.rpc('repartos_area_listar',{p_area_id:areaId,p_incluir_cerrados:true});
+  if(REPARTOS_AREA_ID!==areaId)return;
+  REPARTOS_AREA_CARGANDO=false;
+  if(error){REPARTOS_AREA=[];$('areaRepartos').innerHTML=`<section class="f2-box"><div class="f2-head"><h3>Repartos por recibir</h3></div><div class="f2-empty">${esc(error.message||'No se pudo cargar la bandeja.')}</div></section>`;return;}
+  REPARTOS_AREA=data||[];pintarRepartosArea();
+}
+$('areaRepartos').addEventListener('click',async e=>{
+  const bt=e.target.closest('[data-f2-confirmar]');if(!bt)return;
+  const rep=REPARTOS_AREA.find(r=>r.id===bt.dataset.f2Confirmar),card=bt.closest('[data-f2-recibir]');if(!rep||!card)return;
+  const lineas=(rep.items||[]).map(i=>({item_id:i.id,cantidad_recibida:Number(card.querySelector(`[data-f2-recibida="${i.id}"]`).value)}));
+  if(lineas.some(x=>!Number.isFinite(x.cantidad_recibida)||x.cantidad_recibida<0)){avisar('La cantidad recibida no puede ser negativa.');return;}
+  if(!await preguntar('Confirmar recepción',`Se cerrará ahora el reparto de ${areaLabel(areaActual)} con las cantidades indicadas.`, 'Confirmar'))return;
+  const ref=F2_RECEPCION_REFS.get(rep.id)||crypto.randomUUID();F2_RECEPCION_REFS.set(rep.id,ref);
+  bt.disabled=true;bt.textContent='Confirmando…';
+  const {data,error}=await sb.rpc('reparto_area_recibir',{p_reparto_id:rep.id,p_recepcion_referencia:ref,
+    p_lineas:lineas,p_motivo:'Recepción de reparto por área'});
+  if(error){bt.disabled=false;bt.textContent='Confirmar recepción';avisar(error.message||'No se pudo confirmar la recepción.');return;}
+  F2_RECEPCION_REFS.delete(rep.id);
+  await cargarRepartosArea(areaActual);await loadData();
+  aviso(`✓ Recepción cerrada · ${fmt(Number(data?.total_recibido)||0)} recibido · ${fmt(Number(data?.total_ajustado)||0)} diferencia auditada`);
+});
+
 /* ---------------- reparto ----------------
    Adriana arma el envío; el jefe de turno confirma lo que llegó y el stock
    sube en ese momento. Nadie transcribe nada desde WhatsApp.
@@ -18238,7 +18386,7 @@ function pickTab(tab){
     }
     loadRepartos();
   }
-  if(esEnvios) loadEnlaces().then(()=>repcModo('salida'));
+  if(esEnvios){f2CargarAreas();loadEnlaces().then(()=>repcModo('salida'));}
   /* Abre siempre en la portada, no en el último modo que se dejó: mientras
      jefatura está aprendiendo, lo primero que tienen que ver es dónde está el
      hueco. Cuando ya se sepa de memoria, esto pasa a abrir en el taller. */

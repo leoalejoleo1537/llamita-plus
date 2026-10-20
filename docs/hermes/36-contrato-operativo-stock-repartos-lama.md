@@ -1,7 +1,7 @@
 # Contrato operativo — Ajustes, repartos y ventas por áreas
 
 **Fecha:** 19 de octubre de 2026  
-**Estado:** especificación aprobada; Fase 1 completada el 20 de octubre de 2026. Fase 2 continúa pendiente.
+**Estado:** especificación aprobada; Fases 1 y 2 completadas el 20 de octubre de 2026. Fase 3 continúa pendiente.
 **Repositorio:** `leoalejoleo1537/llamita-plus`  
 **Propósito:** convertir las decisiones conversadas en reglas que Codex pueda aplicar sin reinterpretar la operación de Brunetti.
 
@@ -240,6 +240,12 @@ Fase 2 — recepción por área, reservas, ventas, urgencias y recetas no quedan
 ### Fase 2 — Recepción propia por área y liquidación inmediata de diferencias
 
 Añadir el documento/estado de reparto con destino dinámico y bandeja de recepción dentro del área destino. La recepción por línea acepta cantidad real, incluyendo 0, parcial y excedente; aplica transferencia hasta el saldo disponible de Bodega y ajuste positivo por exceso; cierra inmediatamente con diferencia registrada. Evitar cualquier saldos negativos y estados pendientes permanentes.
+
+#### Resultado técnico de Fase 2
+
+Completada e instalada con la migración `20261020003917_fase2_repartos_recepcion_areas`. Bodega prepara documentos privados para áreas activas sin mover existencias. Cada área lista únicamente sus repartos y la recepción completa todas las líneas de forma atómica e idempotente. El saldo recibido se transfiere hasta lo disponible en Bodega y cualquier excedente físico se incorpora como ajuste auditado de Fase 1; una línea recibida en cero no mueve stock. Lotes conocidos conservan identidad/vencimiento y el saldo desconocido usa el bucket sin lote.
+
+Las RPC `reparto_area_catalogo_buscar`, `reparto_area_crear`, `repartos_area_listar` y `reparto_area_recibir` están cerradas a `authenticated` con validación interna. Las tablas privadas no admiten DML del navegador. El reparto legacy no se reactivó y no se escriben directamente ni `productos.stock_actual` ni `stock_internal.existencias`. Fase 3 no queda activada por este resultado.
 
 ### Fase 3 — Urgencias y operación visible para Bodega
 
