@@ -55,7 +55,10 @@ const tryArchived = new Function('sedeActiva', 'showGate',
 assert.equal(tryArchived(catalog.sedeActiva, () => { gateShown = true; }), null,
   'una llamada directa a pickSede no establece Angamos');
 assert.equal(gateShown, false, 'desde el selector no se abre una ruta de sede');
-assert.match(html, /function pickTab\(tab\)\{\s*if\(!SEDE\)return;\s*if\(!sedeActiva\(SEDE\)\)\{ showGate\(\); return; \}/,
+const tabStart = html.indexOf('function pickTab(tab){');
+const tabEnd = html.indexOf("document.querySelectorAll('.tab')", tabStart);
+const tabGuard = html.slice(tabStart, tabEnd);
+assert.match(tabGuard, /if\(!sedeActiva\(SEDE\)\)\{ showGate\(\); return; \}/,
   'la navegación vuelve al selector si la sede abierta deja de estar activa');
 assert.match(html, /const SEDES_ENLACE = \['plaza'\];/,
   'los nuevos repartos solo ofrecen Local 1');

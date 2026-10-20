@@ -64,6 +64,13 @@ La recomendación es prototipar la opción 1 antes de reemplazar la navegación;
 - Archivos de implementación: `index.html`, migración y prueba SQL/rollback bajo `supabase/migrations/` y `sql/`, más `pruebas/fase1-ajuste-stock.mjs`. Se actualizaron contrato 36, cola y mapa. No se alteraron Fudo, Lama, caja, recetas, lotes existentes, repartos ni `stock_transferir`; Fudo remoto no fue consultado ni modificado.
 - Fase 2 queda pendiente y requiere activación explícita de Alejo.
 
+### Cierre mínimo de pruebas de Fase 1
+
+- La falla atribuida inicialmente a `pruebas/ajustes-navegacion.mjs` provenía realmente de `pruebas/sedes-seguras.mjs`. Su aserción exigía que el guard de sede activa apareciera inmediatamente después de `if(!SEDE)return;` dentro de `pickTab`.
+- Desde el commit `ebd08f1`, anterior a Fase 1, existe entre ambas líneas una navegación legítima: al tocar Inventario mientras está abierta un área, se vuelve a Todas las áreas. El guard de sede seguía presente y se ejecutaba antes de cambiar vistas; no había regresión funcional.
+- Se ajustó únicamente la prueba para inspeccionar el tramo inicial de `pickTab` y comprobar la presencia del guard sin depender de que dos instrucciones no relacionadas sean adyacentes. Fase 2 continúa pendiente y no fue activada.
+- Resultado: `npm test` completo y `git diff --check` pasan. Las pruebas que requieren navegador continúan informando su omisión cuando Chromium no está instalado, sin convertirla en un fallo de la suite.
+
 ## 2026-10-19 — Movimientos de caja y correcciones de legibilidad
 
 - Movimientos de caja conserva la misma RPC `arqueo_movimiento`, el turno abierto y sus permisos, pero ahora presenta una acción permanente **Nuevo movimiento** y un historial ordenado. La creación abre una ventana centrada en escritorio y una hoja inferior en teléfono, con tipo, monto, detalle, Cancelar y Guardar. Si no hay caja abierta, la pantalla ofrece ir a Arqueo y no promete una operación imposible.
