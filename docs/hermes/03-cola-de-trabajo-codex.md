@@ -1,10 +1,10 @@
 # Cola de trabajo de Codex
 
-## Prioridad vigente — P2 completado; P3 pendiente
+## Prioridad vigente — P3 completado; P4 pendiente
 
-Ver [P0](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md) y cierres P1/P2 en bitácora (2026-10-21). El Panel visible y su RPC atómica son ahora la única alta humana: Bodega, alta general, áreas, Ajustes y creación de ingrediente en Recetas convergen allí. El contexto de área queda preseleccionado y Recetas recupera el insumo recién creado sin generar receta automática. Las pruebas SQL revertidas y las pruebas Chromium específicas P1/P2 pasan; `npm test` ordinario pasa. La suite completa forzada con Chromium conserva la falla preexistente de `ajustes-navegacion.mjs`, ya reproducida antes de P1.
+Ver [P0](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md) y cierres P1–P3 en bitácora (2026-10-21). El Panel contiene `Insumos` y `Productos de venta`; el segundo es un catálogo neutral nuevo, con precio y recetas manuales versionadas. Cada componente referencia una configuración producto–área activa, conserva orden y admite decimales. Crear un insumo desde la receta vuelve al editor con su origen seleccionado; nunca crea receta automática.
 
-**P3 — productos de venta y recetas manuales** queda pendiente y no activado. P2 instaló `20261021112507_p2_unificar_altas_productos`: cerró INSERT directo de cliente en `productos` y EXECUTE de las cuatro altas heredadas; `panel_producto_guardar` sigue exclusivo de `authenticated` y valida S1. La gestión manual histórica de enlaces sigue siendo una dependencia separada que P2 no cerró a ciegas. Orden: P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B. Los bloques posteriores y la purga requieren su propia ejecución.
+**P4 — Mesas consume recetas y componentes desde una o varias áreas** queda pendiente y no activado. P3 instaló `20261021181318_p3_catalogo_comercial_recetas_manuales` y `20261021181440_p3_indices_fk_catalogo_comercial`; no conectó Mesas/Lama ni Fudo. SQL revertido, Chromium específico, regresiones P1/P2, `npm test` y diff-check pasan. Orden: P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B. Los bloques posteriores y la purga requieren su propia ejecución.
 
 ## Estado del árbol de Inventario por Áreas — 2026-10-20
 

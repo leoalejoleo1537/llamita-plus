@@ -10,7 +10,8 @@ function panelContextoPintar(){
     inventario:'Local 1 · busca y reutiliza un insumo antes de crear uno nuevo.',
     area:`${c.areaNombre||'Área de Local 1'} · quedará preseleccionada. Configurar el producto no mueve stock.`,
     'receta-editor':'Recetas · al guardar volverás al editor con el nuevo insumo seleccionado. No se creará una receta automáticamente.',
-    'receta-taller':'Recetas · al guardar volverás al taller con el nuevo insumo seleccionado. No se creará una receta automáticamente.'
+    'receta-taller':'Recetas · al guardar volverás al taller con el nuevo insumo seleccionado. No se creará una receta automáticamente.',
+    'producto-venta':'Receta neutral · configura al menos un área y volverás con el insumo seleccionado. La receta seguirá siendo manual.'
   };
   el.textContent=textos[c.origen]||'Busca y reutiliza un insumo antes de crear uno nuevo.';
   el.hidden=false;volver.hidden=false;
@@ -27,13 +28,16 @@ function abrirPanelProductos(opciones={}){
   const contexto={
     origen:opciones.origen||'inventario', areaId:opciones.areaId||null, areaCodigo:opciones.areaCodigo||null,
     sugerido:(opciones.sugerido||'').trim(), sedeOrigen:SEDE, vistaOrigen:vistaActual,
-    requiereRepresentacion:!!opciones.requiereRepresentacion||opciones.origen==='area'||(opciones.origen==='inventario'&&SEDE==='plaza')
+    requiereRepresentacion:!!opciones.requiereRepresentacion||opciones.origen==='area'||opciones.origen==='producto-venta'||(opciones.origen==='inventario'&&SEDE==='plaza'),
+    requiereArea:!!opciones.requiereArea||opciones.origen==='producto-venta'
   };
   contexto.areaNombre=contexto.areaCodigo&&typeof areaLabel==='function'?areaLabel(contexto.areaCodigo):null;
   if(contexto.origen.startsWith('receta-'))contexto.requiereRepresentacion=SEDE==='plaza';
   PANEL.contexto=contexto;PANEL.ficha=null;PANEL.intento=null;
   $('panel-q').value=contexto.sugerido;
-  panelCerrar();panelContextoPintar();pickTab('productos');
+  panelCerrar();panelContextoPintar();
+  if(typeof panelTabCambiar==='function')panelTabCambiar('insumos');
+  pickTab('productos');
 }
 async function panelRPC(nombre,args){
   const {data,error}=await sb.rpc(nombre,args);
@@ -115,6 +119,7 @@ function panelDatos(){
   });
   const rep=$('panel-representacion').value;
   if((areas.length||PANEL.contexto?.requiereRepresentacion)&&!$('panel-representacion-label').hidden&&!rep)throw Error('Elige explícitamente la representación de Local 1.');
+  if(PANEL.contexto?.requiereArea&&!areas.length)throw Error('Elige al menos un área activa para usar este insumo en la receta.');
   return {nombre:$('panel-nombre').value.trim(),unidad:$('panel-unidad').value.trim(),rubro:$('panel-grupo').value,costo_compra:Number($('panel-costo').value),costo_pendiente:$('panel-pendiente').checked,representacion_id:rep?Number(rep):null,crear_representacion:!!PANEL.contexto?.requiereRepresentacion,areas};
 }
 async function panelRetornar(resultado){
@@ -146,6 +151,9 @@ async function panelRetornar(resultado){
     }
     aviso('Insumo seleccionado. Completa la receta manualmente.');return true;
   }
+  if(c.origen==='producto-venta'&&typeof panelVentaRetornarInsumo==='function'){
+    await panelVentaRetornarInsumo(resultado);return true;
+  }
   return false;
 }
 function panelVolver(){
@@ -157,6 +165,10 @@ function panelVolver(){
   }
   if(c.origen==='receta-taller'){
     pickTab('recetas');$('rec-portada').style.display='none';$('rec-combos').style.display='none';$('rec-taller').style.display='block';pintarTaller();return;
+  }
+  if(c.origen==='producto-venta'){
+    if(typeof panelTabCambiar==='function')panelTabCambiar('ventas');
+    pickTab('productos');return;
   }
   if(c.origen==='bodega')return pickTab(c.vistaOrigen==='enlaces'?'enlaces':'inv');
   pickTab('inv');if(c.areaCodigo)cambiarArea(c.areaCodigo);

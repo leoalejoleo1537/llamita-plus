@@ -48,6 +48,36 @@ El cajón actual conserva las rutas y etiquetas accesibles y tiene ancho máximo
 
 La recomendación es prototipar la opción 1 antes de reemplazar la navegación; esta nota no cambia la navegación actual. La ruta Mesas ya aparece en el menú móvil para cuentas con `puede_lama` y sedes habilitadas. El permiso y las restricciones por sede siguen siendo la autoridad: no se habilita Mesas a cuentas no autorizadas desde CSS o por defecto.
 
+## 2026-10-21 — P3: catálogo comercial neutral y recetas manuales
+
+Se implementó únicamente P3 en `leoalejoleo1537/llamita-plus`, Supabase `llamita-plus` / `iuryhsjucblmebdogewa`, destino `origin/master`. P4 permanece pendiente y no activo.
+
+### Resultado visible
+
+- `Menú → Panel de productos` tiene dos pestañas: **Insumos** conserva el motor P1/P2; **Productos de venta** administra una identidad comercial neutral, nombre, precio y estado borrador/listo.
+- La receta se arma siempre a mano. Cada línea elige un insumo existente, una cantidad decimal positiva y una configuración producto–área activa como origen. Las líneas se pueden añadir, quitar y reordenar.
+- Un producto puede guardarse como borrador sin receta. Para marcarlo listo el servidor exige al menos un componente y valida todos los orígenes. Cada guardado con ingredientes crea una versión nueva y conserva las anteriores.
+- **Crear insumo** desde la receta abre la pestaña Insumos, exige al menos un área activa y vuelve al editor con el nuevo insumo y su origen seleccionados. No crea recetas, reservas ni publicaciones POS.
+
+### Backend y seguridad
+
+- Migraciones instaladas: `20261021181318_p3_catalogo_comercial_recetas_manuales` y `20261021181440_p3_indices_fk_catalogo_comercial`.
+- Tablas privadas nuevas: `catalogo_internal.productos_venta`, `recetas_venta`, `receta_venta_componentes`, `producto_venta_pos_enlaces` —vacía y reservada para el enlace explícito futuro— y `producto_venta_operaciones`.
+- RPC nuevas: `panel_ventas_listar`, `panel_ingredientes_listar` y `panel_venta_guardar`. Usan sesión, capacidades S1, `SECURITY DEFINER`, `search_path=''`, idempotencia y revisión optimista. Solo `authenticated` ejecuta; `anon` no lee ni escribe y el navegador no tiene DML sobre las tablas.
+- La identidad no depende de `fudo_productos` ni usa `fudo_product_id`. No se modificaron `recetas`/`receta_items` heredados, reservas Lama, fuentes directas, ledger, stock, repartos, caja, pagos o Edge Functions.
+
+### Pruebas y conteos
+
+1. `sql/2026-10-p3-pruebas-catalogo-comercial-recetas.sql`, ejecutado completo en `BEGIN … ROLLBACK`: borrador sin receta, receta manual de una línea, tres ingredientes, decimal `0,5`, origen en otra área, orden, idempotencia, rechazo de cero/negativo/origen inactivo/receta vacía lista, raíz, usuario operativo, usuario sin permiso y anon.
+2. Chromium: `pruebas/p3-catalogo-comercial.mjs` validó las dos pestañas, guardado de borrador, receta multiárea, retorno desde Crear insumo y ausencia de desborde en 390×844. Regresiones `panel-productos.mjs` y `p2-unificacion-altas.mjs` pasan.
+3. `npm test`, sintaxis JavaScript y `git diff --check` pasan. Advisors no atribuyen una apertura de seguridad a P3; los avisos globales anteriores permanecen. Los índices de FK nuevos eliminan los avisos de FK sin índice del esquema P3; aparecen como no usados porque las tablas nacen vacías.
+
+Conteos persistentes pre/post idénticos: 1.438 productos; stock proyectado 15.456; saldo ledger 9.334,7; 410 movimientos ledger; 42 lotes; 0 transferencias; 1 reparto; 396 recetas/514 ingredientes heredados; 1.377 productos y 15.357 movimientos Fudo; 0 reservas Lama; 64 cuentas; 2 movimientos de caja. El catálogo neutral quedó vacío: 0 productos de venta, 0 versiones, 0 componentes y 0 enlaces POS.
+
+Rollback técnico: `sql/2026-10-p3-catalogo-comercial-recetas.rollback.sql`, aplicable antes de uso real y después de retirar las RPC. Archivos funcionales: `index.html`, `panel-productos.js`, `panel-productos-venta.js`, `panel-productos.css`, migraciones y pruebas P3. No se accedió ni modificó Café del Desierto / Llamita Stock.
+
+**Siguiente nodo: P4 — Mesas consume recetas y componentes desde una o varias áreas, pendiente y no activado.**
+
 ## 2026-10-21 — P2: unificación de entradas de creación
 
 Se implementó únicamente P2 en `leoalejoleo1537/llamita-plus`, Supabase `llamita-plus` / `iuryhsjucblmebdogewa`, destino `origin/master`. P3 permanece pendiente y no activo.

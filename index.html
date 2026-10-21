@@ -3782,33 +3782,63 @@
      bodega. Sin esto el reparto no sabe a qué sumarle al llegar.
      Maqueta aprobada por Jhon: docs/propuesta-enlaces.html            -->
 <section class="wrap" id="view-productos" style="display:none" aria-labelledby="panel-titulo">
-  <div class="panel-cabecera"><div><h2 id="panel-titulo">Panel de productos</h2><p>Insumos · una ficha para Bodega y Local 1</p></div><div class="panel-acciones"><button type="button" id="panel-volver" hidden>Volver</button><button type="button" id="panel-nuevo">Nuevo insumo</button></div></div>
-  <p id="panel-contexto" class="panel-contexto" hidden></p>
-  <p id="panel-mensaje" role="status" aria-live="polite"></p>
-  <form id="panel-busqueda" class="panel-busqueda"><label for="panel-q">Buscar en Bodega</label><div><input id="panel-q" type="search" placeholder="Nombre del insumo" maxlength="160"><button type="submit">Buscar</button></div></form>
-  <div id="panel-lista"></div>
-  <form id="panel-ficha" hidden>
-    <fieldset id="panel-campos">
-      <div class="panel-cabecera"><h3 id="panel-ficha-titulo">Nuevo insumo</h3><button type="button" id="panel-cerrar">Cerrar ficha</button></div>
-      <p id="panel-identidad"></p>
-      <div class="panel-datos">
-        <label>Nombre<input id="panel-nombre" required maxlength="160"></label>
-        <label>Unidad<input id="panel-unidad" maxlength="40" placeholder="kg, unidad, litro…"></label>
-        <label>Grupo existente<select id="panel-grupo" required></select></label>
-        <label>Costo de compra por unidad<input id="panel-costo" type="number" min="0" max="999999999999" step="0.000001" value="0" required></label>
-      </div>
-      <label class="panel-check"><input id="panel-pendiente" type="checkbox" checked> Costo pendiente de completar (cero)</label>
-      <p class="panel-ayuda">Nombre, unidad y costo se guardan juntos en Bodega y sus representaciones enlazadas. Cambiar la unidad no convierte cantidades.</p>
-      <label id="panel-representacion-label" hidden>Representación en Local 1<select id="panel-representacion"></select></label>
-      <h3>Dónde estará configurado</h3>
-      <p>Bodega es el catálogo maestro. Elige también las áreas de Local 1.</p>
-      <div id="panel-areas"></div>
-      <p class="panel-ayuda">Las áreas que ya estaban configuradas se conservan. Aquí puedes añadir o editar su configuración; no retirarlas.</p>
-      <p><strong>Las nuevas fichas se crean con saldo cero.</strong> Este paso no mueve stock ni crea recetas.</p>
-      <button type="submit" id="panel-guardar">Guardar insumo</button>
-    </fieldset>
-    <p id="panel-error" role="alert"></p>
-  </form>
+  <div class="panel-cabecera"><div><h2 id="panel-titulo">Panel de productos</h2><p>Un catálogo para insumos y productos que se venden</p></div><div class="panel-acciones"><button type="button" id="panel-volver" hidden>Volver</button></div></div>
+  <div class="panel-tabs" role="tablist" aria-label="Catálogo del Panel">
+    <button type="button" id="panel-tab-insumos" role="tab" aria-selected="true" aria-controls="panel-insumos" data-panel-tab="insumos">Insumos</button>
+    <button type="button" id="panel-tab-ventas" role="tab" aria-selected="false" aria-controls="panel-ventas" data-panel-tab="ventas">Productos de venta</button>
+  </div>
+
+  <section id="panel-insumos" role="tabpanel" aria-labelledby="panel-tab-insumos">
+    <div class="panel-subcabecera"><div><h3>Insumos</h3><p class="panel-ayuda">Productos físicos que se compran, guardan y consumen.</p></div><button type="button" id="panel-nuevo">Nuevo insumo</button></div>
+    <p id="panel-contexto" class="panel-contexto" hidden></p>
+    <p id="panel-mensaje" role="status" aria-live="polite"></p>
+    <form id="panel-busqueda" class="panel-busqueda"><label for="panel-q">Buscar en Bodega</label><div><input id="panel-q" type="search" placeholder="Nombre del insumo" maxlength="160"><button type="submit">Buscar</button></div></form>
+    <div id="panel-lista"></div>
+    <form id="panel-ficha" hidden>
+      <fieldset id="panel-campos">
+        <div class="panel-cabecera"><h3 id="panel-ficha-titulo">Nuevo insumo</h3><button type="button" id="panel-cerrar">Cerrar ficha</button></div>
+        <p id="panel-identidad"></p>
+        <div class="panel-datos">
+          <label>Nombre<input id="panel-nombre" required maxlength="160"></label>
+          <label>Unidad<input id="panel-unidad" maxlength="40" placeholder="kg, unidad, litro…"></label>
+          <label>Grupo existente<select id="panel-grupo" required></select></label>
+          <label>Costo de compra por unidad<input id="panel-costo" type="number" min="0" max="999999999999" step="0.000001" value="0" required></label>
+        </div>
+        <label class="panel-check"><input id="panel-pendiente" type="checkbox" checked> Costo pendiente de completar (cero)</label>
+        <p class="panel-ayuda">Nombre, unidad y costo se guardan juntos en Bodega y sus representaciones enlazadas. Cambiar la unidad no convierte cantidades.</p>
+        <label id="panel-representacion-label" hidden>Representación en Local 1<select id="panel-representacion"></select></label>
+        <h3>Dónde estará configurado</h3>
+        <p>Bodega es el catálogo maestro. Elige también las áreas de Local 1.</p>
+        <div id="panel-areas"></div>
+        <p class="panel-ayuda">Las áreas que ya estaban configuradas se conservan. Aquí puedes añadir o editar su configuración; no retirarlas.</p>
+        <p><strong>Las nuevas fichas se crean con saldo cero.</strong> Este paso no mueve stock ni crea recetas.</p>
+        <button type="submit" id="panel-guardar">Guardar insumo</button>
+      </fieldset>
+      <p id="panel-error" role="alert"></p>
+    </form>
+  </section>
+
+  <section id="panel-ventas" role="tabpanel" aria-labelledby="panel-tab-ventas" hidden>
+    <div class="panel-subcabecera"><div><h3>Productos de venta</h3><p class="panel-ayuda">Productos comerciales para Mesas, Fudo o una carta futura. Se crean y enlazan manualmente.</p></div><button type="button" id="panel-venta-nuevo">Nuevo producto de venta</button></div>
+    <p id="panel-venta-mensaje" role="status" aria-live="polite"></p>
+    <form id="panel-venta-busqueda" class="panel-busqueda"><label for="panel-venta-q">Buscar producto de venta</label><div><input id="panel-venta-q" type="search" placeholder="Nombre comercial" maxlength="160"><button type="submit">Buscar</button></div></form>
+    <div id="panel-venta-lista"></div>
+    <form id="panel-venta-ficha" hidden>
+      <fieldset id="panel-venta-campos">
+        <div class="panel-cabecera"><div><h3 id="panel-venta-titulo">Nuevo producto de venta</h3><p id="panel-venta-identidad" class="panel-ayuda"></p></div><button type="button" id="panel-venta-cerrar">Cerrar ficha</button></div>
+        <div class="panel-datos">
+          <label>Nombre comercial<input id="panel-venta-nombre" required maxlength="160" placeholder="Ej: Coca-Cola cubana"></label>
+          <label>Precio de venta<input id="panel-venta-precio" type="number" min="0" max="999999999999" step="0.000001" value="0" required></label>
+        </div>
+        <div class="panel-receta-cabecera"><div><h3>Receta manual</h3><p class="panel-ayuda">Cada ingrediente necesita cantidad y un área de origen explícita.</p></div><div class="panel-acciones"><button type="button" id="panel-venta-crear-insumo">Crear insumo</button><button type="button" id="panel-venta-agregar">Añadir ingrediente</button></div></div>
+        <div id="panel-venta-componentes"></div>
+        <p id="panel-venta-sin-componentes" class="panel-vacio">El borrador todavía no tiene ingredientes.</p>
+        <p class="panel-ayuda"><strong>Guardar aquí no mueve stock ni crea reservas.</strong> La conexión con Mesas y Fudo se hará en P4 y fases posteriores.</p>
+        <div class="panel-acciones panel-guardar-venta"><button type="submit" id="panel-venta-borrador" value="borrador">Guardar borrador</button><button type="submit" id="panel-venta-listo" value="listo">Marcar lista</button></div>
+      </fieldset>
+      <p id="panel-venta-error" role="alert"></p>
+    </form>
+  </section>
 </section>
 <div class="wrap" id="view-enlaces" style="display:none">
   <div id="area-bodega-return-note" class="area-assign-explain" hidden></div>
@@ -18480,7 +18510,7 @@ function pickTab(tab){
   moverCarril();
   $('view-inv').style.display = tab==='inv'?'block':'none';
   $('view-productos').style.display = tab==='productos'?'block':'none';
-  if(tab==='productos') panelCargar();
+  if(tab==='productos') (typeof panelVistaCargar==='function'?panelVistaCargar():panelCargar());
   /* Los dos trabajos del reparto. En Plaza y Angamos hay uno solo y se
      llama "Reparto": recibir lo que manda bodega. En Bodega son dos y cada
      uno tiene su pestaña:
@@ -19781,5 +19811,6 @@ initAuth();
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
 </script>
 <script src="panel-productos.js"></script>
+<script src="panel-productos-venta.js"></script>
 </body>
 </html>

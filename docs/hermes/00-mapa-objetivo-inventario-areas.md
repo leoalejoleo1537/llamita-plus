@@ -2,9 +2,16 @@
 
 ## Frente vigente — Panel de productos
 
-P0 publicado en `34b4b48`: [informe 37](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md). **P1 y P2 implementados**: el Panel administra el maestro central y todas las entradas humanas de Bodega, Local 1, áreas y Recetas llegan al mismo motor protegido. Nombre/unidad/costo se editan una vez y se propagan; configurar un área o crear un ingrediente genera saldo cero y ninguna receta automática. Migraciones `20261021020517_p1_panel_productos` y `20261021112507_p2_unificar_altas_productos`.
+P0 publicado en `34b4b48`: [informe 37](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md). **P1, P2 y P3 implementados**: el Panel administra el maestro central, unifica las altas humanas y separa `Insumos` de `Productos de venta`. Nombre/unidad/costo se editan una vez; el catálogo comercial y sus recetas manuales son neutrales, versionados y no mueven stock. Migraciones `20261021020517_p1_panel_productos`, `20261021112507_p2_unificar_altas_productos`, `20261021181318_p3_catalogo_comercial_recetas_manuales` y `20261021181440_p3_indices_fk_catalogo_comercial`.
 
-Siguiente nodo **P3 — productos de venta y recetas manuales**, pendiente y no activado. Secuencia aprobada: **P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B**. Fudo no bloquea el laboratorio. No se activan P3, reinicio ni adaptación POS automáticamente. El árbol histórico siguiente conserva evidencia de trabajo completado y no sustituye esta prioridad.
+Siguiente nodo **P4 — Mesas consume recetas y componentes desde una o varias áreas**, pendiente y no activado. Secuencia aprobada: **P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B**. Fudo no bloquea el laboratorio. No se activan P4, reinicio ni adaptación POS automáticamente. El árbol histórico siguiente conserva evidencia de trabajo completado y no sustituye esta prioridad.
+
+### Resultado P3 — catálogo comercial neutral y recetas manuales
+
+- El Panel muestra `Insumos` y `Productos de venta`; una identidad comercial no nace de un insumo ni de `fudo_productos`.
+- Un producto de venta puede guardarse en borrador sin receta. Para quedar `listo` necesita al menos un ingrediente, cantidad positiva y una configuración producto–área activa como origen explícito para cada línea.
+- Guardar genera una versión nueva de receta y conserva el orden manual. Crear un insumo desde el editor vuelve con ese insumo seleccionado, pero no crea receta, reserva, movimiento ni enlace POS.
+- Las 396 recetas y 514 líneas heredadas permanecen idénticas. Las tablas neutrales nacen vacías; P4 será quien adapte Mesas al nuevo contrato sin doble descuento.
 
 ### Resultado P2 — entradas de creación unificadas
 
