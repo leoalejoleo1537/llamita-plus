@@ -48,6 +48,37 @@ El cajón actual conserva las rutas y etiquetas accesibles y tiene ancho máximo
 
 La recomendación es prototipar la opción 1 antes de reemplazar la navegación; esta nota no cambia la navegación actual. La ruta Mesas ya aparece en el menú móvil para cuentas con `puede_lama` y sedes habilitadas. El permiso y las restricciones por sede siguen siendo la autoridad: no se habilita Mesas a cuentas no autorizadas desde CSS o por defecto.
 
+## 2026-10-21 — P2: unificación de entradas de creación
+
+Se implementó únicamente P2 en `leoalejoleo1537/llamita-plus`, Supabase `llamita-plus` / `iuryhsjucblmebdogewa`, destino `origin/master`. P3 permanece pendiente y no activo.
+
+### Resultado visible
+
+- **Bodega**, el botón general, Ajustes y **cualquier área de Local 1** abren el Panel de productos. Al entrar desde un área, esta queda preseleccionada y la persona ve primero la búsqueda del maestro central para reutilizarlo antes de crear otro.
+- **Recetas → Crear ingrediente** abre el mismo Panel. Al guardar vuelve al editor con la representación Local 1 seleccionada; el taller vuelve con el insumo elegido. El Panel no crea `recetas` ni `receta_items`.
+- El contexto de origen se muestra dentro del Panel y **Volver** restituye la pantalla anterior. No se rediseñaron el Panel, inventario ni navegación.
+- El alta antigua de Enlaces queda oculta y redirigida. Se eliminó de ese flujo la invocación que publicaba en Fudo y creaba una receta automáticamente.
+
+### Backend y cierre coordinado
+
+- Migración instalada: `20261021112507_p2_unificar_altas_productos`.
+- `panel_producto_guardar` admite `crear_representacion=true`: crea o reutiliza la representación enlazada de Local 1 con saldo cero. Si Recetas todavía no elige un área, la deja explícitamente **Sin asignar**, sin existencia física.
+- `authenticated` y `anon` perdieron INSERT directo en `public.productos`; se retiraron las políticas INSERT abiertas. Las RPC `crear_producto_enlazado`, `producto_plaza_crear`, `producto_plaza_crear_configurado` y `bodega_producto_area_agregar` ya no son ejecutables por la aplicación. `panel_producto_guardar` conserva `SECURITY DEFINER`, `search_path=''`, sesión y capacidad S1, y ejecución exclusiva de `authenticated`.
+- No se revocó todavía el DML histórico de mantenimiento sobre `producto_enlace`: la pantalla Enlaces aún crea/quita vínculos manuales fuera del alta de productos. Es una dependencia concreta distinta y debe migrarse a RPC protegida en un bloque posterior; cerrarla aquí habría roto una función visible.
+
+### Pruebas y conteos
+
+1. `sql/2026-10-p2-pruebas-unificacion-altas.sql`, ejecutado completo en `BEGIN … ROLLBACK`: raíz, usuario operativo con edición, usuario sin permiso y ACL anónima; alta desde área, representación para Recetas, mismo insumo en dos áreas, idempotencia, DML directo bloqueado y las cuatro RPC heredadas cerradas. Verificó ausencia de saldos, existencias, lotes, movimientos, repartos, recetas automáticas, Fudo y reservas Lama.
+2. Chromium: `pruebas/p2-unificacion-altas.mjs` validó alta Bodega, búsqueda/reutilización, área preseleccionada y retorno real al editor de Recetas con el insumo seleccionado. `pruebas/panel-productos.mjs` confirmó la regresión P1. Ambas pasan.
+3. `npm test` ordinario pasa; `git diff --check` y sintaxis JS pasan. La suite completa forzada con Chromium vuelve a detenerse primero en `ajustes-navegacion.mjs`: su mock histórico no entrega `permisos_mios()` con la forma vigente y no muestra Ajustes. Es la misma falla reproducida antes de P1; no se modificó una prueba ajena para ocultarla.
+4. Advisors no muestran una apertura nueva en P2. Persisten hallazgos globales anteriores de vistas/functions legacy y políticas duplicadas; la RPC P2 permanece cerrada para anon y las cuatro RPC antiguas aparecen cerradas para anon/authenticated.
+
+Los conteos persistentes pre/post fueron idénticos: 1.438 productos; stock proyectado 15.456; saldo ledger 9.334,7; 410 movimientos ledger; 42 lotes; 0 transferencias; 1 reparto de área; 396 recetas/514 ingredientes; 15.357 movimientos y 1.377 productos espejo Fudo; 0 reservas Lama; 2 movimientos de caja. Las pruebas SQL no dejaron productos ni operaciones sintéticas.
+
+Archivos funcionales: `index.html`, `panel-productos.js`, `panel-productos.css`, migración P2, prueba SQL y pruebas de interfaz actualizadas. No se modificaron ledger, `stock_transferir`, Fudo/Edge Functions, Lama, Mesas, reservas, recetas, caja, repartos, precios o stock. No se accedió ni modificó Café del Desierto / Llamita Stock.
+
+**Siguiente nodo: P3 — productos de venta y recetas manuales, pendiente y no activado.**
+
 ## 2026-10-21 — P1: núcleo del Panel de productos
 
 P0 se publicó primero en `34b4b48`. Se implementa únicamente P1 en `leoalejoleo1537/llamita-plus`, destino `origin/master`, Supabase `llamita-plus` / `iuryhsjucblmebdogewa`. El commit de esta entrada se identifica con `git log --grep='Implementar P1'`. P2 y posteriores no se activan.

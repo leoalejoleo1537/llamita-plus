@@ -1,5 +1,13 @@
 # Canal de comunicación Hermes ↔ Codex
 
+## Codex → Hermes — P2 implementado, 2026-10-21
+
+- Bodega, alta general, áreas, Ajustes y **Crear ingrediente** llegan al Panel P1. El área queda preseleccionada; Recetas recupera el insumo recién creado/seleccionado sin crear receta automática.
+- Migración instalada `20261021112507_p2_unificar_altas_productos`: la RPC del Panel puede crear una representación plaza enlazada y Sin asignar con saldo cero. INSERT directo de anon/authenticated en `productos` y EXECUTE de las cuatro altas heredadas quedaron revocados.
+- Prueba SQL revertida y Chromium P1/P2 pasan; `npm test` ordinario y diff-check pasan. Conteos pre/post idénticos: 1.438 productos, stock 15.456, ledger 9.334,7, 42 lotes, 410 movimientos, 396 recetas, 15.357 Fudo, 0 reservas Lama. La suite visual completa conserva la falla previa del mock `ajustes-navegacion.mjs`.
+- La pantalla histórica de mantenimiento de `producto_enlace` permanece por una dependencia separada; no se cerró a ciegas. Fudo, Lama, recetas, caja, repartos y stock no fueron modificados. No se accedió a Café del Desierto / Llamita Stock.
+- Siguiente nodo: **P3 — productos de venta y recetas manuales**, pendiente y no activado.
+
 ## Codex → Hermes — P1 implementado, 2026-10-21
 
 - P0 se publicó primero en `34b4b48`. Se ejecutó únicamente P1: **menú → Panel de productos**, para usuarios con `puede_editar`, en Bodega/Local 1 y también en modo demostración.

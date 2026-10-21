@@ -2,6 +2,8 @@
 #view-productos { max-width:1200px; color:var(--text,#171717); }
 #view-productos [hidden] { display:none !important; }
 #view-productos .panel-cabecera { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+#view-productos .panel-acciones { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+#view-productos .panel-contexto { margin:14px 0 0; padding:12px 14px; border-left:4px solid #F35B04; border-radius:10px; background:#fff4ec; }
 #view-productos h2,#view-productos h3 { margin:8px 0; }
 #view-productos p { line-height:1.5; }
 #view-productos button,#view-productos input,#view-productos select { font:inherit; min-height:44px; border-radius:12px; }

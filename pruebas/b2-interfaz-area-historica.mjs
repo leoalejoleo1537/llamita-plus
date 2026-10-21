@@ -55,9 +55,11 @@ check('Al entrar al área se abre la primera sección física para mostrar produ
 check('El panel de secciones reutiliza lectura y RPC protegida de creación; no hace DML directo ni escribe stock',
   html.includes("sb.rpc('area_seccion_crear'")&&html.includes("sb.rpc('area_secciones_listar'")
   &&html.includes('p_turno:\'pm\'')&&!html.includes("sb.from('area_secciones').insert"));
-check('Producto nuevo inicia como maestro de Bodega sin Fudo/receta y vuelve al área para usar el flujo B1',
-  html.includes("p_destinos: destinos")&&html.includes('prepararNuevoBodegaDesdeArea')
-  &&html.includes("AREA_BODEGA_RETURN?.fase==='crear'")&&html.includes("sb.rpc('bodega_producto_area_agregar'")
-  &&html.includes("$('enl-n-fudo').checked=false;$('enl-n-fudo').closest('.chkrow').style.display='none'"));
+check('Producto nuevo usa el Panel único, conserva el área y no publica en Fudo ni crea receta',
+  html.includes("abrirPanelProductos({origen:'area',areaCodigo:codigo,sugerido:consulta})")
+  &&html.includes("abrirPanelProductos({origen:'area',areaCodigo:asignar.dataset.areaAssign})")
+  &&!html.includes("sb.rpc('crear_producto_enlazado'")
+  &&html.slice(html.indexOf("$('enl-crear').addEventListener"),html.indexOf("$('btnMermasExcel')")).includes("abrirPanelProductos({origen:'bodega'}")
+  &&!html.slice(html.indexOf("$('enl-crear').addEventListener"),html.indexOf("$('btnMermasExcel')")).includes('functions.invoke'));
 
 if(fallas.length){console.error(`Fallaron ${fallas.length} verificaciones B2.`);process.exit(1);}

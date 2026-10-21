@@ -2,9 +2,18 @@
 
 ## Frente vigente — Panel de productos
 
-P0 publicado en `34b4b48`: [informe 37](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md). **P1 — núcleo del Panel de productos implementado**: acceso desde menú en Bodega/Local 1, maestro central, edición única y propagación atómica de nombre/unidad/costo a representaciones plaza enlazadas, configuración multiárea sin stock. Migración `20261021020517_p1_panel_productos`; pruebas y limitación de la suite legacy en bitácora, entrada 2026-10-21.
+P0 publicado en `34b4b48`: [informe 37](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md). **P1 y P2 implementados**: el Panel administra el maestro central y todas las entradas humanas de Bodega, Local 1, áreas y Recetas llegan al mismo motor protegido. Nombre/unidad/costo se editan una vez y se propagan; configurar un área o crear un ingrediente genera saldo cero y ninguna receta automática. Migraciones `20261021020517_p1_panel_productos` y `20261021112507_p2_unificar_altas_productos`.
 
-Siguiente nodo **P2 — unificación de entradas de creación**, pendiente y no activado. Secuencia aprobada: **P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B**. Fudo no bloquea el laboratorio. Producto de venta y receta siempre manuales. No se activan recetas, reinicio ni adaptación POS. El árbol histórico siguiente conserva evidencia de trabajo completado y no sustituye esta prioridad.
+Siguiente nodo **P3 — productos de venta y recetas manuales**, pendiente y no activado. Secuencia aprobada: **P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B**. Fudo no bloquea el laboratorio. No se activan P3, reinicio ni adaptación POS automáticamente. El árbol histórico siguiente conserva evidencia de trabajo completado y no sustituye esta prioridad.
+
+### Resultado P2 — entradas de creación unificadas
+
+- Bodega abre el Panel con contexto Bodega; un área abre el mismo Panel con el destino preseleccionado.
+- Recetas abre el Panel en modo ingrediente y regresa al editor/taller con la representación correcta seleccionada; la receta continúa siendo una decisión manual.
+- Buscar y seleccionar un maestro existente precede al alta. Una representación enlazada se reutiliza en varias áreas; no se crea una copia por área.
+- `authenticated` y `anon` ya no tienen INSERT directo en `productos`. Las RPC heredadas de alta perdieron ejecución de aplicación; `panel_producto_guardar` permanece como único escritor humano.
+- La pantalla histórica de mantenimiento manual de `producto_enlace` se conserva por una dependencia distinta. Su sustitución por RPC protegida queda documentada como riesgo, sin reabrir otra alta.
+- Las pruebas SQL terminaron con `ROLLBACK`; productos, stock, ledger, lotes, repartos, recetas, Fudo y Lama conservaron los conteos de línea base.
 
 > Estado actualizado: 20 de octubre de 2026. B1 y B2 completados; B3 continúa pendiente. Las Fases 1, 2, 3 y 4 del contrato operativo de stock están completadas; Fase 5 permanece pendiente y no activa.
 >

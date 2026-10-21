@@ -65,9 +65,12 @@ console.log('\nCada camino consulta su llave (no es un catálogo decorativo):');
 for(const [c, donde] of [['boton','el paso fudo del ⟳'], ['ficha','la ficha del producto'],
                          ['reparto','sumarAFudo'], ['merma','bajarEnFudo'],
                          ['todo','adm-empujar'], ['deshacer','adm-deshacer'],
-                         ['crear','crear en Fudo'], ['apagar','activar producto']])
+                         ['apagar','activar producto']])
   await caso(`${c} · ${donde}`, () =>
     html.includes(`puedeEnFudo('${c}')`) || `nadie pregunta por "${c}": el interruptor no haría nada`);
+await caso('crear · queda reservado para el futuro adaptador POS, no para altas de insumo', () =>
+  !html.slice(html.indexOf("$('enl-crear').addEventListener"),html.indexOf("$('btnMermasExcel')")).includes('functions.invoke')
+  || 'el alta de insumo todavía publica en Fudo');
 
 /* ---------- 4 · el reloj automático nunca pregunta ---------- */
 console.log('\nEl reloj automático no pasa por acá (punto 2 de la doctrina):');

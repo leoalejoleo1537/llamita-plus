@@ -1,10 +1,10 @@
 # Cola de trabajo de Codex
 
-## Prioridad vigente — P1 implementado; P2 pendiente
+## Prioridad vigente — P2 completado; P3 pendiente
 
-Ver [P0](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md), publicado en `34b4b48`, y cierre P1 en bitácora (2026-10-21). Panel visible y RPC atómica implementados: nombre/unidad/costo únicos, propagación y bloqueo de edición independiente al adoptar el maestro, múltiples áreas con saldo cero. Pruebas SQL revertidas y navegador específico aprobadas; `npm test` ordinario pasa, pero la ejecución ampliada con Chromium reproduce una falla preexistente del mock de permisos de Ajustes (documentada, sin alterar esa prueba).
+Ver [P0](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md) y cierres P1/P2 en bitácora (2026-10-21). El Panel visible y su RPC atómica son ahora la única alta humana: Bodega, alta general, áreas, Ajustes y creación de ingrediente en Recetas convergen allí. El contexto de área queda preseleccionado y Recetas recupera el insumo recién creado sin generar receta automática. Las pruebas SQL revertidas y las pruebas Chromium específicas P1/P2 pasan; `npm test` ordinario pasa. La suite completa forzada con Chromium conserva la falla preexistente de `ajustes-navegacion.mjs`, ya reproducida antes de P1.
 
-**P2 — unificar las entradas Bodega/área/ingrediente y retirar escritores legacy de manera coordinada** queda pendiente, no activado. Recetas y productos comerciales exclusivamente manuales. Orden: P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B. Los bloques posteriores y la purga requieren su propia ejecución.
+**P3 — productos de venta y recetas manuales** queda pendiente y no activado. P2 instaló `20261021112507_p2_unificar_altas_productos`: cerró INSERT directo de cliente en `productos` y EXECUTE de las cuatro altas heredadas; `panel_producto_guardar` sigue exclusivo de `authenticated` y valida S1. La gestión manual histórica de enlaces sigue siendo una dependencia separada que P2 no cerró a ciegas. Orden: P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B. Los bloques posteriores y la purga requieren su propia ejecución.
 
 ## Estado del árbol de Inventario por Áreas — 2026-10-20
 

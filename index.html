@@ -3782,7 +3782,8 @@
      bodega. Sin esto el reparto no sabe a qué sumarle al llegar.
      Maqueta aprobada por Jhon: docs/propuesta-enlaces.html            -->
 <section class="wrap" id="view-productos" style="display:none" aria-labelledby="panel-titulo">
-  <div class="panel-cabecera"><div><h2 id="panel-titulo">Panel de productos</h2><p>Insumos · una ficha para Bodega y Local 1</p></div><button type="button" id="panel-nuevo">Nuevo insumo</button></div>
+  <div class="panel-cabecera"><div><h2 id="panel-titulo">Panel de productos</h2><p>Insumos · una ficha para Bodega y Local 1</p></div><div class="panel-acciones"><button type="button" id="panel-volver" hidden>Volver</button><button type="button" id="panel-nuevo">Nuevo insumo</button></div></div>
+  <p id="panel-contexto" class="panel-contexto" hidden></p>
   <p id="panel-mensaje" role="status" aria-live="polite"></p>
   <form id="panel-busqueda" class="panel-busqueda"><label for="panel-q">Buscar en Bodega</label><div><input id="panel-q" type="search" placeholder="Nombre del insumo" maxlength="160"><button type="submit">Buscar</button></div></form>
   <div id="panel-lista"></div>
@@ -3812,12 +3813,20 @@
 <div class="wrap" id="view-enlaces" style="display:none">
   <div id="area-bodega-return-note" class="area-assign-explain" hidden></div>
 
+  <div class="enl-caja" id="enl-panel-p2">
+    <div class="enl-cab">CREAR PRODUCTOS</div>
+    <div class="enl-cuerpo">
+      <p class="rep-sub" style="margin:0 0 10px">La identidad, unidad, costo y destinos se administran en un solo lugar.</p>
+      <button type="button" class="btn btn-orange" id="enl-abrir-panel">Abrir Panel de productos</button>
+    </div>
+  </div>
+
   <!-- Esta pantalla es SOLO para crear productos nuevos.
        Tuvo un rato una lista de "94 pendientes de enlazar" que nadie pidió:
        hacía parecer que emparejar el catálogo entero era una tarea del
        equipo, y no lo es. Emparejar un producto se resuelve solo, en el
        reparto, la primera vez que ese producto se envía. -->
-  <div id="enl-nuevo">
+  <div id="enl-nuevo" hidden aria-hidden="true">
     <div class="enl-caja">
       <div class="enl-cab">EL PRODUCTO</div>
       <div class="enl-cuerpo">
@@ -4070,6 +4079,7 @@
       <label>Insumos que se descuentan por unidad vendida</label>
       <div id="rec-insumos"></div>
       <button type="button" class="btn btn-outline btn-sm" id="btnAddInsumo" style="margin-top:8px">+ Agregar insumo</button>
+      <button type="button" class="btn btn-outline btn-sm" id="btnCrearInsumo" style="margin-top:8px">Crear ingrediente</button>
     </div>
     <button type="button" class="btn-del" id="rec-eliminar" style="display:none">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6M14 11v6"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -12584,86 +12594,8 @@ async function buscarParecidos(){
         (p.activo!=='SÍ'?' · <b>apagado</b>':'')).join('<br>')}</span></div>`;
 }
 
-$('enl-crear').addEventListener('click', async ()=>{
-  const btn=$('enl-crear'), nombre=$('enl-n-nombre').value.trim();
-  if(!nombre) return;
-  /* Bodega viaja DENTRO de la lista de destinos, no como un parámetro aparte.
-     Así la firma de la función no cambia — y no cambiarla es lo que evita que
-     queden dos versiones conviviendo en la base, que es la falla que dejó al
-     sistema 15 horas sin descontar (§0.5). */
-  const destinos = [
-    ...(enlDest.central ? [{sede:'central', rubro:$('enl-n-rubro').value || null}] : []),
-    ...SEDES_ENLACE.filter(s=>enlDest[s]).map(s=>({
-      sede: s,
-      rubro: ($('enl-destinos').querySelector(`[data-enlrubro="${s}"]`)||{}).value || null }))];
-  if(!destinos.length){ avisar('Elige dónde crearlo'); return; }
-  if(AREA_BODEGA_RETURN?.fase==='crear'){
-    const existentes=await sb.from('productos').select('id,producto').eq('sede','central').ilike('producto',nombre).limit(10);
-    if(existentes.error){avisar('No se pudo verificar si el producto ya existe en Bodega. No se creó nada; intenta de nuevo.');return;}
-    const iguales=(existentes.data||[]).filter(p=>normNombre(p.producto)===normNombre(nombre));
-    if(iguales.length){
-      AREA_BODEGA_RETURN={...AREA_BODEGA_RETURN,producto:nombre,fase:'volver',coincidencias:iguales.length};
-      $('area-bodega-return-note').hidden=true;
-      pickSede('plaza');LAMA_ATERRIZAR=false;
-      return;
-    }
-  }
-  btn.disabled=true; btn.textContent='Creando…';
-  const {data,error} = await sb.rpc('crear_producto_enlazado',{
-    p_nombre: nombre,
-    p_seccion: $('enl-n-rubro').value || null,
-    p_min: $('enl-n-min').value===''?null:+$('enl-n-min').value,
-    p_max: $('enl-n-max').value===''?null:+$('enl-n-max').value,
-    p_perecedero: $('enl-n-perec').checked,
-    p_destinos: destinos,
-    p_quien: NOMBRE });
-  btn.disabled=false; btn.textContent='Crear y enlazar';
-  if(error){ avisar(error.message || 'No se pudo crear. Revisa tu señal e inténtalo de nuevo.'); return; }
-  const det = (data && data.detalle) || [];
-  const lineas = det.map(d=>(SEDES[d.sede]?SEDES[d.sede].corto:d.sede)+': '+d.estado);
-
-  if(AREA_BODEGA_RETURN?.fase==='crear'&&enlDest.central&&!enlDest.plaza&&!$('enl-n-fudo').checked){
-    AREA_BODEGA_RETURN={...AREA_BODEGA_RETURN,producto:nombre,fase:'volver'};
-    $('area-bodega-return-note').hidden=true;
-    pickSede('plaza');
-    LAMA_ATERRIZAR=false;
-    return;
-  }
-
-  /* Y si se marcó "se vende en Fudo", nace allá también, con su receta ya
-     apuntando al producto del local. Es lo que pidió Jhon: que el enlace y
-     la receta nazcan con el producto, en vez de quedar como dos trabajos
-     sueltos que alguien tiene que acordarse de hacer después.
-
-     Va DESPUÉS de crear en el inventario y no antes: la receta necesita el
-     id del producto del local, así que si esto fallara, lo que queda es un
-     producto sin vender — molesto pero inofensivo. Al revés quedaría algo
-     vendiéndose en Fudo sin descontar nada, que es la falla cara.
-
-     Se hace sede por sede porque cada local tiene su propio Fudo: son dos
-     catálogos distintos y cada uno da su propio id. */
-  if($('enl-n-fudo').checked && puedeEnFudo('crear')){
-    const precio = +$('enl-n-precio').value;
-    for(const d of det){
-      if(d.sede === 'central' || !d.id) continue;
-      const r = await sb.functions.invoke('fudo-crear-producto',
-        {body:{sede:d.sede, producto_id:d.id, nombre, precio,
-               categoria:$('enl-n-cat').value}});
-      const err = await motivoDeFuncion(r);
-      const corto = SEDES[d.sede] ? SEDES[d.sede].corto : d.sede;
-      if(err){
-        lineas.push('⚠ Fudo ' + corto + ':\n' + err);
-      } else {
-        lineas.push('Fudo ' + corto + ': ' +
-          (r.data && r.data.ya_existia ? 'ya estaba · receta hecha' : 'creado · con receta'));
-      }
-    }
-  }
-
-  avisar('✓ '+nombre+'\n'+lineas.join('\n'));
-  await loadData(); await loadEnlaces();
-  prepararNuevo();          // el formulario queda limpio para el siguiente
-});
+$('enl-crear').addEventListener('click',()=>abrirPanelProductos({origen:'bodega'}));
+$('enl-abrir-panel').addEventListener('click',()=>abrirPanelProductos({origen:'bodega'}));
 
 $('btnMermasExcel').addEventListener('click',()=>{
   const exportar=MERMAS_DEMO?aplicarRangoMermas(mermasDemo()):MERMAS_TODAS;
@@ -13284,10 +13216,9 @@ function cerrarAsignarProducto(){
 }
 function crearProductoBodegaDesdeArea(){
   if(SEDE!=='plaza'||!PERMISOS.puede_editar||!ASIGNAR_AREA_CODIGO)return;
-  AREA_BODEGA_RETURN={areaCodigo:ASIGNAR_AREA_CODIGO,consulta:$('area-producto-q').value.trim(),fase:'crear'};
+  const codigo=ASIGNAR_AREA_CODIGO,consulta=$('area-producto-q').value.trim();
   cerrarAsignarProducto();
-  pickSede('central');
-  pickTab('enlaces');
+  abrirPanelProductos({origen:'area',areaCodigo:codigo,sugerido:consulta});
 }
 function prepararAltaBodegaDesdeArea(){
   const ctx=AREA_BODEGA_RETURN;if(!ctx||ctx.fase!=='crear'||SEDE!=='central')return;
@@ -13528,7 +13459,7 @@ listEl.addEventListener('click',e=>{
   if(e.target.closest('[data-area-retry]')){loadData();return;}
   if(e.target.closest('[data-area-manage]')){gestionarAreas();return;}
   const asignar=e.target.closest('[data-area-assign]');
-  if(asignar){abrirAsignarProducto(asignar.dataset.areaAssign);return;}
+  if(asignar){abrirPanelProductos({origen:'area',areaCodigo:asignar.dataset.areaAssign});return;}
   const estado=e.target.closest('[data-area-state]');
   if(estado){areaFilterCard=areaFilterCard===estado.dataset.areaState?null:estado.dataset.areaState;render();return;}
   const area=e.target.closest('[data-area-open]');
@@ -13559,7 +13490,7 @@ listEl.addEventListener('click',e=>{
 });
 $('areaNav').addEventListener('click',e=>{
   const asignar=e.target.closest('[data-area-assign]');
-  if(asignar){abrirAsignarProducto(asignar.dataset.areaAssign);return;}
+  if(asignar){abrirPanelProductos({origen:'area',areaCodigo:asignar.dataset.areaAssign});return;}
   if(e.target.closest('[data-area-home]')) cambiarArea(null);
 });
 $('area-producto-q').addEventListener('input',()=>{
@@ -14089,28 +14020,17 @@ $('m-fudo').addEventListener('click', async()=>{
   $('overlay-fudo').classList.add('open');
 });
 
-/* Acceso directo a Bodega -> Enlaces, que es el camino completo: crea en
-   bodega, en los locales elegidos y en Fudo, con su receta y su enlace.
-   Antes esto abría el alta suelta de la sede abierta — un producto que
-   nacía sin enlace, y que el reparto después no podía mover. */
+/* P2: también el acceso de Ajustes usa el único Panel. No publica en Fudo ni
+   crea recetas; esas decisiones pertenecen a sus módulos específicos. */
 $('adm-nuevo').addEventListener('click', async ()=>{
-  if(SEDE==='plaza'){
-    abrirNuevoProducto(null);
-    return;
-  }
-  if(SEDE !== 'central'){
+  if(!['central','plaza'].includes(SEDE)){
     if(!await preguntar('Crear un producto',
-        'Se crea desde Bodega, para que nazca enlazado con los locales y con Fudo.',
+        'El catálogo maestro se administra desde Bodega.',
         'Ir a Bodega')) return;
-    /* Cambiar de sede es lo mismo que hace el selector de siempre: se
-       apoya en pickSede en vez de escribir otra forma de hacerlo. */
     pickSede('central');
-    /* pickSede deja la app en Inventario y recargando; se espera a que
-       termine, si no la pestaña Enlaces se pinta sobre datos viejos. */
     await new Promise(r=>setTimeout(r, 400));
   }
-  pickTab('enlaces');
-  setTimeout(()=>{ const c = $('enl-n-nombre'); if(c) c.focus(); }, 300);
+  abrirPanelProductos({origen:SEDE==='central'?'bodega':'inventario'});
 });
 $('adm-edicion').addEventListener('click', ()=>{
   setModoEdicion(!modoEdicion);
@@ -14599,8 +14519,10 @@ async function abrirNuevoProducto(areaCodigo=null){
   $('overlay-nuevo').classList.add('open');
   setTimeout(()=>$('n-nombre').focus(),50);
 }
-$('btnNuevo').addEventListener('click',()=>abrirNuevoProducto(
-  SEDE==='plaza'&&areaActual&&areaActual!==AREA_TODAS?areaActual:null));
+$('btnNuevo').addEventListener('click',()=>abrirPanelProductos({
+  origen:SEDE==='central'?'bodega':'inventario',
+  areaCodigo:SEDE==='plaza'&&areaActual&&areaActual!==AREA_TODAS?areaActual:null
+}));
 $('n-area').addEventListener('change',cargarSeccionesNuevoProducto);
 function closeNuevo(){ $('overlay-nuevo').classList.remove('open'); NUEVO_AREA_ID=null; }
 $('n-cancelar').addEventListener('click',closeNuevo);
@@ -14632,48 +14554,9 @@ function listaY(xs){
   if(xs.length <= 1) return xs[0] || '';
   return xs.slice(0,-1).join(', ') + ' y ' + xs[xs.length-1];
 }
-$('n-guardar').addEventListener('click', async()=>{
-  const nombre=$('n-nombre').value.replace(/\s+/g,' ').trim();
-  const rubro=$('n-rubro').value.replace(/\s+/g,' ').trim();
-  if(!nombre){ avisar('Escribe el nombre del producto.'); $('n-nombre').focus(); return; }
-  if(!rubro){ avisar('Elige una sección.'); $('n-rubro').focus(); return; }
-  const dup=DATA.find(d=>normNombre(d.producto)===normNombre(nombre));
-  if(dup){
-    closeNuevo();
-    avisar('Ya existe una ficha con ese nombre en Local 1. Para agregar un producto de Bodega, entra al área y usa “Agregar producto de Bodega”; no se creó una ficha aislada.');
-    return;
-  }
-  const num=el=>el.value===''?null:+el.value;
-  const stockInicial=(SEDE==='central'||SEDE==='plaza')?0:num($('n-stock'));
-  const fila={producto:nombre, rubro, stock_actual:stockInicial, stock_min:num($('n-min')), stock_max:num($('n-max')),
-    activo:'SÍ', origen:'APP', notas:'', sede:SEDE};
-  if(hasPerec) fila.perecedero=$('n-perec').checked;
-  const btn=$('n-guardar'); btn.disabled=true; btn.textContent='Agregando…';
-  try{
-    const areaId=SEDE==='plaza'?($('n-area').value||null):null;
-    const peticion=SEDE==='plaza'
-      ? ()=>sb.rpc('producto_plaza_crear_configurado',{
-          p_nombre:nombre,p_rubro:rubro,p_stock_min:fila.stock_min??0,p_stock_max:fila.stock_max??0,
-          p_perecedero:!!fila.perecedero,p_tipo:rubro,p_unidad:null,p_area_id:areaId,
-          p_seccion_id:areaId?($('n-area-seccion').value||null):null,p_notas:null,p_sede:'plaza'
-        })
-      : ()=>sb.from('productos').insert([fila]).select();
-    const {data,error}=await conReintento(peticion);
-    if(error){
-      avisar(error.message||'No se pudo agregar. Revisa tu señal e inténtalo de nuevo.');
-      console.error(error); return;
-    }
-    if(SEDE==='plaza'){
-      closeNuevo();
-      await loadData();
-      aviso(`✓ Producto creado y ${areaId?'asignado a '+(AREAS_CATALOGO.find(a=>a.id===areaId)?.nombre||'el área'):'dejado Sin asignar'} · saldo cero`);
-    }else if(data && data[0]){
-      DATA.push(data[0]); closeNuevo(); metrics(); render();
-    }
-    qEl.value=nombre; filterState=null;
-    document.querySelectorAll('.mcard').forEach(x=>x.classList.remove('sel'));
-    render();
-  } finally { btn.disabled=false; btn.textContent='Agregar'; }
+$('n-guardar').addEventListener('click',()=>{
+  closeNuevo();
+  abrirPanelProductos({origen:SEDE==='central'?'bodega':'inventario',areaId:$('n-area').value||null,sugerido:$('n-nombre').value.trim()});
 });
 
 /* ---------------- Fase 2 · reparto Bodega -> área ----------------
@@ -18997,27 +18880,7 @@ async function crearProducto(){
     if(usar){ SEL.add(ya.id); pintarTaller(); }
     return;
   }
-  const rubro = await elegirSeccion();
-  if(!rubro) return;
-  const r = SEDE==='plaza'
-    ? await conReintento(()=>sb.rpc('producto_plaza_crear',{
-        p_nombre:nombre,p_rubro:rubro,p_stock_min:0,p_stock_max:0,p_perecedero:false,
-        p_tipo:null,p_unidad:null,p_area_id:null,p_notas:null,p_sede:'plaza'
-      }))
-    : await conReintento(()=>sb.from('productos')
-        .insert({sede:SEDE, producto:nombre, rubro, stock_actual:0, activo:'SÍ'}).select().single());
-  if(r.error){ avisar('No se pudo crear el producto.\n\nDetalle: '+r.error.message); return; }
-  let nuevo=r.data;
-  if(SEDE==='plaza'){
-    const id=Number(r.data?.producto_id);
-    const leido=await sb.from('productos').select('*').eq('id',id).eq('sede','plaza').maybeSingle();
-    if(leido.error||!leido.data){ avisar('El producto se creó, pero no se pudo releer para continuar la receta.'); return; }
-    nuevo=leido.data;
-  }
-  DATA.push(nuevo);
-  metrics(); render();
-  SEL.add(nuevo.id);
-  pintarTaller();
+  abrirPanelProductos({origen:'receta-taller',sugerido:nombre,requiereRepresentacion:true});
 }
 
 /* Deshacer cualquiera del historial, no solo el último. El producto vuelve a la
@@ -19231,6 +19094,10 @@ $('btnNuevaReceta').addEventListener('click',()=>{
 $('receta-cancelar').addEventListener('click',closeRecetaModal);
 $('overlay-receta').addEventListener('click',e=>{ if(e.target===$('overlay-receta')) closeRecetaModal(); });
 $('btnAddInsumo').addEventListener('click',()=>addInsumoRow());
+$('btnCrearInsumo').addEventListener('click',()=>{
+  $('overlay-receta').classList.remove('open');
+  abrirPanelProductos({origen:'receta-editor',requiereRepresentacion:true});
+});
 $('rec-insumos').addEventListener('click',e=>{ const d=e.target.closest('.rec-ins-del'); if(d) d.closest('.rec-irow').remove(); });
 $('rec-list').addEventListener('click',e=>{ const c=e.target.closest('[data-rec]'); if(c) openReceta(+c.dataset.rec); });
 $('rec-q').addEventListener('input',renderRecetas);
