@@ -3087,6 +3087,7 @@
 <link rel="stylesheet" href="area-selection.css">
 <link rel="stylesheet" href="area-workspace.css">
 <link rel="stylesheet" href="identity-modules.css">
+<link rel="stylesheet" href="panel-productos.css">
 </head>
 <body>
 
@@ -3231,6 +3232,7 @@
     <button class="tab" data-tab="movcaja" id="tabMovCaja" style="display:none"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18H5z M8 7h8 M8 11h8 M8 15h5"></path></svg><span class="nav-label">Movimientos</span></button>
     <!-- El inventario pasa a ser una sección más, como Reparto o Recetas. -->
     <button class="tab active" data-tab="inv" id="tabInv"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5v9l-9 5-9-5V8z M3 8l9 5 9-5 M12 13v9"></path></svg><span class="nav-label">Inventario</span></button>
+    <button class="tab" data-tab="productos" id="tabProductos" style="display:none"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h12v18H4z M8 7h5 M8 11h5 M17 13l3-3 2 2-3 3-3 1z"></path></svg><span class="nav-label">Panel de productos</span></button>
     <button class="tab" data-tab="reparto"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h11v12H3z M14 10h4l3 4v4h-7 M6 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4 M18 21a2 2 0 1 0 0-4 2 2 0 0 0 0 4"></path></svg><span class="nav-label">Reparto <span class="tab-badge" id="repBadge" style="display:none"></span></span></button>
     <button class="tab" data-tab="recetas"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h7l1 2 1-2h7v16h-7l-1 1-1-1H4z M12 6v15"></path></svg><span class="nav-label">Recetas</span></button>
     <!-- solo en Bodega, igual que la franja de crítico -->
@@ -3779,6 +3781,34 @@
      Le dice al sistema qué producto de cada local es el mismo que el de
      bodega. Sin esto el reparto no sabe a qué sumarle al llegar.
      Maqueta aprobada por Jhon: docs/propuesta-enlaces.html            -->
+<section class="wrap" id="view-productos" style="display:none" aria-labelledby="panel-titulo">
+  <div class="panel-cabecera"><div><h2 id="panel-titulo">Panel de productos</h2><p>Insumos · una ficha para Bodega y Local 1</p></div><button type="button" id="panel-nuevo">Nuevo insumo</button></div>
+  <p id="panel-mensaje" role="status" aria-live="polite"></p>
+  <form id="panel-busqueda" class="panel-busqueda"><label for="panel-q">Buscar en Bodega</label><div><input id="panel-q" type="search" placeholder="Nombre del insumo" maxlength="160"><button type="submit">Buscar</button></div></form>
+  <div id="panel-lista"></div>
+  <form id="panel-ficha" hidden>
+    <fieldset id="panel-campos">
+      <div class="panel-cabecera"><h3 id="panel-ficha-titulo">Nuevo insumo</h3><button type="button" id="panel-cerrar">Cerrar ficha</button></div>
+      <p id="panel-identidad"></p>
+      <div class="panel-datos">
+        <label>Nombre<input id="panel-nombre" required maxlength="160"></label>
+        <label>Unidad<input id="panel-unidad" maxlength="40" placeholder="kg, unidad, litro…"></label>
+        <label>Grupo existente<select id="panel-grupo" required></select></label>
+        <label>Costo de compra por unidad<input id="panel-costo" type="number" min="0" max="999999999999" step="0.000001" value="0" required></label>
+      </div>
+      <label class="panel-check"><input id="panel-pendiente" type="checkbox" checked> Costo pendiente de completar (cero)</label>
+      <p class="panel-ayuda">Nombre, unidad y costo se guardan juntos en Bodega y sus representaciones enlazadas. Cambiar la unidad no convierte cantidades.</p>
+      <label id="panel-representacion-label" hidden>Representación en Local 1<select id="panel-representacion"></select></label>
+      <h3>Dónde estará configurado</h3>
+      <p>Bodega es el catálogo maestro. Elige también las áreas de Local 1.</p>
+      <div id="panel-areas"></div>
+      <p class="panel-ayuda">Las áreas que ya estaban configuradas se conservan. Aquí puedes añadir o editar su configuración; no retirarlas.</p>
+      <p><strong>Las nuevas fichas se crean con saldo cero.</strong> Este paso no mueve stock ni crea recetas.</p>
+      <button type="submit" id="panel-guardar">Guardar insumo</button>
+    </fieldset>
+    <p id="panel-error" role="alert"></p>
+  </form>
+</section>
 <div class="wrap" id="view-enlaces" style="display:none">
   <div id="area-bodega-return-note" class="area-assign-explain" hidden></div>
 
@@ -4300,7 +4330,7 @@ async function cargarRegistroSedes(){
 }
 const etiquetaSedeUI = s => SEDES[s]?.label || s || '—';
 /* el título de la barra dice en qué estás, como en Fudo */
-const TITULOS = {inv:'Inventario', reparto:'Reparto', recepcion:'Lo que llega a bodega', envios:'Enviar a los locales', aplaza:'Enviar a Mall Plaza', hist:'Historial', recetas:'Recetas', mermas:'Mermas', enlaces:'Enlaces', lama:'Mesas', arqueo:'Arqueo de caja', movcaja:'Movimientos de caja', ajustes:'Ajustes'};
+const TITULOS = {inv:'Inventario', productos:'Panel de productos', reparto:'Reparto', recepcion:'Lo que llega a bodega', envios:'Enviar a los locales', aplaza:'Enviar a Mall Plaza', hist:'Historial', recetas:'Recetas', mermas:'Mermas', enlaces:'Enlaces', lama:'Mesas', arqueo:'Arqueo de caja', movcaja:'Movimientos de caja', ajustes:'Ajustes'};
 let SEDE = null;
 let channel = null;
 /* Lo pide pickSede() y lo cumple aplicarPermisos(): "abrí en el hogar, que
@@ -4976,6 +5006,9 @@ async function cargarPermisos(){
   cargarMetas();
 }
 function aplicarPermisos(){
+  const panelPermitido=!!(PERMISOS.puede_editar && ['central','plaza'].includes(SEDE));
+  $('tabProductos').style.display=panelPermitido?'':'none';
+  if(!panelPermitido && vistaActual==='productos') pickTab('inv');
   const admin = PERMISOS.puede_fudo || PERMISOS.puede_editar;
   /* Los dos botones grandes de la zona roja, cada uno con su propia llave.
      Están dentro de Ajustes, así que ya pasaron el único candado de verdad
@@ -5606,6 +5639,7 @@ function pickSede(s){
   $('view-aplaza').style.display='none';
   $('view-inv').style.display='block'; $('view-ajustes').style.display='none'; $('view-reparto').style.display='none'; $('view-hist').style.display='none'; $('view-recetas').style.display='none'; $('view-mermas').style.display='none'; $('view-enlaces').style.display='none'; $('view-repcentral').style.display='none'; $('view-lama').style.display='none';
   vistaActual='inv';
+  $('view-productos').style.display='none';
   aplicarNavegacionDemo();
   document.querySelectorAll('.drawer-item.active').forEach(b=>b.classList.remove('active'));
   listEl.innerHTML='';
@@ -12934,7 +12968,7 @@ async function saveFields(id,fields){
   const {error}=await conReintento(()=>sb.from('productos').update({...fields,updated_at:new Date().toISOString()}).eq('id',id));
   if(row)row.classList.remove('saving');
   if(error){
-    const msg=error.code==='23514'?'El stock no puede quedar negativo.':'No se pudo guardar. La conexión falló varias veces — revisa tu señal e inténtalo de nuevo.';
+    const msg=/Panel de productos/.test(error.message||'')?error.message:error.code==='23514'?'El stock no puede quedar negativo.':'No se pudo guardar. La conexión falló varias veces — revisa tu señal e inténtalo de nuevo.';
     avisar(msg);console.error(error);return false;
   }
   return true;
@@ -17704,9 +17738,10 @@ async function ajDeshacerFusion(id){
 let AJUSTES_VAL = null;
 /* La sede vacía de public.ajustes significa alcance global. Mientras llega la
    lectura se mantiene la navegación de inventario; después manda la base. */
-const DEMO_VISTAS = new Set(['inv','reparto','recepcion','envios','aplaza','hist','mermas','ajustes','lama']);
+const DEMO_VISTAS = new Set(['inv','reparto','recepcion','envios','aplaza','hist','mermas','ajustes','lama','productos']);
 function modoDemo(){ return AJUSTES_VAL === null || !!ajVal('modo_demostracion', '', false); }
 function demoPermiteVista(tab){
+  if(tab==='productos') return !!(PERMISOS.puede_editar && ['central','plaza'].includes(SEDE));
   if(!DEMO_VISTAS.has(tab)) return false;
   if(tab==='reparto') return SEDE !== 'central';
   if(tab==='recepcion' || tab==='envios') return SEDE === 'central';
@@ -18544,6 +18579,7 @@ aplicarNavegacionFija();
 
 function pickTab(tab){
   if(!SEDE)return;
+  if(tab==='productos' && !(PERMISOS.puede_editar && ['central','plaza'].includes(SEDE))) tab='inv';
   if(tab==='inv'&&vistaActual==='inv'&&areaActual!==null){cambiarArea(null);return;}
   if(!sedeActiva(SEDE)){ showGate(); return; }
   if(tab==='aplaza' && !sedeActiva('angamos')) tab='inv';
@@ -18560,6 +18596,8 @@ function pickTab(tab){
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));
   moverCarril();
   $('view-inv').style.display = tab==='inv'?'block':'none';
+  $('view-productos').style.display = tab==='productos'?'block':'none';
+  if(tab==='productos') panelCargar();
   /* Los dos trabajos del reparto. En Plaza y Angamos hay uno solo y se
      llama "Reparto": recibir lo que manda bodega. En Bodega son dos y cada
      uno tiene su pestaña:
@@ -19875,5 +19913,6 @@ initAuth();
 /* app instalable (PWA): service worker sin caché, solo para instalación */
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
 </script>
+<script src="panel-productos.js"></script>
 </body>
 </html>

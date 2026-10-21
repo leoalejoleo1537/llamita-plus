@@ -1,8 +1,10 @@
 # Cola de trabajo de Codex
 
-## Prioridad vigente — P0 publicado; P1 autorizado
+## Prioridad vigente — P1 implementado; P2 pendiente
 
-Ver [P0](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md). Activar solo **P1 — núcleo del Panel de productos** después de publicar el preflight. Nombre/unidad/costo se editan una vez y deben conservar coherencia en representaciones plaza. Recetas y productos comerciales exclusivamente manuales. Orden: P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B. Los bloques posteriores y la purga requieren su propia ejecución.
+Ver [P0](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md), publicado en `34b4b48`, y cierre P1 en bitácora (2026-10-21). Panel visible y RPC atómica implementados: nombre/unidad/costo únicos, propagación y bloqueo de edición independiente al adoptar el maestro, múltiples áreas con saldo cero. Pruebas SQL revertidas y navegador específico aprobadas; `npm test` ordinario pasa, pero la ejecución ampliada con Chromium reproduce una falla preexistente del mock de permisos de Ajustes (documentada, sin alterar esa prueba).
+
+**P2 — unificar las entradas Bodega/área/ingrediente y retirar escritores legacy de manera coordinada** queda pendiente, no activado. Recetas y productos comerciales exclusivamente manuales. Orden: P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B. Los bloques posteriores y la purga requieren su propia ejecución.
 
 ## Estado del árbol de Inventario por Áreas — 2026-10-20
 

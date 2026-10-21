@@ -2,7 +2,9 @@
 
 ## Frente vigente — Panel de productos
 
-P0 completado: [informe 37](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md). Siguiente hoja autorizada, tras publicar P0: **P1 — núcleo del Panel de productos**. Secuencia aprobada: **P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B**. Fudo no bloquea el laboratorio. Producto de venta y receta siempre manuales. P1 ofrece edición única del maestro central y coherencia con representaciones plaza; no activa recetas, reinicio ni adaptación POS. El árbol histórico siguiente conserva evidencia de trabajo completado y no sustituye esta prioridad.
+P0 publicado en `34b4b48`: [informe 37](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md). **P1 — núcleo del Panel de productos implementado**: acceso desde menú en Bodega/Local 1, maestro central, edición única y propagación atómica de nombre/unidad/costo a representaciones plaza enlazadas, configuración multiárea sin stock. Migración `20261021020517_p1_panel_productos`; pruebas y limitación de la suite legacy en bitácora, entrada 2026-10-21.
+
+Siguiente nodo **P2 — unificación de entradas de creación**, pendiente y no activado. Secuencia aprobada: **P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B**. Fudo no bloquea el laboratorio. Producto de venta y receta siempre manuales. No se activan recetas, reinicio ni adaptación POS. El árbol histórico siguiente conserva evidencia de trabajo completado y no sustituye esta prioridad.
 
 > Estado actualizado: 20 de octubre de 2026. B1 y B2 completados; B3 continúa pendiente. Las Fases 1, 2, 3 y 4 del contrato operativo de stock están completadas; Fase 5 permanece pendiente y no activa.
 >

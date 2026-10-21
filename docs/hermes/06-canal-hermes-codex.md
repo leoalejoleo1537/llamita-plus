@@ -1,5 +1,14 @@
 # Canal de comunicación Hermes ↔ Codex
 
+## Codex → Hermes — P1 implementado, 2026-10-21
+
+- P0 se publicó primero en `34b4b48`. Se ejecutó únicamente P1: **menú → Panel de productos**, para usuarios con `puede_editar`, en Bodega/Local 1 y también en modo demostración.
+- RPC `panel_productos_listar` y `panel_producto_guardar`; migración `20261021020517_p1_panel_productos`. Maestro central con costo cero pendiente; nombre/unidad/costo se propagan atómicamente a todos sus enlaces plaza. La primera edición adopta el maestro; antes de eso no se normalizan históricos silenciosamente. Los atributos de maestros adoptados y sus representaciones quedan bloqueados fuera del motor.
+- Configuración multiárea, sección, límites y principal opcional. Varias representaciones requieren elección explícita; no se fusiona por nombre. Alta saldo cero; no recetas/ingredientes, lotes ni movimientos.
+- SQL con ROLLBACK, rol authenticated, navegador móvil/escritorio y navegación móvil pasan. `npm test` normal y diff-check pasan. La suite completa forzada con Chromium falla en el mock histórico de `ajustes-navegacion.mjs`; reproducido también sobre `34b4b48`, sin cambios P1. No se presenta como suite visual íntegramente aprobada.
+- Conteos y huellas de 16 tablas iguales antes/después; productos 1.438, stock global 15.456, ledger central/plaza 9.334,7. Auditoría P1 vacía tras pruebas; sin datos sintéticos persistentes.
+- Siguiente nodo: **P2**, no activo. Fudo, Lama, recetas, caja, repartos y stock_transferir no se modificaron. No se accedió a Café del Desierto / Llamita Stock. Detalle, riesgos y rollback en bitácora.
+
 ## Codex → Hermes — P0 completado; P1 autorizado
 
 Informe [37](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md): altas, identidad, POS, contradicciones locales/instaladas y mapa de reinicio verificados. Alejo aprobó catálogo comercial neutral, receta manual incluso para venta directa, y secuencia P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B. Maestro central visible único; P1 debe probar coherencia de nombre/unidad/costo con plaza. Este commit solo documenta P0; la implementación posterior se limita a P1. No se ejecutó reinicio ni se contactó Fudo/Café del Desierto.

@@ -1,0 +1,36 @@
+/* P1: presentación acotada al catálogo; sin cambiar navegación ni inventario. */
+#view-productos { max-width:1200px; color:var(--text,#171717); }
+#view-productos [hidden] { display:none !important; }
+#view-productos .panel-cabecera { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+#view-productos h2,#view-productos h3 { margin:8px 0; }
+#view-productos p { line-height:1.5; }
+#view-productos button,#view-productos input,#view-productos select { font:inherit; min-height:44px; border-radius:12px; }
+#view-productos button { cursor:pointer; padding:10px 16px; background:var(--card,#fff); color:inherit; border:1px solid var(--line,#CCE3DE); }
+#view-productos #panel-nuevo,#view-productos #panel-guardar { background:#F35B04; color:#171717; border-color:transparent; font-weight:700; }
+#view-productos input:not([type=checkbox]):not([type=radio]),#view-productos select { display:block; width:100%; min-width:0; box-sizing:border-box; padding:10px; border:1px solid var(--line,#CCE3DE); background:var(--card,#fff); color:inherit; }
+#view-productos label { display:block; font-weight:600; }
+#view-productos label input,#view-productos label select { margin-top:6px; }
+#view-productos .panel-check { display:flex; align-items:center; gap:10px; min-height:44px; }
+#view-productos input[type=checkbox],#view-productos input[type=radio] { width:20px; min-height:20px; height:20px; accent-color:#F35B04; flex-shrink:0; }
+#view-productos :focus-visible { outline:3px solid #F35B04; outline-offset:3px; }
+#view-productos :disabled { opacity:.65; cursor:default; }
+#view-productos .panel-busqueda { margin:20px 0; }
+#view-productos .panel-busqueda>div { display:flex; gap:10px; margin-top:6px; }
+#panel-lista { display:grid; gap:8px; }
+#view-productos .panel-fila { width:100%; text-align:left; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+#view-productos .panel-fila span { display:block; font-weight:normal; overflow-wrap:anywhere; }
+#view-productos .panel-fila small { display:block; margin-top:4px; }
+#view-productos #panel-ficha { margin:20px 0; padding:24px; background:var(--card,#fff); border-radius:20px; box-shadow:0 4px 20px #17171708; }
+#view-productos fieldset { border:0; padding:0; margin:0; min-width:0; }
+#view-productos .panel-datos { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin:16px 0; }
+#view-productos .panel-area { padding:12px 0; border-bottom:1px solid var(--line,#CCE3DE); }
+#view-productos .panel-ayuda { font-size:.9rem; color:var(--muted,#516358); }
+#panel-error { color:#ae2434; font-weight:600; }
+#panel-mensaje:empty,#panel-error:empty { display:none; }
+@media(max-width:600px){
+  #view-productos #panel-ficha { padding:16px; }
+  #view-productos .panel-datos { grid-template-columns:1fr; }
+  #view-productos .panel-fila { align-items:flex-start; flex-direction:column; gap:4px; }
+  #view-productos .panel-busqueda>div { flex-wrap:wrap; }
+  #view-productos .panel-busqueda input { flex:1 1 180px; }
+}

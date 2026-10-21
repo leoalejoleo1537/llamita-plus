@@ -48,6 +48,60 @@ El cajón actual conserva las rutas y etiquetas accesibles y tiene ancho máximo
 
 La recomendación es prototipar la opción 1 antes de reemplazar la navegación; esta nota no cambia la navegación actual. La ruta Mesas ya aparece en el menú móvil para cuentas con `puede_lama` y sedes habilitadas. El permiso y las restricciones por sede siguen siendo la autoridad: no se habilita Mesas a cuentas no autorizadas desde CSS o por defecto.
 
+## 2026-10-21 — P1: núcleo del Panel de productos
+
+P0 se publicó primero en `34b4b48`. Se implementa únicamente P1 en `leoalejoleo1537/llamita-plus`, destino `origin/master`, Supabase `llamita-plus` / `iuryhsjucblmebdogewa`. El commit de esta entrada se identifica con `git log --grep='Implementar P1'`. P2 y posteriores no se activan.
+
+### Resultado visible y coherencia del maestro
+
+- **Menú → Panel de productos**, desde Bodega o Local 1, con `puede_editar`; disponible también en demostración. Buscar maestros, crear insumo, editar nombre/unidad/costo y configurar una o varias áreas con sección física, mínimo/máximo y principal opcional. Los grupos se eligen del catálogo existente; no hay clasificación automática.
+- `productos` de sede `central` conserva la identidad maestra. El Panel muestra esa identidad una sola vez. Una edición adopta el maestro como `panel_gestionado` y propaga nombre, unidad, costo y condición pendiente a **todas** sus representaciones enlazadas de plaza en la misma transacción. Un enlace posterior hereda esos atributos mediante trigger. No se escriben cantidades.
+- Los atributos administrados quedan bloqueados fuera del motor, tanto en central como en sus representaciones. El modal legacy muestra el mensaje de ir al Panel si intenta modificarlos. No se obliga a una segunda edición. La unidad es una etiqueta: cambiarla no convierte existencias; enlaces con factor distinto de 1 se rechazan para revisión explícita.
+- No se adopta ni renombra masivamente el catálogo histórico. Antes de su primera edición desde Panel, cada maestro conserva el comportamiento anterior. P2 unificará entradas y retirará escritores legacy coordinadamente. No se afirma que todo el DML histórico ya esté cerrado.
+- Al configurar áreas se reutiliza `producto_enlace`: con una representación activa se reutiliza; con varias se exige escoger; sin ninguna se crea plaza enlazada, saldo cero. Un homónimo sin enlace o una representación archivada exige revisar identidad: nunca se adivina ni fusiona. Una representación se configura en varias áreas; no se crea una por área. Omitir un área conserva su configuración; este bloque no implementa retirarla.
+- Costo inicial cero/pending; puede completarse manualmente por unidad. Nuevas fichas y configuraciones no generan stock, lotes, movimientos, recetas, ingredientes ni enlaces Fudo.
+
+### Archivos y objetos
+
+- `index.html`: entrada, formulario, guard de acceso y mensaje claro al intentar editar atributos protegidos por una ruta antigua.
+- `panel-productos.js` / `.css`: lectura, formulario, reintento con referencia estable, validación y presentación acotada según guía Darío. Sin DML navegador ni llamadas Edge/Fudo.
+- `supabase/migrations/20261021020517_p1_panel_productos.sql`: aplicada, versión instalada confirmada. Agrega `costo_compra`, `costo_pendiente`, `panel_gestionado`, `catalogo_revision` a productos; índice único de nombre normalizado central activo; esquema privado `catalogo_internal`, auditoría `operaciones` y permiso transitorio privado por transacción/backend. Los saltos de secuencia producidos por tests revertidos son esperables; no equivalen a filas persistentes.
+- RPC `panel_productos_listar(text,bigint)` y `panel_producto_guardar(uuid,bigint,bigint,jsonb)`: S1 `editar`, sesión/Auth validada, SECURITY DEFINER con search_path vacío, solo authenticated; sin EXECUTE para anon/service_role/PUBLIC. Helpers privados sin ejecución de aplicación; RLS forzada y política cerrada. Reutiliza `stock_internal.guardar_configuracion_producto`, sin modificarlo.
+- Triggers `catalogo_proteger_producto`, `catalogo_enlace_coherente` y auditoría inmutable. Referencia+actor+contenido idénticos recuperan resultado; referencia con otro contenido/actor se rechaza. Bloqueos por referencia/nombre/maestro y revisión optimista evitan sobrescrituras y altas duplicadas.
+- `sql/2026-10-p1-pruebas-panel-productos.sql`, `pruebas/panel-productos.mjs` y rollback `sql/2026-10-p1-panel-productos.rollback.sql`.
+
+### Pruebas y evidencia
+
+1. SQL en BEGIN/ROLLBACK sobre la definición instalada: alta maestro y plaza con dos áreas, cero existencias/lotes, reintento, referencia inválida, duplicado, segunda representación histórica y herencia, edición operativa de nombre/unidad/costo coherente en las tres filas, auditoría, revisión obsoleta, rechazo de edición directa/desvinculación, inmutabilidad, fallo tardío que revierte todo, ambigüedad y elección explícita, configuración omitida conservada, usuario no autorizado, anónimo y ACL. También alta/lectura con `SET LOCAL ROLE authenticated`; identidades simuladas en SQL, no inicio de sesión real ni JWT compartido. Concurrencia validada mediante bloqueo + revisión obsoleta equivalente al segundo guardado, no prueba de carga de dos clientes simultáneos.
+2. Navegador Chromium contra aplicación local y Supabase simulado: ruta real, alta multiárea, sección y límites fraccionarios, costo pendiente cero, edición, elección explícita de representación, respuesta perdida/reintento idéntico, rechazo UI sin permiso y acceso móvil. Capturas revisadas a 1366 y 390 px, sin desbordamiento horizontal. `pruebas/movil-navegacion.mjs` con Chromium pasa; no se rediseñó la navegación.
+3. `npm test` ordinario pasa; este entorno requiere CHROME_PATH para que las pruebas de pantalla encuentren Chromium, por lo que ese comando salta las visuales. La ejecución ampliada `CHROME_PATH=/usr/bin/chromium PRUEBAS_HTTP_BASE=... npm test` falla en `ajustes-navegacion.mjs`: el mock devuelve `{data:[]}` a `permisos_mios`, no concede Ajustes y el clic expira. Reproducido sobre copia limpia de `34b4b48` con idéntico resultado antes de P1. No se altera la prueba legacy ni se presenta la suite ampliada como aprobada. Las dos pruebas visuales pertinentes se ejecutaron explícitamente y pasaron. `git diff --check` y sintaxis JS pasan.
+4. Advisors: las dos RPC aparecen en [aviso de SECURITY DEFINER ejecutable por authenticated](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable), comportamiento intencional con autorización S1 probada; el [índice del actor aún sin uso](https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index) se conserva para la FK. No hay hallazgo nuevo de RLS abierta, EXECUTE anónimo o search_path inseguro en P1. Los hallazgos históricos no se modificaron.
+
+### Conteos pre/post
+
+Los conteos y hashes del contenido de 16 tablas coinciden (para productos se excluyen del hash solo las cuatro columnas nuevas). No quedaron filas de prueba, operaciones P1 ni permisos transitorios.
+
+| Objeto | Antes | Después |
+|---|---:|---:|
+| productos / enlaces / configuraciones área | 1.438 / 513 / 6 | 1.438 / 513 / 6 |
+| stock proyectado global | 15.456 | 15.456 |
+| saldo ledger central+plaza | 9.334,7 | 9.334,7 |
+| movimientos ledger / filas existencias | 410 / 409 | 410 / 409 |
+| lotes / transferencias / repartos de área | 42 / 0 / 1 | 42 / 0 / 1 |
+| movimientos Fudo / espejo Fudo | 15.357 / 1.377 | 15.357 / 1.377 |
+| recetas / ingredientes | 396 / 514 | 396 / 514 |
+| reservas Lama / cuentas / pagos / movimientos caja | 0 / 64 / 33 / 2 | 0 / 64 / 33 / 2 |
+
+El total global incluye las sedes históricas angamos/bodega; central (4.750,5) + plaza (4.584,2) concilian con ledger 9.334,7. No se cambian saldos históricos.
+
+### Límites, rollback y siguiente nodo
+
+Rollback SQL provisto únicamente antes de uso real: se niega si hay auditoría o maestros adoptados; no borra evidencia. No se ejecutó el rollback en producción. Después de uso, retirar la interfaz conservando datos/protecciones y planificar migración compensatoria. Revertir solo frontend no debe reabrir la edición independiente.
+
+Pendientes: P2 reemplazará entradas antiguas Bodega/área/taller; los homónimos históricos y enlaces de conversión requieren resolución humana. La búsqueda del Panel devuelve hasta 100 maestros activos por consulta; no importa desde Fudo. Productos de venta y recetas manuales corresponden a P3; la función antigua fudo-crear-producto no se usa y deberá perder su receta automática antes de cualquier reutilización en P6. No hay sesión Auth real de usuario en la prueba visual ni validación manual en iPhone físico.
+
+**Siguiente nodo: P2 — unificación de entradas de creación, pendiente y no activado.** Se conserva P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B. No se tocaron Fudo remoto, Lama, recetas, caja, repartos ni stock_transferir; Bodega solo recibe los atributos/guardas del catálogo descritos, no cambios operativos. No se accedió ni modificó Café del Desierto / Llamita Stock.
+
 ## 2026-10-20 — P0: preflight Panel de productos y decisiones de Alejo
 
 - Preflight completado mediante lecturas sobre `7b8309d`, sin DML ni llamadas Fudo. Informe único: [37](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md).
