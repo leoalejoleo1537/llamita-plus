@@ -48,6 +48,37 @@ El cajón actual conserva las rutas y etiquetas accesibles y tiene ancho máximo
 
 La recomendación es prototipar la opción 1 antes de reemplazar la navegación; esta nota no cambia la navegación actual. La ruta Mesas ya aparece en el menú móvil para cuentas con `puede_lama` y sedes habilitadas. El permiso y las restricciones por sede siguen siendo la autoridad: no se habilita Mesas a cuentas no autorizadas desde CSS o por defecto.
 
+## 2026-10-21 — P4: Mesas consume recetas manuales multiárea
+
+Se implementó únicamente P4 en `leoalejoleo1537/llamita-plus`, Supabase `llamita-plus` / `iuryhsjucblmebdogewa`, destino `origin/master`. Fudo permaneció inactivo y P5 continúa pendiente.
+
+### Resultado visible
+
+- Mesas usa los **Productos de venta** neutrales de P3. La carta distingue productos listos, borradores y configuraciones no vendibles; muestra disponibilidad calculada y áreas de origen. Un producto sin receta lista, sin origen activo o sin saldo no puede agregarse.
+- Añadir a una mesa no reserva ni consume. **Confirmar comanda** toma un snapshot de la receta vigente y reserva atómicamente todos los ingredientes, incluso si pertenecen a áreas distintas. Si uno falla no se crea una comanda ni quedan reservas parciales.
+- **Cerrar mesa** consume el snapshot una sola vez desde el ledger y mantiene los lotes mediante FIFO. Anular antes del cierre libera; anular después del consumo registra movimientos compensatorios una sola vez.
+- El circuito directo de Fase 4 queda rotulado como **Compatibilidad directa**. Cada línea usa exclusivamente el motor neutral o el directo; ambos descuentan sus reservas al calcular disponibilidad, evitando sobreventa y doble descuento.
+- Una falla técnica al consumir no oculta el problema ni bloquea el cierre comercial: la reserva queda en error y se registra una alerta pendiente auditable.
+
+### Backend y seguridad
+
+- Migración instalada: `20261021193322_p4_lama_recetas_manuales` (archivo fuente `supabase/migrations/20261021210000_p4_lama_recetas_manuales.sql`).
+- `cuenta_items.producto_venta_id` enlaza la línea comercial con su identidad neutral. Las nuevas tablas privadas `stock_internal.lama_receta_reservas` y `lama_receta_reserva_movimientos` conservan el snapshot por componente y sus movimientos definitivos/compensatorios.
+- RPC nuevas: `lama_productos_venta_listar()` y `cuenta_producto_venta_agregar(...)`. Se adaptaron `cuenta_confirmar(...)` e `item_anular(...)`, y el cierre reutiliza `consumir_cuenta_lama(...)` para ambos motores. Sesión y `puede_lama` se validan mediante S1; las RPC son `SECURITY DEFINER`, `search_path=''`, solo `authenticated`. Las tablas tienen RLS forzada y no exponen DML a navegador, `anon` ni `service_role`.
+- La concurrencia se serializa por producto+ubicación con bloqueos ordenados; las claves únicas por línea/componente y movimiento hacen idempotentes confirmación, cierre y anulación.
+
+### Pruebas y conteos
+
+1. `sql/2026-10-p4-pruebas-lama-recetas-manuales.sql`, ejecutado en `BEGIN … ROLLBACK`: receta de una línea, combo, dos áreas, reserva sin consumo, cierre único, liberación y compensación, falta de saldo, origen inactivo, idempotencia, atomicidad, falla física inesperada con cierre comercial y alerta, raíz, usuario Lama, usuario sin permiso y anónimo. No dejó datos sintéticos.
+2. `pruebas/p4-lama-recetas-manuales.mjs` validó contratos, bloqueos, separación de motores y ausencia de Fudo/recetas heredadas. Chromium real validó catálogo, borradores, stock, escritorio y 390×844; la regresión visual P3 también pasó.
+3. `npm test` completo y `git diff --check` pasan. Los advisors no atribuyen a P4 RLS abierta, ejecución anónima ni `search_path` inseguro. Permanecen avisos globales históricos fuera de alcance; los índices P4 aparecen aún sin uso porque el catálogo neutral y las reservas nacen vacíos.
+
+Conteos persistentes pre/post idénticos: 1.438 productos; stock proyectado 15.456; saldo ledger 9.334,7; 410 movimientos ledger; 42 lotes; 0 transferencias; 1 reparto; 396 recetas/514 ingredientes heredados; 1.377 productos y 15.357 movimientos Fudo; 64 cuentas; 33 pagos; 2 movimientos de caja. P4 quedó con 0 productos neutrales listos, 0 reservas por receta y 0 enlaces a movimientos. `origen_pos` continúa en `ninguno`.
+
+Los 321 productos activos del espejo antiguo de Mesas continúan en compatibilidad directa y **ninguno tiene fuente directa activa**; por tanto, no son vendibles por stock hasta configurarlos o reemplazarlos por Productos de venta con receta manual. No se accedió ni modificó Café del Desierto / Llamita Stock.
+
+**Siguiente nodo según la secuencia aprobada: P7A — respaldo, restauración ensayada y reinicio limpio. P5 — adaptador Fudo hacia este mismo motor neutral— sigue pendiente y no activo.**
+
 ## 2026-10-21 — P3: catálogo comercial neutral y recetas manuales
 
 Se implementó únicamente P3 en `leoalejoleo1537/llamita-plus`, Supabase `llamita-plus` / `iuryhsjucblmebdogewa`, destino `origin/master`. P4 permanece pendiente y no activo.

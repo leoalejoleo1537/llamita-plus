@@ -1,10 +1,10 @@
 # Cola de trabajo de Codex
 
-## Prioridad vigente — P3 completado; P4 pendiente
+## Prioridad vigente — P4 completado; P7A pendiente
 
-Ver [P0](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md) y cierres P1–P3 en bitácora (2026-10-21). El Panel contiene `Insumos` y `Productos de venta`; el segundo es un catálogo neutral nuevo, con precio y recetas manuales versionadas. Cada componente referencia una configuración producto–área activa, conserva orden y admite decimales. Crear un insumo desde la receta vuelve al editor con su origen seleccionado; nunca crea receta automática.
+Ver [P0](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md) y cierres P1–P4 en bitácora (2026-10-21). El Panel contiene `Insumos` y `Productos de venta`; el segundo es un catálogo neutral con precio y recetas manuales versionadas. Mesas ya lista los productos listos, reserva cada ingrediente desde su origen explícito al confirmar y consume el snapshot una sola vez al cerrar.
 
-**P4 — Mesas consume recetas y componentes desde una o varias áreas** queda pendiente y no activado. P3 instaló `20261021181318_p3_catalogo_comercial_recetas_manuales` y `20261021181440_p3_indices_fk_catalogo_comercial`; no conectó Mesas/Lama ni Fudo. SQL revertido, Chromium específico, regresiones P1/P2, `npm test` y diff-check pasan. Orden: P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B. Los bloques posteriores y la purga requieren su propia ejecución.
+**P7A — respaldo, restauración ensayada y reinicio limpio** queda pendiente y no activado. P4 instaló `20261021193322_p4_lama_recetas_manuales`; no activó Fudo ni modificó las recetas heredadas. El adaptador **P5** continúa pendiente para después de P7A y del laboratorio. Orden: P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B. Los bloques posteriores y la purga requieren su propia ejecución.
 
 ## Estado del árbol de Inventario por Áreas — 2026-10-20
 

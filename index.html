@@ -1811,6 +1811,8 @@
     display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;
     margin-left:8px;padding:0 7px}
   .lama-carta-nada{padding:40px 20px;text-align:center;color:var(--muted);font-size:14.5px}
+  .lama-prod.no-vendible{opacity:.68;cursor:not-allowed}
+  .lama-prod.no-vendible .mas{display:none}
 
 
   /* LO PENDIENTE, en su propia tarjeta ámbar. Es lo que Fudo pone arriba de
@@ -7759,9 +7761,10 @@ const lamaAreaDe   = id    => LAMA_AREAS.find(a => a.id === id) || null;
 const lamaHayAreas = ()    => lamaPaginas().length > 0;
 const plata = n => '$' + Math.round(+n || 0).toLocaleString('es-CL');
 
-/* La carta sale de `fudo_productos`, el espejo del catálogo de Fudo que se
-   sincroniza con el botón ⟳. No hay que cargar nada: nombre, precio y
-   categoría ya están ahí desde julio. */
+/* En Local 1 la carta sale del catálogo comercial neutral y de sus recetas
+   manuales P3. El catálogo directo anterior solo aparece cuando tiene una
+   fuente configurada y se etiqueta como compatibilidad; nunca se mezclan las
+   dos identidades en una línea. */
 /* EL ECO DE LO PROPIO — la tercera causa del lag al sumar, y la que faltaba.
 
    Cada toque al + escribe en `cuenta_items` y después llama a
@@ -7784,22 +7787,32 @@ const lamaMioEmpieza = () => { LAMA_MIO++; };
 const lamaMioTermina = () => { LAMA_MIO--; LAMA_MIO_HASTA = Date.now() + 500; };
 const lamaEsEcoPropio = () => LAMA_MIO > 0 || Date.now() < LAMA_MIO_HASTA;
 
-function lamaAplicarDisponibilidad(){
-  for(const p of LAMA_CARTA){
-    const d=LAMA_DISP.get(String(p.fudo_product_id));
-    p.stock_estado=d?.estado_fuente||'sin_fuente';
-    p.stock_disponible=Number(d?.disponible||0);
-    p.stock_area=d?.area||null;
-  }
-}
 async function lamaCargarStock(){
   if(SEDE!=='plaza'||!PERMISOS.puede_lama){LAMA_DISP=new Map();LAMA_STOCK_ALERTAS=[];return;}
-  const [d,a]=await Promise.all([
+  const [v,d,a]=await Promise.all([
+    sb.rpc('lama_productos_venta_listar'),
     sb.rpc('lama_fuentes_directas_listar'),sb.rpc('lama_stock_alertas_listar')
   ]);
-  if(!d.error)LAMA_DISP=new Map((d.data||[]).map(x=>[String(x.fudo_product_id),x]));
+  const ventas=!v.error?(v.data||[]).map(x=>({
+    catalogo_clave:'venta:'+x.producto_venta_id,catalogo_tipo:'receta_manual',
+    producto_venta_id:x.producto_venta_id,nombre:x.nombre,precio:x.precio,
+    stock_estado:x.receta_valida?'configurada':(x.estado==='borrador'?'borrador':'receta_invalida'),
+    stock_disponible:Number(x.disponible||0),stock_area:x.areas||null,
+    receta_valida:!!x.receta_valida,vendible:!!x.vendible,motivo:x.motivo||null
+  })):[];
+  const directos=!d.error?(d.data||[]).filter(x=>x.estado_fuente==='configurada').map(x=>({
+    catalogo_clave:'directo:'+x.fudo_product_id,catalogo_tipo:'directo_compatibilidad',
+    fudo_product_id:String(x.fudo_product_id),nombre:x.nombre,precio:x.precio,
+    stock_estado:'configurada',stock_disponible:Number(x.disponible||0),stock_area:x.area||null,
+    receta_valida:true,vendible:Number(x.disponible||0)>=1,
+    motivo:Number(x.disponible||0)>=1?null:'Stock insuficiente para una unidad'
+  })):[];
+  if((!v.error||!d.error)){
+    LAMA_CARTA=ventas.concat(directos);
+    LAMA_CARTA_SEDE=SEDE;
+    LAMA_DISP=new Map(LAMA_CARTA.map(x=>[x.catalogo_clave,x]));
+  }
   if(!a.error)LAMA_STOCK_ALERTAS=a.data||[];
-  lamaAplicarDisponibilidad();
 }
 
 function lamaPintarStockBanner(){
@@ -7844,7 +7857,12 @@ async function lamaCargar(forzar){
     LAMA_CUENTAS = cc.data || [];
     LAMA_AREAS   = aa.data || [];
     if(pp){
-      LAMA_CARTA = (pp.data || []).filter(p => p.nombre && +p.precio > 0);
+      LAMA_CARTA = (pp.data || []).filter(p => p.nombre && +p.precio > 0).map(p=>({
+        ...p,catalogo_clave:'directo:'+p.fudo_product_id,
+        catalogo_tipo:'directo_compatibilidad',stock_estado:'configurada',
+        stock_disponible:0,stock_area:null,receta_valida:false,vendible:false,
+        motivo:'No se pudo verificar la receta o el inventario'
+      }));
       LAMA_CARTA_SEDE = SEDE;
     }
     await lamaCargarStock();
@@ -9389,11 +9407,14 @@ function lamaCanasta(texto, boton){
    − n + en vez del +: lo que no se ve no se cuenta, y antes había que tocar
    otra vez el mismo producto y confiar en que estaba sumando. */
 function lamaFilaCarta(p, puestos){
-  const n = puestos[p.nombre] || 0;
-  const fuenteOk=p.stock_estado==='configurada';
-  const stockInfo=fuenteOk
-    ? `${fmt(p.stock_disponible)} disponibles · ${p.stock_area||'Local 1'}`
-    : 'Sin área de inventario para venta';
+  const clave=lamaClaveProducto(p);
+  const n = puestos[clave] || 0;
+  const recetaOk=!!p.receta_valida;
+  const stockInfo=p.catalogo_tipo==='directo_compatibilidad'
+    ? `Compatibilidad directa · ${fmt(p.stock_disponible)} disponibles · ${p.stock_area||'Local 1'}`
+    : recetaOk
+      ? `Receta manual · ${fmt(p.stock_disponible)} vendibles · ${p.stock_area||'Local 1'}`
+      : (p.motivo||'Borrador · receta no disponible');
   /* EN 1, EL MENOS SE VUELVE UN BASURERO. Pedido de Jhon (2026-09-03): restar
      de 2 a 1 y restar de 1 a 0 se ven idénticos, y no son lo mismo — el
      segundo BORRA el producto del pedido. Un símbolo que no distingue entre
@@ -9403,16 +9424,16 @@ function lamaFilaCarta(p, puestos){
      No se inventa nada: `TRASH_SVG` y la clase `is-trash` ya son la
      convención de esta casa, del carrito y del reparto. Copiarla es gratis y
      además significa lo mismo en las cuatro pantallas. */
-  const uno = n > 0 && lamaMenosBorra(p.nombre);
-  return `<button type="button" class="lama-prod${n?' puesto':''}"
-            data-lamaadd="${esc(p.fudo_product_id)}">
-    <span class="nm">${esc(p.nombre)}<small class="${fuenteOk?'':'sin-fuente'}">${esc(stockInfo)}</small></span>
+  const uno = n > 0 && lamaMenosBorra(clave);
+  return `<button type="button" class="lama-prod${n?' puesto':''}${p.vendible?'':' no-vendible'}"
+            data-lamaadd="${esc(clave)}"${p.vendible?'':' disabled'}>
+    <span class="nm">${esc(p.nombre)}<small class="${recetaOk&&p.vendible?'':'sin-fuente'}">${esc(stockInfo)}</small></span>
     <span class="pr">${plata(p.precio)}</span>
     ${n ? `<span class="paso">
-        <span class="${uno?'is-trash':''}" data-lamacartamenos="${esc(p.nombre)}"
+        <span class="${uno?'is-trash':''}" data-lamacartamenos="${esc(clave)}"
               aria-label="${uno?'Quitar del pedido':'Uno menos'}">${uno?TRASH_SVG:'−'}</span>
         <b>${fmt(n)}</b>
-        <span data-lamacartamas="${esc(p.fudo_product_id)}" aria-label="Uno más">+</span>
+        <span data-lamacartamas="${esc(clave)}" aria-label="Uno más">+</span>
       </span>`
       : '<span class="mas">+</span>'}
   </button>`;
@@ -9464,9 +9485,9 @@ function lamaPanelBuscador(){
       <div id="lama-qp-lista">${lamaPanelResultados()}</div>
     </div>
     ${pil.length ? `<div class="lama-pildoras">${pil.map(p =>
-      `<button type="button" class="lama-pil" data-lamaadd="${esc(p.fudo_product_id)}"
+      `<button type="button" class="lama-pil" data-lamaadd="${esc(lamaClaveProducto(p))}"${p.vendible?'':' disabled'}
         title="${esc(p.nombre)} · ${plata(p.precio)}">${
-        puestos[p.nombre] ? fmt(puestos[p.nombre]) + '× ' : '+ '}${esc(p.nombre)}</button>`
+        puestos[lamaClaveProducto(p)] ? fmt(puestos[lamaClaveProducto(p)]) + '× ' : '+ '}${esc(p.nombre)}</button>`
       ).join('')}</div>` : ''}`;
 }
 
@@ -9513,9 +9534,17 @@ function lamaMarcarFilaQP(){
    aparte: dos fuentes para el mismo número es como se producen los descuadres. */
 function lamaPuestos(){
   const p = {};
-  for(const i of LAMA_ITEMS) p[i.nombre] = (p[i.nombre] || 0) + (+i.cantidad || 0);
+  for(const i of LAMA_ITEMS){
+    const k=lamaClaveItem(i);
+    p[k] = (p[k] || 0) + (+i.cantidad || 0);
+  }
   return p;
 }
+
+const lamaClaveProducto=p=>p.catalogo_clave
+  || (p.producto_venta_id?'venta:'+p.producto_venta_id:'directo:'+p.fudo_product_id);
+const lamaClaveItem=i=>i.producto_venta_id
+  ? 'venta:'+i.producto_venta_id:'directo:'+i.fudo_product_id;
 
 /* SOBRE QUÉ LÍNEA ACTÚA EL − DE LA CARTA.
    ---------------------------------------------------------------------------
@@ -9526,10 +9555,10 @@ function lamaPuestos(){
    línea va a caer. Dos copias de esta regla se habrían separado la primera
    vez que alguien tocara una — es la misma razón por la que el descuento
    tiene un solo dueño. */
-function lamaBlancoDelMenos(nombre){
+function lamaBlancoDelMenos(clave){
   const rev = [...LAMA_ITEMS].reverse();
-  return rev.find(x => x.nombre === nombre && x.estado === 'nuevo')
-      || rev.find(x => x.nombre === nombre)
+  return rev.find(x => lamaClaveItem(x) === clave && x.estado === 'nuevo')
+      || rev.find(x => lamaClaveItem(x) === clave)
       || null;
 }
 
@@ -9537,8 +9566,8 @@ function lamaBlancoDelMenos(nombre){
    que va a caer todavía no salió a la cocina y le queda una sola unidad. Si ya
    salió, el − lleva a ANULAR —que pide motivo y deja rastro—, y eso no es un
    basurero: es otra conversación. */
-function lamaMenosBorra(nombre){
-  const it = lamaBlancoDelMenos(nombre);
+function lamaMenosBorra(clave){
+  const it = lamaBlancoDelMenos(clave);
   return !!it && it.estado === 'nuevo' && !lamaEstaAnulado(it) && (+it.cantidad || 0) <= 1;
 }
 
@@ -9742,7 +9771,7 @@ async function lamaAbrirMesa(){
   lamaPintar();
 }
 
-async function lamaAgregar(fudoId){
+async function lamaAgregar(catalogoClave){
   const c = lamaCuentaDe(LAMA_SEL); if(!c) return;
   /* F2 · EL CANDADO VA ACÁ Y EN NINGÚN OTRO LADO. Todos los caminos que suman
      un producto terminan en esta función —la carta, el buscador del panel, las
@@ -9750,7 +9779,9 @@ async function lamaAgregar(fudoId){
      solo `if` los cubre a todos. Repartirlo por cada botón sería dejar que el
      próximo camino nuevo se olvide de pedirlo. */
   if(lamaTrabadaPorPrecuenta(c)){ await lamaAvisarTrabada(); return; }
-  const p = LAMA_CARTA.find(x => String(x.fudo_product_id) === String(fudoId)); if(!p) return;
+  const p = LAMA_CARTA.find(x => lamaClaveProducto(x) === String(catalogoClave)); if(!p) return;
+  if(!p.receta_valida){ avisar(p.motivo||'Este producto no tiene una receta manual válida.'); return; }
+  if(!p.vendible){ avisar(p.motivo||'No hay stock disponible suficiente para este producto.'); return; }
   LAMA_PAPEL = null;
   /* SE VE PRIMERO, SE GUARDA DESPUÉS. Antes esto esperaba la ida y la vuelta
      de la base antes de mover nada, y en el mesón se toca otra vez creyendo
@@ -9760,10 +9791,12 @@ async function lamaAgregar(fudoId){
      `cuenta_agregar` suma sobre la línea que todavía no salió a la cocina, y
      acá se hace lo mismo para que el número provisorio coincida con el que va
      a volver. Si no coincidiera, se vería un salto. */
-  const suelta = LAMA_ITEMS.find(x => x.nombre === p.nombre && x.estado === 'nuevo' && !x.comentario);
+  const suelta = LAMA_ITEMS.find(x => lamaClaveItem(x)===lamaClaveProducto(p)
+    && x.estado === 'nuevo' && !x.comentario);
   const provisorio = suelta ? null : {
     id: 'nuevo-' + Date.now(), cuenta_id: c.id, nombre: p.nombre,
-    cantidad: 1, precio: +p.precio || 0, comentario: null, estado: 'nuevo'};
+    cantidad: 1, precio: +p.precio || 0, comentario: null, estado: 'nuevo',
+    producto_venta_id:p.producto_venta_id||null,fudo_product_id:p.fudo_product_id||null};
   if(suelta) suelta.cantidad = (+suelta.cantidad || 0) + 1;
   else LAMA_ITEMS.push(provisorio);
   lamaPintarPanel();
@@ -9772,9 +9805,13 @@ async function lamaAgregar(fudoId){
   lamaMioEmpieza();                 // el aviso en vivo que venga es mi propio eco
   let it;
   try{
-    it = await lamaLlamar('cuenta_agregar', {
-      p_cuenta_id: c.id, p_nombre: p.nombre, p_precio: +p.precio || 0,
-      p_cantidad: 1, p_comentario: null, p_fudo_id: String(p.fudo_product_id), p_quien: NOMBRE});
+    it = p.catalogo_tipo==='receta_manual'
+      ? await lamaLlamar('cuenta_producto_venta_agregar', {
+          p_cuenta_id:c.id,p_producto_venta_id:p.producto_venta_id,
+          p_cantidad:1,p_comentario:null,p_quien:NOMBRE})
+      : await lamaLlamar('cuenta_agregar', {
+          p_cuenta_id: c.id, p_nombre: p.nombre, p_precio: +p.precio || 0,
+          p_cantidad: 1, p_comentario: null, p_fudo_id: String(p.fudo_product_id), p_quien: NOMBRE});
   } finally { lamaMioTermina(); }
   if(!it){ await lamaCargarItems(true); lamaPintarPanel(); return; }   // vuelve a la verdad
 
@@ -9808,7 +9845,7 @@ async function lamaCantidad(itemId, delta){
      Y el − de una línea ya salida tampoco resta: lleva a anularla, que es la
      única forma de sacar algo que ya se preparó dejando dicho por qué. */
   if(it.estado === 'confirmado' && !lamaEstaAnulado(it)){
-    if(delta > 0) return lamaAgregar(it.fudo_product_id);
+    if(delta > 0) return lamaAgregar(lamaClaveItem(it));
     return lamaAbrirAnular(itemId);
   }
   if(lamaEstaAnulado(it)) return;      // lo anulado ya no se toca

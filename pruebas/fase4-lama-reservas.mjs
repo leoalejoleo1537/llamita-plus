@@ -25,7 +25,8 @@ assert.doesNotMatch(sql,/update\s+public\.productos\s+set\s+stock_actual/i,'no e
 assert.doesNotMatch(sql,/(insert into|update|delete from)\s+public\.(recetas|receta_items|fudo_movimientos|cuenta_pagos|lama_caja_movimientos)/i,'no toca recetas, Fudo, pagos ni caja');
 
 assert.match(html,/lama_fuentes_directas_listar/,'la carta consume disponibilidad protegida');
-assert.match(html,/Sin área de inventario para venta/,'la carta muestra falta de fuente');
+assert.match(html,/Sin área de inventario para venta|No se pudo verificar la receta o el inventario/,
+  'la carta mantiene un mensaje explícito para el circuito directo');
 assert.match(html,/id="aj-lama-stock"/,'Ajustes permite configurar la fuente explícita');
 assert.match(html,/lama_fuente_directa_guardar/,'la configuración usa RPC, no DML');
 assert.match(html,/const hayLama = !!\(PERMISOS\.puede_lama && SEDE && SEDE !== 'central'\)/,'modo demostración no oculta Mesas autorizado');

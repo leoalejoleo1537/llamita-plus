@@ -2,9 +2,18 @@
 
 ## Frente vigente — Panel de productos
 
-P0 publicado en `34b4b48`: [informe 37](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md). **P1, P2 y P3 implementados**: el Panel administra el maestro central, unifica las altas humanas y separa `Insumos` de `Productos de venta`. Nombre/unidad/costo se editan una vez; el catálogo comercial y sus recetas manuales son neutrales, versionados y no mueven stock. Migraciones `20261021020517_p1_panel_productos`, `20261021112507_p2_unificar_altas_productos`, `20261021181318_p3_catalogo_comercial_recetas_manuales` y `20261021181440_p3_indices_fk_catalogo_comercial`.
+P0 publicado en `34b4b48`: [informe 37](37-p0-panel-productos-catalogo-recetas-fudo-reinicio.md). **P1, P2, P3 y P4 implementados**: el Panel administra el maestro central, unifica las altas humanas y separa `Insumos` de `Productos de venta`. Nombre/unidad/costo se editan una vez; el catálogo comercial y sus recetas manuales son neutrales y versionados. P4 conecta esas recetas con Mesas: confirmar reserva todos sus componentes y cerrar consume el snapshot una sola vez desde las áreas explícitas.
 
-Siguiente nodo **P4 — Mesas consume recetas y componentes desde una o varias áreas**, pendiente y no activado. Secuencia aprobada: **P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B**. Fudo no bloquea el laboratorio. No se activan P4, reinicio ni adaptación POS automáticamente. El árbol histórico siguiente conserva evidencia de trabajo completado y no sustituye esta prioridad.
+Siguiente nodo **P7A — respaldo, restauración ensayada y reinicio limpio**, pendiente y no activado. Secuencia aprobada: **P1 → P2 → P3 → P4 → P7A → laboratorio → P5 → P6 → P7B**. **P5 — adaptador Fudo al mismo motor neutral— permanece pendiente** y no bloquea Mesas ni el laboratorio. No se activan P7A, el laboratorio ni Fudo automáticamente. El árbol histórico siguiente conserva evidencia de trabajo completado y no sustituye esta prioridad.
+
+### Resultado P4 — Mesas consume recetas manuales multiárea
+
+- Mesas lista los Productos de venta neutrales de P3. Un borrador, una receta incompleta o un producto sin disponibilidad queda visible pero no vendible.
+- Confirmar la comanda valida y reserva en una sola transacción cada componente desde la configuración producto–área indicada manualmente. Si una línea falla no queda comanda ni reserva parcial.
+- Cerrar consume el snapshot reservado desde el ledger; anular antes libera y anular después compensa. Confirmación, cierre y anulación son idempotentes.
+- El motor directo de Fase 4 permanece como `Compatibilidad directa` explícita: una línea pertenece a un solo motor y la disponibilidad de ambos descuenta todas las reservas activas.
+- Una falla física inesperada al cerrar no impide el cierre comercial: deja reservas en error y una alerta auditable. No se activó Fudo ni se tocaron recetas heredadas, repartos, caja o pagos.
+- Migración instalada: `20261021193322_p4_lama_recetas_manuales`. Las tablas neutrales siguen vacías; antes de una prueba manual deben crearse Productos de venta listos y sus recetas desde el Panel.
 
 ### Resultado P3 — catálogo comercial neutral y recetas manuales
 
@@ -64,8 +73,8 @@ INVENTARIO POR ÁREAS
 │
 ├── D. Consumo por ventas                                          [EN CURSO]
 │   ├── D0. Lama directo: fuente, reserva y consumo ledger        [x]
-│   ├── D1. Lama: receta + área de producción                     [ ]
-│   ├── D2. Alertas de receta/área ambigua                         [ ]
+│   ├── D1. Lama: receta + área de producción                     [x]
+│   ├── D2. Alertas de receta/área ambigua                         [x]
 │   └── D3. Fudo como adaptador compatible                         [ ]
 │
 └── E. Experiencia y despliegue                                    [POSTERIOR]
@@ -149,9 +158,9 @@ La Fase 3 quedó completada el 20 de octubre de 2026. La urgencia pertenece a un
 
 La Fase 4 quedó completada el 20 de octubre de 2026. Cada producto vendido directamente necesita una fuente explícita producto–área; el disponible es el saldo físico del ledger menos reservas activas. Confirmar comanda reserva atómicamente, cerrar consume una sola vez y anular libera o compensa. Una falla física inesperada no bloquea el cierre comercial: deja alerta auditable. Mesas es visible en teléfono para propietario raíz y cuentas con `puede_lama`; el permiso sigue siendo obligatorio.
 
-## Siguiente nodo del contrato: Fase 5 — recetas y combos multiárea
+## Siguiente nodo del Panel: P7A — respaldo y reinicio controlado
 
-PENDIENTE de activación específica. Debe resolver componentes, cantidades y ubicaciones autorizadas por receta sin inferir destinos ni descontar dos veces. B3 continúa siendo una tarea separada pendiente de activación.
+PENDIENTE de activación específica. P4 ya resolvió recetas y combos multiárea para Mesas. P7A debe respaldar, ensayar restauración y reiniciar únicamente datos operativos antes del laboratorio Brunetti. P5, el adaptador Fudo hacia el mismo motor de recetas, continúa pendiente para después del laboratorio. B3 continúa siendo una tarea separada pendiente de activación.
 
 ## Invariantes: no romper
 
