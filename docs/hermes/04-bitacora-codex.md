@@ -31,6 +31,10 @@ En modo oscuro, conservar el mismo carácter con fondo `#101512`, panel lateral 
 - Mantener separaciones generosas pero eficientes; reducir ruido y repetición. En teléfono priorizar controles táctiles cómodos sin desperdiciar ancho.
 - Las líneas divisorias, cuando sean imprescindibles para separar campos o datos, deben ser finas y de bajo contraste; no decorar cada tarjeta con borde.
 - Respetar `prefers-reduced-motion`; la respuesta visual debe ser sutil, no necesaria para entender el estado.
+- Las cantidades editables se muestran en controles compactos casi cuadrados, con radio de 10–12 px; no usar píldoras, marcos negros ni esquinas filosas.
+- El historial que crece con el tiempo debe vivir plegado o en una vista secundaria. Nunca debe empujar la operación diaria varios pliegues hacia abajo.
+- La paleta clara u oscura se aplica antes de la primera pintura del navegador. No se acepta un destello de la interfaz anterior durante la carga.
+- Una ventana operativa prioriza nombre, campos y acción. Los datos técnicos de auditoría pueden conservarse en la lógica, pero no deben convertirse en párrafos explicativos dentro del formulario.
 
 ### Dibujo e iconografía
 
@@ -47,6 +51,32 @@ El cajón actual conserva las rutas y etiquetas accesibles y tiene ancho máximo
 3. **Riel angosto solo de iconos**: compacto, pero menos descubrible y más propenso a confusiones; usarlo solo con iconos inequívocos, `aria-label`, ayuda al enfocar y prueba con usuarios.
 
 La recomendación es prototipar la opción 1 antes de reemplazar la navegación; esta nota no cambia la navegación actual. La ruta Mesas ya aparece en el menú móvil para cuentas con `puede_lama` y sedes habilitadas. El permiso y las restricciones por sede siguen siendo la autoridad: no se habilita Mesas a cuentas no autorizadas desde CSS o por defecto.
+
+## 2026-10-23 — Corrección visual transversal: Ajustes, Productos y recepciones por área
+
+### Plan ejecutado
+
+1. Se fijó la identidad Lápiz y papel antes de la primera pintura para eliminar el destello de colores antiguos al abrir Local 1.
+2. Se corrigieron contraste y composición de Ajustes, primero Áreas de inventario y luego Secciones y turnos, sin cambiar sus RPC ni permisos.
+3. Se incorporó `productos` al encabezado visual compartido y se rehízo su hoja de estilos con los tokens oficiales para impedir que vuelva a la estética anterior al navegar.
+4. Se simplificó la ficha de producto del área: desaparecen el resumen técnico, el texto de conteo, el motivo visible y la nota de urgencia. El motivo auditado continúa enviándose internamente con su valor seguro predeterminado.
+5. Bodega → Enviar usa menos texto, resultados sin identificadores técnicos, cantidades rectangulares y una acción de quitar compacta.
+6. Las recepciones del área se presentan como lista: nombre, cantidad preparada, confirmación de llegada, cantidad recibida y X para marcar cantidad cero. El historial cerrado queda plegado y muestra como máximo los ocho registros más recientes al abrirlo.
+7. Se verificaron escritorio y 390×844, modo claro/oscuro, teclado, modales, navegación, ausencia de desbordes y conservación de RPC protegidas.
+
+### Límites funcionales respetados
+
+- La X no borra un ítem ni escribe de inmediato: cambia la cantidad recibida a cero y la confirmación final conserva `reparto_area_recibir`, su referencia idempotente y el motivo auditado.
+- La fecha de vencimiento heredada del lote de Bodega se muestra en la lista. La RPC vigente solo recibe `item_id` y `cantidad_recibida`; por eso esta pasada no inventa un selector que no podría persistir una fecha nueva. Añadir o corregir vencimiento al recibir requiere una decisión de contrato y backend.
+- No se cambió arquitectura, esquema, stock, Fudo, Lama, reglas comerciales, permisos ni restricciones por sede. No se habilitó ninguna merma pausada.
+
+### Archivos y comprobaciones
+
+- Aplicación: `index.html`, `identity-modules.css`, `panel-productos.css`.
+- Pruebas ajustadas/ampliadas: `pruebas/identidad-modulos.mjs`, `pruebas/inventario-areas.mjs`, `pruebas/fase2-repartos-area.mjs`.
+- Cobertura nueva: contraste de Ajustes, filas sin solapamiento, identidad persistente de Productos, recepción compacta, historial plegado, X sin escritura inmediata, modal simplificado, desktop y teléfono.
+- Pasaron las pruebas dirigidas `identidad-modulos`, `inventario-areas`, `fase1-ajuste-stock`, `fase2-repartos-area`, `panel-productos`, `movil-navegacion` y `pantalla-sana`, además de `git diff --check`. La suite global todavía se detiene en dos fixtures históricos ajenos a esta pasada: `ajustes-navegacion` espera el permiso antiguo desde `app_permisos` en lugar de la RPC vigente, y `estetica-no-rompio-nada` intenta usar el buscador antes de entrar a un área desde la portada. Ninguno alcanza ni contradice los flujos modificados; no se maquillaron esos fixtures dentro de un cambio visual.
+- Los dos directorios de prototipos locales no rastreados permanecieron intactos y fuera de la publicación.
 
 ## 2026-10-21 — P4: Mesas consume recetas manuales multiárea
 

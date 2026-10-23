@@ -169,6 +169,7 @@ await page.evaluate(()=>{PERMISOS.puede_editar=false;renderAreaLista()});
 
 await page.click('#tabInv');
 await page.click('[data-area-open="cafeteria"]');
+await page.evaluate(()=>{PERMISOS.puede_editar=true;renderAreaLista()});
 await page.fill('#q','leche');
 await page.waitForTimeout(30);
 await check('buscar leche en Cafetería aísla la lectura a esa ubicación',async()=>{
@@ -179,16 +180,48 @@ await check('buscar leche en Cafetería aísla la lectura a esa ubicación',asyn
     &&(await leche.locator('.area-unit').innerText())==='L'
     &&!t.includes('Azúcar blanca')&&!t.includes('999');
 });
+await page.evaluate(()=>{
+  REPARTOS_AREA=[
+    {id:'rep-abierto',estado:'enviado',nombre:'Reposición cafetería',creado_at:new Date().toISOString(),items:[
+      {id:'item-1',producto:'Salsa de caramelo',cantidad_preparada:2,vencimiento:'2026-12-10'},
+      {id:'item-2',producto:'Azúcar blanca',cantidad_preparada:4,vencimiento:null}
+    ]},
+    {id:'rep-cerrado',estado:'recibido',nombre:'Reparto anterior',resultado:{total_recibido:3,total_ajustado:0}}
+  ];
+  pintarRepartosArea();
+});
+await check('recepción usa lista compacta e historial plegado',async()=>page.evaluate(()=>
+  document.querySelectorAll('.f2-receipt-line').length===2&&
+  !document.querySelector('.f2-history').open&&
+  !document.getElementById('areaRepartos').textContent.includes('Solo envíos destinados a')&&
+  document.documentElement.scrollWidth<=innerWidth));
+if(process.env.CAPTURE_AREAS_SCREENSHOT)await page.screenshot({path:'/tmp/llamita-recepcion-area-escritorio.png',fullPage:true});
+await page.setViewportSize({width:390,height:844});
+await page.waitForTimeout(120);
+await check('recepción conserva acciones legibles en teléfono',async()=>page.evaluate(()=>{
+  const acciones=document.querySelector('.f2-receipt-actions');
+  return acciones&&acciones.getBoundingClientRect().right<=innerWidth&&document.documentElement.scrollWidth<=innerWidth;
+}));
+if(process.env.CAPTURE_AREAS_SCREENSHOT)await page.screenshot({path:'/tmp/llamita-recepcion-area-telefono.png'});
+await page.setViewportSize({width:1280,height:900});
+await page.click('[data-f2-rechazar="item-2"]');
+await check('la X marca cero sin cerrar ni escribir el reparto',async()=>page.evaluate(()=>
+  document.querySelector('[data-f2-recibida="item-2"]').value==='0'&&
+  document.querySelector('[data-f2-item="item-2"]').classList.contains('is-rejected')&&
+  !window.__rpcArgs.some(x=>x.name==='reparto_area_recibir')));
 await page.locator('#list .row[data-row="1"] [data-open]').click();
 await page.waitForSelector('#m-ajuste-panel:not([hidden])');
-await check('ficha de área ofrece conteo decimal con saldo y motivo inicial',async()=>
-  await page.locator('#m-ajuste-lineas').innerText().then(t=>t.includes('Saldo actual: 3'))
+await check('ficha de área ofrece cantidad decimal sin texto técnico ni motivo visible',async()=>
+  await page.locator('#m-ajuste-lineas').innerText().then(t=>t.trim()==='Cantidad')
   &&await page.locator('#m-ajuste-motivo').inputValue()==='Conteo/corrección manual'
+  &&await page.locator('#m-ajuste-motivo').isHidden()
+  &&await page.locator('#m-area-ficha-resumen').isHidden()
   &&await page.locator('#m-ajuste-lineas input').getAttribute('step')==='any'
   &&await page.locator('#m-stock').isDisabled());
+if(process.env.CAPTURE_AREAS_SCREENSHOT)await page.screenshot({path:'/tmp/llamita-producto-modal-simplificado.png'});
 await page.locator('#m-ajuste-lineas input[data-ajuste-clave="sin_lote"]').fill('3.25');
 await page.locator('#m-ajuste-guardar').click();
-await page.waitForSelector('#overlay:not(.open)');
+await page.waitForFunction(()=>!document.getElementById('overlay').classList.contains('open'));
 await check('guardar usa la RPC protegida con ubicación, decimal y no hace DML directo',async()=>{
   const llamada=await page.evaluate(()=>window.__rpcArgs.findLast(x=>x.name==='stock_ajuste_guardar'));
   return llamada?.args?.p_producto_id===1&&llamada.args.p_ubicacion_id==='loc-cafeteria'
@@ -222,8 +255,9 @@ await check('Bodega conserva la lista de Inventario y su saldo actual',async()=>
   && !(await page.locator('#areaNav').isVisible()));
 await page.locator('#list [data-open="3"]').click();
 await page.waitForSelector('#m-ajuste-panel:not([hidden])');
-await check('Bodega muestra su conteo del ledger y mantiene bloqueado el campo legacy',async()=>
-  (await page.locator('#m-ajuste-lineas').innerText()).includes('Saldo actual: 17')
+await check('Bodega muestra la cantidad del ledger sin texto técnico y bloquea el campo legacy',async()=>
+  (await page.locator('#m-ajuste-lineas').innerText()).trim()==='Cantidad'
+  &&(await page.locator('#m-ajuste-lineas input').inputValue())==='17'
   &&await page.locator('#m-stock').isDisabled()
   &&(await page.evaluate(()=>window.__rpcArgs.findLast(x=>x.name==='stock_ajuste_desglose_leer').args.p_ubicacion_id))===null);
 await check('sin errores de JavaScript en navegador',async()=>errors.length===0||errors.join('; '));

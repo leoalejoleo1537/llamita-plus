@@ -65,7 +65,7 @@ await page.evaluate(()=>pickTab('inv'));
 await verificar(()=>page.evaluate(()=>Math.abs(document.querySelector('.tabs').getBoundingClientRect().width-208)<1),
   'Inventario usa un riel de 208 px en escritorio');
 for(const [ruta,titulo] of Object.entries({
-  lama:'Mesas',arqueo:'Arqueo',movcaja:'Movimientos de caja',reparto:'Reparto',
+  lama:'Mesas',arqueo:'Arqueo',movcaja:'Movimientos de caja',productos:'Panel de productos',reparto:'Reparto',
   recetas:'Recetas',hist:'Historial',mermas:'Mermas',ajustes:'Ajustes'
 })){
   await page.evaluate(r=>pickTab(r),ruta);
@@ -78,6 +78,34 @@ for(const [ruta,titulo] of Object.entries({
     `${ruta}: riel conserva el mismo ancho que Inventario`);
   if(capturas)await page.screenshot({path:join(capturas,`${ruta}-escritorio.png`)});
 }
+await page.evaluate(()=>{
+  PERMISOS.puede_ajustes=true;
+  AJ_AREAS=[
+    {id:'area-cafe',nombre:'Cafetería',estado:'activa',orden:10,productos_preferidos:12,unidades:34,ubicacion_activa:true},
+    {id:'area-barra',nombre:'Barra',estado:'activa',orden:20,productos_preferidos:8,unidades:11,ubicacion_activa:true}
+  ];
+  AJ_AREA_SEC_AREA='area-cafe';
+  AJ_AREA_SEC_FILAS=[
+    {id:'sec-1',nombre:'Refrigerador',estado:'activa',orden:10,turno:'am',productos_configurados:5},
+    {id:'sec-2',nombre:'Vitrina',estado:'activa',orden:20,turno:'pm',productos_configurados:7}
+  ];
+  pickTab('ajustes');ajActual='areas';pintarAjustes();
+});
+await verificar(()=>page.evaluate(()=>{
+  const titulo=document.querySelector('#view-ajustes .aj-cab h2'),fila=document.querySelector('.area-admin-row');
+  return titulo&&getComputedStyle(titulo).color===getComputedStyle(document.body).color&&
+    fila&&fila.getBoundingClientRect().right<=innerWidth&&document.documentElement.scrollWidth<=innerWidth+2;
+}),'Ajustes conserva contraste y alinea Áreas de inventario');
+await page.evaluate(()=>{ajActual='secciones';pintarAjustes()});
+await verificar(()=>page.evaluate(()=>{
+  const fila=document.querySelector('.area-section-admin-row');
+  return fila&&fila.getBoundingClientRect().right<=innerWidth&&document.documentElement.scrollWidth<=innerWidth+2;
+}),'Secciones y turnos no superpone campos en escritorio');
+if(capturas)await page.screenshot({path:join(capturas,'ajustes-secciones-escritorio.png')});
+await page.evaluate(()=>pickTab('productos'));
+await verificar(()=>page.evaluate(()=>document.body.classList.contains('ux-module-active')&&
+  document.getElementById('uxModuleTitle').textContent==='Panel de productos'),
+  'Productos conserva la identidad al volver a entrar');
 await page.evaluate(()=>pickTab('movcaja'));
 await page.waitForTimeout(180);
 await page.evaluate(()=>{
@@ -256,6 +284,23 @@ for(const ruta of ['inv','recepcion','envios','enlaces']){
     `Bodega ${ruta}: sin desborde horizontal en teléfono`);
   if(capturas)await page.screenshot({path:join(capturas,`bodega-${ruta}-telefono.png`)});
 }
+await page.click('#uxBodegaTabs [data-ux-tab="envios"]');
+await page.waitForTimeout(80);
+await page.evaluate(()=>{
+  F2_RESULTADOS=[{producto:'Salsa de caramelo',producto_bodega_id:2,producto_plaza_id:7,configurado_en_area:true,
+    buckets:[{etiqueta:'Lote 10/12',cantidad:8,lote_id:4,vencimiento:'2026-12-10'}]}];
+  F2_CARRITO=[{producto:'Azúcar blanca',producto_bodega_id:3,producto_plaza_id:8,etiqueta:'Sin lote',disponible:12,cantidad:4}];
+  F2_CARRITO_AREA='area-cafe';f2PintarResultados();f2PintarCarrito();
+});
+await verificar(()=>page.evaluate(()=>{
+  const texto=document.getElementById('f2-resultados').textContent,qty=document.querySelector('#f2-lineas .f2-qty');
+  const activas=[...document.querySelectorAll('#uxBodegaTabs button.active')].map(b=>b.dataset.uxTab);
+  const enviar=document.querySelector('#uxBodegaTabs [data-ux-tab="envios"]'),enlaces=document.querySelector('#uxBodegaTabs [data-ux-tab="enlaces"]');
+  return activas.length===1&&activas[0]==='envios'&&getComputedStyle(enviar).backgroundColor!==getComputedStyle(enlaces).backgroundColor&&
+    !texto.includes('Bodega #')&&qty&&getComputedStyle(qty).borderRadius==='12px'&&
+    document.documentElement.scrollWidth<=innerWidth+2;
+}),'Bodega Enviar evita identificadores técnicos y cantidades en píldora');
+if(capturas)await page.screenshot({path:join(capturas,'bodega-envios-lista-telefono.png')});
 await page.click('#uxThemeToggle');
 await page.waitForTimeout(250);
 await verificar(()=>page.evaluate(()=>document.body.classList.contains('identidad-oscura')&&

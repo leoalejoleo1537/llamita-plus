@@ -27,7 +27,10 @@ for(const rpc of ['areas_operativas_listar','reparto_area_catalogo_buscar','repa
   assert.ok(ui.includes(`'${rpc}'`),`la interfaz usa ${rpc}`);
 assert.match(html,/id="f2-area"/,'selector dinámico de área en Bodega');
 assert.match(html,/id="areaRepartos"/,'bandeja dentro del área');
-assert.match(ui,/Solo envíos destinados a/,'la bandeja identifica el área destino');
+assert.doesNotMatch(ui,/Solo envíos destinados a/,'la bandeja evita texto redundante del área destino');
+assert.match(ui,/data-f2-rechazar=/,'cada producto permite marcar que no llegó');
+assert.match(ui,/input\.value='0'/,'rechazar conserva el flujo auditado con cantidad cero');
+assert.match(ui,/<details class="f2-history">/,'el historial cerrado permanece plegado');
 assert.match(ui,/step="any"/,'preparación y recepción aceptan decimales');
 assert.match(ui,/min="0" step="any"/,'recepción permite cero y rechaza negativos');
 assert.doesNotMatch(ui,/\.from\(['"](?:repartos|reparto_items|stock_internal)/,'sin DML directo desde navegador');
