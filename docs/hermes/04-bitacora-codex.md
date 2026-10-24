@@ -958,6 +958,6 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 
 - Implementados acceso móvil real a Mesas, guard global de rueda numérica, costo editable, secciones en contexto, ficha atómica organización+conteo, sección auditable en repartos y candidatos pendientes en recetas.
 - Migraciones instaladas exclusivamente en Llamita Plus: `20261023152940`, `20261023204230`, `20261023204300`, `20261023204333`.
-- SQL con `ROLLBACK`, `npm test`, Chromium real móvil/escritorio y `git diff --check` aprobados. Conteos pre/post idénticos: productos 1.438; ledger 9.337,7; lotes 42; movimientos ledger 424; repartos área 5; recetas 396; Fudo movimientos 15.357. Cero sintéticos.
+- SQL con `ROLLBACK` (incluida repetición E2E de P4: receta multiárea, reserva, consumo y reversa), `npm test`, Chromium real móvil/escritorio y `git diff --check` aprobados. Conteos pre/post idénticos: productos 1.438; ledger 9.337,7; lotes 42; movimientos ledger 424; repartos área 5; recetas 396; Fudo movimientos 15.357. Cero sintéticos del circuito.
 - AM/PM fue retirado de UI, RPC y columnas de `area_secciones`/`secciones`; sus valores previos tienen respaldo interno versionado. Informe: `docs/hermes/38-circuito-mocachino-e2e.md`.
 - No se accedió a Café del Desierto / Llamita Stock ni se tocó Fudo remoto, caja, pagos o recetas heredadas.

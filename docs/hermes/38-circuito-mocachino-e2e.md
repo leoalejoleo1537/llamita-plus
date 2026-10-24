@@ -29,6 +29,7 @@ Fecha: 2026-10-23. Estado: **IMPLEMENTADA CON LÍMITE DOCUMENTADO**.
 - `npm test`: aprobado.
 - Chromium real: aprobado en 390×844, 667×375 y 1280×800; Mesas se abrió pulsando el acceso móvil visible, se verificaron permisos, barra estable, Panel en móvil/escritorio y ausencia de errores JavaScript.
 - SQL transaccional `sql/2026-10-circuito-mocachino-pruebas.sql`: aprobado con `ROLLBACK`; idempotencia, rechazo de referencia distinta y creación de sección.
+- E2E transaccional P4 repetido después de las migraciones: receta manual simple y multiárea, reserva, consumo, reversa, atomicidad y permisos aprobados; terminó en `ROLLBACK`.
 - `git diff --check`: aprobado.
 - Pre/post idénticos: 1.438 productos; ledger 9.337,7; 42 lotes; 424 movimientos ledger; 5 repartos de área; 396 recetas; 15.357 movimientos Fudo. Cero filas `ZZ_MOCACHINO_E2E` y cero operaciones de ficha persistentes.
 - Advisors: las RPC nuevas usan `SECURITY DEFINER`, `search_path=''`, ACL solo `authenticated`; RLS sin políticas en la tabla interna es intencional. Se añadieron índices de sus FKs. Persisten hallazgos históricos ajenos al bloque.
