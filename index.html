@@ -14188,7 +14188,9 @@ async function openModal(id){
     const tipos=[...new Set(DATA.map(tipoDe).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
     $('lista-tipos').innerHTML = tipos.map(t=>`<option value="${esc(t)}">`).join('');
   }
-  $('m-area-wrap').style.display=SEDE==='plaza'&&!fichaArea?'block':'none';
+  // En una ficha de área el contenedor sigue visible porque ahora aloja la
+  // sección física editable; solo se ocultan el selector de área y el resumen.
+  $('m-area-wrap').style.display=SEDE==='plaza'?'block':'none';
   $('m-area-selector-wrap').style.display=fichaArea?'none':'';
   $('m-area-fisica').style.display=fichaArea?'none':'block';
   $('m-area-ficha-resumen').hidden=true;
