@@ -954,3 +954,10 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - Conteos pre/post idénticos: 1.437 productos; stock global 15.438,00; ledger 9.316,70; 42 lotes; 431 movimientos legacy; 408 ledger; 0 transferencias; 396 recetas; 15.357 movimientos Fudo; 0 eventos Lama.
 - `npm test`, sintaxis JS, advisors, ACL/RPC y `git diff --check` pasaron. No había Chromium; procedimiento manual desktop/móvil documentado en el informe 29.
 - No se accedió a Café del Desierto / Llamita Stock. B3.2a.3 y B3.2b siguen pendientes.
+# 2026-10-23 — Corrección circuito Mocachino E2E
+
+- Implementados acceso móvil real a Mesas, guard global de rueda numérica, costo editable, secciones en contexto, ficha atómica organización+conteo, sección auditable en repartos y candidatos pendientes en recetas.
+- Migraciones instaladas exclusivamente en Llamita Plus: `20261023152940`, `20261023204230`, `20261023204300`, `20261023204333`.
+- SQL con `ROLLBACK`, `npm test`, Chromium real móvil/escritorio y `git diff --check` aprobados. Conteos pre/post idénticos: productos 1.438; ledger 9.337,7; lotes 42; movimientos ledger 424; repartos área 5; recetas 396; Fudo movimientos 15.357. Cero sintéticos.
+- AM/PM fue retirado de UI, RPC y columnas de `area_secciones`/`secciones`; sus valores previos tienen respaldo interno versionado. Informe: `docs/hermes/38-circuito-mocachino-e2e.md`.
+- No se accedió a Café del Desierto / Llamita Stock ni se tocó Fudo remoto, caja, pagos o recetas heredadas.

@@ -760,3 +760,6 @@ Ajustes incorporó “Áreas de inventario” para crear, renombrar, ordenar y a
 Las pruebas sintéticas se ejecutaron con `BEGIN ... ROLLBACK`. La primera detectó un grant de delegación faltante entre la RPC invoker y el helper privado; no persistió datos y se corrigió con una migración mínima. La repetición completa pasó y no dejó Heladería, productos ni asignaciones sintéticas. Conteos pre/post: 1.437 productos, 15.438,00 de proyección global, 9.316,70 en ledger migrado, 42 lotes, 431/408 movimientos legacy/ledger, 0 transferencias, 396 recetas, 15.357 movimientos Fudo y 0 eventos Lama.
 
 No se modificaron Edge Functions, Fudo remoto, Lama, caja, Bodega, recetas, lotes, transferencias ni `stock_transferir`. Informe: `docs/hermes/29-b3-2a-2-interfaz-dinamica-areas.md`. No se accedió a Café del Desierto / Llamita Stock.
+# Codex → Hermes · 2026-10-23 · Circuito Mocachino
+
+Implementación publicada con RPC atómica de ficha y ruta de sección en reparto. Sin cambios de stock o datos comerciales. Ver `docs/hermes/38-circuito-mocachino-e2e.md`. AM/PM salió del esquema y el respaldo interno permite una reversa exacta.

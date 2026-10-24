@@ -14,17 +14,18 @@ const guardado=html.slice(html.indexOf("$('m-guardar').addEventListener('click'"
 check('Las píldoras reutilizan los tipos existentes y los productos presentes en área/ledger',
   area.includes('AREA_ROWS.filter')&&area.includes('r.tipo')&&area.includes('data-area-tipo'));
 check('Las secciones de área usan los acordeones históricos y AM/PM es solo agrupación visual',
-  area.includes('class="sec')&&area.includes('class="sec-btn"')&&area.includes('AM · organización visual')&&area.includes('PM · organización visual')&&area.includes('data-secname="${esc(clave)}"'));
+  area.includes('class="sec')&&area.includes('class="sec-btn"')&&!area.includes('AM · organización visual')&&!area.includes('PM · organización visual')&&area.includes('data-secname="${esc(clave)}"'));
 check('Productos configurados con saldo cero aparecen identificados sin confundirse con existencias',
   area.includes('Configurado · sin existencias')&&area.includes('r.configurado||Number(r.cantidad)!==0'));
 check('Saldo de fila viene del ledger y queda no editable',
   area.includes('stock_actual:cantidad')&&area.includes('disabled title="Saldo de solo lectura: ledger por ubicación"')&&html.includes("sb.rpc('stock_leer_areas'"));
 check('La fila histórica abre el modal con el registro exacto de área',
   html.includes('data-area-code="${esc(r.area_codigo)}"')&&html.includes('AREA_ROWS.find(r=>String(r.producto_id)===String(info.dataset.open)&&r.area_codigo===info.dataset.areaCode)'));
-check('La ficha de área muestra ubicación, sección, límites, saldo y vencimientos sin controles de stock',
-  ficha.includes('m-area-ficha-resumen')&&ficha.includes('Saldo físico')&&ficha.includes('Sección física')&&ficha.includes('Vencimientos')&&ficha.includes("m-stock-field').style.display=fichaArea?'none'"));
-check('Guardar desde área solo usa la RPC de configuración, nunca saveFields ni productos.stock_actual',
-  guardado.indexOf("sb.rpc('producto_area_configuracion_guardar'")<guardado.indexOf('const nombre=')&&guardado.slice(0,guardado.indexOf('const nombre=')).includes("SEDE==='plaza'&&MODAL_AREA_ROW"));
+check('La ficha compacta de área conserva sección editable, límites y conteo auditado',
+  ficha.includes('m-area-seccion-wrap')&&ficha.includes("m-limits-fields').style.display=fichaArea?'flex':'none'")
+  &&ficha.includes('cargarDesgloseAjuste')&&ficha.includes("m-stock-field').style.display=fichaArea?'none'"));
+check('Guardar desde área usa la RPC atómica de ficha y nunca productos.stock_actual',
+  guardado.indexOf("sb.rpc('producto_area_ficha_guardar'")<guardado.indexOf('const nombre=')&&guardado.slice(0,guardado.indexOf('const nombre=')).includes("SEDE==='plaza'&&MODAL_AREA_ROW"));
 check('La vista no reintroduce editor de stock, mermas, lotes ni Fudo en la ficha de área',
   ficha.includes("$('m-mermar').style.display = fichaArea?'none':'flex'")&&ficha.includes("$('m-venc-field').style.display = conVenc&&!fichaArea ? 'block' : 'none'")&&ficha.includes("$('m-fudo').style.display=fichaArea?'none'"));
 check('El gesto legacy de reparto/merma no se activa sobre filas de Local 1',
@@ -54,7 +55,7 @@ check('Al entrar al área se abre la primera sección física para mostrar produ
   &&html.includes('openSecs.add(\'area:\'+areaActual+\':\'+primera.nombre)'));
 check('El panel de secciones reutiliza lectura y RPC protegida de creación; no hace DML directo ni escribe stock',
   html.includes("sb.rpc('area_seccion_crear'")&&html.includes("sb.rpc('area_secciones_listar'")
-  &&html.includes('p_turno:\'pm\'')&&!html.includes("sb.from('area_secciones').insert"));
+  &&html.includes("sb.rpc('area_seccion_crear'")&&!html.includes('p_turno:')&&!html.includes("sb.from('area_secciones').insert"));
 check('Producto nuevo usa el Panel único, conserva el área y no publica en Fudo ni crea receta',
   html.includes("abrirPanelProductos({origen:'area',areaCodigo:codigo,sugerido:consulta})")
   &&html.includes("abrirPanelProductos({origen:'area',areaCodigo:asignar.dataset.areaAssign})")

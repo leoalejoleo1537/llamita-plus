@@ -3813,7 +3813,7 @@
           <label>Grupo existente<select id="panel-grupo" required></select></label>
           <label>Costo de compra por unidad<input id="panel-costo" type="number" min="0" max="999999999999" step="0.000001" value="0" required></label>
         </div>
-        <label class="panel-check"><input id="panel-pendiente" type="checkbox" checked> Costo pendiente de completar (cero)</label>
+        <p class="panel-ayuda">Si todavía no conoces el costo, déjalo en cero. Podrás completarlo después.</p>
         <p class="panel-ayuda">Nombre, unidad y costo se guardan juntos en Bodega y sus representaciones enlazadas. Cambiar la unidad no convierte cantidades.</p>
         <label id="panel-representacion-label" hidden>Representación en Local 1<select id="panel-representacion"></select></label>
         <h3>Dónde estará configurado</h3>
@@ -3841,6 +3841,7 @@
         </div>
         <div class="panel-receta-cabecera"><div><h3>Receta manual</h3><p class="panel-ayuda">Cada ingrediente necesita cantidad y un área de origen explícita.</p></div><div class="panel-acciones"><button type="button" id="panel-venta-crear-insumo">Crear insumo</button><button type="button" id="panel-venta-agregar">Añadir ingrediente</button></div></div>
         <div id="panel-venta-componentes"></div>
+        <div id="panel-venta-pendientes"></div>
         <p id="panel-venta-sin-componentes" class="panel-vacio">El borrador todavía no tiene ingredientes.</p>
         <p class="panel-ayuda"><strong>Guardar aquí no mueve stock ni crea reservas.</strong> La conexión con Mesas y Fudo se hará en P4 y fases posteriores.</p>
         <div class="panel-acciones panel-guardar-venta"><button type="submit" id="panel-venta-borrador" value="borrador">Guardar borrador</button><button type="submit" id="panel-venta-listo" value="listo">Marcar lista</button></div>
@@ -4178,7 +4179,7 @@
       <div class="field" id="m-area-seccion-wrap">
         <label>Sección física dentro del área</label>
         <select id="m-area-seccion"></select>
-        <small style="display:block;color:var(--muted);margin-top:6px">AM/PM organiza visualmente el conteo. No divide ni mueve existencias.</small>
+        <button type="button" class="btn btn-outline btn-sm" id="m-area-seccion-crear" style="margin-top:8px">Crear sección física</button>
       </div>
       <div class="area-pref-box" id="m-area-fisica"><strong>Ubicación física actual</strong><span>Cargando saldo real…</span></div>
       <div class="area-ficha-resumen" id="m-area-ficha-resumen" hidden aria-hidden="true"></div>
@@ -4188,7 +4189,7 @@
       <p class="stock-adjustment-help" id="m-ajuste-resumen" hidden></p>
       <div class="stock-adjustment-caption" hidden><span>Lote</span><span>Cantidad</span></div>
       <div class="stock-adjustment-lines" id="m-ajuste-lineas"><div class="area-loading">Cargando saldo actual…</div></div>
-      <div class="field stock-adjustment-reason" hidden><label for="m-ajuste-motivo">Motivo</label><input id="m-ajuste-motivo" maxlength="240" value="Conteo/corrección manual" autocomplete="off"></div>
+      <div class="field stock-adjustment-reason" id="m-ajuste-motivo-wrap" hidden><label for="m-ajuste-motivo">Motivo</label><input id="m-ajuste-motivo" maxlength="240" value="Conteo/corrección manual" autocomplete="off"></div>
       <button type="button" class="btn btn-orange stock-adjustment-save" id="m-ajuste-guardar" disabled>Guardar cantidad</button>
       <p class="stock-adjustment-status" id="m-ajuste-estado" role="status" aria-live="polite"></p>
     </section>
@@ -4463,6 +4464,12 @@ const urgenteDe = p => !!p.urgente;
 const entraEnCritico = p => estado(p)==='critico' || urgenteDe(p);
 
 const $ = id => document.getElementById(id);
+// Evita cambios accidentales de cantidades/costos al desplazar la página.
+// El teclado y los controles explícitos del campo siguen disponibles.
+document.addEventListener('wheel',event=>{
+  const input=event.target instanceof Element?event.target.closest('input[type="number"]'):null;
+  if(input&&document.activeElement===input)event.preventDefault();
+},{capture:true,passive:false});
 const qEl=$('q'), listEl=$('list');
 let openSecs=new Set();   // secciones desplegadas
 
@@ -4556,15 +4563,15 @@ async function cargarSeccionesArea(areaId,incluirArchivadas=false){
   const filas=data||[]; AREA_SECCIONES.set(clave,filas); return filas;
 }
 function opcionesSeccionesAreaHTML(filas,valor){
-  return '<option value="">Sin sección</option>'+(filas||[]).filter(s=>s.estado==='activa').map(s=>
-    `<option value="${esc(s.id)}"${String(valor||'')===String(s.id)?' selected':''}>${esc(s.nombre)} · ${String(s.turno||'pm').toUpperCase()}</option>`).join('');
+  return '<option value="">Elige una sección</option>'+(filas||[]).filter(s=>s.estado==='activa').map(s=>
+    `<option value="${esc(s.id)}"${String(valor||'')===String(s.id)?' selected':''}>${esc(s.nombre)}</option>`).join('');
 }
 function pintarPanelSeccionesArea(){
   const lista=$('area-section-side-list');if(!lista)return;
   $('area-section-area-name').textContent=areaLabel(ASIGNAR_AREA_CODIGO);
   const activas=BODEGA_AREA_SECCIONES.filter(s=>s.estado==='activa');
-  lista.innerHTML=activas.length?activas.map(s=>`<button type="button" class="area-section-choice" data-area-section-choice="${esc(s.id)}" aria-pressed="${String(s.id)===String(BODEGA_AREA_SECCION_ID)}"><span>${esc(s.nombre)}</span><span>${String(s.turno||'pm').toUpperCase()}</span></button>`).join(''):'<div class="area-loading">Todavía no hay secciones en esta área.</div>';
-  $('area-section-add').style.display=PERMISOS.puede_ajustes?'grid':'none';
+  lista.innerHTML=activas.length?activas.map(s=>`<button type="button" class="area-section-choice" data-area-section-choice="${esc(s.id)}" aria-pressed="${String(s.id)===String(BODEGA_AREA_SECCION_ID)}"><span>${esc(s.nombre)}</span></button>`).join(''):'<div class="area-loading">Todavía no hay secciones en esta área.</div>';
+  $('area-section-add').style.display=PERMISOS.puede_editar?'grid':'none';
 }
 function abrirPanelSeccionesArea(){
   if(!ASIGNAR_AREA_CODIGO||!BODEGA_AREA_SELECCION)return;
@@ -4580,7 +4587,7 @@ function cerrarPanelSeccionesArea(){
   if($('overlay-area-producto')?.classList.contains('open'))setTimeout(()=>$('area-producto-detalle')?.querySelector('[data-area-section-open]')?.focus(),0);
 }
 async function crearSeccionDesdeArea(){
-  if(!PERMISOS.puede_ajustes){avisar('Se necesita acceso a Ajustes para crear secciones.');return;}
+  if(!PERMISOS.puede_editar){avisar('No tienes permiso para crear secciones.');return;}
   const nombre=$('area-section-new-name').value.trim(),areaId=areaIdPorCodigo(ASIGNAR_AREA_CODIGO);
   if(!nombre){$('area-section-new-name').focus();avisar('Escribe el nombre de la sección.');return;}
   if(!areaId){avisar('El área ya no está activa. No se hizo ningún cambio.');return;}
@@ -4588,7 +4595,7 @@ async function crearSeccionDesdeArea(){
   const btn=$('area-section-side').querySelector('[data-area-section-create]');
   btn.disabled=true;btn.textContent='Creando…';
   const {data,error}=await conReintento(()=>sb.rpc('area_seccion_crear',{
-    p_area_id:areaId,p_nombre:nombre,p_orden:orden,p_turno:'pm',p_codigo:null
+    p_area_id:areaId,p_nombre:nombre,p_orden:orden,p_codigo:null
   }));
   btn.disabled=false;btn.textContent='Crear sección';
   if(error){avisar(/23505|duplicad|existe/i.test(error.message||'')?'Ya existe una sección con ese nombre en esta área.':(error.message||'No se pudo crear la sección.'));return;}
@@ -4761,11 +4768,11 @@ function renderAreaLista(){
   const grupos=new Map();
   rows.forEach(r=>{
     const nombre=areaActual==='sin_asignar'?'Pendiente de distribución':r.configurado?(r.seccion_nombre||'Sin sección'):'Sin configurar';
-    const key=(r.seccion_id||nombre), turno=r.seccion_turno||'pm';
-    if(!grupos.has(key))grupos.set(key,{nombre,turno,orden:r.seccion_orden??2147483647,rows:[]});
+    const key=(r.seccion_id||nombre);
+    if(!grupos.has(key))grupos.set(key,{nombre,orden:r.seccion_orden??2147483647,rows:[]});
     grupos.get(key).rows.push(r);
   });
-  const orden=[...grupos.values()].sort((a,b)=>(Number(b.rows.some(r=>r.urgente_area))-Number(a.rows.some(r=>r.urgente_area)))||(a.turno===b.turno?0:a.turno==='am'?-1:1)||(a.orden-b.orden)||a.nombre.localeCompare(b.nombre,'es'));
+  const orden=[...grupos.values()].sort((a,b)=>(Number(b.rows.some(r=>r.urgente_area))-Number(a.rows.some(r=>r.urgente_area)))||(a.orden-b.orden)||a.nombre.localeCompare(b.nombre,'es'));
   const filtrando=!!q||!!tipoSel||!!filterState||!!areaFilterCard;
   if(!filtrando&&AREA_PRIMERA_SECCION_ABIERTA&&orden.length){
     const primera=orden[0];openSecs.add('area:'+areaActual+':'+primera.nombre);AREA_PRIMERA_SECCION_ABIERTA=false;
@@ -4785,8 +4792,7 @@ function renderAreaLista(){
       </button></div>${abierta?`<div class="sec-body">${filasHTML}</div>`:''}
     </div>`;
   };
-  const bloque=(turno,label)=>{const gs=orden.filter(g=>g.turno===turno);return gs.length?`<div class="area-turn-label">${label}</div>${gs.map(seccion).join('')}`:''};
-  const salida=tipoSel?orden.map(seccion).join(''):bloque('am','AM · organización visual')+bloque('pm','PM · organización visual');
+  const salida=orden.map(seccion).join('');
   const mostrarTarjetas=!global&&areaActual!=='sin_asignar';
   const tarjetas=mostrarTarjetas?`<div class="area-work-metrics" role="group" aria-label="Filtrar inventario por estado">
     ${[['criticos','Críticos',stats.criticos,'crit','Sin stock o bajo mínimo'],['sobre','Sobre-stock',stats.sobre,'sobre','Sobre el máximo'],['sin_limites','Sin límites',stats.sinDato,'','Revisar configuración'],['vencimientos','Vencimientos',stats.vencimientos,'venc','Vencidos o por vencer']].map(([id,label,n,clase,ayuda])=>`<button type="button" class="area-work-metric ${clase}" data-area-state="${id}" aria-pressed="${areaFilterCard===id}"><strong>${n}</strong><span class="area-work-metric-copy"><span>${label}</span><small>${ayuda}</small></span></button>`).join('')}
@@ -5312,7 +5318,7 @@ async function renombrarSeccion(actual, n){
   const vieja = secFila(actual);
   if(vieja){
     await sb.from('secciones').insert(
-      {sede:SEDE, nombre:limpio, turno:vieja.turno, orden:vieja.orden});
+      {sede:SEDE, nombre:limpio, orden:vieja.orden});
     await sb.from('secciones').delete().eq('sede',SEDE).eq('nombre',actual);
     await cargarSecciones();
   }
@@ -5379,6 +5385,7 @@ function tabDisponibleEnMovil(original){
   return !!original && !original.hidden && original.style.display!=='none';
 }
 const ICONOS_BARRA_MOVIL={
+  lama:'<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5h20v13H4z"/><path d="M7 8.5V6h14v2.5M8 13h4m4 0h4M8 17h4m4 0h4"/></svg>',
   inv:'<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 13.1 13.3 4.7a1 1 0 0 1 1.4 0l9.8 8.4"/><path d="M6.6 11.3v11.1c0 .7.5 1.2 1.2 1.2h4.1v-7.1h4.2v7.1h4.1c.7 0 1.2-.5 1.2-1.2V11.3"/><path d="m3 14.7 1.7-1.4m18.6 0 1.7 1.4"/></svg>',
   reparto:'<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4.2 8 9.8-4.3L23.8 8v12L14 24.4 4.2 20z"/><path d="m4.2 8 9.8 4.4L23.8 8M14 12.4v12M9 5.9l9.9 4.3M7.2 21.5l2 .9"/></svg>',
   mermas:'<svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7.9h18M10.1 5.3h7.8l1.2 2.6M7.4 8.3l1 14.5c.1.9.6 1.4 1.5 1.4h8.2c.9 0 1.4-.5 1.5-1.4l1-14.5M11.6 12.4v7.4M16.4 12.4v7.4"/><path d="M4.4 9.6h1.4"/></svg>'
@@ -5388,7 +5395,7 @@ function sincronizarNavegacionMovil(){
   if(!SEDE){nav.replaceChildren();delete nav.dataset.sede;return;}
   const candidatos=SEDE==='central'
     ? ['inv','recepcion','envios','mermas']
-    : ['inv','reparto','mermas'];
+    : ['lama','inv','reparto','mermas'];
   // Conservar los mismos botones entre vistas evita saltos de layout y foco.
   if(nav.dataset.sede!==SEDE){
     nav.replaceChildren();
@@ -5895,7 +5902,6 @@ const SEC_ORDEN=['Vitrina de tortas','Limpieza','Sándwiches','Mesones','Congela
 /* El inventario se cuenta en dos rondas: estas secciones las cuenta el turno
    de la mañana, el resto el de la tarde. Para mover una sección de turno,
    basta sacarla o agregarla a esta lista. */
-const SEC_AM=['Limpieza','Mesones','Té','Congelador','Mueble de mezclas','Mueble de bolsas','Mueble de caja'];
 
 /* LAS SECCIONES DE ESTA SEDE, leídas de la base. Las dos listas de arriba
    pasan a ser el valor de fábrica: si la tabla no existe todavía, o está
@@ -5913,10 +5919,6 @@ async function cargarSecciones(){
   if(ajActual === 'secciones' && vistaActual === 'ajustes') pintarAjustes();
 }
 const secFila = nom => SECCIONES.find(x=>normNombre(x.nombre)===normNombre(nom));
-const esAM = sec => {
-  const f = secFila(sec);
-  return f ? f.turno === 'am' : SEC_AM.some(s=>normNombre(s)===normNombre(sec));
-};
 /* Más chico va más arriba. Lo que no está en ninguna lista va al final, y
    entre iguales manda el alfabeto — igual que antes. */
 /* LA LISTA DE SECCIONES DE ESTA SEDE, Y HAY UNA SOLA.
@@ -12818,9 +12820,6 @@ function render(){
       ${abierta?`<div class="sec-body">${items.map(p=>rowHTML(p)).join('')}</div>`:''}
     </div>`;
   };
-  // dos rondas de conteo: mañana y tarde, separadas solo por el fondo gris
-  const bloque=(lbl,secs)=> secs.length
-    ? `<div class="turno"><div class="turno-lbl">${lbl}</div>${secs.map(secHTML).join('')}</div>` : '';
   const bloqueUrg = urgentes.length
     ? `<div class="turno turno-urg"><div class="turno-lbl">URGENTE</div>${urgentes.map(p=>rowHTML(p,true)).join('')}</div>`
     : '';
@@ -12829,9 +12828,7 @@ function render(){
   /* En BODEGA no hay turnos AM/PM: no se cuenta por turno, se cuenta la
      bodega entera. Separarla en dos bloques era una división prestada de los
      locales que ahí no significa nada. En Plaza y Angamos sigue igual. */
-  const cuerpo = (tipoSel || SEDE==='central')
-    ? bloqueUrg + orden.map(secHTML).join('')
-    : bloqueUrg + bloque('AM', orden.filter(esAM)) + bloque('PM', orden.filter(s=>!esAM(s)));
+  const cuerpo = bloqueUrg + orden.map(secHTML).join('');
   listEl.innerHTML = cuerpo || '<div class="empty">No hay productos que coincidan.</div>';
 }
 async function loadData(){
@@ -13387,7 +13384,7 @@ function renderDetalleProductoBodegaLegacy(){
     ${posibles.length?`<div class="area-product-results" style="margin-top:8px"><strong>Posibles fichas existentes, sin enlazar</strong>${botonesPosibles}</div>`:''}
     ${!yaConfiguradoMaestro&&!reps.length&&!seleccionada&&!BODEGA_AREA_CREAR_REP?`<button type="button" class="area-back" data-bodega-crear-rep>${posibles.length?'Ninguna ficha coincide; crear representación enlazada en Local 1':'Crear representación enlazada en Local 1'} · saldo cero</button>`:''}
     ${BODEGA_AREA_CREAR_REP&&nombreExactoLocal?'<p class="notice">Ya existe una ficha local con el mismo nombre. Selecciónala arriba; no se permite crear un duplicado exacto.</p>':''}
-    ${puedeConfigurar?`<div class="field"><label for="area-producto-seccion-legacy">Sección física</label><select id="area-producto-seccion-legacy"><option value="">Sin sección</option>${BODEGA_AREA_SECCIONES.filter(s=>s.estado==='activa').map(s=>`<option value="${esc(s.id)}">${esc(s.nombre)} · ${esc(String(s.turno||'pm').toUpperCase())}</option>`).join('')}</select></div>
+    ${puedeConfigurar?`<div class="field"><label for="area-producto-seccion-legacy">Sección física</label><select id="area-producto-seccion-legacy"><option value="">Elige una sección</option>${BODEGA_AREA_SECCIONES.filter(s=>s.estado==='activa').map(s=>`<option value="${esc(s.id)}">${esc(s.nombre)}</option>`).join('')}</select></div>
       <div style="display:flex;gap:8px"><div class="field" style="flex:1"><label for="area-producto-min-legacy">Mínimo del área</label><input id="area-producto-min-legacy" type="number" min="0" step="0.01" placeholder="Sin mínimo"></div>
       <div class="field" style="flex:1"><label for="area-producto-max-legacy">Máximo del área</label><input id="area-producto-max-legacy" type="number" min="0" step="0.01" placeholder="Sin máximo"></div></div>`:''}
     ${eleccion}<p class="notice">Este paso no mueve stock. No crea lotes, movimientos, recetas ni enlaces Fudo.</p>`;
@@ -13497,13 +13494,15 @@ async function guardarProductoEnArea(){
   const minEl=$('area-producto-min'),maxEl=$('area-producto-max');
   const min=minEl?.value===''||!minEl?null:Number(minEl.value), max=maxEl?.value===''||!maxEl?null:Number(maxEl.value);
   if(min!==null&&(!Number.isFinite(min)||min<0)||max!==null&&(!Number.isFinite(max)||max<0)||min!==null&&max!==null&&max<min){avisar('Revisa los mínimos y máximos del área.');return;}
+  const seccionId=$('area-producto-seccion')?.value||BODEGA_AREA_SECCION_ID||null;
+  if(areaId&&!seccionId){avisar('Elige o crea una sección física antes de agregar el producto.');return;}
   const btn=$('area-producto-guardar');btn.disabled=true;btn.textContent='Agregando producto…';
   const {data,error}=await conReintento(()=>sb.rpc('bodega_producto_area_agregar',{
     p_producto_bodega_id:p.producto_bodega_id,
     p_producto_plaza_id:BODEGA_AREA_CREAR_REP?null:Number(BODEGA_AREA_REP_ID),
     p_crear_representacion:BODEGA_AREA_CREAR_REP,
     p_area_id:areaId,
-    p_seccion_id:$('area-producto-seccion')?.value||BODEGA_AREA_SECCION_ID||null,
+    p_seccion_id:seccionId,
     p_stock_min:min,p_stock_max:max,
     p_es_principal:!AREA_ROWS.some(r=>String(r.producto_id)===String(BODEGA_AREA_REP_ID)&&r.es_principal),
     p_confirmar:true
@@ -14133,7 +14132,7 @@ function pintarLineasAjuste(desglose){
   $('m-ajuste-lineas').innerHTML=lineas.length?lineas.map(l=>{
     const clave=String(l.clave??(l.lote_id==null?'sin_lote':l.lote_id));
     const etiqueta=varias?(l.etiqueta||'Cantidad'):'Cantidad';
-    return `<div class="stock-adjustment-line"><label for="m-ajuste-${esc(clave)}">${esc(etiqueta)}</label><input id="m-ajuste-${esc(clave)}" type="number" min="0" step="any" inputmode="decimal" value="${esc(String(l.cantidad??0))}" data-ajuste-clave="${esc(clave)}" aria-label="${esc(etiqueta)}"></div>`;
+    return `<div class="stock-adjustment-line"><label for="m-ajuste-${esc(clave)}">${esc(etiqueta)}</label><input id="m-ajuste-${esc(clave)}" type="number" min="0" step="any" inputmode="decimal" value="${esc(String(l.cantidad??0))}" data-ajuste-clave="${esc(clave)}" data-ajuste-actual="${esc(String(l.cantidad??0))}" aria-label="${esc(etiqueta)}"></div>`;
   }).join(''):'<div class="area-loading">No hay líneas de stock para contar.</div>';
   $('m-ajuste-guardar').disabled=!PERMISOS.puede_editar||!lineas.length;
   $('m-ajuste-estado').textContent='';
@@ -14177,11 +14176,11 @@ async function openModal(id){
   $('m-perec').disabled=stockCortado; $('m-venc-single').disabled=stockCortado;
   $('m-min').value=configArea?(MODAL_AREA_ROW.stock_min??''):(modalProd.stock_min??'');
   $('m-max').value=configArea?(MODAL_AREA_ROW.stock_max??''):(modalProd.stock_max??'');
-  $('m-limits-fields').style.display=configArea?'flex':'none';
+  $('m-limits-fields').style.display=fichaArea?'flex':'none';
   $('m-min-label').textContent=configArea?'Mínimo en esta área':'Stock mínimo';
   $('m-max-label').textContent=configArea?'Máximo en esta área':'Stock máximo';
-  $('m-min').disabled=SEDE==='plaza'&&(!configArea||!MODAL_AREA_ROW?.configurado||!PERMISOS.puede_editar);
-  $('m-max').disabled=SEDE==='plaza'&&(!configArea||!MODAL_AREA_ROW?.configurado||!PERMISOS.puede_editar);
+  $('m-min').disabled=SEDE==='plaza'&&(!fichaArea||!PERMISOS.puede_editar);
+  $('m-max').disabled=SEDE==='plaza'&&(!fichaArea||!PERMISOS.puede_editar);
   $('m-tipo-row').style.display = hasTipo&&!fichaArea ? '' : 'none';
   if(hasTipo){
     $('m-tipo').value = modalProd.tipo ?? '';
@@ -14201,7 +14200,7 @@ async function openModal(id){
       ? `<option value="${esc(areaId)}">${esc(MODAL_AREA_ROW.area_nombre)}</option>`
       : '<option value="">Sin asignar</option>';
     $('m-area').disabled=true;
-    $('m-area-seccion-wrap').style.display=configArea?'block':'none';
+    $('m-area-seccion-wrap').style.display=fichaArea?'block':'none';
     $('m-area-seccion').disabled=true;
     $('m-area-seccion').innerHTML='<option>Cargando secciones…</option>';
     $('m-area-fisica').innerHTML='<strong>Ubicación física actual</strong><span>Cargando saldo real…</span>';
@@ -14222,7 +14221,7 @@ async function openModal(id){
         $('m-area-seccion').innerHTML='<option value="">No se pudieron leer las secciones</option>';
       }else{
         $('m-area-seccion').innerHTML=opcionesSeccionesAreaHTML(secciones.data,MODAL_AREA_ROW.seccion_id);
-        $('m-area-seccion').disabled=!PERMISOS.puede_editar||!MODAL_AREA_ROW.configurado;
+        $('m-area-seccion').disabled=!PERMISOS.puede_editar;
       }
     }
   }
@@ -14256,8 +14255,8 @@ async function openModal(id){
   $('m-eliminar').style.display=fichaArea?'none':(modoEdicion&&PERMISOS.puede_editar?'':'none');
   if(fichaArea){
     $('m-edicion').style.display='none';
-    $('m-guardar').textContent=configArea?'Guardar organización':'Solo lectura';
-    $('m-guardar').disabled=!configArea||!PERMISOS.puede_editar;
+    $('m-guardar').textContent='Guardar cambios';
+    $('m-guardar').disabled=!PERMISOS.puede_editar;
   }else{
     $('m-guardar').textContent='Guardar';
     $('m-guardar').disabled=false;
@@ -14266,7 +14265,10 @@ async function openModal(id){
   const puedeAjustar=!!PERMISOS.puede_editar&&(SEDE==='central'||(SEDE==='plaza'&&fichaArea&&!!ajusteUbicacion));
   $('m-ajuste-panel').hidden=!puedeAjustar;
   $('m-ajuste-panel').style.display=puedeAjustar?'':'none';
-  if(puedeAjustar) void cargarDesgloseAjuste(modalProd.id,ajusteUbicacion);
+  if(puedeAjustar) void cargarDesgloseAjuste(modalProd.id,ajusteUbicacion).then(()=>{
+    if(fichaArea){$('m-ajuste-guardar').style.display='none';$('m-ajuste-motivo-wrap').style.display='none';}
+    else {$('m-ajuste-guardar').style.display='';$('m-ajuste-motivo-wrap').style.display='';}
+  });
   $('overlay').classList.add('open');
 }
 
@@ -14375,23 +14377,48 @@ $('m-cancelar').addEventListener('click',closeModal);
 $('overlay').addEventListener('click',e=>{ if(e.target===$('overlay')) closeModal(); });
 $('m-menos').addEventListener('click',()=>{const i=$('m-stock');i.value=Math.max(0,(+i.value||0)-1);});
 $('m-mas').addEventListener('click',()=>{const i=$('m-stock');i.value=(+i.value||0)+1;});
+$('m-area-seccion-crear').addEventListener('click',async()=>{
+  if(!MODAL_AREA_ROW?.area_id||!PERMISOS.puede_editar)return;
+  const nombre=(await pedirTexto('Crear sección física','Nombre de la nueva sección','Ej: Refrigerador'))?.trim();
+  if(!nombre)return;
+  const actuales=await cargarSeccionesArea(MODAL_AREA_ROW.area_id,false);
+  const orden=actuales.reduce((m,s)=>Math.max(m,Number(s.orden)||0),0)+10;
+  const {data,error}=await conReintento(()=>sb.rpc('area_seccion_crear',{p_area_id:MODAL_AREA_ROW.area_id,p_nombre:nombre,p_orden:orden,p_codigo:null}));
+  if(error){avisar(error.message||'No se pudo crear la sección.');return;}
+  AREA_SECCIONES.clear();
+  const nuevas=await cargarSeccionesArea(MODAL_AREA_ROW.area_id,false);
+  $('m-area-seccion').innerHTML=opcionesSeccionesAreaHTML(nuevas,data);
+  $('m-area-seccion').value=String(data);
+  aviso('✓ Sección creada y seleccionada');
+});
 $('m-guardar').addEventListener('click',async()=>{
   if(!modalProd)return;
   if(SEDE==='plaza'&&MODAL_AREA_ROW){
-    if(!MODAL_AREA_ROW.area_id||!MODAL_AREA_ROW.configurado||!PERMISOS.puede_editar){avisar('Esta ficha es de solo lectura.');return;}
+    if(!MODAL_AREA_ROW.area_id||!PERMISOS.puede_editar){avisar('Esta ficha es de solo lectura.');return;}
     const numArea=el=>el.value===''?null:Number(el.value);
     const minArea=numArea($('m-min')),maxArea=numArea($('m-max'));
     if(minArea!=null&&(!Number.isFinite(minArea)||minArea<0)||maxArea!=null&&(!Number.isFinite(maxArea)||maxArea<0)||minArea!=null&&maxArea!=null&&maxArea<minArea){
       avisar('Revisa el mínimo y máximo del área.');return;
     }
-    const boton=$('m-guardar');boton.disabled=true;boton.textContent='Guardando organización…';
-    const {error}=await conReintento(()=>sb.rpc('producto_area_configuracion_guardar',{
-      p_producto_id:modalProd.id,p_area_id:MODAL_AREA_ROW.area_id,
-      p_seccion_id:$('m-area-seccion').value||null,p_stock_min:minArea,p_stock_max:maxArea,
-      p_es_principal:!!MODAL_AREA_ROW.es_principal,p_sede:'plaza'
+    const seccion=$('m-area-seccion').value;
+    if(!seccion){avisar('Elige una sección física para guardar el producto en esta área.');return;}
+    const conteos={};let cambioConteo=false;
+    for(const input of $('m-ajuste-lineas').querySelectorAll('[data-ajuste-clave]')){
+      const cantidad=Number(input.value),actual=Number(input.dataset.ajusteActual);
+      if(!Number.isFinite(cantidad)||cantidad<0){avisar('El stock contado debe ser igual o mayor que cero.');input.focus();return;}
+      conteos[input.dataset.ajusteClave]=cantidad;if(cantidad!==actual)cambioConteo=true;
+    }
+    const firma=JSON.stringify({producto:modalProd.id,area:MODAL_AREA_ROW.area_id,seccion,minArea,maxArea,conteos:cambioConteo?conteos:null});
+    if(!AJUSTE_UI_REFERENCIA||AJUSTE_UI_FIRMA!==firma){AJUSTE_UI_REFERENCIA=crypto.randomUUID();AJUSTE_UI_FIRMA=firma;}
+    const boton=$('m-guardar');boton.disabled=true;boton.textContent='Guardando…';
+    const {error}=await conReintento(()=>sb.rpc('producto_area_ficha_guardar',{
+      p_referencia:AJUSTE_UI_REFERENCIA,p_producto_id:modalProd.id,p_area_id:MODAL_AREA_ROW.area_id,
+      p_seccion_id:seccion,p_stock_min:minArea,p_stock_max:maxArea,
+      p_es_principal:!!MODAL_AREA_ROW.es_principal,p_conteos:cambioConteo?conteos:null,
+      p_motivo:'Conteo/corrección manual desde ficha'
     }));
-    if(error){boton.disabled=false;boton.textContent='Guardar organización';avisar(error.message||'No se pudo guardar la organización del área.');return;}
-    await loadData();closeModal();aviso('✓ Organización del área guardada. Ninguna existencia se movió.');return;
+    if(error){boton.disabled=false;boton.textContent='Guardar cambios';avisar(error.message||'No se pudieron guardar los cambios.');return;}
+    await loadData();closeModal();aviso(cambioConteo?'✓ Organización y conteo guardados en una sola operación':'✓ Organización guardada · stock intacto');return;
   }
   const nombre=$('m-producto').value.replace(/\s+/g,' ').trim();
   if(!nombre){ avisar('El producto necesita un nombre.'); $('m-producto').focus(); return; }
@@ -14686,9 +14713,9 @@ function f2PintarResultados(){
   const box=$('f2-resultados');if(!box)return;
   if(!F2_RESULTADOS.length){box.innerHTML=$('f2-q').value.trim().length>=2?'<div class="f2-empty">No hay productos enlazados con ese nombre.</div>':'';return;}
   box.innerHTML=F2_RESULTADOS.map((p,i)=>`<div class="f2-result" data-f2-result="${i}">
-    <div class="f2-main"><b>${esc(p.producto)}</b></div>
+    <div class="f2-main"><b>${esc(p.producto)}</b><div class="f2-sub">${p.ruta?esc(F2_AREAS.find(a=>String(a.id)===$('f2-area').value)?.nombre||'Área')+' → '+esc(p.ruta.seccion):'Falta configurar área y sección'}</div></div>
     <select data-f2-bucket aria-label="Lote de ${esc(p.producto)}">${(p.buckets||[]).map((b,j)=>`<option value="${j}">${esc(f2BucketTexto(b))}</option>`).join('')}</select>
-    <button type="button" class="btn btn-outline btn-sm" data-f2-add="${i}">Agregar</button>
+    <button type="button" class="btn btn-outline btn-sm" data-f2-add="${i}" ${p.ruta?'':'disabled'}>${p.ruta?'Agregar':'Configurar primero'}</button>
   </div>`).join('');
 }
 async function f2Buscar(){
@@ -14696,16 +14723,21 @@ async function f2Buscar(){
   if(q.length<2){F2_RESULTADOS=[];f2PintarResultados();return;}
   if(!area){$('f2-resultados').innerHTML='<div class="f2-empty">Elige primero el área destino.</div>';return;}
   $('f2-resultados').innerHTML='<div class="f2-empty">Buscando en Bodega…</div>';
-  const {data,error}=await sb.rpc('reparto_area_catalogo_buscar',{p_area_id:area,p_consulta:q});
+  const [{data,error},{data:rutas,error:rutasError}]=await Promise.all([
+    sb.rpc('reparto_area_catalogo_buscar',{p_area_id:area,p_consulta:q}),
+    sb.rpc('reparto_area_rutas_listar',{p_area_id:area})
+  ]);
   if(error){F2_RESULTADOS=[];$('f2-resultados').innerHTML=`<div class="f2-empty">${esc(error.message||'No se pudo buscar.')}</div>`;return;}
-  F2_RESULTADOS=data||[];f2PintarResultados();
+  if(rutasError){F2_RESULTADOS=[];$('f2-resultados').innerHTML=`<div class="f2-empty">${esc(rutasError.message||'No se pudo validar la sección destino.')}</div>`;return;}
+  const mapa=new Map((rutas?.configuraciones||[]).map(x=>[String(x.producto_id),x]));
+  F2_RESULTADOS=(data||[]).map(x=>({...x,ruta:mapa.get(String(x.producto_plaza_id))||null}));f2PintarResultados();
 }
 function f2PintarCarrito(){
   const box=$('f2-carrito');if(!box)return;
   if(!F2_CARRITO.length)F2_CARRITO_AREA=null;
   box.style.display=F2_CARRITO.length?'block':'none';
   $('f2-lineas').innerHTML=F2_CARRITO.map((x,i)=>`<div class="f2-line">
-    <div class="f2-main"><b>${esc(x.producto)}</b><div class="f2-sub">${esc(x.etiqueta)} · disponible ${fmt(x.disponible)}</div></div>
+    <div class="f2-main"><b>${esc(x.producto)}</b><div class="f2-sub">${esc(x.areaNombre)} → ${esc(x.seccion)} · ${esc(x.etiqueta)} · disponible ${fmt(x.disponible)}</div></div>
     <input class="f2-qty" type="number" min="0.000001" step="any" value="${x.cantidad}" data-f2-cant="${i}" aria-label="Cantidad de ${esc(x.producto)}">
     <button type="button" class="f2-remove" data-f2-quitar="${i}" aria-label="Quitar ${esc(x.producto)}">×</button>
   </div>`).join('');
@@ -14730,12 +14762,14 @@ function f2AgregarCandidato(p,b,area){
   F2_CARRITO_AREA=area;
   F2_CARRITO.push({producto_bodega_id:p.producto_bodega_id,producto_plaza_id:p.producto_plaza_id,
     producto:p.producto,lote_id:b.lote_id??null,vencimiento:b.vencimiento||null,etiqueta:b.etiqueta,
+    areaNombre:F2_AREAS.find(a=>String(a.id)===String(area))?.nombre||'Área',seccion:p.ruta?.seccion||'',
     disponible:Number(b.cantidad)||0,cantidad:1});
   f2PintarCarrito();return true;
 }
 $('f2-resultados').addEventListener('click',e=>{
   const bt=e.target.closest('[data-f2-add]');if(!bt)return;
   const p=F2_RESULTADOS[+bt.dataset.f2Add],row=bt.closest('[data-f2-result]');if(!p||!row)return;
+  if(!p.ruta){avisar('Configura primero una sección física activa para este producto en el área destino.');return;}
   const b=(p.buckets||[])[+row.querySelector('[data-f2-bucket]').value];if(!b)return;
   f2AgregarCandidato(p,b,$('f2-area').value);
 });
@@ -14782,7 +14816,7 @@ function pintarRepartosArea(){
     <div>${abiertos.length?abiertos.map(r=>`<div class="f2-rep" data-f2-recibir="${r.id}">
       <div class="f2-rep-title"><b>${esc(r.nombre||'Reparto de Bodega')}</b><span class="f2-tag">${new Date(r.creado_at).toLocaleString('es-CL')}</span></div>
       ${(r.items||[]).map(i=>`<div class="f2-receipt-line" data-f2-item="${i.id}">
-        <div class="f2-receipt-title"><b>${esc(i.producto)}</b><span>pidió ${fmt(i.cantidad_preparada)}</span></div>
+        <div class="f2-receipt-title"><b>${esc(i.producto)}</b><span>${esc(areaLabel(areaActual))} → ${esc(i.seccion_destino_nombre||'Sección histórica no informada')} · pidió ${fmt(i.cantidad_preparada)}</span></div>
         <div class="f2-receipt-actions">
           <button type="button" class="f2-arrived" data-f2-llego="${i.id}" data-f2-preparada="${esc(String(i.cantidad_preparada))}">✓ Llegó${i.vencimiento?' · vence '+fmtCorta(i.vencimiento):''}</button>
           <input class="f2-qty" type="number" min="0" step="any" value="${i.cantidad_preparada}" data-f2-recibida="${i.id}" aria-label="Cantidad recibida de ${esc(i.producto)}">
@@ -14797,11 +14831,15 @@ function pintarRepartosArea(){
 async function cargarRepartosArea(codigo=areaActual){
   const areaId=areaIdPorCodigo(codigo);if(!areaId){REPARTOS_AREA=[];REPARTOS_AREA_ID=null;pintarRepartosArea();return;}
   REPARTOS_AREA_CARGANDO=true;REPARTOS_AREA_ID=areaId;pintarRepartosArea();
-  const {data,error}=await sb.rpc('repartos_area_listar',{p_area_id:areaId,p_incluir_cerrados:true});
+  const [{data,error},{data:rutas}]=await Promise.all([
+    sb.rpc('repartos_area_listar',{p_area_id:areaId,p_incluir_cerrados:true}),
+    sb.rpc('reparto_area_rutas_listar',{p_area_id:areaId})
+  ]);
   if(REPARTOS_AREA_ID!==areaId)return;
   REPARTOS_AREA_CARGANDO=false;
   if(error){REPARTOS_AREA=[];$('areaRepartos').innerHTML=`<section class="f2-box"><div class="f2-head"><h3>Recepciones</h3></div><div class="f2-empty">${esc(error.message||'No se pudo cargar la bandeja.')}</div></section>`;return;}
-  REPARTOS_AREA=data||[];pintarRepartosArea();
+  const mapa=new Map((rutas?.lineas||[]).map(x=>[String(x.item_id),x]));
+  REPARTOS_AREA=(data||[]).map(r=>({...r,items:(r.items||[]).map(i=>({...i,seccion_destino_nombre:mapa.get(String(i.id))?.seccion||null}))}));pintarRepartosArea();
 }
 $('areaRepartos').addEventListener('click',async e=>{
   const rechazar=e.target.closest('[data-f2-rechazar]');
@@ -15621,7 +15659,7 @@ const AJUSTES = [
     render:()=>ajAreasHTML(),
     montar:()=>{ if(AJ_AREAS===null) ajUnaVez('areas',ajCargarAreas); } },
 
-  { id:'secciones', ico:'secciones', tit:'Secciones y turnos',
+  { id:'secciones', ico:'secciones', tit:'Secciones',
     sub:'Organiza dónde se cuenta cada producto.',
     render:()=>ajSeccionesHTML(),
     montar:()=>{
@@ -16597,17 +16635,16 @@ function ajAreaSeccionesHTML(){
   const filas=(AJ_AREA_SEC_FILAS||[]).map(s=>`<div class="area-section-admin-row ${s.estado==='archivada'?'archivada':''}" data-area-section-row="${esc(s.id)}">
     <div><label class="aj-nota">Nombre</label><input type="text" data-area-section-name value="${esc(s.nombre)}" maxlength="80" ${s.estado==='archivada'?'disabled':''}><div class="area-admin-meta">${s.productos_configurados} productos configurados${s.estado==='archivada'?' · archivada':''}</div></div>
     <div><label class="aj-nota">Orden</label><input type="number" min="0" step="1" data-area-section-order value="${s.orden}" ${s.estado==='archivada'?'disabled':''}></div>
-    <div><label class="aj-nota">Bloque</label><select data-area-section-turno ${s.estado==='archivada'?'disabled':''}><option value="am"${s.turno==='am'?' selected':''}>AM</option><option value="pm"${s.turno==='pm'?' selected':''}>PM</option></select></div>
     <div class="area-admin-actions">${s.estado==='activa'?`<button type="button" class="btn btn-outline btn-sm" data-area-section-save="${esc(s.id)}">Guardar</button><button type="button" class="btn btn-gris btn-sm" data-area-section-archive="${esc(s.id)}">Archivar</button>`:'<span class="aj-nota">Solo historial</span>'}</div>
   </div>`).join('');
-  return `<div class="aj-caja"><h3>Secciones</h3><p class="aj-nota">Organiza dónde encontrar cada producto.</p><div class="field"><label>Área</label><select data-area-sec-area>${opciones}</select></div>
-    <div class="area-admin-new area-section-admin-new"><div><label class="aj-nota">Nueva sección</label><input type="text" id="aj-area-sec-nombre" maxlength="80" placeholder="Ej: Refrigerador"></div><div><label class="aj-nota">Orden</label><input type="number" id="aj-area-sec-orden" min="0" value="${(AJ_AREA_SEC_FILAS||[]).reduce((m,s)=>Math.max(m,s.orden),0)+10}"></div><div><label class="aj-nota">Bloque visual</label><select id="aj-area-sec-turno"><option value="am">AM</option><option value="pm" selected>PM</option></select></div><button type="button" class="adm-btn" data-area-section-new>Crear</button></div>
+  return `<div class="aj-caja"><h3>Secciones</h3><p class="aj-nota">Organiza dónde encontrar cada producto; ninguna sección contiene stock.</p><div class="field"><label>Área</label><select data-area-sec-area>${opciones}</select></div>
+    <div class="area-admin-new area-section-admin-new"><div><label class="aj-nota">Nueva sección</label><input type="text" id="aj-area-sec-nombre" maxlength="80" placeholder="Ej: Refrigerador"></div><div><label class="aj-nota">Orden</label><input type="number" id="aj-area-sec-orden" min="0" value="${(AJ_AREA_SEC_FILAS||[]).reduce((m,s)=>Math.max(m,s.orden),0)+10}"></div><button type="button" class="adm-btn" data-area-section-new>Crear</button></div>
     <div class="area-section-admin">${filas||'<div class="aj-vacio">Esta área aún no tiene secciones físicas.</div>'}</div></div>`;
 }
 async function ajAreaSeccionCrear(){
   const nombre=$('aj-area-sec-nombre')?.value.trim();if(!nombre)return avisar('Escribe el nombre de la sección.');
   const {error}=await sb.rpc('area_seccion_crear',{p_area_id:AJ_AREA_SEC_AREA,p_nombre:nombre,
-    p_orden:Number($('aj-area-sec-orden').value||0),p_turno:$('aj-area-sec-turno').value,p_codigo:null});
+    p_orden:Number($('aj-area-sec-orden').value||0),p_codigo:null});
   if(error)return avisar(error.message||'No se pudo crear la sección.');
   AREA_SECCIONES.clear();AJ_AREA_SEC_FILAS=null;await ajCargarSeccionesOperativas();aviso('✓ Sección creada sin alterar existencias');
 }
@@ -16615,8 +16652,7 @@ async function ajAreaSeccionEditar(id){
   const row=document.querySelector(`[data-area-section-row="${id}"]`);if(!row)return;
   const {error}=await sb.rpc('area_seccion_editar',{p_seccion_id:id,
     p_nombre:row.querySelector('[data-area-section-name]').value.trim(),
-    p_orden:Number(row.querySelector('[data-area-section-order]').value||0),
-    p_turno:row.querySelector('[data-area-section-turno]').value});
+    p_orden:Number(row.querySelector('[data-area-section-order]').value||0)});
   if(error)return avisar(error.message||'No se pudo guardar la sección.');
   AREA_SECCIONES.clear();AJ_AREA_SEC_FILAS=null;await ajCargarSeccionesOperativas();await loadData();aviso('✓ Sección actualizada');
 }
@@ -16640,7 +16676,6 @@ function ajSeccionesHTML(){
 
   const filas = nombres.map((nom,i)=>{
     const n = cuenta(nom);
-    const am = esAM(nom);
     return `<div class="aj-sec">
       <div class="mov">
         <button type="button" class="fl" data-secsube="${esc(nom)}" ${i===0?'disabled':''}
@@ -16648,10 +16683,7 @@ function ajSeccionesHTML(){
         <button type="button" class="fl" data-secbaja="${esc(nom)}" ${i===nombres.length-1?'disabled':''}
           aria-label="Bajar ${esc(nom)}">▼</button>
       </div>
-      <div class="nm"><b>${esc(nom)}</b>
-        <span>${n} producto${n===1?'':'s'}${SEDE==='central' ? '' : ' · cuenta ' + (am?'en la mañana':'en la tarde')}</span></div>
-      ${SEDE==='central' ? '' : `<button type="button" class="aj-turno${am?' am':''}"
-        data-secturno="${esc(nom)}">${am?'AM':'PM'}</button>`}
+      <div class="nm"><b>${esc(nom)}</b><span>${n} producto${n===1?'':'s'}</span></div>
       <button type="button" class="quitar" data-secborrar="${esc(nom)}" data-n="${n}"
         aria-label="Borrar ${esc(nom)}">✕</button>
     </div>`;
@@ -16659,8 +16691,7 @@ function ajSeccionesHTML(){
 
   return `<div class="aj-caja">
       <h3>Las secciones de ${esc(SEDES[SEDE]?.label || 'esta sede')}</h3>
-      <p class="aj-nota">El orden es el que ves al contar${SEDE==='central' ? '' :
-        `, y la píldora dice qué turno la cuenta. <b>AM</b> es la mañana`}.
+      <p class="aj-nota">El orden es el que ves al contar.
         Una sección solo se puede borrar cuando no le queda ningún producto.</p>
       <div style="margin-top:12px">${filas || '<div class="aj-vacio">Esta sede todavía no tiene secciones.</div>'}</div>
     </div>
@@ -16712,8 +16743,8 @@ function ajRepintarMover(){
 /* GUARDAR UNA SECCIÓN. `upsert` porque puede no tener fila todavía: hasta
    hoy las secciones existían solo dentro de los productos. */
 async function ajGuardarSeccion(nombre, cambios){
-  const previa = secFila(nombre) || {sede:SEDE, nombre, turno: esAM(nombre)?'am':'pm', orden: secPeso(nombre)};
-  const fila = {sede:SEDE, nombre, turno:previa.turno, orden:previa.orden, ...cambios};
+  const previa = secFila(nombre) || {sede:SEDE, nombre, orden: secPeso(nombre)};
+  const fila = {sede:SEDE, nombre, orden:previa.orden, ...cambios};
   const {data,error} = await sb.from('secciones')
     .upsert(fila, {onConflict:'sede,nombre'}).select();
   if(error || !data || !data.length){
@@ -16736,10 +16767,7 @@ async function ajMoverSeccion(nombre, dir){
   const i = lista.indexOf(nombre), j = i + dir;
   if(i < 0 || j < 0 || j >= lista.length) return;
   lista.splice(j, 0, lista.splice(i, 1)[0]);
-  const filas = lista.map((nom, k)=>({
-    sede:SEDE, nombre:nom, orden:k,
-    turno: (secFila(nom)||{}).turno || (esAM(nom) ? 'am' : 'pm'),
-  }));
+  const filas = lista.map((nom, k)=>({sede:SEDE,nombre:nom,orden:k}));
   const {data,error} = await sb.from('secciones')
     .upsert(filas, {onConflict:'sede,nombre'}).select();
   if(error || !data || !data.length){
@@ -16752,15 +16780,6 @@ async function ajMoverSeccion(nombre, dir){
   render();
 }
 
-async function ajTurnoSeccion(nombre){
-  const am = esAM(nombre);
-  if(await ajGuardarSeccion(nombre, {turno: am ? 'pm' : 'am'})){
-    aviso(am ? 'Pasa a la tarde' : '✓ Pasa a la mañana');
-    pintarAjustes();
-    render();
-  }
-}
-
 async function ajCrearSeccion(){
   const inp = $('aj-sec-nueva');
   const nom = (inp.value||'').trim();
@@ -16769,7 +16788,7 @@ async function ajCrearSeccion(){
   if(existe){ avisar('Ya existe una sección con ese nombre en esta sede.'); return; }
   const orden = Math.max(0, ...SECCIONES.map(x=>x.orden||0)) + 1;
   const {data,error} = await sb.from('secciones')
-    .insert({sede:SEDE, nombre:nom, turno:'pm', orden}).select();
+    .insert({sede:SEDE, nombre:nom, orden}).select();
   if(error || !data || !data.length){
     avisar('No se pudo crear\n\n'
       + (error?.message || 'La base no dejó escribir. ¿Corriste "2026-08-secciones-y-fudo-desde-ajustes.sql"?'));
@@ -18507,8 +18526,6 @@ $('aj-pane').addEventListener('click', async e=>{
   if(ss){ ajMoverSeccion(ss.dataset.secsube, -1); return; }
   const sb2 = e.target.closest('[data-secbaja]');
   if(sb2){ ajMoverSeccion(sb2.dataset.secbaja, 1); return; }
-  const st = e.target.closest('[data-secturno]');
-  if(st){ ajTurnoSeccion(st.dataset.secturno); return; }
   const sx = e.target.closest('[data-secborrar]');
   if(sx){ ajBorrarSeccion(sx.dataset.secborrar, +sx.dataset.n); return; }
   const mc = e.target.closest('[data-metacerrar]');

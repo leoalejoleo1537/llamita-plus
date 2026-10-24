@@ -66,10 +66,6 @@ function panelCerrar(){
   ++PANEL.apertura; PANEL.ficha=null; PANEL.intento=null;
   $('panel-ficha').hidden=true; $('panel-lista').hidden=false; $('panel-busqueda').hidden=false;
 }
-function panelCosto(){
-  $('panel-costo').disabled=$('panel-pendiente').checked;
-  if($('panel-pendiente').checked)$('panel-costo').value='0';
-}
 async function panelAbrir(id=null){
   if(!panelPermitido()||PANEL.guardando)return;
   const apertura=++PANEL.apertura;
@@ -83,7 +79,7 @@ async function panelAbrir(id=null){
     $('panel-nombre').value=ficha?.producto||(PANEL.contexto?.sugerido||''); $('panel-unidad').value=ficha?.unidad||'';
     $('panel-grupo').innerHTML='<option value="">Elige un grupo existente</option>'+[...new Set([...PANEL.grupos,...(ficha?.rubro?[ficha.rubro]:[])])].map(g=>`<option>${esc(g)}</option>`).join('');
     $('panel-grupo').value=ficha?.rubro||''; $('panel-grupo').disabled=!!ficha;
-    $('panel-pendiente').checked=ficha?.costo_pendiente??true; $('panel-costo').value=ficha?.costo_compra??0; panelCosto();
+    $('panel-costo').disabled=false; $('panel-costo').value=ficha?.costo_compra??0;
     $('panel-ficha-titulo').textContent=ficha?'Editar insumo':'Nuevo insumo';
     $('panel-identidad').textContent=ficha?`Producto maestro #${ficha.id} · Bodega`:'Se creará un único producto maestro en Bodega.';
     const reps=(ficha?.representaciones||[]).filter(r=>r.activo==='SÍ');
@@ -105,7 +101,7 @@ async function panelAreas(apertura=PANEL.apertura){
     $('panel-areas').innerHTML=PANEL.areas.map((a,i)=>{
       const c=(PANEL.ficha?.configuraciones||[]).find(c=>String(c.area_id)===String(a.id)&&String(c.producto_id)===rep);
       const usar=!!c||String(areaContexto||'')===String(a.id);
-      return `<div class="panel-area" data-area="${esc(a.id)}"><label class="panel-check"><input type="checkbox" class="panel-area-usar"${usar?' checked':''}${c?' disabled':''}>${esc(a.nombre)}</label><div class="panel-area-config"${usar?'':' hidden'}><div class="panel-datos"><label>Sección física<select class="panel-seccion"><option value="">Sin sección</option>${(secciones[i]||[]).filter(s=>s.estado==='activa'||s.id===c?.seccion_id).map(s=>`<option value="${esc(s.id)}"${s.id===c?.seccion_id?' selected':''}>${esc(s.nombre)}</option>`).join('')}</select></label><label>Mínimo<input class="panel-min" type="number" min="0" step="any" value="${c?.stock_min??''}" placeholder="Sin límite"></label><label>Máximo<input class="panel-max" type="number" min="0" step="any" value="${c?.stock_max??''}" placeholder="Sin límite"></label></div><label class="panel-check"><input type="radio" name="panel-principal" value="${esc(a.id)}"${c?.es_principal||(!c&&usar)?' checked':''}>Área principal</label></div></div>`;
+      return `<div class="panel-area" data-area="${esc(a.id)}" data-area-nombre="${esc(a.nombre)}"><label class="panel-check"><input type="checkbox" class="panel-area-usar"${usar?' checked':''}${c?' disabled':''}>${esc(a.nombre)}</label><div class="panel-area-config"${usar?'':' hidden'}><div class="panel-datos"><label>Sección física<select class="panel-seccion"><option value="">Elige una sección</option>${(secciones[i]||[]).filter(s=>s.estado==='activa'||s.id===c?.seccion_id).map(s=>`<option value="${esc(s.id)}"${s.id===c?.seccion_id?' selected':''}>${esc(s.nombre)}</option>`).join('')}</select><button type="button" class="panel-crear-seccion" data-panel-crear-seccion>Crear sección física</button></label><label>Mínimo<input class="panel-min" type="number" min="0" step="any" value="${c?.stock_min??''}" placeholder="Sin límite"></label><label>Máximo<input class="panel-max" type="number" min="0" step="any" value="${c?.stock_max??''}" placeholder="Sin límite"></label></div><label class="panel-check"><input type="radio" name="panel-principal" value="${esc(a.id)}"${c?.es_principal||(!c&&usar)?' checked':''}>Área principal</label></div></div>`;
     }).join('')+'<label class="panel-check"><input type="radio" name="panel-principal" value=""'+((PANEL.ficha?.configuraciones||[]).some(c=>String(c.producto_id)===rep&&c.es_principal)||areaContexto?'':' checked')+'>Sin área principal</label>';
     $('panel-guardar').disabled=false;
   }catch(e){$('panel-areas').textContent='No se pudieron cargar las secciones. Cierra y vuelve a abrir la ficha.';$('panel-error').textContent=e.message;}
@@ -115,12 +111,33 @@ function panelDatos(){
     const numero=sel=>el.querySelector(sel).value===''?null:Number(el.querySelector(sel).value);
     const min=numero('.panel-min'),max=numero('.panel-max');
     if(min!==null&&max!==null&&min>max)throw Error('El mínimo no puede superar el máximo.');
-    return {area_id:el.dataset.area,seccion_id:el.querySelector('.panel-seccion').value||null,stock_min:min,stock_max:max,es_principal:el.querySelector('[type=radio]').checked};
+    const seccion=el.querySelector('.panel-seccion').value;
+    if(!seccion)throw Error(`Elige una sección física para ${el.dataset.areaNombre}.`);
+    return {area_id:el.dataset.area,seccion_id:seccion,stock_min:min,stock_max:max,es_principal:el.querySelector('[type=radio]').checked};
   });
   const rep=$('panel-representacion').value;
   if((areas.length||PANEL.contexto?.requiereRepresentacion)&&!$('panel-representacion-label').hidden&&!rep)throw Error('Elige explícitamente la representación de Local 1.');
   if(PANEL.contexto?.requiereArea&&!areas.length)throw Error('Elige al menos un área activa para usar este insumo en la receta.');
-  return {nombre:$('panel-nombre').value.trim(),unidad:$('panel-unidad').value.trim(),rubro:$('panel-grupo').value,costo_compra:Number($('panel-costo').value),costo_pendiente:$('panel-pendiente').checked,representacion_id:rep?Number(rep):null,crear_representacion:!!PANEL.contexto?.requiereRepresentacion,areas};
+  const costo=Number($('panel-costo').value);
+  return {nombre:$('panel-nombre').value.trim(),unidad:$('panel-unidad').value.trim(),rubro:$('panel-grupo').value,costo_compra:costo,costo_pendiente:costo===0,representacion_id:rep?Number(rep):null,crear_representacion:!!PANEL.contexto?.requiereRepresentacion,areas};
+}
+async function panelCrearSeccion(box){
+  if(!box||!PERMISOS.puede_editar)return;
+  const nombre=await pedirTexto(`Nueva sección en ${box.dataset.areaNombre}`,'');
+  if(nombre===null)return;
+  const limpio=nombre.replace(/\s+/g,' ').trim();
+  if(!limpio)return aviso('Escribe el nombre de la sección.');
+  const boton=box.querySelector('[data-panel-crear-seccion]');boton.disabled=true;boton.textContent='Creando…';
+  try{
+    const actuales=await panelRPC('area_secciones_listar',{p_area_id:box.dataset.area,p_incluir_archivadas:false});
+    const orden=(actuales||[]).reduce((m,s)=>Math.max(m,Number(s.orden)||0),0)+10;
+    const id=await panelRPC('area_seccion_crear',{p_area_id:box.dataset.area,p_nombre:limpio,p_orden:orden,p_codigo:null});
+    const filas=await panelRPC('area_secciones_listar',{p_area_id:box.dataset.area,p_incluir_archivadas:false});
+    const select=box.querySelector('.panel-seccion');
+    select.innerHTML='<option value="">Elige una sección</option>'+filas.filter(s=>s.estado==='activa').map(s=>`<option value="${esc(s.id)}">${esc(s.nombre)}</option>`).join('');
+    select.value=String(id);aviso('✓ Sección creada y seleccionada. No se movió stock.');
+  }catch(e){aviso(e.message||'No se pudo crear la sección.');}
+  finally{boton.disabled=false;boton.textContent='Crear sección física';}
 }
 async function panelRetornar(resultado){
   const c=PANEL.contexto;
@@ -195,7 +212,6 @@ $('panel-busqueda').addEventListener('submit',e=>{e.preventDefault();panelCargar
 $('panel-nuevo').addEventListener('click',()=>panelAbrir());
 $('panel-volver').addEventListener('click',panelVolver);
 $('panel-cerrar').addEventListener('click',panelCerrar);
-$('panel-pendiente').addEventListener('change',panelCosto);
 $('panel-representacion').addEventListener('change',()=>{$('panel-error').textContent='';panelAreas();});
 $('panel-lista').addEventListener('click',e=>{const b=e.target.closest('[data-panel-id]');if(b)panelAbrir(b.dataset.panelId);});
 $('panel-areas').addEventListener('change',e=>{
@@ -204,4 +220,5 @@ $('panel-areas').addEventListener('change',e=>{
     if(!e.target.checked&&box.querySelector('[type=radio]').checked)$('panel-areas').querySelector('[type=radio][value=""]').checked=true;
   }
 });
+$('panel-areas').addEventListener('click',e=>{const b=e.target.closest('[data-panel-crear-seccion]');if(b)panelCrearSeccion(b.closest('[data-area]'));});
 $('panel-ficha').addEventListener('submit',panelGuardar);

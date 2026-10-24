@@ -438,3 +438,7 @@ Este archivo se utiliza como una cola explícita. Codex debe leerlo antes de cad
 - Estado: **PENDIENTE**.
 - Alcance futuro: reversas administrativas compensatorias, panel de operación y activación gradual; requiere decisión y pruebas separadas.
 - No activar automáticamente desde A3.4c.
+# 2026-10-23 — Circuito Mocachino E2E
+
+- **COMPLETADO:** navegación móvil Mesas, controles numéricos, secciones en contexto, ficha atómica, rutas de sección en reparto y diagnóstico de ingredientes pendientes.
+- **COMPLETADO:** AM/PM retirado de esquema, RPC, UI y pruebas; respaldo interno conservado para rollback.

@@ -1,6 +1,6 @@
 /* P3: catálogo comercial neutral y recetas manuales. Solo consume RPC protegidas. */
 let PANEL_TAB_ACTIVO='insumos';
-let PANEL_VENTA={filas:[],ingredientes:[],ficha:null,componentes:[],carga:0,guardando:false,intento:null,retornoKey:null};
+let PANEL_VENTA={filas:[],ingredientes:[],pendientes:[],ficha:null,componentes:[],carga:0,guardando:false,intento:null,retornoKey:null};
 
 function panelTabCambiar(tab){
   PANEL_TAB_ACTIVO=tab==='ventas'?'ventas':'insumos';
@@ -28,8 +28,9 @@ async function panelVentasCargar(){
   }catch(e){if(carga===PANEL_VENTA.carga)panelVentaMensaje(e.message||'No se pudo cargar el catálogo comercial.');}
 }
 async function panelVentaIngredientesCargar(){
-  const datos=await panelRPC('panel_ingredientes_listar',{p_consulta:''});
+  const [datos,pendientes]=await Promise.all([panelRPC('panel_ingredientes_listar',{p_consulta:''}),panelRPC('panel_ingredientes_pendientes_listar',{p_consulta:''})]);
   PANEL_VENTA.ingredientes=datos.ingredientes||[];
+  PANEL_VENTA.pendientes=pendientes.pendientes||[];
 }
 function panelVentaCerrar(){
   if(PANEL_VENTA.guardando)return;
@@ -58,6 +59,7 @@ function panelVentaPintarComponentes(){
     </div>`;
   }).join('');
   $('panel-venta-sin-componentes').hidden=PANEL_VENTA.componentes.length>0;
+  $('panel-venta-pendientes').innerHTML=PANEL_VENTA.pendientes.length?`<div class="panel-vacio"><strong>Con saldo, pero pendientes de configuración</strong>${PANEL_VENTA.pendientes.map(p=>`<div>${esc(p.producto)} · ${esc(p.area)}: ${esc(p.motivo)}</div>`).join('')}</div>`:'';
 }
 async function panelVentaAbrir(id=null){
   if(!panelPermitido()||PANEL_VENTA.guardando)return;

@@ -46,15 +46,15 @@ await check('móvil sin ancho reservado a la izquierda',async()=>
   page.evaluate(()=>getComputedStyle(document.body).paddingLeft==='0px'));
 await check('el viewport no dibuja bajo las barras translúcidas de iPhone',async()=>
   page.evaluate(()=>!document.querySelector('meta[name="viewport"]').content.includes('viewport-fit=cover')));
-await check('Inventario, Reparto y Mermas visibles sin Más',async()=>
+await check('Mesas, Inventario, Reparto y Mermas visibles sin Más',async()=>
   page.evaluate(()=>{
     const rutas=[...document.querySelectorAll('#mobileBottom button:not([hidden])')]
       .map(b=>b.dataset.mobileTab);
-    return rutas.join(',')==='inv,reparto,mermas' &&
+    return rutas.join(',')==='lama,inv,reparto,mermas' &&
       !document.querySelector('#mobileBottom [data-mobile-more]');
   }));
-await check('iconos lineales propios de Inicio, caja y basurero',async()=>
-  page.evaluate(()=>['inv','reparto','mermas'].every(ruta=>
+await check('iconos lineales propios de Mesas, Inicio, caja y basurero',async()=>
+  page.evaluate(()=>['lama','inv','reparto','mermas'].every(ruta=>
     document.querySelector(`[data-mobile-tab="${ruta}"] svg`)?.getAttribute('viewBox')==='0 0 28 28')));
 await page.click('#mobileMenuTrigger');
 await check('menú abierto con foco y estado accesible',async()=>
@@ -94,6 +94,10 @@ await check('barra inferior usa la ruta original',async()=>
   page.evaluate(()=>vistaActual==='inv' && document.querySelector('.tab[data-tab="inv"]').classList.contains('active')));
 await check('etiqueta de Inventario no se alarga al cargar el modo',async()=>
   page.locator('[data-mobile-tab="inv"] span').textContent().then(t=>t==='Inventario'));
+await page.click('[data-mobile-tab="lama"]');
+await check('Mesas se abre pulsando el acceso móvil real',async()=>
+  page.evaluate(()=>vistaActual==='lama'&&document.querySelector('[data-mobile-tab="lama"]').getAttribute('aria-current')==='page'));
+await page.click('[data-mobile-tab="inv"]');
 if(process.env.M1_SCREENSHOT) await page.screenshot({path:process.env.M1_SCREENSHOT});
 const medirBarra=()=>page.evaluate(()=>{
   const barra=document.getElementById('mobileBottom').getBoundingClientRect();

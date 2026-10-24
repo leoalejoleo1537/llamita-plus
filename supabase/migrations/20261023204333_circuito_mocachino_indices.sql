@@ -1,0 +1,3 @@
+create index if not exists idx_repartos_area_items_configuracion on stock_internal.repartos_area_items(configuracion_id);
+create index if not exists idx_repartos_area_items_seccion_destino on stock_internal.repartos_area_items(seccion_destino_id);
+create index if not exists idx_ficha_operaciones_actor on stock_internal.producto_area_ficha_operaciones(actor);

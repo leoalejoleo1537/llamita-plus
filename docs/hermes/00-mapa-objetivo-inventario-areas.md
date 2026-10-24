@@ -171,6 +171,10 @@ PENDIENTE de activación específica. P4 ya resolvió recetas y combos multiáre
 - No crear sedes nuevas para simular áreas.
 - No hacer rediseño de tarjetas, marca o móvil durante B1–B3.
 
+## Corrección circuito Mocachino — 2026-10-23
+
+Implementada: Mesas móvil, sección creada en contexto, ficha atómica configuración/conteo, sección destino auditable en repartos, visibilidad de ingredientes pendientes y retiro completo de AM/PM. Informe 38.
+
 ## Lectura mínima para Codex
 
 Antes de una hoja, leer solamente:

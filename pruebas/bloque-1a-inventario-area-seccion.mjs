@@ -10,7 +10,7 @@ check('la pantalla de área conserva buscador y grupos históricos',
 check('los productos configurados con saldo cero son visibles',
   html.includes("r.configurado||Number(r.cantidad)!==0")&&html.includes('Configurado · sin existencias'));
 check('las secciones físicas se agrupan por AM/PM solo visual',
-  html.includes('AM · organización visual')&&html.includes('PM · organización visual'));
+  !html.includes('AM · organización visual')&&!html.includes('PM · organización visual'));
 check('la ficha de área no habilita escritura de saldo',
   html.includes("const stockCortado=SEDE==='central'||SEDE==='plaza'")&&html.includes('producto_area_configuracion_guardar'));
 const tablaSecciones=migration.split('create table public.area_secciones(')[1]?.split('comment on table public.area_secciones')[0]||'';
