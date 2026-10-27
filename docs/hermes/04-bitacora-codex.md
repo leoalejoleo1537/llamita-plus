@@ -961,3 +961,12 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - SQL con `ROLLBACK` (incluida repetición E2E de P4: receta multiárea, reserva, consumo y reversa), `npm test`, Chromium real móvil/escritorio y `git diff --check` aprobados. Conteos pre/post idénticos: productos 1.438; ledger 9.337,7; lotes 42; movimientos ledger 424; repartos área 5; recetas 396; Fudo movimientos 15.357. Cero sintéticos del circuito.
 - AM/PM fue retirado de UI, RPC y columnas de `area_secciones`/`secciones`; sus valores previos tienen respaldo interno versionado. Informe: `docs/hermes/38-circuito-mocachino-e2e.md`.
 - No se accedió a Café del Desierto / Llamita Stock ni se tocó Fudo remoto, caja, pagos o recetas heredadas.
+
+# 2026-10-27 — Reparación de acceso a Inventario por áreas
+
+- Se reprodujo el error real de la portada de Inventario con una sesión operativa de Llamita Plus. La causa no era la conexión del teléfono ni del navegador: `stock_internal.leer_existencias_areas_plaza()` intentaba aplicar un `ORDER BY` con expresiones al nivel de un `UNION ALL`, lo que PostgreSQL rechazaba con `0A000 invalid UNION/INTERSECT/EXCEPT ORDER BY clause`.
+- Se instaló la migración `20261027231127_reparar_lectura_inventario_areas`. La unión quedó encapsulada en la CTE `filas` y el orden se aplica sobre columnas explícitas de esa relación. No cambió el contrato de `public.stock_leer_areas()`, sus cantidades ni las fuentes del ledger.
+- Verificación autenticada posterior: 266 filas leídas, cuatro áreas activas y total de 4.613,2 unidades; el total coincide exactamente con `stock_internal.existencias` para las ubicaciones activas de Local 1. Una sesión anónima continúa rechazada.
+- Se añadió `supabase/tests/inventario_areas_lectura.sql`, ejecutado dentro de `BEGIN … ROLLBACK`, para comprobar lectura, conciliación con el ledger y rechazo anónimo. No hubo escrituras de negocio ni cambios de stock, productos, lotes, movimientos o repartos.
+- La ejecución completa de `npm test` sigue exponiendo pruebas de navegador históricas desactualizadas (`ajustes-navegacion.mjs` aún simula el contrato anterior de permisos y AM/PM; `inventario-areas.mjs` aún busca el botón separado de conteo eliminado por la ficha unificada). No se confundieron esos fallos del arnés con el bloqueo SQL de producción; quedan para saneamiento separado.
+- No se accedió a Café del Desierto / Llamita Stock y no se tocaron Fudo, Lama, caja, recetas ni el motor de transferencias.
