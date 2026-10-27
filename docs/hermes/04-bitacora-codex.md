@@ -970,3 +970,9 @@ Las futuras entradas deben incluir fase, commit, archivos tocados, pruebas, resu
 - Se añadió `supabase/tests/inventario_areas_lectura.sql`, ejecutado dentro de `BEGIN … ROLLBACK`, para comprobar lectura, conciliación con el ledger y rechazo anónimo. No hubo escrituras de negocio ni cambios de stock, productos, lotes, movimientos o repartos.
 - La ejecución completa de `npm test` sigue exponiendo pruebas de navegador históricas desactualizadas (`ajustes-navegacion.mjs` aún simula el contrato anterior de permisos y AM/PM; `inventario-areas.mjs` aún busca el botón separado de conteo eliminado por la ficha unificada). No se confundieron esos fallos del arnés con el bloqueo SQL de producción; quedan para saneamiento separado.
 - No se accedió a Café del Desierto / Llamita Stock y no se tocaron Fudo, Lama, caja, recetas ni el motor de transferencias.
+
+## Corrección del mismo cierre
+
+- La primera verificación configuró claims autenticados, pero no ejecutó con `SET ROLE authenticated`; por eso no detectó que la migración había revocado el `EXECUTE` interno requerido por la RPC pública `SECURITY INVOKER`. En el navegador el error persistía como `42501 permission denied for function leer_existencias_areas_plaza`.
+- Se añadió `20261027234000_restaurar_execute_lector_areas`, que devuelve únicamente `EXECUTE` sobre el lector interno a `authenticated`, tal como exigía el contrato delegado previo. `anon` y `service_role` continúan sin ese permiso y no se concedió DML.
+- La prueba de regresión ahora usa explícitamente `SET LOCAL ROLE authenticated`, además de los claims JWT, para reproducir la ejecución real de PostgREST y evitar otro falso positivo de privilegios.

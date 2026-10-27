@@ -10,6 +10,24 @@ select set_config(
   true
 );
 
+-- Reproduce el rol efectivo que PostgREST usa en el navegador. Configurar
+-- únicamente los claims no basta: postgres (el ejecutor de las pruebas)
+-- puede invocar funciones que authenticated no puede.
+set local role authenticated;
+
+do $browser_role$
+declare
+  v_filas bigint;
+begin
+  select count(*) into v_filas from public.stock_leer_areas();
+  if v_filas=0 then
+    raise exception 'stock_leer_areas no devolvió filas con rol authenticated';
+  end if;
+end
+$browser_role$;
+
+reset role;
+
 do $test$
 declare
   v_filas bigint;
@@ -44,6 +62,8 @@ begin
 end
 $test$;
 
+set local role anon;
+
 do $anonymous$
 declare
   v_rechazado boolean:=false;
@@ -63,5 +83,7 @@ begin
   end if;
 end
 $anonymous$;
+
+reset role;
 
 rollback;
