@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0",
+  "project": "Llamita Plus",
+  "generated_at": "2026-10-27",
+  "repository_ref": "master@f8d4ad4",
+  "language": "es",
+  "purpose": "Contexto portable para humanos e inteligencias artificiales",
+  "source_priority": [
+    "codigo_y_migraciones_actuales",
+    "informes_de_prueba_recientes",
+    "decisiones_actuales_del_propietario",
+    "context_pack",
+    "documentacion_historica"
+  ],
+  "status_vocabulary": {
+    "IMPLEMENTADO": "Existe en el producto y tiene evidencia reciente",
+    "APROBADO": "Decision del propietario que orienta la construccion",
+    "PROPUESTO": "Direccion todavia no implementada",
+    "LEGADO": "Componente historico conservado por compatibilidad"
+  },
+  "entrypoint": "00-LEEME-PRIMERO.md",
+  "universal_context": "01-CONTEXTO-UNIVERSAL-IA.md",
+  "documents": [
+    {"id": "brand", "file": "02-MARCA-Y-COMUNICACION.md", "topics": ["marca", "identidad_visual", "voz", "contenido"]},
+    {"id": "product", "file": "03-PRODUCTO-Y-EXPERIENCIA.md", "topics": ["producto", "ux", "flujos", "usuarios"]},
+    {"id": "marketing", "file": "04-MARKETING-Y-VENTAS.md", "topics": ["marketing", "ventas", "posicionamiento", "pilotos"]},
+    {"id": "roadmap", "file": "05-ESTADO-Y-HORIZONTE.md", "topics": ["estado", "pendientes", "riesgos", "hoja_de_ruta"]},
+    {"id": "engineering", "file": "06-ANEXO-INGENIERIA.md", "topics": ["arquitectura", "supabase", "ledger", "seguridad", "fudo"]},
+    {"id": "invariants", "file": "07-REGLAS-INVARIANTES.md", "topics": ["reglas", "restricciones", "decisiones"]},
+    {"id": "glossary", "file": "08-GLOSARIO.md", "topics": ["terminologia"]},
+    {"id": "sources", "file": "09-FUENTES-Y-TRAZABILIDAD.md", "topics": ["fuentes", "trazabilidad", "mantenimiento"]}
+  ],
+  "task_bundles": {
+    "marketing": ["01-CONTEXTO-UNIVERSAL-IA.md", "02-MARCA-Y-COMUNICACION.md", "04-MARKETING-Y-VENTAS.md"],
+    "brand_design": ["01-CONTEXTO-UNIVERSAL-IA.md", "02-MARCA-Y-COMUNICACION.md", "03-PRODUCTO-Y-EXPERIENCIA.md"],
+    "product_design": ["01-CONTEXTO-UNIVERSAL-IA.md", "03-PRODUCTO-Y-EXPERIENCIA.md", "05-ESTADO-Y-HORIZONTE.md", "07-REGLAS-INVARIANTES.md"],
+    "engineering": ["01-CONTEXTO-UNIVERSAL-IA.md", "05-ESTADO-Y-HORIZONTE.md", "06-ANEXO-INGENIERIA.md", "07-REGLAS-INVARIANTES.md", "08-GLOSARIO.md"],
+    "sales_presentation": ["01-CONTEXTO-UNIVERSAL-IA.md", "02-MARCA-Y-COMUNICACION.md", "04-MARKETING-Y-VENTAS.md", "05-ESTADO-Y-HORIZONTE.md"]
+  },
+  "hard_boundary": "No acceder ni modificar Cafe del Desierto / Llamita Stock sin autorizacion expresa y separada"
+}
+
