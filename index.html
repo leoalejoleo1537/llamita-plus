@@ -3786,6 +3786,21 @@
 
 </div>
 
+<!-- Resuelve una ruta incompleta sin abandonar el reparto actual. -->
+<div class="overlay" id="overlay-f2-config">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="f2-config-title">
+    <h2 id="f2-config-title">Configurar producto para el área</h2>
+    <p class="mr" id="f2-config-explain"></p>
+    <div class="field"><label for="f2-config-seccion">Sección física</label>
+      <div style="display:flex;gap:8px;align-items:center"><select id="f2-config-seccion" style="min-width:0;flex:1"></select><button type="button" class="btn btn-outline btn-sm" id="f2-config-create-section">Crear sección</button></div>
+    </div>
+    <div style="display:flex;gap:8px"><div class="field" style="flex:1"><label for="f2-config-min">Mínimo</label><input id="f2-config-min" type="number" min="0" step="any" placeholder="Sin mínimo"></div><div class="field" style="flex:1"><label for="f2-config-max">Máximo</label><input id="f2-config-max" type="number" min="0" step="any" placeholder="Sin máximo"></div></div>
+    <label class="chkrow"><input id="f2-config-principal" type="checkbox"><span>Área principal</span></label>
+    <p class="notice">No mueve stock ni crea un reparto.</p>
+    <div class="mbtns"><button type="button" class="btn btn-outline" id="f2-config-cancel">Cancelar</button><button type="button" class="btn btn-orange" id="f2-config-save">Guardar</button></div>
+  </div>
+</div>
+
 <!-- ================= ENLACES (solo Bodega) =================
      Le dice al sistema qué producto de cada local es el mismo que el de
      bodega. Sin esto el reparto no sabe a qué sumarle al llegar.
@@ -14776,7 +14791,7 @@ $('n-guardar').addEventListener('click',()=>{
 /* ---------------- Fase 2 · reparto Bodega -> área ----------------
    Este circuito usa solo RPC protegidas. Preparar crea el documento privado;
    recibir aplica el ledger completo en una única transacción. */
-let F2_AREAS=[],F2_RESULTADOS=[],F2_CARRITO=[],F2_CARRITO_AREA=null,F2_BUSQUEDA_TIMER=null;
+let F2_AREAS=[],F2_RESULTADOS=[],F2_CARRITO=[],F2_CARRITO_AREA=null,F2_BUSQUEDA_TIMER=null,F2_CONFIG=null;
 let F3_URGENCIAS=[];
 let REPARTOS_AREA=[],REPARTOS_AREA_CARGANDO=false,REPARTOS_AREA_ID=null;
 const F2_RECEPCION_REFS=new Map();
@@ -14830,7 +14845,7 @@ function f2PintarResultados(){
   box.innerHTML=F2_RESULTADOS.map((p,i)=>`<div class="f2-result" data-f2-result="${i}">
     <div class="f2-main"><b>${esc(p.producto)}</b><div class="f2-sub">${p.ruta?esc(F2_AREAS.find(a=>String(a.id)===$('f2-area').value)?.nombre||'Área')+' → '+esc(p.ruta.seccion):'Falta configurar área y sección'}</div></div>
     <select data-f2-bucket aria-label="Lote de ${esc(p.producto)}">${(p.buckets||[]).map((b,j)=>`<option value="${j}">${esc(f2BucketTexto(b))}</option>`).join('')}</select>
-    <button type="button" class="btn btn-outline btn-sm" data-f2-add="${i}" ${p.ruta?'':'disabled'}>${p.ruta?'Agregar':'Configurar primero'}</button>
+    <button type="button" class="btn btn-outline btn-sm" data-f2-add="${i}">${p.ruta?'Agregar':'Configurar primero'}</button>
   </div>`).join('');
 }
 async function f2Buscar(){
@@ -14884,10 +14899,71 @@ function f2AgregarCandidato(p,b,area){
 $('f2-resultados').addEventListener('click',e=>{
   const bt=e.target.closest('[data-f2-add]');if(!bt)return;
   const p=F2_RESULTADOS[+bt.dataset.f2Add],row=bt.closest('[data-f2-result]');if(!p||!row)return;
-  if(!p.ruta){avisar('Configura primero una sección física activa para este producto en el área destino.');return;}
+  if(!p.ruta){f2AbrirConfiguracion(p);return;}
   const b=(p.buckets||[])[+row.querySelector('[data-f2-bucket]').value];if(!b)return;
   f2AgregarCandidato(p,b,$('f2-area').value);
 });
+function f2CerrarConfiguracion(){
+  $('overlay-f2-config').classList.remove('open');F2_CONFIG=null;
+}
+async function f2AbrirConfiguracion(producto){
+  const areaId=$('f2-area').value,area=F2_AREAS.find(a=>String(a.id)===String(areaId));
+  if(!areaId||!area){avisar('Elige primero el área destino.');return;}
+  if(!PERMISOS.puede_editar){avisar('Tu cuenta no puede configurar productos en áreas.');return;}
+  F2_CONFIG={producto,areaId};
+  $('f2-config-title').textContent='Configurar '+producto.producto;
+  $('f2-config-explain').textContent=`Destino: ${area.nombre}. Elige dónde se guardará físicamente.`;
+  $('f2-config-seccion').innerHTML='<option value="">Cargando secciones…</option>';
+  $('f2-config-min').value='';$('f2-config-max').value='';$('f2-config-principal').checked=false;
+  $('overlay-f2-config').classList.add('open');
+  const [secciones,configuraciones]=await Promise.all([
+    cargarSeccionesArea(areaId,false),
+    producto.producto_plaza_id
+      ? sb.rpc('producto_area_configuraciones_listar',{p_producto_id:producto.producto_plaza_id,p_sede:'plaza'})
+      : Promise.resolve({data:[],error:null})
+  ]).catch(error=>{avisar(error.message||'No se pudo abrir la configuración.');return [null,null];});
+  if(!F2_CONFIG||!secciones)return;
+  if(configuraciones?.error){f2CerrarConfiguracion();avisar(configuraciones.error.message||'No se pudo leer la configuración.');return;}
+  const actual=(configuraciones?.data||[]).find(x=>String(x.area_id)===String(areaId));
+  $('f2-config-seccion').innerHTML=opcionesSeccionesAreaHTML(secciones,actual?.seccion_id||'');
+  $('f2-config-min').value=actual?.stock_min??'';$('f2-config-max').value=actual?.stock_max??'';
+  $('f2-config-principal').checked=!!actual?.es_principal;
+  setTimeout(()=>$('f2-config-seccion').focus(),20);
+}
+async function f2CrearSeccion(){
+  if(!F2_CONFIG||!PERMISOS.puede_editar)return;
+  const nombre=(await pedirTexto('Crear sección física',''))?.trim();if(!nombre)return;
+  const actuales=await cargarSeccionesArea(F2_CONFIG.areaId,false).catch(()=>[]);
+  const orden=actuales.reduce((m,s)=>Math.max(m,Number(s.orden)||0),0)+10;
+  const {data,error}=await conReintento(()=>sb.rpc('area_seccion_crear',{
+    p_area_id:F2_CONFIG.areaId,p_nombre:nombre,p_orden:orden,p_codigo:null
+  }));
+  if(error){avisar(error.message||'No se pudo crear la sección.');return;}
+  const nuevas=await cargarSeccionesArea(F2_CONFIG.areaId,false);
+  $('f2-config-seccion').innerHTML=opcionesSeccionesAreaHTML(nuevas,data);$('f2-config-seccion').value=String(data);
+}
+async function f2GuardarConfiguracion(){
+  if(!F2_CONFIG||!PERMISOS.puede_editar)return;
+  const {producto,areaId}=F2_CONFIG,seccion=$('f2-config-seccion').value;
+  const valor=id=>$(id).value===''?null:Number($(id).value),minimo=valor('f2-config-min'),maximo=valor('f2-config-max');
+  if(!seccion){avisar('Elige o crea una sección física.');return;}
+  if(minimo!=null&&(!Number.isFinite(minimo)||minimo<0)||maximo!=null&&(!Number.isFinite(maximo)||maximo<0)||minimo!=null&&maximo!=null&&maximo<minimo){avisar('Revisa el mínimo y máximo del área.');return;}
+  const boton=$('f2-config-save');boton.disabled=true;boton.textContent='Guardando…';
+  const {error}=await conReintento(()=>sb.rpc('panel_producto_area_configurar',{
+    p_referencia:crypto.randomUUID(),p_maestro_id:Number(producto.producto_bodega_id),
+    p_representacion_id:producto.producto_plaza_id==null?null:Number(producto.producto_plaza_id),
+    p_area_id:areaId,p_seccion_id:seccion,p_stock_min:minimo,p_stock_max:maximo,
+    p_es_principal:$('f2-config-principal').checked
+  }));
+  boton.disabled=false;boton.textContent='Guardar';
+  if(error){avisar(error.message||'No se pudo configurar el producto.');return;}
+  const nombre=producto.producto;f2CerrarConfiguracion();await f2Buscar();
+  aviso(`✓ ${nombre} quedó configurado · ya puedes agregarlo al reparto.`);
+}
+$('f2-config-cancel').addEventListener('click',f2CerrarConfiguracion);
+$('f2-config-create-section').addEventListener('click',f2CrearSeccion);
+$('f2-config-save').addEventListener('click',f2GuardarConfiguracion);
+$('overlay-f2-config').addEventListener('click',e=>{if(e.target===$('overlay-f2-config'))f2CerrarConfiguracion();});
 $('f3-urgentes').addEventListener('click',async e=>{
   const bt=e.target.closest('[data-f3-add]');if(!bt)return;
   const urgente=F3_URGENCIAS.find(u=>String(u.configuracion_id)===bt.dataset.f3Add);if(!urgente)return;
