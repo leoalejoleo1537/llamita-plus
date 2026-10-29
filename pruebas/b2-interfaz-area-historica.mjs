@@ -24,11 +24,11 @@ check('Saldo de fila viene del ledger y se corrige solo mediante el ajuste audit
 check('La fila histórica abre el modal con el registro exacto de área',
   html.includes('data-area-code="${esc(r.area_codigo)}"')&&html.includes('AREA_ROWS.find(r=>String(r.producto_id)===String(info.dataset.open)&&r.area_codigo===info.dataset.areaCode)'));
 check('La ficha compacta de área conserva sección editable, límites y conteo auditado',
-  ficha.includes('m-area-seccion-wrap')&&ficha.includes("m-limits-fields').style.display=fichaArea?'flex':'none'")
-  &&ficha.includes('cargarDesgloseAjuste')&&ficha.includes("m-stock-field').style.display=fichaArea?'none'"));
+  ficha.includes('m-area-seccion-wrap')&&ficha.includes("m-limits-fields').style.display=(fichaArea||SEDE==='central')?'flex':'none'")
+  &&ficha.includes('cargarDesgloseAjuste')&&ficha.includes("m-stock-field').style.display=stockCortado?'none':''"));
 check('La ficha de área presenta sección, saldo y límites en el orden de trabajo móvil',
   ficha.includes("$('overlay').classList.toggle('modal-area-ficha',fichaArea)")
-  &&ficha.includes("$('m-ajuste-title').textContent='Stock actual'")
+  &&ficha.includes("$('m-ajuste-title').textContent=fichaArea?'Stock actual':'Stock contado'")
   &&ficha.includes("$('m-min-label').textContent='Stock mínimo'")
   &&ficha.includes("$('m-max-label').textContent='Stock máximo'"));
 check('Guardar desde área usa la RPC atómica de ficha y nunca productos.stock_actual',

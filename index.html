@@ -14238,20 +14238,22 @@ async function openModal(id){
   const secs=[...new Set([...seccionesDeLaSede(), modalProd.rubro].filter(Boolean))];
   $('m-seccion').innerHTML=secs.map(s=>`<option${s===modalProd.rubro?' selected':''}>${esc(s)}</option>`).join('');
   $('m-stock').value=SEDE==='plaza'&&MODAL_AREA_ROW?Number(MODAL_AREA_ROW.cantidad)||0:(modalProd.stock_actual??'');
-  $('m-stock-field').style.display=fichaArea?'none':'';
   const stockCortado=SEDE==='central'||SEDE==='plaza';
+  /* Bodega y Local 1 tienen un solo conteo auditado más abajo. Un segundo
+     stepper aquí duplicaba la cantidad y obligaba a dos guardados. */
+  $('m-stock-field').style.display=stockCortado?'none':'';
   $('m-stock').disabled=stockCortado;
   $('m-stock').title=stockCortado?'Saldo de solo lectura: existencias por ubicación':'';
   $('m-menos').disabled=stockCortado; $('m-mas').disabled=stockCortado;
   $('m-stock-corte').style.display=stockCortado?'block':'none';
-  $('m-perec').disabled=stockCortado; $('m-venc-single').disabled=stockCortado;
+  $('m-perec').disabled=stockCortado&&!PERMISOS.puede_editar; $('m-venc-single').disabled=stockCortado;
   $('m-min').value=configArea?(MODAL_AREA_ROW.stock_min??''):(modalProd.stock_min??'');
   $('m-max').value=configArea?(MODAL_AREA_ROW.stock_max??''):(modalProd.stock_max??'');
-  $('m-limits-fields').style.display=fichaArea?'flex':'none';
+  $('m-limits-fields').style.display=(fichaArea||SEDE==='central')?'flex':'none';
   $('m-min-label').textContent='Stock mínimo';
   $('m-max-label').textContent='Stock máximo';
-  $('m-min').disabled=SEDE==='plaza'&&(!fichaArea||!PERMISOS.puede_editar);
-  $('m-max').disabled=SEDE==='plaza'&&(!fichaArea||!PERMISOS.puede_editar);
+  $('m-min').disabled=stockCortado&&!PERMISOS.puede_editar;
+  $('m-max').disabled=stockCortado&&!PERMISOS.puede_editar;
   $('m-tipo-row').style.display = hasTipo&&!fichaArea ? '' : 'none';
   if(hasTipo){
     $('m-tipo').value = modalProd.tipo ?? '';
@@ -14332,18 +14334,23 @@ async function openModal(id){
     $('m-guardar').disabled=!PERMISOS.puede_editar;
   }else{
     $('m-guardar').textContent='Guardar';
-    $('m-guardar').disabled=false;
+    $('m-guardar').disabled=SEDE==='central'&&!PERMISOS.puede_editar;
   }
   const ajusteUbicacion=fichaArea?MODAL_AREA_ROW?.ubicacion_id:null;
   const puedeAjustar=!!PERMISOS.puede_editar&&(SEDE==='central'||(SEDE==='plaza'&&fichaArea&&!!ajusteUbicacion));
-  $('m-ajuste-title').hidden=!fichaArea;
-  $('m-ajuste-title').textContent='Stock actual';
   $('m-ajuste-panel').hidden=!puedeAjustar;
   $('m-ajuste-panel').style.display=puedeAjustar?'':'none';
-  if(puedeAjustar) void cargarDesgloseAjuste(modalProd.id,ajusteUbicacion).then(()=>{
-    if(fichaArea){$('m-ajuste-guardar').style.display='none';$('m-ajuste-motivo-wrap').style.display='none';}
-    else {$('m-ajuste-guardar').style.display='';$('m-ajuste-motivo-wrap').style.display='';}
-  });
+  if(puedeAjustar){
+    if(stockCortado)$('m-guardar').disabled=true;
+    void cargarDesgloseAjuste(modalProd.id,ajusteUbicacion).then(()=>{
+      if(stockCortado){
+        $('m-ajuste-title').hidden=false;$('m-ajuste-title').textContent=fichaArea?'Stock actual':'Stock contado';
+        $('m-ajuste-guardar').style.display='none';
+        $('m-ajuste-motivo-wrap').style.display=fichaArea?'none':'';
+        $('m-guardar').disabled=!PERMISOS.puede_editar;
+      } else {$('m-ajuste-guardar').style.display='';$('m-ajuste-motivo-wrap').style.display='';}
+    });
+  }
   $('overlay').classList.add('open');
 }
 
@@ -14494,6 +14501,39 @@ $('m-guardar').addEventListener('click',async()=>{
     }));
     if(error){boton.disabled=false;boton.textContent='Guardar cambios';avisar(error.message||'No se pudieron guardar los cambios.');return;}
     await loadData();closeModal();aviso(cambioConteo?'✓ Organización y conteo guardados en una sola operación':'✓ Organización guardada · stock intacto');return;
+  }
+  if(SEDE==='central'){
+    if(!PERMISOS.puede_editar){avisar('Tu cuenta no puede editar el inventario.');return;}
+    const numero=el=>el.value===''?null:Number(el.value);
+    const minimo=numero($('m-min')),maximo=numero($('m-max'));
+    if(minimo!=null&&(!Number.isFinite(minimo)||minimo<0)||maximo!=null&&(!Number.isFinite(maximo)||maximo<0)||minimo!=null&&maximo!=null&&maximo<minimo){
+      avisar('Revisa el stock mínimo y máximo de Bodega.');return;
+    }
+    const rubro=$('m-seccion').value.trim();
+    if(!rubro){avisar('El producto necesita una clasificación.');return;}
+    const conteos={};let cambioConteo=false;
+    for(const input of $('m-ajuste-lineas').querySelectorAll('[data-ajuste-clave]')){
+      const cantidad=Number(input.value),actual=Number(input.dataset.ajusteActual);
+      if(!Number.isFinite(cantidad)||cantidad<0){avisar('El stock contado debe ser igual o mayor que cero.');input.focus();return;}
+      conteos[input.dataset.ajusteClave]=cantidad;
+      if(cantidad!==actual)cambioConteo=true;
+    }
+    const motivo=$('m-ajuste-motivo').value.trim()||'Conteo/corrección manual desde ficha';
+    const solicitud={producto:modalProd.id,minimo,maximo,rubro,tipo:hasTipo?$('m-tipo').value.trim():null,
+      perecedero:hasPerec?$('m-perec').checked:!!modalProd.perecedero,conteos:cambioConteo?conteos:null,motivo};
+    const firma=JSON.stringify(solicitud);
+    if(!AJUSTE_UI_REFERENCIA||AJUSTE_UI_FIRMA!==firma){AJUSTE_UI_REFERENCIA=crypto.randomUUID();AJUSTE_UI_FIRMA=firma;}
+    const boton=$('m-guardar');boton.disabled=true;boton.textContent='Guardando…';
+    const {error}=await conReintento(()=>sb.rpc('producto_bodega_ficha_guardar',{
+      p_referencia:AJUSTE_UI_REFERENCIA,p_producto_id:modalProd.id,
+      p_stock_min:minimo,p_stock_max:maximo,p_rubro:rubro,
+      p_tipo:solicitud.tipo||null,p_perecedero:solicitud.perecedero,
+      p_conteos:cambioConteo?conteos:null,p_motivo:motivo
+    }));
+    if(error){boton.disabled=false;boton.textContent='Guardar';avisar(error.message||'No se pudieron guardar los cambios.');return;}
+    await loadData();closeModal();
+    aviso(cambioConteo?'✓ Ficha y conteo guardados en una sola operación':'✓ Ficha de Bodega guardada · stock intacto');
+    return;
   }
   const nombre=$('m-producto').value.replace(/\s+/g,' ').trim();
   if(!nombre){ avisar('El producto necesita un nombre.'); $('m-producto').focus(); return; }
