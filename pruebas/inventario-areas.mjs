@@ -180,6 +180,19 @@ await check('buscar leche en Cafetería aísla la lectura a esa ubicación',asyn
     &&(await leche.locator('.area-unit').innerText())==='L'
     &&!t.includes('Azúcar blanca')&&!t.includes('999');
 });
+await page.locator('#list .row[data-row="1"] [data-quick-stock]').click();
+await page.waitForSelector('#list .row[data-row="1"] [data-quick-save]:not([hidden])');
+await page.locator('#list .row[data-row="1"] [data-quick-stock]').fill('3.25');
+await page.locator('#list .row[data-row="1"] [data-quick-save]').click();
+await page.waitForTimeout(30);
+await check('la edición rápida guarda un saldo contado por ledger, con motivo fijo y sin DML directo',async()=>{
+  const llamada=await page.evaluate(()=>window.__rpcArgs.findLast(x=>x.name==='stock_ajuste_guardar'));
+  return llamada?.args?.p_producto_id===1&&llamada.args.p_ubicacion_id==='loc-cafeteria'
+    &&llamada.args.p_conteos.sin_lote===3.25
+    &&llamada.args.p_motivo==='Conteo/corrección manual desde inventario'
+    &&await page.locator('#list .row[data-row="1"] [data-quick-stock]').inputValue()==='3.25'
+    &&await page.evaluate(()=>window.__writes.length===0);
+});
 await page.evaluate(()=>{
   REPARTOS_AREA=[
     {id:'rep-abierto',estado:'enviado',nombre:'Reposición cafetería',creado_at:new Date().toISOString(),items:[
@@ -234,13 +247,13 @@ await page.click('.area-secondary-view[data-area-open="__todas__"]');
 await check('vista global separa las cantidades por área',async()=>{
   const fila=page.locator('.area-global-product').filter({hasText:'Leche entera'});
   const t=await fila.innerText();
-  return t.includes('Cafetería')&&t.includes('3')&&t.includes('Barra')&&t.includes('2')&&t.includes('Sin asignar')&&t.includes('5');
+  return t.includes('Cafetería')&&t.includes('3.25')&&t.includes('Barra')&&t.includes('2')&&t.includes('Sin asignar')&&t.includes('5');
 });
 await page.locator('.area-global-link[data-area-open="cafeteria"][data-area-product="Leche entera"]').click();
 await check('desde global se abre el producto filtrado dentro de su área',async()=>
   (await page.locator('#topSede').innerText())==='Inventario · Cafetería'
   && (await page.locator('#q').inputValue())==='Leche entera'
-  && (await page.locator('#list .row[data-row="1"] input[type="number"]').inputValue())==='3');
+  && (await page.locator('#list .row[data-row="1"] input[type="number"]').inputValue())==='3.25');
 await check('la navegación de áreas no escribe datos',async()=>
   (await page.evaluate(()=>window.__writes.length))===0);
 await check('la lectura usa la RPC del libro, no un RPC de escritura',async()=>

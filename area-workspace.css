@@ -288,6 +288,15 @@ body.area-workspace-active #list .row .right input[type=number] {
   opacity: 1;
   -webkit-text-fill-color: var(--area-ink);
 }
+body.area-workspace-active #list .area-quick-control { display:flex; align-items:center; gap:4px; }
+body.area-workspace-active #list .area-quick-control input[type=number] { cursor:text; text-align:right; font-weight:800; }
+body.area-workspace-active #list .area-quick-control input[readonly] { cursor:pointer; }
+body.area-workspace-active #list .area-quick-control.editing input { outline:2px solid var(--area-action); outline-offset:1px; }
+body.area-workspace-active #list .area-quick-control.loading { opacity:.62; pointer-events:none; }
+body.area-workspace-active #list .area-quick-save,
+body.area-workspace-active #list .area-quick-cancel { width:28px; height:32px; padding:0; border:0; border-radius:9px; font:800 16px/1 inherit; cursor:pointer; }
+body.area-workspace-active #list .area-quick-save { background:var(--area-action); color:#fff; }
+body.area-workspace-active #list .area-quick-cancel { background:var(--area-soft); color:var(--area-muted); }
 body.area-workspace-active #list .area-unit { color: var(--area-muted); }
 body.area-workspace-active #list .empty {
   padding: 22px 18px;

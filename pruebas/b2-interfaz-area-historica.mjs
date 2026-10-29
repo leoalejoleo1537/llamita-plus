@@ -17,8 +17,9 @@ check('Las secciones de área usan los acordeones históricos y AM/PM es solo ag
   area.includes('class="sec')&&area.includes('class="sec-btn"')&&!area.includes('AM · organización visual')&&!area.includes('PM · organización visual')&&area.includes('data-secname="${esc(clave)}"'));
 check('Productos configurados con saldo cero aparecen identificados sin confundirse con existencias',
   area.includes('Configurado · sin existencias')&&area.includes('r.configurado||Number(r.cantidad)!==0'));
-check('Saldo de fila viene del ledger y queda no editable',
-  area.includes('stock_actual:cantidad')&&area.includes('disabled title="Saldo de solo lectura: ledger por ubicación"')&&html.includes("sb.rpc('stock_leer_areas'"));
+check('Saldo de fila viene del ledger y se corrige solo mediante el ajuste auditado',
+  area.includes('stock_actual:cantidad')&&area.includes('data-quick-stock')&&html.includes("sb.rpc('stock_leer_areas'")
+  &&html.includes("sb.rpc('stock_ajuste_guardar'")&&html.includes("p_motivo:'Conteo/corrección manual desde inventario'"));
 check('La fila histórica abre el modal con el registro exacto de área',
   html.includes('data-area-code="${esc(r.area_codigo)}"')&&html.includes('AREA_ROWS.find(r=>String(r.producto_id)===String(info.dataset.open)&&r.area_codigo===info.dataset.areaCode)'));
 check('La ficha compacta de área conserva sección editable, límites y conteo auditado',
