@@ -52,6 +52,8 @@
 #view-productos .panel-estado{padding:6px 10px;border-radius:10px;background:var(--ux-soft);color:var(--muted);font-size:.85rem;font-weight:700;white-space:nowrap}
 #view-productos .panel-estado.listo{background:var(--green-bg);color:var(--green-fg)}
 #view-productos .panel-vacio{padding:20px;border-radius:14px;background:var(--ux-soft);color:var(--muted);text-align:center}
+#view-productos .panel-pendiente{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:9px;text-align:left}
+#view-productos .panel-pendiente button{flex:0 0 auto;padding:7px 10px;border:1px solid var(--orange);border-radius:9px;background:var(--card);color:var(--orange-dark);font:inherit;font-weight:800;cursor:pointer}
 #view-productos .panel-componente{
   display:grid;grid-template-columns:36px minmax(180px,1.25fr) minmax(180px,1fr) minmax(110px,.45fr) auto;
   align-items:end;gap:12px;margin:10px 0;padding:14px;border-radius:16px;background:var(--bg)

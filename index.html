@@ -14513,7 +14513,11 @@ $('m-guardar').addEventListener('click',async()=>{
       p_motivo:'Conteo/corrección manual desde ficha'
     }));
     if(error){boton.disabled=false;boton.textContent='Guardar cambios';avisar(error.message||'No se pudieron guardar los cambios.');return;}
-    await loadData();closeModal();aviso(cambioConteo?'✓ Organización y conteo guardados en una sola operación':'✓ Organización guardada · stock intacto');return;
+    await loadData();closeModal();
+    if(typeof panelVentaIngredientesCargar==='function'&&!$('panel-venta-ficha').hidden){
+      await panelVentaIngredientesCargar();panelVentaPintarComponentes();
+    }
+    aviso(cambioConteo?'✓ Organización y conteo guardados en una sola operación':'✓ Organización guardada · stock intacto');return;
   }
   if(SEDE==='central'){
     if(!PERMISOS.puede_editar){avisar('Tu cuenta no puede editar el inventario.');return;}

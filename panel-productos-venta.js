@@ -59,7 +59,13 @@ function panelVentaPintarComponentes(){
     </div>`;
   }).join('');
   $('panel-venta-sin-componentes').hidden=PANEL_VENTA.componentes.length>0;
-  $('panel-venta-pendientes').innerHTML=PANEL_VENTA.pendientes.length?`<div class="panel-vacio"><strong>Con saldo, pero pendientes de configuración</strong>${PANEL_VENTA.pendientes.map(p=>`<div>${esc(p.producto)} · ${esc(p.area)}: ${esc(p.motivo)}</div>`).join('')}</div>`:'';
+  $('panel-venta-pendientes').innerHTML=PANEL_VENTA.pendientes.length?`<div class="panel-vacio"><strong>Con saldo, pero pendientes de configuración</strong>${PANEL_VENTA.pendientes.map(p=>`<div class="panel-pendiente"><span>${esc(p.producto)} · ${esc(p.area)}: ${esc(p.motivo)}</span><button type="button" data-pv-pendiente="${esc(p.producto_id)}" data-pv-area="${esc(p.area_id)}">Configurar</button></div>`).join('')}</div>`:'';
+}
+function panelVentaAbrirPendiente(productoId,areaId){
+  if(SEDE!=='plaza'){avisar('Abre el Panel desde Local 1 para configurar la ubicación de este insumo.');return;}
+  const fila=AREA_ROWS.find(r=>String(r.producto_id)===String(productoId)&&String(r.area_id)===String(areaId));
+  if(!fila){avisar('No se encontró el saldo de este producto en el área. Actualiza la pantalla e inténtalo otra vez.');return;}
+  MODAL_AREA_ROW=fila;openModal(Number(productoId));
 }
 async function panelVentaAbrir(id=null){
   if(!panelPermitido()||PANEL_VENTA.guardando)return;
@@ -146,5 +152,8 @@ $('panel-venta-componentes').addEventListener('click',e=>{
   else if(e.target.closest('[data-pv-mover="abajo"]')&&i<PANEL_VENTA.componentes.length-1)[PANEL_VENTA.componentes[i+1],PANEL_VENTA.componentes[i]]=[PANEL_VENTA.componentes[i],PANEL_VENTA.componentes[i+1]];
   else return;
   panelVentaPintarComponentes();
+});
+$('panel-venta-pendientes').addEventListener('click',e=>{
+  const b=e.target.closest('[data-pv-pendiente]');if(b)panelVentaAbrirPendiente(b.dataset.pvPendiente,b.dataset.pvArea);
 });
 $('panel-venta-ficha').addEventListener('submit',panelVentaGuardar);
