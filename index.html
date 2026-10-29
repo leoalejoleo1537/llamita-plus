@@ -5039,24 +5039,34 @@ let PERMISOS = { puede_fudo:false, puede_editar:false, puede_ajustes:false, pued
        Un problema de señal no es una revocación de permiso.             */
 async function cargarPermisos(){
   const antes = PERMISOS;
+  let sesionActual=null;
   try{
     const {data:{session}} = await sb.auth.getSession();
+    sesionActual=session;
     const correo = session?.user?.email?.toLowerCase() || null;
     if(!correo){
       PERMISOS = { puede_fudo:false, puede_editar:false, puede_ajustes:false, puede_lama:false, correo:null, sede:null, auth_uid:null, es_propietario_raiz:false, fudo_bloqueos:[] };
     } else {
-      const {data,error} = await sb.rpc('permisos_mios').maybeSingle();
+      const consulta=sb.rpc('permisos_mios');
+      const respuesta=typeof consulta?.maybeSingle==='function'?await consulta.maybeSingle():await consulta;
+      const error=respuesta?.error,data=Array.isArray(respuesta?.data)?respuesta.data[0]||null:respuesta?.data;
       if(error){
         // la lectura no llegó: se deja lo de antes si es la misma persona
-        PERMISOS = (antes.correo === correo) ? antes
-          : { puede_fudo:false, puede_editar:false, puede_ajustes:false, puede_lama:false, correo, sede:null, auth_uid:null, es_propietario_raiz:false, fudo_bloqueos:[] };
+        PERMISOS = (antes.correo === correo) ? {...antes,auth_uid:session.user.id}
+          : { puede_fudo:false, puede_editar:false, puede_ajustes:false, puede_lama:false, correo, sede:null, auth_uid:session.user.id, es_propietario_raiz:false, fudo_bloqueos:[] };
         console.warn('No se pudieron releer los permisos; se conservan los anteriores.', error);
       } else {
-        PERMISOS = { puede_fudo:false, puede_editar:false, puede_ajustes:false, puede_lama:false, correo, sede:null, auth_uid:null, es_propietario_raiz:false, fudo_bloqueos:[] };
+        PERMISOS = { puede_fudo:false, puede_editar:false, puede_ajustes:false, puede_lama:false, correo, sede:null, auth_uid:session.user.id, es_propietario_raiz:false, fudo_bloqueos:[] };
         if(data) Object.assign(PERMISOS, permisosDeLaSede(data, SEDE));
       }
     }
-  }catch(e){ console.error(e); }   // si la tabla no existe todavía, nadie ve nada nuevo
+  }catch(e){
+    console.error(e);
+    const correo=sesionActual?.user?.email?.toLowerCase()||null;
+    PERMISOS=correo
+      ? (antes.correo===correo?{...antes,auth_uid:sesionActual.user.id}:{puede_fudo:false,puede_editar:false,puede_ajustes:false,puede_lama:false,correo,sede:null,auth_uid:sesionActual.user.id,es_propietario_raiz:false,fudo_bloqueos:[]})
+      : {puede_fudo:false,puede_editar:false,puede_ajustes:false,puede_lama:false,correo:null,sede:null,auth_uid:null,es_propietario_raiz:false,fudo_bloqueos:[]};
+  }
   aplicarPermisos();
   ajCargarAjustes().then(aplicarInterruptores);
   cargarMetas();
@@ -5088,23 +5098,24 @@ function aplicarPermisos(){
      sistema, que es lo único que este proyecto no puede perder. */
   $('motorAviso').classList.toggle('solo-admin', !admin);
 
-  /* LLAMITA LAMA. La pestaña solo existe para quien la está construyendo, y
-     solo en los locales: bodega no vende. Se decide acá y no en pickSede
+  /* Mesas es operación diaria para cualquier sesión autenticada de Local 1.
+     La administración de Lama conserva su permiso reforzado. Se decide acá y no en pickSede
      porque el permiso puede llegar DESPUÉS de elegir la sede — cargarPermisos
      corre al final de pickSede—, y si se decidiera allá la pestaña no
      aparecería hasta cambiar de sede. */
   const tl = $('tabLama');
-  const hayLama = !!(PERMISOS.puede_lama && SEDE && SEDE !== 'central');
-  if(tl) tl.style.display = hayLama ? '' : 'none';
-  if(!hayLama && vistaActual === 'lama') pickTab('inv');
+  const hayMesas = !!(PERMISOS.auth_uid && SEDE && SEDE !== 'central');
+  const hayGobiernoLama = !!(PERMISOS.puede_lama && SEDE && SEDE !== 'central');
+  if(tl) tl.style.display = hayMesas ? '' : 'none';
+  if(!hayMesas && vistaActual === 'lama') pickTab('inv');
   /* Arqueo y Movimientos de caja son del mismo permiso que Mesas — cuadrar
      la caja no es un trabajo aparte de vender, así que no se inventa un
      candado nuevo (§0.8: un permiso se justifica por lo que decide, y acá
      no hay una decisión distinta que proteger). */
   const taq = $('tabArqueo'), tmc = $('tabMovCaja');
-  if(taq) taq.style.display = hayLama ? '' : 'none';
-  if(tmc) tmc.style.display = hayLama ? '' : 'none';
-  if(!hayLama && (vistaActual === 'arqueo' || vistaActual === 'movcaja')) pickTab('inv');
+  if(taq) taq.style.display = hayGobiernoLama ? '' : 'none';
+  if(tmc) tmc.style.display = hayGobiernoLama ? '' : 'none';
+  if(!hayGobiernoLama && (vistaActual === 'arqueo' || vistaActual === 'movcaja')) pickTab('inv');
 
   /* EL ATERRIZAJE EN EL HOGAR. pickSede pidió abrir en el hogar, pero allá
      todavía no se sabía si esta cuenta tiene Mesas; acá sí. Se cumple una
@@ -5114,7 +5125,7 @@ function aplicarPermisos(){
      pantalla de las manos. */
   if(LAMA_ATERRIZAR && AJUSTES_VAL !== null){
     LAMA_ATERRIZAR = false;
-    if(hayLama && vistaActual === 'inv') pickTab('lama');
+    if(hayMesas && vistaActual === 'inv') pickTab('lama');
   }
 
   // si le quitaron el permiso con la pantalla abierta, se sale de ella
@@ -7798,7 +7809,7 @@ const lamaMioTermina = () => { LAMA_MIO--; LAMA_MIO_HASTA = Date.now() + 500; };
 const lamaEsEcoPropio = () => LAMA_MIO > 0 || Date.now() < LAMA_MIO_HASTA;
 
 async function lamaCargarStock(){
-  if(SEDE!=='plaza'||!PERMISOS.puede_lama){LAMA_DISP=new Map();LAMA_STOCK_ALERTAS=[];return;}
+  if(SEDE!=='plaza'||!PERMISOS.auth_uid){LAMA_DISP=new Map();LAMA_STOCK_ALERTAS=[];return;}
   const [v,d,a]=await Promise.all([
     sb.rpc('lama_productos_venta_listar'),
     sb.rpc('lama_fuentes_directas_listar'),sb.rpc('lama_stock_alertas_listar')
@@ -17746,7 +17757,7 @@ function demoPermiteVista(tab){
   if(tab==='reparto') return SEDE !== 'central';
   if(tab==='recepcion' || tab==='envios') return SEDE === 'central';
   if(tab==='aplaza') return SEDE === 'angamos';
-  if(tab==='lama') return !!(PERMISOS.puede_lama && SEDE && SEDE!=='central');
+  if(tab==='lama') return !!(PERMISOS.auth_uid && SEDE && SEDE!=='central');
   if(tab==='ajustes') return !!PERMISOS.puede_ajustes;
   return true;
 }
@@ -18581,7 +18592,8 @@ function pickTab(tab){
   if(tab==='inv'&&vistaActual==='inv'&&areaActual!==null){cambiarArea(null);return;}
   if(!sedeActiva(SEDE)){ showGate(); return; }
   if(tab==='aplaza' && !sedeActiva('angamos')) tab='inv';
-  if((tab==='lama'||tab==='arqueo'||tab==='movcaja')
+  if(tab==='lama' && !(PERMISOS.auth_uid&&SEDE&&SEDE!=='central')) tab='inv';
+  if((tab==='arqueo'||tab==='movcaja')
       && !(PERMISOS.puede_lama&&SEDE&&SEDE!=='central')) tab='inv';
   if(modoDemo() && !demoPermiteVista(tab)) tab='inv';
   /* En Bodega "Reparto" ya no existe como pestaña: son dos. Si algo llama

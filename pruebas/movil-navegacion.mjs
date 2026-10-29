@@ -137,17 +137,17 @@ await check('menú e identidad de los módulos conservan el naranja de marca',as
   page.evaluate(()=>getComputedStyle(document.querySelector('.mobile-bottom-item.active')).color===
     'rgb(243, 91, 4)'));
 await page.evaluate(()=>{AJUSTES_VAL={'modo_demostracion|':true};PERMISOS.puede_lama=true;aplicarPermisos();pickTab('lama');});
-await check('usuario Lama conserva Mesas visible y navegable en modo demostración',async()=>
+await check('sesión de Local 1 conserva Mesas visible y navegable en modo demostración',async()=>
   page.evaluate(()=>vistaActual==='lama' && getComputedStyle(document.getElementById('tabLama')).display!=='none'));
 await page.evaluate(()=>{PERMISOS.puede_lama=false;aplicarPermisos();});
-await check('permiso retirado oculta Mesas en el menú',async()=>
-  page.evaluate(()=>document.getElementById('tabLama').style.display==='none'));
+await check('quitar el permiso administrativo no oculta la operación diaria de Mesas',async()=>
+  page.evaluate(()=>document.getElementById('tabLama').style.display!=="none"));
 await page.evaluate(()=>{pickTab('lama');});
-await check('usuario sin permiso tampoco abre Mesas por ruta directa',async()=>
-  page.evaluate(()=>vistaActual!=='lama'));
+await check('usuario autenticado de Local 1 abre Mesas por la ruta real',async()=>
+  page.evaluate(()=>vistaActual==='lama'));
 await page.evaluate(()=>{aplicarNavegacionDemo();});
 await check('modo demostración mantiene rutas permitidas',async()=>
-  page.locator('#mobileBottom button:visible').count().then(n=>n===3));
+  page.locator('#mobileBottom button:visible').count().then(n=>n===4));
 await page.evaluate(()=>{AJUSTES_VAL={};pickSede('central');});
 await check('Bodega ofrece Recibir y Enviar, no Mesas',async()=>
   page.evaluate(()=>!!document.querySelector('[data-mobile-tab="recepcion"]:not([hidden])') &&
