@@ -14170,6 +14170,7 @@ async function openModal(id){
   if(SEDE!=='plaza')MODAL_AREA_ROW=null;
   const fichaArea=SEDE==='plaza'&&!!MODAL_AREA_ROW;
   const configArea=fichaArea&&!!MODAL_AREA_ROW.area_id&&!!MODAL_AREA_ROW.configurado;
+  $('overlay').classList.toggle('modal-area-ficha',fichaArea);
   $('m-nombre').textContent=modalProd.producto;
   $('m-producto').value=modalProd.producto??'';
   /* La sección actual del producto se agrega aunque ya no exista en la lista:
@@ -14188,8 +14189,8 @@ async function openModal(id){
   $('m-min').value=configArea?(MODAL_AREA_ROW.stock_min??''):(modalProd.stock_min??'');
   $('m-max').value=configArea?(MODAL_AREA_ROW.stock_max??''):(modalProd.stock_max??'');
   $('m-limits-fields').style.display=fichaArea?'flex':'none';
-  $('m-min-label').textContent=configArea?'Mínimo en esta área':'Stock mínimo';
-  $('m-max-label').textContent=configArea?'Máximo en esta área':'Stock máximo';
+  $('m-min-label').textContent='Stock mínimo';
+  $('m-max-label').textContent='Stock máximo';
   $('m-min').disabled=SEDE==='plaza'&&(!fichaArea||!PERMISOS.puede_editar);
   $('m-max').disabled=SEDE==='plaza'&&(!fichaArea||!PERMISOS.puede_editar);
   $('m-tipo-row').style.display = hasTipo&&!fichaArea ? '' : 'none';
@@ -14276,6 +14277,8 @@ async function openModal(id){
   }
   const ajusteUbicacion=fichaArea?MODAL_AREA_ROW?.ubicacion_id:null;
   const puedeAjustar=!!PERMISOS.puede_editar&&(SEDE==='central'||(SEDE==='plaza'&&fichaArea&&!!ajusteUbicacion));
+  $('m-ajuste-title').hidden=!fichaArea;
+  $('m-ajuste-title').textContent='Stock actual';
   $('m-ajuste-panel').hidden=!puedeAjustar;
   $('m-ajuste-panel').style.display=puedeAjustar?'':'none';
   if(puedeAjustar) void cargarDesgloseAjuste(modalProd.id,ajusteUbicacion).then(()=>{
@@ -14385,7 +14388,7 @@ $('m-perec').addEventListener('change',()=>{
   if(!puedeLotes) pintarLotes([]);
   if(puedeSoloFecha) $('m-venc-single').value = modalProd.vencimiento ?? '';
 });
-function closeModal(){ $('overlay').classList.remove('open'); modalProd=null; MODAL_AREA_ROW=null; }
+function closeModal(){ $('overlay').classList.remove('open','modal-area-ficha'); modalProd=null; MODAL_AREA_ROW=null; }
 $('m-cancelar').addEventListener('click',closeModal);
 $('overlay').addEventListener('click',e=>{ if(e.target===$('overlay')) closeModal(); });
 $('m-menos').addEventListener('click',()=>{const i=$('m-stock');i.value=Math.max(0,(+i.value||0)-1);});

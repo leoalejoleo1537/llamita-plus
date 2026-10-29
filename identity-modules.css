@@ -390,6 +390,18 @@ body.ux-module-active #view-inv:not(.area-workspace-wide) #list{display:block}
 #m-ajuste-panel .stock-adjustment-line label{color:var(--text)}
 #m-ajuste-panel .stock-adjustment-line input{border:0;border-radius:12px;box-shadow:inset 0 0 0 1px var(--border)}
 
+/* Ficha dentro de un área: sigue el orden de trabajo del local. Primero se
+   ubica el producto, después se revisa el saldo y se definen sus límites. */
+#overlay.modal-area-ficha .modal{display:flex;flex-direction:column}
+#overlay.modal-area-ficha .modal-top{order:1}
+#overlay.modal-area-ficha #m-area-wrap{order:2;margin-top:4px}
+#overlay.modal-area-ficha #m-ajuste-panel{order:3;margin:10px 0 4px}
+#overlay.modal-area-ficha #m-ajuste-title{display:block;margin:0 0 7px;text-align:center;color:var(--muted);font-size:14px;font-weight:700}
+#overlay.modal-area-ficha #m-limits-fields{order:4;margin:6px 0 2px}
+#overlay.modal-area-ficha #m-urgente{order:5}
+#overlay.modal-area-ficha .mbtns{order:10}
+#overlay.modal-area-ficha #m-area-seccion-wrap{margin-bottom:0}
+
 @media(max-width:700px){
   #view-ajustes .area-admin-new,#view-ajustes .area-admin-row,#view-ajustes .area-section-admin-row{grid-template-columns:1fr}
   #view-ajustes .area-admin-actions{justify-content:stretch}

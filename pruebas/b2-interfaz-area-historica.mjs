@@ -24,6 +24,11 @@ check('La fila histórica abre el modal con el registro exacto de área',
 check('La ficha compacta de área conserva sección editable, límites y conteo auditado',
   ficha.includes('m-area-seccion-wrap')&&ficha.includes("m-limits-fields').style.display=fichaArea?'flex':'none'")
   &&ficha.includes('cargarDesgloseAjuste')&&ficha.includes("m-stock-field').style.display=fichaArea?'none'"));
+check('La ficha de área presenta sección, saldo y límites en el orden de trabajo móvil',
+  ficha.includes("$('overlay').classList.toggle('modal-area-ficha',fichaArea)")
+  &&ficha.includes("$('m-ajuste-title').textContent='Stock actual'")
+  &&ficha.includes("$('m-min-label').textContent='Stock mínimo'")
+  &&ficha.includes("$('m-max-label').textContent='Stock máximo'"));
 check('Guardar desde área usa la RPC atómica de ficha y nunca productos.stock_actual',
   guardado.indexOf("sb.rpc('producto_area_ficha_guardar'")<guardado.indexOf('const nombre=')&&guardado.slice(0,guardado.indexOf('const nombre=')).includes("SEDE==='plaza'&&MODAL_AREA_ROW"));
 check('La vista no reintroduce editor de stock, mermas, lotes ni Fudo en la ficha de área',
