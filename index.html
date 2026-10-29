@@ -4714,8 +4714,6 @@ function filaAreaHistorica(r){
     <div class="right"><span class="pill" style="background:${cf.bg};color:${cf.fg}">${cf.t}</span>
       <div class="area-quick-control">
         <input type="number" step="any" min="0" value="${cantidad}" readonly data-quick-stock data-producto-id="${p.id}" data-ubicacion-id="${esc(r.ubicacion_id||'')}" data-area-code="${esc(r.area_codigo)}" aria-label="Saldo contado de ${esc(p.producto)}" title="Toca para corregir el saldo contado">
-        <button type="button" class="area-quick-save" data-quick-save hidden aria-label="Guardar saldo contado de ${esc(p.producto)}">✓</button>
-        <button type="button" class="area-quick-cancel" data-quick-cancel hidden aria-label="Cancelar edición de ${esc(p.producto)}">×</button>
       </div><small class="area-unit">${esc(p.unidad||'')}</small></div>
   </div>`;
 }
@@ -13571,18 +13569,6 @@ listEl.addEventListener('click',e=>{
     if(openSecs.has(s)) deslizarSeccion(s);
     return;
   }
-  const guardarRapido=e.target.closest('[data-quick-save]');
-  if(guardarRapido){
-    const input=guardarRapido.closest('.area-quick-control')?.querySelector('[data-quick-stock]');
-    if(input) guardarConteoRapido(input);
-    return;
-  }
-  const cancelarRapido=e.target.closest('[data-quick-cancel]');
-  if(cancelarRapido){
-    const input=cancelarRapido.closest('.area-quick-control')?.querySelector('[data-quick-stock]');
-    if(input) cancelarConteoRapido(input);
-    return;
-  }
   const conteoRapido=e.target.closest('[data-quick-stock]');
   if(conteoRapido){iniciarConteoRapido(conteoRapido);return;}
   const info=e.target.closest('[data-open]'); if(!info)return;
@@ -13591,56 +13577,45 @@ listEl.addEventListener('click',e=>{
     : null;
   openModal(+info.dataset.open);
 });
-function controlesConteoRapido(input){
-  const box=input.closest('.area-quick-control');
-  return {box,guardar:box?.querySelector('[data-quick-save]'),cancelar:box?.querySelector('[data-quick-cancel]')};
-}
 function cancelarConteoRapido(input){
   input.value=input.dataset.stockOriginal??input.value;
   input.readOnly=true;input.removeAttribute('data-quick-editing');
-  const {box,guardar,cancelar}=controlesConteoRapido(input);
-  box?.classList.remove('editing','loading');guardar&&(guardar.hidden=true);cancelar&&(cancelar.hidden=true);
+  input.closest('.area-quick-control')?.classList.remove('editing','loading');
 }
-async function iniciarConteoRapido(input){
+function iniciarConteoRapido(input){
   if(!PERMISOS.puede_editar){avisar('Tu usuario no tiene permiso para corregir inventario.');return;}
   if(input.dataset.quickEditing==='true')return;
   const productoId=Number(input.dataset.productoId),ubicacionId=input.dataset.ubicacionId||null;
   if(!Number.isFinite(productoId)||!ubicacionId){avisar('No se encontró la ubicación física de este producto. Ábrelo para revisarlo.');return;}
-  const {box,guardar,cancelar}=controlesConteoRapido(input);
-  input.dataset.quickEditing='loading';box?.classList.add('loading');
-  const {data,error}=await conReintento(()=>sb.rpc('stock_ajuste_desglose_leer',{p_producto_id:productoId,p_ubicacion_id:ubicacionId}));
-  if(input.dataset.quickEditing!=='loading')return;
-  box?.classList.remove('loading');
-  if(error){input.removeAttribute('data-quick-editing');avisar(error.message||'No se pudo leer el saldo para corregirlo.');return;}
-  const lineas=Array.isArray(data?.lotes)?data.lotes:[];
-  /* Un lote, aunque sea el único, requiere conservar su identidad y vencimiento.
-     El editor de ficha ya muestra ese desglose y usa el mismo motor auditado. */
-  if(data?.tiene_lotes||lineas.length!==1||String(lineas[0]?.clave)!=='sin_lote'){
-    input.removeAttribute('data-quick-editing');
+  input.dataset.stockOriginal=input.value;input.dataset.quickEditing='true';input.readOnly=false;
+  input.closest('.area-quick-control')?.classList.add('editing');
+  input.focus();input.select();
+}
+async function guardarConteoRapido(input){
+  if(input.dataset.quickEditing!=='true'||input.dataset.quickSaving==='true')return;
+  const contado=Number(input.value);
+  if(!Number.isFinite(contado)||contado<0){avisar('El saldo contado debe ser un número igual o mayor que cero.');input.focus();return;}
+  if(String(contado)===String(Number(input.dataset.stockOriginal))){cancelarConteoRapido(input);return;}
+  const productoId=Number(input.dataset.productoId),ubicacionId=input.dataset.ubicacionId;
+  const box=input.closest('.area-quick-control');
+  const referencia=crypto?.randomUUID?.();
+  if(!referencia){avisar('Este navegador no puede generar una referencia segura para el ajuste.');return;}
+  input.dataset.quickSaving='true';input.readOnly=true;box?.classList.add('loading');
+  const desglose=await conReintento(()=>sb.rpc('stock_ajuste_desglose_leer',{p_producto_id:productoId,p_ubicacion_id:ubicacionId}));
+  if(desglose.error){input.removeAttribute('data-quickSaving');input.readOnly=false;box?.classList.remove('loading');avisar(desglose.error.message||'No se pudo validar el saldo contado.');return;}
+  const lineas=Array.isArray(desglose.data?.lotes)?desglose.data.lotes:[];
+  if(desglose.data?.tiene_lotes||lineas.length!==1||String(lineas[0]?.clave)!=='sin_lote'){
+    input.removeAttribute('data-quickSaving');input.removeAttribute('data-quick-editing');box?.classList.remove('editing','loading');
     const fila=AREA_ROWS.find(r=>String(r.producto_id)===String(productoId)&&String(r.ubicacion_id)===String(ubicacionId));
     MODAL_AREA_ROW=fila||null;openModal(productoId);
     aviso('Este producto usa lotes. Corrige cada lote o “Sin lote / vencimiento no informado” desde su ficha.');
     return;
   }
-  input.dataset.stockOriginal=String(lineas[0].cantidad??input.value??0);
-  input.value=input.dataset.stockOriginal;input.dataset.quickEditing='true';input.readOnly=false;
-  box?.classList.add('editing');guardar&&(guardar.hidden=false);cancelar&&(cancelar.hidden=false);
-  input.focus();input.select();
-}
-async function guardarConteoRapido(input){
-  if(input.dataset.quickEditing!=='true')return;
-  const contado=Number(input.value);
-  if(!Number.isFinite(contado)||contado<0){avisar('El saldo contado debe ser un número igual o mayor que cero.');input.focus();return;}
-  const productoId=Number(input.dataset.productoId),ubicacionId=input.dataset.ubicacionId;
-  const {box,guardar,cancelar}=controlesConteoRapido(input);
-  const referencia=crypto?.randomUUID?.();
-  if(!referencia){avisar('Este navegador no puede generar una referencia segura para el ajuste.');return;}
-  input.readOnly=true;guardar&&(guardar.disabled=true);cancelar&&(cancelar.disabled=true);box?.classList.add('loading');
   const {data,error}=await conReintento(()=>sb.rpc('stock_ajuste_guardar',{
     p_referencia:referencia,p_producto_id:productoId,p_ubicacion_id:ubicacionId,
     p_conteos:{sin_lote:contado},p_motivo:'Conteo/corrección manual desde inventario'
   }));
-  if(error){input.readOnly=false;guardar&&(guardar.disabled=false);cancelar&&(cancelar.disabled=false);box?.classList.remove('loading');avisar(error.message||'No se pudo guardar el saldo contado.');return;}
+  if(error){input.removeAttribute('data-quickSaving');input.readOnly=false;box?.classList.remove('loading');avisar(error.message||'No se pudo guardar el saldo contado.');return;}
   const fila=AREA_ROWS.find(r=>String(r.producto_id)===String(productoId)&&String(r.ubicacion_id)===String(ubicacionId));
   if(fila)fila.cantidad=contado;
   const producto=DATA.find(p=>String(p.id)===String(productoId));if(producto)producto.stock_actual=contado;
@@ -13650,8 +13625,12 @@ async function guardarConteoRapido(input){
 }
 listEl.addEventListener('keydown',e=>{
   const input=e.target.closest?.('[data-quick-stock]');if(!input||input.dataset.quickEditing!=='true')return;
-  if(e.key==='Enter'){e.preventDefault();guardarConteoRapido(input);}
-  if(e.key==='Escape'){e.preventDefault();cancelarConteoRapido(input);}
+  if(e.key==='Enter'){e.preventDefault();input.blur();}
+  if(e.key==='Escape'){e.preventDefault();cancelarConteoRapido(input);input.blur();}
+});
+listEl.addEventListener('focusout',e=>{
+  const input=e.target.closest?.('[data-quick-stock]');
+  if(input&&input.dataset.quickEditing==='true')guardarConteoRapido(input);
 });
 $('areaNav').addEventListener('click',e=>{
   const asignar=e.target.closest('[data-area-assign]');

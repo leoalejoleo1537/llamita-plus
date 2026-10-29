@@ -19,7 +19,8 @@ check('Productos configurados con saldo cero aparecen identificados sin confundi
   area.includes('Configurado · sin existencias')&&area.includes('r.configurado||Number(r.cantidad)!==0'));
 check('Saldo de fila viene del ledger y se corrige solo mediante el ajuste auditado',
   area.includes('stock_actual:cantidad')&&area.includes('data-quick-stock')&&html.includes("sb.rpc('stock_leer_areas'")
-  &&html.includes("sb.rpc('stock_ajuste_guardar'")&&html.includes("p_motivo:'Conteo/corrección manual desde inventario'"));
+  &&html.includes("sb.rpc('stock_ajuste_guardar'")&&html.includes("p_motivo:'Conteo/corrección manual desde inventario'")
+  &&html.includes("listEl.addEventListener('focusout'")&&!area.includes('data-quick-save'));
 check('La fila histórica abre el modal con el registro exacto de área',
   html.includes('data-area-code="${esc(r.area_codigo)}"')&&html.includes('AREA_ROWS.find(r=>String(r.producto_id)===String(info.dataset.open)&&r.area_codigo===info.dataset.areaCode)'));
 check('La ficha compacta de área conserva sección editable, límites y conteo auditado',

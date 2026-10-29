@@ -181,11 +181,10 @@ await check('buscar leche en Cafetería aísla la lectura a esa ubicación',asyn
     &&!t.includes('Azúcar blanca')&&!t.includes('999');
 });
 await page.locator('#list .row[data-row="1"] [data-quick-stock]').click();
-await page.waitForSelector('#list .row[data-row="1"] [data-quick-save]:not([hidden])');
 await page.locator('#list .row[data-row="1"] [data-quick-stock]').fill('3.25');
-await page.locator('#list .row[data-row="1"] [data-quick-save]').click();
+await page.locator('#q').click();
 await page.waitForTimeout(30);
-await check('la edición rápida guarda un saldo contado por ledger, con motivo fijo y sin DML directo',async()=>{
+await check('la edición rápida guarda al tocar fuera, por ledger, con motivo fijo y sin DML directo',async()=>{
   const llamada=await page.evaluate(()=>window.__rpcArgs.findLast(x=>x.name==='stock_ajuste_guardar'));
   return llamada?.args?.p_producto_id===1&&llamada.args.p_ubicacion_id==='loc-cafeteria'
     &&llamada.args.p_conteos.sin_lote===3.25
