@@ -14,7 +14,7 @@ check('el acceso secundario abre la sección protegida existente de Ajustes',
 check('cada área ofrece agregar el producto maestro de Bodega, no crear un producto local aislado',
   html.includes('data-area-assign=')&&html.includes('Agregar producto de Bodega')&&!html.includes('Crear producto nuevo'));
 check('la incorporación escribe vínculo y configuración mediante la RPC protegida',
-  html.includes("sb.rpc('bodega_producto_area_agregar'")&&html.includes('function guardarProductoEnArea()'));
+  html.includes("sb.rpc('panel_producto_area_configurar'")&&html.includes('function guardarProductoEnArea()'));
 check('la búsqueda consulta el catálogo maestro y tolera variaciones del lado servidor',
   html.includes("sb.rpc('bodega_productos_area_buscar'")&&html.includes('normNombre(q).length<2'));
 const flujoSimple=html.slice(html.indexOf('/* Presentación simplificada del alta'),html.indexOf('async function elegirRepresentacionBodega'));

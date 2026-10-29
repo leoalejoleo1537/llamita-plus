@@ -13525,15 +13525,11 @@ async function guardarProductoEnArea(){
   const seccionId=$('area-producto-seccion')?.value||BODEGA_AREA_SECCION_ID||null;
   if(areaId&&!seccionId){avisar('Elige o crea una sección física antes de agregar el producto.');return;}
   const btn=$('area-producto-guardar');btn.disabled=true;btn.textContent='Agregando producto…';
-  const {data,error}=await conReintento(()=>sb.rpc('bodega_producto_area_agregar',{
-    p_producto_bodega_id:p.producto_bodega_id,
-    p_producto_plaza_id:BODEGA_AREA_CREAR_REP?null:Number(BODEGA_AREA_REP_ID),
-    p_crear_representacion:BODEGA_AREA_CREAR_REP,
-    p_area_id:areaId,
-    p_seccion_id:seccionId,
-    p_stock_min:min,p_stock_max:max,
-    p_es_principal:!AREA_ROWS.some(r=>String(r.producto_id)===String(BODEGA_AREA_REP_ID)&&r.es_principal),
-    p_confirmar:true
+  const {data,error}=await conReintento(()=>sb.rpc('panel_producto_area_configurar',{
+    p_referencia:crypto.randomUUID(),p_maestro_id:Number(p.producto_bodega_id),
+    p_representacion_id:BODEGA_AREA_CREAR_REP?null:Number(BODEGA_AREA_REP_ID),
+    p_area_id:areaId,p_seccion_id:seccionId,p_stock_min:min,p_stock_max:max,
+    p_es_principal:!AREA_ROWS.some(r=>String(r.producto_id)===String(BODEGA_AREA_REP_ID)&&r.es_principal)
   }));
   btn.textContent=`Agregar a ${areaLabel(codigo)}`;
   if(error){btn.disabled=false;avisar(error.message||'No se pudo vincular el producto.');return;}

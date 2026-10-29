@@ -43,7 +43,7 @@ await page.addInitScript(()=>{
       producto_bodega_id:501,nombre_bodega:'Helado de vainilla premium',rubro:'Congelador',tipo:'Helados',unidad:'un',stock_bodega:7,
       representaciones:[],posibles_representaciones:[]
     }]);
-    if(name==='bodega_producto_area_agregar'){
+    if(name==='panel_producto_area_configurar'){
       window.__rpcWrites.push({name,args});
       return wrap({producto_bodega_id:501,producto_plaza_id:99,area_id:args.p_area_id,
         representacion_creada:true,vinculo_creado:true,ya_configurado:false,saldo_movido:false});
@@ -89,10 +89,10 @@ await check('producto maestro muestra Bodega, representación local y ausencia d
   const t=await page.locator('#area-producto-detalle').innerText();return t.includes('Producto maestro')&&t.includes('Bodega: 7')&&t.includes('saldo cero')&&t.includes('no mueve existencias');
 });
 await page.click('#area-producto-guardar');
-await page.waitForFunction(()=>window.__rpcWrites.some(x=>x.name==='bodega_producto_area_agregar'));
+await page.waitForFunction(()=>window.__rpcWrites.some(x=>x.name==='panel_producto_area_configurar'));
 await check('usa RPC del vínculo, exige confirmación y no modifica tablas desde el navegador',async()=>page.evaluate(()=>{
-  const w=window.__rpcWrites.find(x=>x.name==='bodega_producto_area_agregar');
-  return !!w&&w.args.p_producto_bodega_id===501&&w.args.p_crear_representacion&&w.args.p_confirmar&&
+  const w=window.__rpcWrites.find(x=>x.name==='panel_producto_area_configurar');
+  return !!w&&w.args.p_maestro_id===501&&w.args.p_representacion_id===null&&!!w.args.p_referencia&&
     window.__tableWrites.length===0&&window.__fudoCalls.length===0;
 }));
 await page.evaluate(()=>{PERMISOS.puede_ajustes=false;PERMISOS.puede_editar=false;aplicarPermisos();pickTab('inv');render();});
