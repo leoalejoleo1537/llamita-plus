@@ -3692,7 +3692,9 @@
   <!-- Salida y entrada son el mismo trabajo visto al revés, así que viven en la
        misma pestaña. Entra por SALIDA porque es lo que se hace todos los días. -->
 
-  <div id="repc-salida">
+  <!-- Motor histórico preservado sin inicializar: no se ofrece porque mezcla
+       franquicias ajenas con el reparto por áreas de Local 1. -->
+  <div id="repc-salida" hidden>
 
   <!-- ---- A DÓNDE VA ----
        Un solo selector para los siete destinos: los dos locales con Llamita y
@@ -18853,7 +18855,7 @@ function pickTab(tab){
     }
     loadRepartos();
   }
-  if(esEnvios){f2CargarAreas();loadEnlaces().then(()=>repcModo('salida'));}
+  if(esEnvios) f2CargarAreas();
   /* Abre siempre en la portada, no en el último modo que se dejó: mientras
      jefatura está aprendiendo, lo primero que tienen que ver es dónde está el
      hueco. Cuando ya se sepa de memoria, esto pasa a abrir en el taller. */
