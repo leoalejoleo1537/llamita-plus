@@ -5430,6 +5430,11 @@ function terminarGestoMenu(cancelado=false){
   if(!gesto) return;
   gestoMenu=null;
   document.body.classList.remove('mobile-menu-gesturing');
+  /* Un toque dentro del cajón no es un gesto de cierre. Antes llegaba aquí
+     con `tomado=false` y el simple pointerup cerraba el menú ANTES del click
+     de la ruta; por eso parecía que las opciones no respondían. Sólo un
+     arrastre horizontal que ya superó el umbral puede decidir su estado. */
+  if(!gesto.tomado) return;
   if(gesto.tomado && !cancelado){
     const abrir=gesto.sentido==='abrir' && gesto.progreso>=.32;
     const mantener=gesto.sentido==='cerrar' && gesto.progreso>=.68;
