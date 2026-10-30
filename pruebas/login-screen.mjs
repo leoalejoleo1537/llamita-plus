@@ -267,6 +267,23 @@ for(const [width,height,nombre] of [[1440,900,'escritorio'],[390,844,'móvil']])
       &&document.documentElement.scrollHeight<=document.documentElement.clientHeight;
   })||'logo, opciones o espacio incorrectos');
 }
+/* El tema se guarda al elegirlo dentro de la app y debe seguir presente en
+   la siguiente sesión, antes de que JavaScript alcance a montar una sede. */
+await page.evaluate(()=>localStorage.setItem('llamita_areas_tema','dark'));
+await page.reload(); await page.waitForTimeout(280);
+await page.fill('#login-email','jhon@cafe.cl'); await page.fill('#login-pass','unaClave123');
+await page.click('#login-btn'); await page.waitForTimeout(350);
+if(process.env.CAPTURA_LOGIN) await page.screenshot({path:`${process.env.CAPTURA_LOGIN}-sede-oscuro.png`});
+await caso('el selector de sede conserva el modo oscuro y sus superficies',async()=>page.evaluate(()=>{
+  const gate=document.querySelector('#gate'),box=gate?.querySelector('.gate-box'),btn=gate?.querySelector('.gate-btn');
+  const color=e=>getComputedStyle(e).backgroundColor;
+  const listo=document.documentElement.dataset.tema==='dark'
+    &&color(gate)==='rgb(16, 21, 18)'
+    &&color(box)==='rgb(27, 34, 30)'
+    &&color(btn)==='rgb(27, 34, 30)'
+    &&getComputedStyle(btn).color==='rgb(246, 255, 248)';
+  return listo||`tema=${document.documentElement.dataset.tema}; cuerpo=${document.body.className}; fondo=${color(gate)}; tarjeta=${color(box)}; botón=${color(btn)}; texto=${getComputedStyle(btn).color}`;
+}));
 await caso('la sidebar sigue sin contener el logo oficial',async()=>await page.locator('#drawer img').count()===0);
 
 console.log('\nY NINGÚN ERROR DE JAVASCRIPT:');

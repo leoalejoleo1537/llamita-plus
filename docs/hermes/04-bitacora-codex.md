@@ -52,6 +52,12 @@ El cajón actual conserva las rutas y etiquetas accesibles y tiene ancho máximo
 
 La recomendación es prototipar la opción 1 antes de reemplazar la navegación; esta nota no cambia la navegación actual. La ruta Mesas ya aparece en el menú móvil para cuentas con `puede_lama` y sedes habilitadas. El permiso y las restricciones por sede siguen siendo la autoridad: no se habilita Mesas a cuentas no autorizadas desde CSS o por defecto.
 
+## 2026-10-30 — Punto 1: selector de sede y modo oscuro
+
+- El selector de sede toma sus superficies directamente del tema guardado antes de que JavaScript monte una sede. En oscuro usa fondo `#101512`, tarjeta y botones `#1B221E`, texto `#F6FFF8`, secundario `#AAB7AF` y énfasis `#F35B04`.
+- No depende de clases de una vista interior: volver a elegir sede, recargar la aplicación o iniciar una sesión con el tema oscuro guardado conserva la misma apariencia sin un destello blanco.
+- Se incorporó una prueba de navegador que guarda el tema oscuro, reinicia la sesión y comprueba colores reales del selector. También valida que no haya desborde en escritorio y teléfono.
+
 ## 2026-10-23 — Corrección visual transversal: Ajustes, Productos y recepciones por área
 
 ### Plan ejecutado
