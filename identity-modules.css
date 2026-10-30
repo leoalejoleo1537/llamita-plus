@@ -232,6 +232,85 @@ body.identidad-oscura #view-lama{
 #view-reparto .cerr-cab{padding:14px 17px}
 #view-reparto .cerr-body{background:var(--card);border:0;box-shadow:var(--sombra)}
 #view-reparto .sec-btn,#view-repcentral .sec-btn{font-size:15px}
+
+/* Reparto · recibir no es una planilla ni un mensaje de sistema. El reparto
+   se lee como una serie de decisiones: qué llegó, cuánto y qué faltó. Los
+   mismos botones y atributos conservan la recepción, fechas y auditoría. */
+#view-reparto{max-width:1120px}
+#view-reparto #sec-armar{margin-bottom:22px}
+#view-reparto #sec-armar .sec-head{border-radius:19px;box-shadow:var(--sombra),inset 4px 0 0 var(--orange)}
+#view-reparto #sec-armar .sec-body{padding:13px 2px 2px}
+#view-reparto #sec-armar .controls.busca{margin:0 0 10px!important}
+#view-reparto #sec-armar .controls.busca input,#view-reparto #rep-nombre{
+  min-height:46px;border:0;border-radius:13px;background:var(--card);color:var(--text);
+  box-shadow:inset 0 0 0 1px var(--border);
+}
+#view-reparto #reparto-results .rep-result{border:0;border-radius:15px;background:var(--card);box-shadow:var(--sombra)}
+#view-reparto #carrito-box{margin:13px 0 4px;padding:15px;border:0;border-radius:18px;background:var(--card);box-shadow:var(--sombra)}
+#view-reparto #carrito-box .cart-title{margin:0 0 10px;color:var(--text);font-size:15px}
+#view-reparto #btnRegistrarReparto{min-height:46px;border-radius:13px}
+#view-reparto #repartos-abiertos .turno{margin:0 0 22px}
+#view-reparto #repartos-abiertos .turno-lbl{padding:0 3px 8px;color:var(--muted);font-size:11px;letter-spacing:.12em}
+#view-reparto .rep-abierto{margin:0 0 13px}
+#view-reparto .rep-abierto>.sec-head{border-radius:18px;box-shadow:var(--sombra),inset 4px 0 0 var(--orange)}
+#view-reparto .rep-abierto>.sec-head .sec-btn{min-height:62px;padding:14px 13px 14px 18px;font-size:15px}
+#view-reparto .rep-abierto>.sec-head .sec-btn>b{font-weight:780}
+#view-reparto .rep-progress{display:flex;align-items:baseline;gap:4px;min-width:55px;justify-content:flex-end;color:var(--muted);font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+#view-reparto .rep-progress b{color:var(--text);font-size:16px;font-weight:800}
+#view-reparto .rep-progress span{font-weight:680}
+#view-reparto .rep-abierto>.sec-body{display:grid;gap:9px;padding:10px 0 2px}
+#view-reparto .rep-fila{margin:0;padding:14px 15px;border:0;border-radius:17px;background:var(--card);box-shadow:var(--sombra)}
+#view-reparto .rep-fila .lin1{align-items:baseline;gap:12px}
+#view-reparto .rep-fila .nm{font-size:15px;font-weight:770;line-height:1.3;overflow-wrap:anywhere}
+#view-reparto .rep-fila .ped{flex:0 0 auto;color:var(--muted);font-size:12px;font-weight:620;white-space:nowrap}
+#view-reparto .rep-pendiente{gap:11px}
+#view-reparto .rep-acc{display:grid;grid-template-columns:minmax(0,1fr) 72px 46px;gap:8px;align-items:center}
+#view-reparto .rep-bt{min-height:46px;height:46px;padding:0 12px;border:0;border-radius:12px;background:var(--bg);color:var(--text);font-size:14px;font-weight:750;box-shadow:none}
+#view-reparto .rep-bt.si{background:var(--green-bg);color:var(--green-fg)}
+#view-reparto .rep-bt.no{width:46px;height:46px;min-height:46px;padding:0;justify-self:end;border:0;border-radius:12px;background:var(--red-bg);color:var(--red-fg);font-size:25px;font-weight:430}
+#view-reparto .rep-cant{width:72px;height:46px;min-height:46px;padding:7px 6px;border:0;border-radius:12px;background:var(--bg);color:var(--text);box-shadow:inset 0 0 0 1px var(--border);font-size:17px;font-weight:780}
+#view-reparto .rep-resuelta{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:9px 12px}
+#view-reparto .rep-resuelta .lin1{grid-column:1/-1}
+#view-reparto .rep-estado{margin:0;padding:0;background:transparent!important;border-radius:0;color:var(--muted);font-size:13px;font-weight:730}
+#view-reparto .rep-estado.rec{color:var(--green-fg)}
+#view-reparto .rep-estado.nol{color:var(--red-fg)}
+#view-reparto .rep-deshacer{justify-self:end;padding:7px 3px;color:var(--muted);font-size:12px;font-weight:680;text-decoration:none}
+#view-reparto .rep-deshacer:hover{color:var(--text);text-decoration:underline}
+#view-reparto .rep-add{padding:5px 3px;color:var(--orange-dark);font-size:13px;font-weight:740}
+#view-reparto .rep-bodega{margin:0;border:0;border-radius:13px;box-shadow:none}
+#view-reparto .sec-body>.btn.btn-orange{min-height:46px;margin-top:1px!important;border-radius:13px}
+#view-reparto #sec-cerrados{margin-top:8px}
+#view-reparto #sec-cerrados>.sec-head{box-shadow:var(--sombra),inset 4px 0 0 var(--linea)}
+#view-reparto .cerr{margin:0 0 9px}
+#view-reparto .cerr-cab{gap:3px;padding:14px 16px;border:0;border-radius:16px;background:var(--card);box-shadow:var(--sombra)}
+#view-reparto .cerr.open .cerr-cab{border-radius:16px 16px 0 0}
+#view-reparto .cerr-nom{font-size:14px;font-weight:750}
+#view-reparto .cerr-res{font-size:12px;color:var(--muted)}
+#view-reparto .cerr-body{padding:7px 15px 12px;border-radius:0 0 16px 16px}
+#view-reparto .cerr-lin{padding:8px 0;border-color:var(--border)}
+
+/* Recepción por fechas: la fecha es un campo, no una explicación. */
+#overlay-recibir .modal-recepcion{max-width:430px}
+#overlay-recibir .modal-recepcion h2{margin-bottom:3px;letter-spacing:-.025em}
+#overlay-recibir .modal-recepcion .mr{margin:0 0 16px;color:var(--muted);font-size:13px;line-height:1.35}
+#overlay-recibir .modal-recepcion .field{padding:14px;border:0;border-radius:16px;background:var(--bg)}
+#overlay-recibir .modal-recepcion .field>label{margin:0 0 10px;color:var(--text);font-size:13px;font-weight:760}
+#overlay-recibir .modal-recepcion .lote-cab{margin:0 0 6px;color:var(--muted);font-size:10px;font-weight:720;letter-spacing:.035em;text-transform:uppercase}
+#overlay-recibir .modal-recepcion .lote-row{margin-bottom:8px}
+#overlay-recibir .modal-recepcion .lote-row input{border:0;background:var(--card);color:var(--text);box-shadow:inset 0 0 0 1px var(--border)}
+#overlay-recibir .modal-recepcion .lote-row .lote-del{border:0;background:var(--red-bg);color:var(--red-fg)}
+#overlay-recibir .modal-recepcion #btnRecAddLote{border:0;background:var(--card);box-shadow:inset 0 0 0 1px var(--border)}
+#overlay-recibir .modal-recepcion .suma-rec{margin:12px 0 0;padding:12px 14px;border-radius:14px;background:var(--bg);color:var(--text)}
+#overlay-recibir .modal-recepcion .mbtns{margin-top:14px}
+
+/* La recepción dentro de un área comparte el mismo patrón: producto, pedido,
+   llegada, cifra y descarte. La ruta física ya está resuelta por el reparto,
+   así que no se repite como texto de ayuda en cada fila. */
+:where(body.ux-module-active,.area-workspace-wide) .f2-receipt-title span{white-space:normal;overflow-wrap:anywhere}
+:where(body.ux-module-active,.area-workspace-wide) .f2-receipt-title b{font-size:15px;font-weight:770;overflow-wrap:anywhere}
+:where(body.ux-module-active,.area-workspace-wide) .f2-receipt-title{align-items:baseline}
+:where(body.ux-module-active,.area-workspace-wide) .f2-receipt-line{box-shadow:none}
+:where(body.ux-module-active,.area-workspace-wide) .f2-actions .btn{min-height:46px;border-radius:12px}
 #view-repcentral .repc-dest button.on{background:var(--text);color:var(--card)}
 #view-repcentral .repc-cajas .sec-head{background:var(--card)}
 #view-repcentral .rf-caja{min-height:0}
@@ -489,6 +568,17 @@ body.ux-module-active #view-inv:not(.area-workspace-wide) #list{display:block}
   :where(body.ux-module-active,.area-workspace-wide) .f2-result .f2-main{grid-column:1/-1}
   :where(body.ux-module-active,.area-workspace-wide) .f2-result select{grid-column:1;width:100%;max-width:none}
   :where(body.ux-module-active,.area-workspace-wide) .f2-result [data-f2-add]{grid-column:2}
+  #view-reparto #sec-armar{margin-bottom:18px}
+  #view-reparto .rep-abierto>.sec-head .sec-btn{min-height:58px;padding-left:16px;font-size:14px}
+  #view-reparto .rep-fila{padding:13px}
+  #view-reparto .rep-fila .lin1{align-items:flex-start;flex-direction:column;gap:3px}
+  #view-reparto .rep-fila .ped{white-space:normal}
+  #view-reparto .rep-acc{grid-template-columns:minmax(0,1fr) 64px 44px;gap:7px}
+  #view-reparto .rep-bt,#view-reparto .rep-cant{height:44px;min-height:44px}
+  #view-reparto .rep-cant{width:64px;font-size:16px}
+  #view-reparto .rep-bt.no{width:44px;height:44px;min-height:44px}
+  #view-reparto .rep-resuelta{grid-template-columns:minmax(0,1fr) auto}
+  #overlay-recibir .modal-recepcion .field{padding:12px}
 }
 
 /* Mermas: el prototipo no habilita una operación pausada. Solo lectura. */

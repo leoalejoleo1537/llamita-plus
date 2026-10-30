@@ -3604,15 +3604,15 @@
 </div>
 
 <!-- ================= MODAL: CONFIRMAR UN PERECEDERO ================= -->
-<div class="overlay" id="overlay-recibir">
-  <div class="modal">
+<div class="overlay overlay-blur" id="overlay-recibir">
+  <div class="modal modal-recepcion">
     <h2 id="rec-prod">Producto</h2>
     <p class="mr" id="rec-pedido">—</p>
     <div class="field" style="margin-top:0">
-      <label>Cuánto llegó, por fecha</label>
+      <label>Recepción por fecha</label>
       <div class="lote-cab"><span>Cantidad</span><span>Vence</span></div>
       <div id="rec-lotes"></div>
-      <button type="button" class="btn btn-outline btn-sm" id="btnRecAddLote" style="margin-top:8px">+ Agregar fecha</button>
+      <button type="button" class="btn btn-outline btn-sm" id="btnRecAddLote" style="margin-top:8px">+ Fecha</button>
     </div>
     <div class="suma-rec"><span>Recibido</span><b id="rec-suma">0</b></div>
     <div class="mbtns">
@@ -15089,7 +15089,7 @@ function pintarRepartosArea(){
     <div>${abiertos.length?abiertos.map(r=>`<div class="f2-rep" data-f2-recibir="${r.id}">
       <div class="f2-rep-title"><b>${esc(r.nombre||'Reparto de Bodega')}</b><span class="f2-tag">${new Date(r.creado_at).toLocaleString('es-CL')}</span></div>
       ${(r.items||[]).map(i=>`<div class="f2-receipt-line" data-f2-item="${i.id}">
-        <div class="f2-receipt-title"><b>${esc(i.producto)}</b><span>${esc(areaLabel(areaActual))} → ${esc(i.seccion_destino_nombre||'Sección histórica no informada')} · pidió ${fmt(i.cantidad_preparada)}</span></div>
+        <div class="f2-receipt-title"><b>${esc(i.producto)}</b><span>Pidió ${fmt(i.cantidad_preparada)}${i.vencimiento?' · vence '+fmtCorta(i.vencimiento):''}</span></div>
         <div class="f2-receipt-actions">
           <button type="button" class="f2-arrived" data-f2-llego="${i.id}" data-f2-preparada="${esc(String(i.cantidad_preparada))}">✓ Llegó${i.vencimiento?' · vence '+fmtCorta(i.vencimiento):''}</button>
           <input class="f2-qty" type="number" min="0" step="any" value="${i.cantidad_preparada}" data-f2-recibida="${i.id}" aria-label="Cantidad recibida de ${esc(i.producto)}">
@@ -15195,9 +15195,9 @@ function repItemHTML(it){
   if(it.estado==='pendiente'){
     const btnSi = perec
       ? `<button type="button" class="rep-bt si" data-fechas="${it.id}">✓ Llegó · fechas</button>`
-      : `<button type="button" class="rep-bt si" data-recibir="${it.id}">✓ Llegó · suma a Fudo</button>
+      : `<button type="button" class="rep-bt si" data-recibir="${it.id}">✓ Llegó</button>
          <input type="number" class="rep-cant" step="0.5" min="0" value="${fmt(cantInicial(it))}" data-cant="${it.id}" aria-label="Cantidad recibida">`;
-    return `<div class="rep-fila" data-item="${it.id}">
+    return `<div class="rep-fila rep-pendiente" data-item="${it.id}">
       <div class="lin1"><span class="nm">${esc(it.producto)}</span><span class="ped">${pedidoTxt(it)}</span></div>
       <div class="rep-acc">${btnSi}
         <button type="button" class="rep-bt no" data-rechazar="${it.id}" aria-label="No llegó">✕</button>
@@ -15207,7 +15207,7 @@ function repItemHTML(it){
   const est = it.estado==='recibido'
     ? `<span class="rep-estado rec">✓ Recibido ${fmt(it.cantidad_recibida)}</span>`
     : `<span class="rep-estado nol">✕ No llegó</span>`;
-  return `<div class="rep-fila" data-item="${it.id}">
+  return `<div class="rep-fila rep-resuelta" data-item="${it.id}">
     <div class="lin1"><span class="nm">${esc(it.producto)}</span><span class="ped">${pedidoTxt(it)}</span></div>
     ${est}
     <button type="button" class="rep-deshacer" data-deshacer="${it.id}">Deshacer</button>
@@ -15222,11 +15222,11 @@ function renderRepartos(){
   const htmlAbiertos = abiertos.map(r=>{
     const hechos = r.items.filter(i=>i.estado!=='pendiente').length;
     const abierta = cajasAbiertas.has('rep'+r.id) || abiertos.length===1;
-    return `<div class="sec${abierta?' open':''}" data-repsec="${r.id}">
+    return `<div class="sec rep-abierto${abierta?' open':''}" data-repsec="${r.id}">
       <div class="sec-head">
         <button type="button" class="sec-btn" data-caja="rep${r.id}">
           <span>${r.nombre?'<b>'+esc(r.nombre)+'</b> · ':''}${r.creado_por?esc(r.creado_por)+' · ':''}${new Date(r.created_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'})}</span>
-          <span class="sec-tags"><span class="sec-count">${hechos} de ${r.items.length}</span></span>
+          <span class="sec-tags"><span class="rep-progress"><b>${hechos}</b><span>de ${r.items.length}</span></span></span>
         </button>
         <button type="button" class="sec-copy" data-copiarrep="${r.id}" aria-label="Copiar resumen" title="Copiar resumen">${COPY_SVG}</button>
       </div>
