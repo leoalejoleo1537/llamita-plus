@@ -111,6 +111,42 @@ body.area-workspace-active .area-page-heading .area-portal-art svg {
   stroke-width: 2.1;
 }
 
+/* Inventario y repartos son dos trabajos distintos. La pestaña mantiene la
+   lista de entregas —incluido su historial— fuera del inventario diario, sin
+   crear otra ruta ni duplicar los datos de recepción. */
+body.area-workspace-active .area-workspace-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin: -4px 0 18px;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--area-soft);
+}
+body.area-workspace-active .area-workspace-tabs[hidden] { display: none; }
+body.area-workspace-active .area-workspace-tabs button {
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--area-muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 690;
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+body.area-workspace-active .area-workspace-tabs button:hover { color: var(--area-ink); }
+body.area-workspace-active .area-workspace-tabs button.active {
+  background: var(--area-card);
+  color: var(--area-ink);
+  box-shadow: var(--area-shadow);
+}
+body.area-workspace-active #areaRepartos { margin: 0; }
+body.area-workspace-active #areaRepartos .f2-receptions > .f2-head { padding-top: 2px; }
+body.area-workspace-active #areaRepartos .f2-history { margin-top: 18px; }
+
 body.area-workspace-active .inv-filtros { margin-bottom: 15px; }
 body.area-workspace-active .inv-busca {
   min-height: 49px;
@@ -357,6 +393,8 @@ body.area-workspace-active .area-tipo-pills button:focus-visible {
   body.area-workspace-active .area-page-heading { min-height: 48px; margin-bottom: 15px; gap: 8px; }
   body.area-workspace-active .area-page-heading h2 { font-size: 28px; }
   body.area-workspace-active .area-page-heading .area-portal-art { display: none; }
+  body.area-workspace-active .area-workspace-tabs { width: 100%; margin: -3px 0 15px; }
+  body.area-workspace-active .area-workspace-tabs button { flex: 1 1 0; min-height: 42px; padding: 8px 10px; }
   body.area-workspace-active .inv-filtros { margin-bottom: 13px; }
   body.area-workspace-active .inv-busca { min-height: 45px; padding: 0 12px; }
   body.area-workspace-active .area-tipo-pills { margin-bottom: 14px; }

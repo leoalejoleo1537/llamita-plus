@@ -55,7 +55,7 @@ await page.addInitScript(({productos,permisos,lectura,catalogo})=>{
         return Promise.resolve({data:{producto_id:args?.p_producto_id,sede:central?'central':'plaza',ubicacion_id:args?.p_ubicacion_id||'loc-bodega',tiene_lotes:false,saldo_total:cantidad,lotes:[{clave:'sin_lote',lote_id:null,vencimiento:null,etiqueta:'Stock físico',cantidad}]},error:null});
       }
       if(name==='stock_ajuste_guardar')return Promise.resolve({data:{repetido:false,lineas:[{diferencia:0.25}]},error:null});
-      return Promise.resolve({data:name==='stock_leer_areas'?lectura:name==='areas_operativas_listar'?catalogo:[],error:null});
+      return Promise.resolve({data:name==='stock_leer_areas'?lectura:name==='areas_operativas_listar'?catalogo:name==='repartos_area_listar'?(window.__areaRepartosMock||[]):[],error:null});
     },
     auth:{getSession:async()=>({data:{session:SES}}),getUser:async()=>({data:{user:SES.user}}),
       onAuthStateChange(cb){setTimeout(()=>cb&&cb('SIGNED_IN',SES),0);return {data:{subscription:{unsubscribe(){}}}};},
@@ -200,8 +200,19 @@ await page.evaluate(()=>{
     ]},
     {id:'rep-cerrado',estado:'recibido',nombre:'Reparto anterior',resultado:{total_recibido:3,total_ajustado:0}}
   ];
+  window.__areaRepartosMock=REPARTOS_AREA;
   pintarRepartosArea();
 });
+await check('el área separa Inventario y Repartos en pestañas',async()=>page.evaluate(()=>
+  !document.getElementById('areaWorkspaceTabs').hidden&&
+  document.querySelector('[data-area-view="inventario"]')?.getAttribute('aria-selected')==='true'&&
+  getComputedStyle(document.getElementById('areaRepartos')).display==='none'));
+await page.click('[data-area-view="repartos"]');
+await check('Repartos mantiene pendientes y cerrados fuera del inventario',async()=>page.evaluate(()=>
+  getComputedStyle(document.getElementById('areaRepartos')).display!=='none'&&
+  getComputedStyle(document.getElementById('list')).display==='none'&&
+  document.getElementById('areaRepartos').textContent.includes('Por recibir')&&
+  document.getElementById('areaRepartos').textContent.includes('Cerrados')));
 await check('recepción usa lista compacta e historial plegado',async()=>page.evaluate(()=>
   document.querySelectorAll('.f2-receipt-line').length===2&&
   !document.querySelector('.f2-history').open&&
@@ -221,6 +232,7 @@ await check('la X marca cero sin cerrar ni escribir el reparto',async()=>page.ev
   document.querySelector('[data-f2-recibida="item-2"]').value==='0'&&
   document.querySelector('[data-f2-item="item-2"]').classList.contains('is-rejected')&&
   !window.__rpcArgs.some(x=>x.name==='reparto_area_recibir')));
+await page.click('[data-area-view="inventario"]');
 await page.locator('#list .row[data-row="1"] [data-open]').click();
 await page.waitForSelector('#m-ajuste-panel:not([hidden])');
 await check('ficha de área ofrece cantidad decimal sin texto técnico ni motivo visible',async()=>

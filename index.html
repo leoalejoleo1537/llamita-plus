@@ -3487,7 +3487,11 @@
 <div class="wrap" id="view-inv">
   <div class="area-nav" id="areaNav" style="display:none"></div>
   <div class="area-page-heading" id="area-page-heading" hidden></div>
-  <div id="areaRepartos" style="display:none"></div>
+  <nav class="area-workspace-tabs" id="areaWorkspaceTabs" role="tablist" aria-label="Vista del área" hidden>
+    <button type="button" data-area-view="inventario" id="areaTabInventario" role="tab" aria-controls="list">Inventario</button>
+    <button type="button" data-area-view="repartos" id="areaTabRepartos" role="tab" aria-controls="areaRepartos">Repartos</button>
+  </nav>
+  <div id="areaRepartos" role="tabpanel" aria-labelledby="areaTabRepartos" style="display:none"></div>
   <div class="area-note" id="areaNote" style="display:none"></div>
   <div class="inv-filtros" id="invFiltros">
     <label class="inv-busca" for="q">
@@ -3514,7 +3518,7 @@
   <!-- La meta viva, arriba del inventario. Una competencia que hay que ir
        a buscar a Ajustes no compite con nada. -->
   <div id="metaPortada" style="display:none"></div>
-  <div id="list"></div>
+  <div id="list" role="tabpanel" aria-labelledby="areaTabInventario"></div>
   <button class="fab" id="btnNuevo" title="Agregar producto" aria-label="Agregar producto">+</button>
 </div>
 
@@ -4421,6 +4425,7 @@ let AREA_SOLICITUD = 0;
 let areaActual = null;              // null=portada; '__todas__'=vista global; otro=ubicación plaza
 const AREA_TODAS = '__todas__';
 let AREA_PRIMERA_SECCION_ABIERTA = true;
+let areaVista = 'inventario';       // pestaña visual del área; no cambia datos ni rutas
 let areaPortadaTema = 'light';
 try { if(localStorage.getItem('llamita_areas_tema')==='dark') areaPortadaTema='dark'; } catch(_) {}
 function aparienciaPortada(activa){
@@ -4531,12 +4536,33 @@ function cambiarArea(codigo, producto=''){
   if(SEDE!=='plaza') return;
   if(codigo!==null && codigo!==AREA_TODAS && !areasNavegacion().includes(codigo)) return;
   areaActual=codigo;
+  areaVista='inventario';
   qEl.value=producto;
   filterState=null; areaFilterCard=null; tipoSel=null; openSecs.clear();AREA_PRIMERA_SECCION_ABIERTA=true;
   $('view-inv').classList.toggle('area-workspace-wide',codigo!==null);
   document.querySelectorAll('.mcard').forEach(x=>x.classList.remove('sel'));
   renderTipos(); render(); tituloInventarioArea();
   if(areaRepartosActiva())cargarRepartosArea(codigo);else pintarRepartosArea();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function pintarPestanasArea(){
+  const tabs=$('areaWorkspaceTabs'), disponibles=areaRepartosActiva();
+  if(!tabs)return;
+  if(!disponibles){areaVista='inventario';tabs.hidden=true;return;}
+  tabs.hidden=false;
+  tabs.querySelectorAll('[data-area-view]').forEach(b=>{
+    const activa=b.dataset.areaView===areaVista;
+    b.classList.toggle('active',activa);
+    b.setAttribute('aria-selected',String(activa));
+    b.tabIndex=activa?0:-1;
+  });
+}
+function cambiarVistaArea(vista){
+  if(!areaRepartosActiva() || !['inventario','repartos'].includes(vista))return;
+  if(areaVista===vista)return;
+  areaVista=vista;
+  render();
+  if(vista==='repartos'&&!REPARTOS_AREA_CARGANDO)cargarRepartosArea(areaActual);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function areaStats(codigo){
@@ -4662,6 +4688,7 @@ function htmlTarjetaArea(codigo){
 function renderAreaPortada(){
   $('view-inv').classList.remove('area-workspace-wide');
   $('area-page-heading').hidden=true;
+  $('areaWorkspaceTabs').hidden=true;
   aparienciaPortada(vistaActual==='inv');
   $('areaNav').style.display='none'; $('areaNav').innerHTML=''; $('areaNote').style.display='none';
   $('areaRepartos').style.display='none';$('areaRepartos').innerHTML='';
@@ -4738,6 +4765,7 @@ function filaAreaHistorica(r){
 function renderAreaLista(){
   aparienciaPortada(vistaActual==='inv');
   const global=areaActual===AREA_TODAS;
+  pintarPestanasArea();
   pintarRepartosArea();
   $('view-inv').classList.add('area-workspace-wide');
   renderAreaTipoPills();
@@ -4751,6 +4779,14 @@ function renderAreaLista(){
   $('critSedes').style.display='none'; $('metaPortada').style.display='none';
   $('btnNuevo').style.display='none'; $('inv-estado').style.display='none';
   $('areaNote').style.display='none';
+  if(areaVista==='repartos'&&areaRepartosActiva()){
+    $('invFiltros').style.display='none';
+    $('areaTipoPills').style.display='none';
+    listEl.style.display='none';
+    $('areaRepartos').style.display='block';
+    return;
+  }
+  listEl.style.display='';
   if(AREA_LOADING&&!AREA_CARGADA){ listEl.innerHTML='<div class="area-loading">Cargando existencias por ubicación…</div>'; return; }
   if(AREA_ERROR){ listEl.innerHTML='<div class="empty">No se pudo leer el libro de existencias de Local 1. Vuelve a cargar para intentarlo otra vez.</div>'; return; }
   const q=normNombre(qEl.value), tipo=tipoSel;
@@ -13623,6 +13659,8 @@ function gestionarAreas(){
 
 /* El mismo control de apariencia acompaña al selector y al interior del área. */
 $('view-inv').addEventListener('click',e=>{
+  const vista=e.target.closest('[data-area-view]');
+  if(vista){cambiarVistaArea(vista.dataset.areaView);return;}
   if(e.target.closest('[data-area-theme-toggle]')){
     areaPortadaTema=areaPortadaTema==='dark'?'light':'dark';
     try { localStorage.setItem('llamita_areas_tema',areaPortadaTema); } catch(_) {}
@@ -15082,10 +15120,10 @@ function areaRepartosActiva(){return SEDE==='plaza'&&areaActual&&areaActual!==AR
 function pintarRepartosArea(){
   const box=$('areaRepartos');if(!box)return;
   if(!areaRepartosActiva()){box.style.display='none';box.innerHTML='';return;}
-  box.style.display='block';
-  if(REPARTOS_AREA_CARGANDO){box.innerHTML='<section class="f2-box"><div class="f2-head"><h3>Recepciones</h3></div><div class="f2-empty">Cargando…</div></section>';return;}
+  box.style.display=areaVista==='repartos'?'block':'none';
+  if(REPARTOS_AREA_CARGANDO){box.innerHTML='<section class="f2-box"><div class="f2-head"><h3>Por recibir</h3></div><div class="f2-empty">Cargando…</div></section>';return;}
   const abiertos=REPARTOS_AREA.filter(r=>r.estado==='enviado'),todosCerrados=REPARTOS_AREA.filter(r=>r.estado==='recibido'),cerrados=todosCerrados.slice(0,8);
-  box.innerHTML=`<section class="f2-box f2-receptions"><div class="f2-head"><h3>Recepciones</h3><span class="f2-count" aria-label="${abiertos.length} pendientes">${abiertos.length}</span></div>
+  box.innerHTML=`<section class="f2-box f2-receptions"><div class="f2-head"><h3>Por recibir</h3><span class="f2-count" aria-label="${abiertos.length} pendientes">${abiertos.length}</span></div>
     <div>${abiertos.length?abiertos.map(r=>`<div class="f2-rep" data-f2-recibir="${r.id}">
       <div class="f2-rep-title"><b>${esc(r.nombre||'Reparto de Bodega')}</b><span class="f2-tag">${new Date(r.creado_at).toLocaleString('es-CL')}</span></div>
       ${(r.items||[]).map(i=>`<div class="f2-receipt-line" data-f2-item="${i.id}">
@@ -15098,7 +15136,7 @@ function pintarRepartosArea(){
       </div>`).join('')}
       <div class="f2-actions"><button type="button" class="btn btn-orange" data-f2-confirmar="${r.id}" ${PERMISOS.puede_editar?'':'disabled'}>Confirmar recepción</button></div>
     </div>`).join(''):'<div class="f2-empty">No hay repartos pendientes para esta área.</div>'}</div>
-    ${cerrados.length?`<details class="f2-history"><summary>Historial <span>${todosCerrados.length}</span></summary><div>${cerrados.map(r=>`<div class="f2-history-row"><b>${esc(r.nombre||'Reparto de Bodega')}</b><span>${fmt(Number(r.resultado?.total_recibido)||0)} recibido</span></div>`).join('')}</div></details>`:''}
+    ${cerrados.length?`<details class="f2-history"><summary>Cerrados <span>${todosCerrados.length}</span></summary><div>${cerrados.map(r=>`<div class="f2-history-row"><b>${esc(r.nombre||'Reparto de Bodega')}</b><span>${fmt(Number(r.resultado?.total_recibido)||0)} recibido</span></div>`).join('')}</div></details>`:''}
   </section>`;
 }
 async function cargarRepartosArea(codigo=areaActual){
@@ -15110,7 +15148,7 @@ async function cargarRepartosArea(codigo=areaActual){
   ]);
   if(REPARTOS_AREA_ID!==areaId)return;
   REPARTOS_AREA_CARGANDO=false;
-  if(error){REPARTOS_AREA=[];$('areaRepartos').innerHTML=`<section class="f2-box"><div class="f2-head"><h3>Recepciones</h3></div><div class="f2-empty">${esc(error.message||'No se pudo cargar la bandeja.')}</div></section>`;return;}
+  if(error){REPARTOS_AREA=[];$('areaRepartos').style.display=areaVista==='repartos'?'block':'none';$('areaRepartos').innerHTML=`<section class="f2-box"><div class="f2-head"><h3>Por recibir</h3></div><div class="f2-empty">${esc(error.message||'No se pudo cargar la bandeja.')}</div></section>`;return;}
   const mapa=new Map((rutas?.lineas||[]).map(x=>[String(x.item_id),x]));
   REPARTOS_AREA=(data||[]).map(r=>({...r,items:(r.items||[]).map(i=>({...i,seccion_destino_nombre:mapa.get(String(i.id))?.seccion||null}))}));pintarRepartosArea();
 }

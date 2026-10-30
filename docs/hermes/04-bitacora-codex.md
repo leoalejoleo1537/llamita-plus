@@ -91,6 +91,12 @@ En modo oscuro, conservar el mismo carácter con fondo `#101512`, panel lateral 
 - Armar pedido, pendientes, cerrados y la ventana de recepción por fechas usan las mismas superficies, espaciado, contraste y radio de la identidad Lápiz y papel, en claro y oscuro. La recepción hacia áreas también elimina la ruta física repetida en cada línea y muestra solo pedido, fecha útil cuando existe y controles de recepción.
 - No se modificaron RPC, stock, Fudo, permisos, restricciones por sede ni el flujo de perecederos. Marcar X sigue poniendo cantidad cero hasta la confirmación; las fechas siguen siendo obligatorias para productos perecederos.
 
+## 2026-10-30 — Inventario por área: pestaña Repartos
+
+- Cada área operativa tiene dos vistas separadas: **Inventario** y **Repartos**. El inventario ya no empieza con documentos de llegada ni el historial crece debajo de los productos.
+- Repartos reúne las recepciones abiertas bajo “Por recibir” y mantiene los documentos cerrados en un bloque plegado “Cerrados”, limitado a los registros recientes que ya entrega el contrato. La navegación no crea una segunda fuente ni una nueva ruta comercial.
+- Cambiar de pestaña no escribe, no modifica cantidades y no altera permisos, sede, stock, Fudo o el contrato de recepción. La bandeja se mantiene cargada sin hacerse visible fuera de su pestaña.
+
 ## 2026-10-23 — Corrección visual transversal: Ajustes, Productos y recepciones por área
 
 ### Plan ejecutado
