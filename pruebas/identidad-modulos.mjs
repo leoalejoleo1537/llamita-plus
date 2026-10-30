@@ -106,11 +106,28 @@ await page.evaluate(()=>{
   ];
   pickTab('ajustes');ajActual='areas';pintarAjustes();
 });
+if(capturas)await page.screenshot({path:join(capturas,'ajustes-areas-escritorio.png')});
 await verificar(()=>page.evaluate(()=>{
-  const titulo=document.querySelector('#view-ajustes .aj-cab h2'),fila=document.querySelector('.area-admin-row');
+  const titulo=document.querySelector('#view-ajustes .aj-cab h2'),fila=document.querySelector('.area-admin-row'),
+    nombre=fila?.querySelector('.area-admin-name-field'),orden=fila?.querySelector('.area-admin-order'),
+    acciones=fila?.querySelector('.area-admin-actions');
+  const rn=nombre?.getBoundingClientRect(),ro=orden?.getBoundingClientRect(),ra=acciones?.getBoundingClientRect();
   return titulo&&getComputedStyle(titulo).color===getComputedStyle(document.body).color&&
-    fila&&fila.getBoundingClientRect().right<=innerWidth&&document.documentElement.scrollWidth<=innerWidth+2;
-}),'Ajustes conserva contraste y alinea Áreas de inventario');
+    fila&&getComputedStyle(fila).borderRadius==='16px'&&rn&&ro&&ra&&
+    rn.right<=ro.left+1&&ra.top>=ro.bottom-1&&fila.getBoundingClientRect().right<=innerWidth&&
+    document.documentElement.scrollWidth<=innerWidth+2;
+}),'Ajustes usa tarjetas alineadas para Áreas de inventario');
+await page.setViewportSize({width:390,height:844});
+await page.waitForTimeout(280);
+await verificar(()=>page.evaluate(()=>{
+  const fila=document.querySelector('.area-admin-row'),nombre=fila?.querySelector('.area-admin-name-field'),
+    orden=fila?.querySelector('.area-admin-order'),acciones=fila?.querySelector('.area-admin-actions');
+  const rf=fila?.getBoundingClientRect(),rn=nombre?.getBoundingClientRect(),ro=orden?.getBoundingClientRect(),ra=acciones?.getBoundingClientRect();
+  return rf&&rn&&ro&&ra&&rf.right<=innerWidth&&rn.right<=ro.left+1&&
+    ra.top>=Math.max(rn.bottom,ro.bottom)-1&&document.documentElement.scrollWidth<=innerWidth+2;
+}),'Áreas de inventario conserva tarjetas legibles en teléfono');
+if(capturas)await page.screenshot({path:join(capturas,'ajustes-areas-movil.png')});
+await page.setViewportSize({width:1440,height:900});
 await page.evaluate(()=>{ajActual='secciones';pintarAjustes()});
 await verificar(()=>page.evaluate(()=>{
   const fila=document.querySelector('.area-section-admin-row');

@@ -15848,17 +15848,18 @@ async function ajCargarAreas(){
 function ajAreasHTML(){
   if(AJ_AREAS===null) return '<div class="aj-caja"><p>Cargando áreas…</p></div>';
   if(AJ_AREAS.error) return `<div class="aj-caja"><p>No se pudieron leer las áreas.</p><p class="aj-nota">${esc(AJ_AREAS.error.message||'Acceso rechazado')}</p></div>`;
-  const filas=AJ_AREAS.map(a=>`<div class="area-admin-row ${a.estado==='archivada'?'archivada':''}" data-area-admin="${esc(a.id)}">
-    <div><label class="aj-nota">Nombre</label><input type="text" data-area-name value="${esc(a.nombre)}" maxlength="80" ${a.estado==='archivada'?'disabled':''}>
-      <div class="area-admin-meta">${a.estado==='archivada'?'Archivada':`${a.productos_preferidos} productos · ${fmt(Number(a.unidades)||0)} unidades`}</div></div>
-    <div><label class="aj-nota">Orden</label><input type="number" min="0" step="1" data-area-order value="${a.orden}" ${a.estado==='archivada'?'disabled':''}></div>
-    <div class="area-admin-actions">${a.estado==='activa'?`<button type="button" class="btn btn-outline btn-sm" data-area-save="${esc(a.id)}">Guardar</button><button type="button" class="btn btn-gris btn-sm" data-area-archive="${esc(a.id)}">Archivar</button>`:'<span class="aj-nota">Solo historial</span>'}</div>
-  </div>`).join('');
-  return `<div class="aj-caja"><h3>Crear área</h3><p class="aj-nota">Aparecerá en Inventario con saldo cero.</p>
-    <div class="area-admin-new"><div><label class="aj-nota">Nombre</label><input type="text" id="aj-area-nombre" maxlength="80" placeholder="Ej: Heladería"></div>
-      <div><label class="aj-nota">Orden</label><input type="number" id="aj-area-orden" min="0" step="1" value="${(AJ_AREAS.filter(a=>a.estado==='activa').reduce((m,a)=>Math.max(m,a.orden),0)+10)}"></div>
-      <button type="button" class="adm-btn" data-area-new>Crear área</button></div></div>
-    <div class="aj-caja"><h3>Áreas de Local 1</h3>${filas||'<div class="aj-vacio">No hay áreas.</div>'}</div>`;
+  const activas=AJ_AREAS.filter(a=>a.estado==='activa').length;
+  const filas=AJ_AREAS.map(a=>`<article class="area-admin-row area-admin-card ${a.estado==='archivada'?'archivada':''}" data-area-admin="${esc(a.id)}">
+    <label class="area-admin-field area-admin-name-field"><span>Área</span><input type="text" data-area-name value="${esc(a.nombre)}" maxlength="80" ${a.estado==='archivada'?'disabled':''}>
+      <span class="area-admin-meta">${a.estado==='archivada'?'<span>Archivada · solo historial</span>':`<span>${a.productos_preferidos} productos</span><span>${fmt(Number(a.unidades)||0)} unidades</span>`}</span></label>
+    <label class="area-admin-field area-admin-order"><span>Orden</span><input type="number" min="0" step="1" data-area-order value="${a.orden}" ${a.estado==='archivada'?'disabled':''}></label>
+    <div class="area-admin-actions">${a.estado==='activa'?`<button type="button" class="btn btn-outline btn-sm" data-area-save="${esc(a.id)}">Guardar</button><button type="button" class="btn btn-gris btn-sm" data-area-archive="${esc(a.id)}">Archivar</button>`:'<span class="area-admin-history">Historial</span>'}</div>
+  </article>`).join('');
+  return `<section class="aj-caja area-admin-create"><div class="area-admin-card-heading"><div><h3>Nueva área</h3><p>Se crea sin stock.</p></div></div>
+    <div class="area-admin-new"><label class="area-admin-field"><span>Nombre</span><input type="text" id="aj-area-nombre" maxlength="80" placeholder="Ej: Heladería"></label>
+      <label class="area-admin-field area-admin-order"><span>Orden</span><input type="number" id="aj-area-orden" min="0" step="1" value="${(AJ_AREAS.filter(a=>a.estado==='activa').reduce((m,a)=>Math.max(m,a.orden),0)+10)}"></label>
+      <button type="button" class="adm-btn" data-area-new>Crear área</button></div></section>
+    <section class="aj-caja area-admin-list-card"><div class="area-admin-card-heading"><div><h3>Áreas de Local 1</h3><p>${activas} activas</p></div></div><div class="area-admin-list">${filas||'<div class="aj-vacio">No hay áreas.</div>'}</div></section>`;
 }
 async function ajAreaCrear(){
   const nombre=$('aj-area-nombre')?.value.trim(), orden=Number($('aj-area-orden')?.value||0);

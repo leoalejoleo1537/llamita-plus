@@ -69,6 +69,13 @@ En modo oscuro, conservar el mismo carácter con fondo `#101512`, panel lateral 
 - Se mantuvieron los mismos botones originales dentro del cajón, por lo que rutas, permisos, sede, estado activo y handlers siguen siendo únicos. La barra inferior permanece fija y sus cuatro rutas operativas no cambian.
 - Cobertura automatizada: 390×844, 320×700, horizontal, claro/oscuro, apertura/cierre por gesto, toque exterior, Escape, todas las rutas de Local 1 y las rutas de Bodega, permisos de Mesas, barra inferior, ausencia de errores JavaScript y riel de escritorio. Sin escrituras comerciales.
 
+## 2026-10-30 — Punto 5: Ajustes → Áreas de inventario
+
+- Las áreas dejaron de dibujarse como filas administrativas comprimidas. Cada una es ahora una tarjeta de superficie suave: nombre editable, contexto de productos/unidades, orden numérico compacto y acciones al final de la lectura.
+- Crear un área usa la misma composición y no promete stock: la única nota visible es “Se crea sin stock”. Las cifras son texto auxiliar, no cápsulas ni barras.
+- Se conservaron IDs, atributos `data-*`, botones, RPC, permisos y validaciones existentes; el cambio es estrictamente de jerarquía, espaciado y contraste.
+- Pruebas visuales verifican tarjetas, separación de campos/acciones y ausencia de desborde a 1440×900 y 390×844. Sin escrituras comerciales.
+
 ## 2026-10-23 — Corrección visual transversal: Ajustes, Productos y recepciones por área
 
 ### Plan ejecutado

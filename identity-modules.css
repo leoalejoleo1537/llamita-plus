@@ -370,6 +370,29 @@ body.ux-module-active #view-inv:not(.area-workspace-wide) #list{display:block}
 #view-ajustes .area-section-admin{border:0;margin-top:14px;padding-top:0}
 #view-ajustes .area-admin-row.archivada,#view-ajustes .area-section-admin-row.archivada{opacity:.62}
 
+/* Áreas de inventario: son espacios de trabajo, no una tabla administrativa.
+   Nombre, contexto y orden viven en una tarjeta tranquila; las mismas RPC y
+   atributos data conservan la edición, archivo y permisos ya existentes. */
+#view-ajustes .area-admin-create,#view-ajustes .area-admin-list-card{padding:20px;border-radius:20px}
+#view-ajustes .area-admin-card-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:0 0 15px}
+#view-ajustes .area-admin-card-heading h3{margin:0;color:var(--text);font-size:17px;letter-spacing:-.018em}
+#view-ajustes .area-admin-card-heading p{margin:4px 0 0;color:var(--muted);font-size:12px;line-height:1.35}
+#view-ajustes .area-admin-new{grid-template-columns:minmax(0,1fr) 72px auto;gap:11px;margin:0;padding:0;background:transparent;box-shadow:none}
+#view-ajustes .area-admin-list{display:grid;gap:10px}
+#view-ajustes .area-admin-row.area-admin-card{grid-template-columns:minmax(0,1fr) 72px auto;gap:12px;
+  align-items:end;margin:0;padding:14px 15px;border:0;border-radius:16px;background:var(--bg);box-shadow:none}
+#view-ajustes .area-admin-field{display:block;min-width:0;margin:0}
+#view-ajustes .area-admin-field>span:first-child{display:block;margin:0 0 6px;color:var(--muted);font-size:11px;font-weight:740;letter-spacing:.015em}
+#view-ajustes .area-admin-field input{height:44px;min-height:44px;padding:9px 11px;border:0;border-radius:11px;background:var(--card);color:var(--text);box-shadow:inset 0 0 0 1px var(--border);font:inherit;font-size:15px;font-weight:680}
+#view-ajustes .area-admin-order{width:72px}
+#view-ajustes .area-admin-order input{width:100%;padding:9px 6px;text-align:center;font-variant-numeric:tabular-nums}
+#view-ajustes .area-admin-meta{display:flex;flex-wrap:wrap;gap:0;margin:7px 0 0!important;font-size:11.5px;line-height:1.35}
+#view-ajustes .area-admin-meta span+span::before{content:'·';margin:0 6px;color:var(--muted)}
+#view-ajustes .area-admin-actions{min-height:44px;justify-content:flex-end;gap:7px}
+#view-ajustes .area-admin-actions .btn{height:40px;min-height:40px;padding:0 12px;border-radius:11px;box-shadow:none}
+#view-ajustes .area-admin-history{align-self:center;padding:0 4px;color:var(--muted);font-size:12px;font-weight:680}
+#view-ajustes .area-admin-row.area-admin-card.archivada{background:var(--gray-bg);opacity:.76}
+
 /* Bodega y recepción por área: listas compactas, cantidades cuadradas y
    acciones claras sin convertir la pantalla en un formulario explicativo. */
 :where(body.ux-module-active,.area-workspace-wide) .f2-box{border:0;border-radius:20px;background:var(--card);box-shadow:var(--sombra)}
@@ -445,6 +468,11 @@ body.ux-module-active #view-inv:not(.area-workspace-wide) #list{display:block}
   #view-ajustes .area-admin-new,#view-ajustes .area-admin-row,#view-ajustes .area-section-admin-row{grid-template-columns:1fr}
   #view-ajustes .area-admin-actions{justify-content:stretch}
   #view-ajustes .area-admin-actions button{flex:1;min-width:0}
+  #view-ajustes .area-admin-new{grid-template-columns:minmax(0,1fr) 72px}
+  #view-ajustes .area-admin-new [data-area-new]{grid-column:1/-1}
+  #view-ajustes .area-admin-row.area-admin-card{grid-template-columns:minmax(0,1fr) 72px;padding:13px}
+  #view-ajustes .area-admin-row.area-admin-card .area-admin-actions{grid-column:1/-1;justify-content:flex-end}
+  #view-ajustes .area-admin-row.area-admin-card .area-admin-actions button{flex:0 1 auto}
   :where(body.ux-module-active,.area-workspace-wide) .f2-receipt-actions{grid-template-columns:minmax(0,1fr) 68px 44px;gap:7px}
   :where(body.ux-module-active,.area-workspace-wide) .f2-qty{width:68px!important;flex-basis:68px}
   :where(body.ux-module-active,.area-workspace-wide) .f2-rep{padding:12px}
