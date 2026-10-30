@@ -62,8 +62,23 @@ const verificar=async(condicion,mensaje)=>{
 await verificar(()=>page.evaluate(()=>document.documentElement.dataset.paleta==='lapiz'),
   'Lápiz y papel es la paleta inicial');
 await page.evaluate(()=>pickTab('inv'));
-await verificar(()=>page.evaluate(()=>Math.abs(document.querySelector('.tabs').getBoundingClientRect().width-208)<1),
-  'Inventario usa un riel de 208 px en escritorio');
+await verificar(()=>page.evaluate(()=>Math.abs(document.querySelector('.tabs').getBoundingClientRect().width-72)<1),
+  'Inventario usa el riel compacto de 72 px en escritorio');
+await page.mouse.move(36,220);await page.waitForTimeout(260);
+await verificar(()=>page.evaluate(()=>{
+  const rail=document.querySelector('.tabs').getBoundingClientRect();
+  const main=document.querySelector('#view-inv').getBoundingClientRect();
+  const label=document.querySelector('.tab.active .nav-label');
+  return Math.abs(rail.width-208)<1&&Math.abs(main.left-72)<1
+    &&Number(getComputedStyle(label).opacity)>0.9;
+}),'el riel se expande sobre el contenido sin moverlo');
+if(capturas)await page.screenshot({path:join(capturas,'riel-desplegado-escritorio.png')});
+await page.mouse.move(520,220);await page.waitForTimeout(260);
+await verificar(()=>page.evaluate(()=>{
+  const rail=document.querySelector('.tabs').getBoundingClientRect();
+  const label=document.querySelector('.tab.active .nav-label');
+  return Math.abs(rail.width-72)<1&&Number(getComputedStyle(label).opacity)<0.1;
+}),'al retirar el puntero el riel se repliega sin desorden');
 for(const [ruta,titulo] of Object.entries({
   lama:'Mesas',arqueo:'Arqueo',movcaja:'Movimientos de caja',productos:'Panel de productos',reparto:'Reparto',
   recetas:'Recetas',hist:'Historial',mermas:'Mermas',ajustes:'Ajustes'
@@ -74,8 +89,8 @@ for(const [ruta,titulo] of Object.entries({
     document.getElementById('uxModuleTitle').textContent===t,titulo),`${ruta}: título visible`);
   await verificar(()=>page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),
     `${ruta}: sin desborde horizontal en escritorio`);
-  await verificar(()=>page.evaluate(()=>Math.abs(document.querySelector('.tabs').getBoundingClientRect().width-208)<1),
-    `${ruta}: riel conserva el mismo ancho que Inventario`);
+  await verificar(()=>page.evaluate(()=>Math.abs(document.querySelector('.tabs').getBoundingClientRect().width-72)<1),
+    `${ruta}: riel conserva el mismo ancho compacto que Inventario`);
   if(capturas)await page.screenshot({path:join(capturas,`${ruta}-escritorio.png`)});
 }
 await page.evaluate(()=>{
@@ -117,6 +132,7 @@ await verificar(()=>page.evaluate(()=>!!document.querySelector('[data-movcaja="n
   document.querySelector('#view-movcaja .movcaja-lista-head')?.textContent.includes('Historial')),
   'Movimientos muestra una acción permanente y el historial rediseñado');
 await page.click('[data-movcaja="nuevo"]');
+await page.waitForTimeout(80);
 await verificar(()=>page.evaluate(()=>document.querySelector('#movcaja-overlay [role="dialog"]')?.getAttribute('aria-modal')==='true'&&
   document.activeElement?.id==='movcaja-monto'),'Nuevo movimiento abre el formulario y lleva el foco al monto');
 await verificar(()=>page.evaluate(()=>['egreso','ingreso'].every(tipo=>

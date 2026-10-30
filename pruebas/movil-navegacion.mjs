@@ -162,8 +162,17 @@ await check('escritorio conserva el riel y oculta la barra inferior',async()=>
   page.evaluate(()=>getComputedStyle(document.body).paddingLeft!=='0px' &&
     getComputedStyle(document.getElementById('mobileBottom')).display==='none' &&
     !document.getElementById('mobileNav').inert));
-await check('Bodega conserva el mismo ancho de riel que Inventario',async()=>
-  page.evaluate(()=>Math.abs(document.getElementById('mobileNav').getBoundingClientRect().width-208)<1 &&
-    Math.abs(parseFloat(getComputedStyle(document.body).paddingLeft)-208)<1));
+await check('Bodega conserva el mismo riel compacto que Inventario',async()=>
+  page.evaluate(()=>{
+    /* Esta página conserva un puntero táctil aunque se agrande su viewport.
+       En un escritorio real el riel es 72; en una tablet ancha mantiene 208
+       para no esconder rutas sin posibilidad de hover. */
+    const compacto=matchMedia('(hover:hover) and (pointer:fine)').matches;
+    const esperado=compacto?72:208;
+    const riel=document.getElementById('mobileNav').getBoundingClientRect().width;
+    const cuerpo=parseFloat(getComputedStyle(document.body).paddingLeft);
+    return Math.abs(riel-esperado)<1 && Math.abs(cuerpo-esperado)<1
+      || `fino=${compacto}; esperado=${esperado}; riel=${riel}; cuerpo=${cuerpo}`;
+  }));
 await check('sin errores JavaScript',async()=>{if(errors.length)console.error(errors);return errors.length===0;});
 await browser.close();

@@ -76,6 +76,45 @@ body.ux-module-active .topbar{box-shadow:none;border-bottom:1px solid var(--bord
   body.ux-module-active .topbar{display:none}
 }
 
+/* Riel de escritorio: el espacio que ocupa la aplicación es siempre el del
+   estado compacto. Al acercar el puntero, el panel crece SOBRE el contenido;
+   no empuja la página ni desplaza los iconos. El foco de teclado abre la
+   misma vista completa sin inventar un segundo control. */
+@media (min-width:1080px) and (hover:hover) and (pointer:fine){
+  body.navegacion-fija,
+  body.ux-module-active.navegacion-fija,
+  body.area-portada-activa.navegacion-fija{--riel:72px}
+  body.navegacion-fija .tabs{
+    width:var(--riel);z-index:50;overflow-x:hidden;
+    transition:width .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s ease;
+  }
+  body.navegacion-fija .tabs:is(:hover,:focus-within){
+    width:208px;box-shadow:12px 0 28px rgba(18,31,26,.12);
+  }
+  body.navegacion-fija .tab,
+  body.navegacion-fija .drawer-item{
+    justify-content:flex-start;min-height:40px;padding:9px 14px;
+    overflow:hidden;white-space:nowrap;
+  }
+  body.navegacion-fija .tab svg,
+  body.navegacion-fija .drawer-item svg{flex:0 0 20px;width:20px;height:20px}
+  body.navegacion-fija .tab-carril{left:0!important;width:100%!important}
+  body.navegacion-fija .nav-label{
+    display:block;max-width:0;opacity:0;overflow:hidden;transform:translateX(-6px);
+    transition:max-width .2s ease,opacity .13s ease,transform .2s ease;
+  }
+  body.navegacion-fija .tabs:is(:hover,:focus-within) .nav-label{
+    max-width:156px;opacity:1;transform:none;transition-delay:.035s;
+  }
+  /* Los rótulos de grupo no justifican que los íconos salten hacia abajo.
+     La separación funcional vive en el espacio, no en texto adicional. */
+  body.navegacion-fija .drawer-sec{display:none!important}
+  body.navegacion-fija .drawer-foot{justify-content:flex-start;padding-left:14px}
+}
+@media (min-width:1080px) and (hover:hover) and (pointer:fine) and (prefers-reduced-motion:reduce){
+  body.navegacion-fija .tabs,body.navegacion-fija .nav-label{transition:none}
+}
+
 /* Título y selector de Bodega: una sola jerarquía, sin barra duplicada. */
 .ux-module-head[hidden],.ux-bodega-tabs[hidden],.ux-module-location[hidden]{display:none!important}
 .ux-module-head{

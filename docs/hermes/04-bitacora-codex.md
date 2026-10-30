@@ -58,6 +58,13 @@ La recomendación es prototipar la opción 1 antes de reemplazar la navegación;
 - No depende de clases de una vista interior: volver a elegir sede, recargar la aplicación o iniciar una sesión con el tema oscuro guardado conserva la misma apariencia sin un destello blanco.
 - Se incorporó una prueba de navegador que guarda el tema oscuro, reinicia la sesión y comprueba colores reales del selector. También valida que no haya desborde en escritorio y teléfono.
 
+## 2026-10-30 — Punto 3A: riel lateral compacto en escritorio
+
+- En pantallas con puntero preciso, la navegación reserva siempre un riel de `72 px`. Al posar el puntero o navegar con teclado, el riel se abre hasta `208 px` **sobre** el contenido: el lienzo de trabajo conserva su ancho y posición.
+- Los iconos usan la misma coordenada en ambos estados. Las etiquetas aparecen con opacidad y desplazamiento sutil; no hay reordenamiento, salto vertical ni títulos de grupo que empujen las acciones.
+- El riel conserva rutas, permisos, sede y estado activo existentes. En dispositivos táctiles no cambia todavía: el gesto de arrastre desde el borde izquierdo se implementará como el siguiente punto independiente.
+- La prueba visual cubre compacto, expansión por puntero, repliegue, ausencia de desborde y la consistencia del riel en Inventario, Mesas, Arqueo, Movimientos, Productos, Reparto, Recetas, Historial, Mermas y Ajustes.
+
 ## 2026-10-23 — Corrección visual transversal: Ajustes, Productos y recepciones por área
 
 ### Plan ejecutado
