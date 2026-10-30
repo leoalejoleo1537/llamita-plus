@@ -228,8 +228,13 @@ await check('ficha de área ofrece cantidad decimal sin texto técnico ni motivo
   &&await page.locator('#m-ajuste-motivo').inputValue()==='Conteo/corrección manual'
   &&await page.locator('#m-ajuste-motivo').isHidden()
   &&await page.locator('#m-area-ficha-resumen').isHidden()
+  &&await page.locator('#m-area-fisica').isHidden()
+  &&await page.locator('#m-area-selector-wrap').isHidden()
   &&await page.locator('#m-ajuste-lineas input').getAttribute('step')==='any'
-  &&await page.locator('#m-stock').isDisabled());
+  &&await page.locator('#m-stock').isDisabled()
+  &&await page.locator('#overlay .modal').innerText().then(t=>
+    !t.includes('La cantidad pertenece al ledger')&&!t.includes('Ubicación física actual')&&
+    !t.includes('Nota de urgencia')));
 if(process.env.CAPTURE_AREAS_SCREENSHOT)await page.screenshot({path:'/tmp/llamita-producto-modal-simplificado.png'});
 await page.locator('#m-ajuste-lineas input[data-ajuste-clave="sin_lote"]').fill('3.25');
 await page.locator('#m-ajuste-guardar').click();

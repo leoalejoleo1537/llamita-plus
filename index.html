@@ -4174,9 +4174,8 @@
         <input type="text" id="m-producto" autocomplete="off">
       </div>
       <div class="field">
-      <label>Clasificación histórica</label>
+      <label>Categoría</label>
         <select id="m-seccion"></select>
-      <small style="display:block;color:var(--muted);margin-top:6px">Se conserva como dato descriptivo. La sección física del área se elige abajo.</small>
       </div>
     </div>
     <div class="field" id="m-stock-field" style="text-align:center;margin-top:0">
@@ -4186,7 +4185,7 @@
         <input type="number" step="0.5" min="0" id="m-stock">
         <button type="button" id="m-mas">+</button>
       </div>
-      <small id="m-stock-corte" style="display:none;color:var(--muted);margin-top:6px">Saldo de solo lectura: Bodega y Local 1 usan existencias por ubicación.</small>
+      <small id="m-stock-corte" hidden aria-hidden="true"></small>
     </div>
       <div id="m-limits-fields" style="display:flex;gap:10px">
       <div class="field" style="flex:1"><label id="m-min-label">Stock mínimo</label><input type="number" step="0.5" min="0" id="m-min"></div>
@@ -4199,16 +4198,15 @@
     </div>
     <div id="m-area-wrap" style="display:none">
       <div class="field" id="m-area-selector-wrap">
-        <label>Área de esta ficha</label>
+        <label>Área</label>
         <select id="m-area"></select>
-        <small style="display:block;color:var(--muted);margin-top:6px">La cantidad pertenece al ledger del área; esta ficha solo guarda organización y límites.</small>
       </div>
       <div class="field" id="m-area-seccion-wrap">
-        <label>Sección física dentro del área</label>
+        <label>Sección</label>
         <select id="m-area-seccion"></select>
-        <button type="button" class="btn btn-outline btn-sm" id="m-area-seccion-crear" style="margin-top:8px">Crear sección física</button>
+        <button type="button" class="btn btn-outline btn-sm" id="m-area-seccion-crear" style="margin-top:8px">+ Sección</button>
       </div>
-      <div class="area-pref-box" id="m-area-fisica"><strong>Ubicación física actual</strong><span>Cargando saldo real…</span></div>
+      <div class="area-pref-box" id="m-area-fisica" hidden aria-hidden="true"></div>
       <div class="area-ficha-resumen" id="m-area-ficha-resumen" hidden aria-hidden="true"></div>
     </div>
     <section class="stock-adjustment" id="m-ajuste-panel" hidden aria-labelledby="m-ajuste-title">
@@ -4223,25 +4221,7 @@
     <div class="field f3-urgency-note" id="m-urgente-nota-wrap" hidden>
       <label for="m-urgente-nota">Nota de urgencia (opcional)</label>
       <input id="m-urgente-nota" maxlength="240" autocomplete="off" placeholder="Ej: priorizar en el próximo reparto">
-      <small style="display:block;color:var(--muted);margin-top:6px">Es una prioridad manual de esta área. No cambia el stock.</small>
     </div>
-    <button type="button" class="btn-urg" id="m-urgente" style="display:none">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>
-      <span id="m-urgente-txt">Marcar urgente</span>
-    </button>
-    <!-- Mermar está en la ficha, a un toque de cualquier producto, porque es
-         algo que pasa todos los días y tiene que estar siempre a la mano.
-         Solo aparece en Bodega. -->
-    <button type="button" class="btn-merma" id="m-mermar" style="display:none">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M14 11l-4 6"></path><path d="M10 11l4 6"></path></svg>
-      <span>Mermar</span>
-    </button>
-    <!-- Solo administración. Un producto del inventario puede afectar a
-         VARIOS de Fudo (un selladito está en el combo KIDS y se vende solo),
-         así que el botón muestra cuáles antes de escribir nada. -->
-    <button type="button" class="btn-fudo" id="m-fudo" style="display:none">
-      🚨 Actualizar en Fudo
-    </button>
     <label class="chkrow" id="m-perec-row" style="display:none">
       <input type="checkbox" id="m-perec">
       <span>Producto perecedero</span>
@@ -4251,6 +4231,17 @@
       <div id="m-lotes"></div>
       <button type="button" class="btn btn-outline btn-sm" id="btnAddLote" style="margin-top:8px">+ Agregar fecha</button>
       <input type="date" id="m-venc-single" style="display:none">
+    </div>
+    <div class="modal-product-actions" id="m-acciones-rapidas">
+      <button type="button" class="btn-urg" id="m-urgente" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>
+        <span id="m-urgente-txt">Marcar urgente</span>
+      </button>
+      <button type="button" class="btn-merma" id="m-mermar" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M14 11l-4 6"></path><path d="M10 11l4 6"></path></svg>
+        <span>Mermar</span>
+      </button>
+      <button type="button" class="btn-fudo" id="m-fudo" style="display:none">Actualizar en Fudo</button>
     </div>
     <div class="mbtns">
       <button class="btn btn-outline" id="m-cancelar">Cancelar</button>
@@ -14420,6 +14411,10 @@ async function openModal(id){
   pintarLotes(puedeLotes ? lotesDe(modalProd.id) : []);
   if(puedeSoloFecha) $('m-venc-single').value = modalProd.vencimiento ?? '';
   $('m-fudo').style.display=fichaArea?'none':(puedeEnFudo('ficha')?'':'none');
+  const accionesRapidas=$('m-acciones-rapidas');
+  const accionesVisibles=[...accionesRapidas.querySelectorAll('button')].filter(b=>b.style.display!=='none');
+  accionesRapidas.hidden=!accionesVisibles.length;
+  accionesRapidas.dataset.count=String(accionesVisibles.length);
   $('m-eliminar').style.display=fichaArea?'none':(modoEdicion&&PERMISOS.puede_editar?'':'none');
   if(fichaArea){
     $('m-edicion').style.display='none';

@@ -35,6 +35,7 @@ En modo oscuro, conservar el mismo carácter con fondo `#101512`, panel lateral 
 - El historial que crece con el tiempo debe vivir plegado o en una vista secundaria. Nunca debe empujar la operación diaria varios pliegues hacia abajo.
 - La paleta clara u oscura se aplica antes de la primera pintura del navegador. No se acepta un destello de la interfaz anterior durante la carga.
 - Una ventana operativa prioriza nombre, campos y acción. Los datos técnicos de auditoría pueden conservarse en la lógica, pero no deben convertirse en párrafos explicativos dentro del formulario.
+- **Regla de explicación cero:** si una acción o dato necesita un párrafo para entenderse, primero corregir jerarquía, orden, etiqueta, forma, color o estado visual. El texto complementario se reserva para errores, confirmaciones y consecuencias que no puedan expresarse sin perder seguridad; nunca para compensar una interfaz confusa.
 
 ### Dibujo e iconografía
 
@@ -75,6 +76,13 @@ En modo oscuro, conservar el mismo carácter con fondo `#101512`, panel lateral 
 - Crear un área usa la misma composición y no promete stock: la única nota visible es “Se crea sin stock”. Las cifras son texto auxiliar, no cápsulas ni barras.
 - Se conservaron IDs, atributos `data-*`, botones, RPC, permisos y validaciones existentes; el cambio es estrictamente de jerarquía, espaciado y contraste.
 - Pruebas visuales verifican tarjetas, separación de campos/acciones y ausencia de desborde a 1440×900 y 390×844. Sin escrituras comerciales.
+
+## 2026-10-30 — Punto 8: ficha de producto
+
+- La ficha muestra una secuencia de trabajo directa: nombre/categoría cuando son editables, cantidad, límites, vencimiento y acciones disponibles. Área, sección y cantidad solo aparecen cuando aplican a esa ficha.
+- Se retiraron de la vista los resúmenes de saldo físico, explicaciones del ledger, clasificación histórica, motivo visible de conteo y nota visible de urgencia. La auditoría conserva internamente el motivo seguro de conteo y las mismas validaciones.
+- Las acciones rápidas se agrupan sólo si están disponibles; una única acción ocupa todo el ancho. Los botones y handlers de urgente, merma, Fudo, vencimientos, guardado, cancelación y eliminación se mantienen sin cambiar su contrato.
+- Se adopta la Regla de explicación cero de esta guía para toda la aplicación.
 
 ## 2026-10-23 — Corrección visual transversal: Ajustes, Productos y recepciones por área
 

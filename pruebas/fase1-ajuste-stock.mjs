@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+const modalProducto = html.slice(html.indexOf('<!-- ================= MODAL PRODUCTO ================= -->'),html.indexOf('<!-- ================= MODAL NUEVO PRODUCTO ================= -->'));
 const migration = readFileSync(new URL('../supabase/migrations/20261020000825_fase1_ajustes_manual_ledger.sql', import.meta.url), 'utf8');
 const rollback = readFileSync(new URL('../sql/2026-10-fase1-ajustes-manuales.rollback.sql', import.meta.url), 'utf8');
 const sqlTest = readFileSync(new URL('../sql/2026-10-fase1-pruebas-ajuste-manual.sql', import.meta.url), 'utf8');
@@ -23,6 +24,10 @@ assert.match(html, /stock_ajuste_desglose_leer/);
 assert.match(html, /stock_ajuste_guardar/);
 assert.match(html, /Saldo físico actual:/);
 assert.match(html, /data-ajuste-clave/);
+assert.match(modalProducto, /id="m-acciones-rapidas"/);
+assert.doesNotMatch(modalProducto, /La cantidad pertenece al ledger/);
+assert.doesNotMatch(modalProducto, /Clasificación histórica/);
+assert.doesNotMatch(modalProducto, /Ubicación física actual/);
 assert.match(rollback, /Rollback técnico detenido: existen ajustes/);
 assert.match(sqlTest, /begin;[\s\S]*rollback;\s*$/i);
 assert.match(sqlTest, /positive|positivo/i);
