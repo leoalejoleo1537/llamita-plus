@@ -2478,7 +2478,6 @@
   .rep-result{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 14px;margin-bottom:6px;cursor:pointer}
   .rep-result:hover{border-color:var(--orange);background:var(--sec-bg)}
   .rep-result .rn{font-size:14px;font-weight:600}
-  .rep-result .rs{font-size:12px;color:var(--muted);margin-top:2px}
   .rep-result .add{color:var(--orange);font-weight:800;font-size:22px;line-height:1}
   .rep-fin{display:flex;align-items:center;gap:10px;flex-shrink:0}
   /* cuánto hay, con el color del estado: el número y la urgencia en un gesto */
@@ -15732,19 +15731,15 @@ function renderRepartoResults(){
      imprime una explicación grande encima de los resultados: solo ofrece
      directamente el producto correcto. */
   $('reparto-results').innerHTML = rows.map(p=>{
-    const {hay, t, cf} = infoReparto(p);
-    // el número va en la píldora de color: cuánto hay y cómo está, de un vistazo
+    const {hay, cf} = infoReparto(p);
+    // El contador compacto conserva cantidad y estado sin añadir una segunda línea.
     return `
-    <div class="rep-result" data-add="${p.id}">
-      <div style="min-width:0">
-        <div class="rn">${esc(p.producto)}</div>
-        <div class="rs">${esc(p.rubro)}${t.multi?' · total':''} · mín ${fmt(p.stock_min)}${maxOk(p)?' · máx '+fmt(p.stock_max):''}</div>
-      </div>
-      <div class="rep-fin">
-        <span class="rep-hay" style="background:${cf.bg};color:${cf.fg}">${fmt(hay)}</span>
-        <span class="add">+</span>
-      </div>
-    </div>`;
+    <button class="rep-result" type="button" data-add="${p.id}"
+            aria-label="Agregar ${esc(p.producto)} al reparto; ${fmt(hay)} disponible">
+      <span class="rn">${esc(p.producto)}</span>
+      <span class="rep-hay" style="background:${cf.bg};color:${cf.fg}" title="${fmt(hay)} disponible">${fmt(hay)}</span>
+      <span class="add" aria-hidden="true">+</span>
+    </button>`;
   }).join('');
 }
 rqEl.addEventListener('input', renderRepartoResults);

@@ -281,6 +281,29 @@ await verificar(()=>page.evaluate(()=>document.documentElement.scrollWidth<=inne
   'Reparto sin desborde horizontal en teléfono');
 await verificar(()=>page.evaluate(()=>!renderRepartoResults.toString().includes('tl-pista')),
   'buscar en Reparto no agrega el texto auxiliar encima de los resultados');
+await page.evaluate(()=>{
+  DATA=[{id:701,sede:'plaza',producto:'Salsa de caramelo',rubro:'Cafetería',stock_actual:8,stock_min:2,stock_max:12,activo:'SÍ'}];
+  carrito=[];rqEl.value='salsa';renderRepartoResults();
+});
+await verificar(()=>page.evaluate(()=>{
+  const fila=document.querySelector('#reparto-results .rep-result');
+  return fila?.tagName==='BUTTON'&&!fila.querySelector('.rs')&&
+    !fila.textContent.includes('mín')&&!fila.textContent.includes('máx')&&
+    fila.getBoundingClientRect().height<=50&&document.documentElement.scrollWidth<=innerWidth+2;
+}),'búsqueda de Reparto reduce el resultado a producto, disponibilidad y acción en teléfono');
+await page.locator('#reparto-results .rep-result').click();
+await verificar(()=>page.evaluate(()=>carrito.length===1&&carrito[0].id===701),
+  'el resultado compacto agrega al carrito con el handler existente');
+await page.setViewportSize({width:1440,height:900});
+await page.evaluate(()=>{carrito=[];renderCarrito();rqEl.value='salsa';renderRepartoResults();});
+await verificar(()=>page.evaluate(()=>{
+  const fila=document.querySelector('#reparto-results .rep-result');
+  return fila&&fila.getBoundingClientRect().height<=58&&
+    fila.querySelector('.rep-hay')?.textContent.trim()==='8'&&
+    document.documentElement.scrollWidth<=innerWidth+2;
+}),'búsqueda de Reparto mantiene una fila concisa y legible en escritorio');
+if(capturas)await page.screenshot({path:join(capturas,'reparto-busqueda-escritorio.png')});
+await page.setViewportSize({width:390,height:844});
 await page.evaluate(()=>{preguntar('¿Continuar?','Prueba visual','Sí').then(v=>window.__uxRespuesta=v);});
 await verificar(()=>page.evaluate(()=>document.getElementById('overlay-ask').classList.contains('open') &&
   getComputedStyle(document.getElementById('overlay-ask')).alignItems==='flex-end'),
