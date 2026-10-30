@@ -42,6 +42,16 @@ await page.goto(pathToFileURL(join(raiz,'index.html')).href);
 await page.evaluate(()=>{pickSede('plaza');AJUSTES_VAL={};PERMISOS.puede_lama=true;aplicarPermisos();});
 await page.waitForTimeout(150);
 const check=async(label,ok)=>{if(!await ok())throw Error(label);console.log('✓ '+label);};
+const abrirPorGesto=async()=>{
+  await page.mouse.move(8,260);await page.mouse.down();
+  await page.mouse.move(96,260,{steps:6});await page.mouse.move(230,260,{steps:6});await page.mouse.up();
+  await page.waitForTimeout(280);
+};
+const cerrarPorGesto=async()=>{
+  await page.mouse.move(220,260);await page.mouse.down();
+  await page.mouse.move(42,260,{steps:8});await page.mouse.up();
+  await page.waitForTimeout(280);
+};
 await check('móvil sin ancho reservado a la izquierda',async()=>
   page.evaluate(()=>getComputedStyle(document.body).paddingLeft==='0px'));
 await check('el viewport no dibuja bajo las barras translúcidas de iPhone',async()=>
@@ -56,35 +66,69 @@ await check('Mesas, Inventario, Reparto y Mermas visibles sin Más',async()=>
 await check('iconos lineales propios de Mesas, Inicio, caja y basurero',async()=>
   page.evaluate(()=>['lama','inv','reparto','mermas'].every(ruta=>
     document.querySelector(`[data-mobile-tab="${ruta}"] svg`)?.getAttribute('viewBox')==='0 0 28 28')));
-await page.click('#mobileMenuTrigger');
+await page.mouse.move(8,260);await page.mouse.down();await page.mouse.move(24,260,{steps:2});await page.mouse.up();
+await check('un gesto corto desde el borde no abre el menú',async()=>
+  page.evaluate(()=>!document.body.classList.contains('mobile-menu-open')));
+await abrirPorGesto();
 await check('menú abierto con foco y estado accesible',async()=>
   page.evaluate(()=>document.body.classList.contains('mobile-menu-open') &&
-    document.activeElement.id==='mobileNavClose' &&
     document.getElementById('mobileMenuTrigger').getAttribute('aria-expanded')==='true'));
+await check('el menú sigue el gesto y difumina la pantalla sin sumar botones',async()=>
+  page.evaluate(()=>{
+    const velo=document.getElementById('mobileNavScrim');
+    return getComputedStyle(document.getElementById('mobileMenuTrigger')).width==='1px' &&
+      getComputedStyle(velo).backdropFilter.includes('blur') &&
+      Math.abs(document.getElementById('mobileNav').getBoundingClientRect().left)<1;
+  }));
 if(process.env.M1_MENU_SCREENSHOT)await page.screenshot({path:process.env.M1_MENU_SCREENSHOT});
 await check('el menú lateral compacto da acceso a todos los módulos permitidos',async()=>
   page.evaluate(()=>['lama','arqueo','movcaja','inv','reparto','mermas','recetas'].every(ruta=>
     getComputedStyle(document.querySelector(`.tab[data-tab="${ruta}"]`)).display!=='none')));
-await check('el menú móvil ocupa como máximo la mitad del ancho y conserva texto legible',async()=>
+await check('el menú móvil deja espacio para leer todas sus etiquetas',async()=>
   page.evaluate(()=>{
     const panel=document.getElementById('mobileNav'),items=[...panel.querySelectorAll('.inner .tab')];
-    return panel.getBoundingClientRect().width<=innerWidth*.5+1 &&
+    return panel.getBoundingClientRect().width<=innerWidth*.86+1 &&
+      panel.getBoundingClientRect().width>=Math.min(344,innerWidth*.8) &&
       items.filter(b=>getComputedStyle(b).display!=='none')
         .every(b=>parseFloat(getComputedStyle(b).fontSize)>=14);
   }));
 await check('Apariencia, presencia en línea y nombres de usuario se quitaron del lateral',async()=>
   page.evaluate(()=>['.drawer-appearance','#drawerOnlineLabel','#drawerOnline','.drawer-user']
     .every(sel=>getComputedStyle(document.querySelector(sel)).display==='none')));
+await cerrarPorGesto();
+await check('un gesto hacia la izquierda repliega el menú',async()=>
+  page.evaluate(()=>!document.body.classList.contains('mobile-menu-open')));
+await abrirPorGesto();
 await page.keyboard.press('Escape');
-await check('Escape cierra y devuelve el foco',async()=>
-  page.evaluate(()=>!document.body.classList.contains('mobile-menu-open') &&
-    document.activeElement.id==='mobileMenuTrigger'));
-await page.click('#mobileMenuTrigger');
+await check('Escape repliega el menú',async()=>
+  page.evaluate(()=>!document.body.classList.contains('mobile-menu-open')));
+await abrirPorGesto();
 await page.click('#mobileNavScrim',{position:{x:380,y:200}});
 await check('toque fuera cierra el menú',async()=>
   page.evaluate(()=>!document.body.classList.contains('mobile-menu-open')));
+await page.setViewportSize({width:320,height:700});
+await abrirPorGesto();
+await check('en un teléfono angosto el cajón conserva opciones legibles',async()=>
+  page.evaluate(()=>{
+    const panel=document.getElementById('mobileNav').getBoundingClientRect();
+    return panel.width<=innerWidth*.86+1 && panel.width>=innerWidth*.8 &&
+      [...document.querySelectorAll('#mobileNav .tab')]
+        .filter(b=>getComputedStyle(b).display!=='none')
+        .every(b=>parseFloat(getComputedStyle(b).fontSize)>=14);
+  }));
+await cerrarPorGesto();
+await page.setViewportSize({width:390,height:844});
+await page.evaluate(()=>{areaPortadaTema='dark';aparienciaPortada(true);sincronizarIdentidadUI();});
+await abrirPorGesto();
+await check('el cajón adopta la superficie y el texto del modo oscuro',async()=>
+  page.evaluate(()=>{
+    const estilo=getComputedStyle(document.getElementById('mobileNav'));
+    return estilo.backgroundColor==='rgb(12, 16, 14)' && estilo.color==='rgb(246, 255, 248)';
+  }));
+await cerrarPorGesto();
+await page.evaluate(()=>{areaPortadaTema='light';aparienciaPortada(true);sincronizarIdentidadUI();});
 for(const ruta of ['lama','arqueo','movcaja','inv','reparto','mermas','recetas']){
-  await page.click('#mobileMenuTrigger');
+  await abrirPorGesto();
   await page.click(`#mobileNav .tab[data-tab="${ruta}"]`);
   await check(`menú móvil abre ${ruta} por su ruta real`,async()=>page.evaluate(r=>
     vistaActual===r && !document.body.classList.contains('mobile-menu-open'),ruta));

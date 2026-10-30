@@ -42,15 +42,12 @@ En modo oscuro, conservar el mismo carácter con fondo `#101512`, panel lateral 
 - Evitar ilustraciones genéricas, emoji, clip-art, decoración abundante y símbolos ambiguos. Mantener pocos trazos, grosor coherente y lectura reconocible a tamaño móvil.
 - Los dibujos de áreas, el icono de Inicio/casa y el futuro logo pueden compartir esta familia; el logo/rostro final sigue pendiente de decisión.
 
-### Navegación compacta en teléfono — propuestas, aún no implementadas
+### Navegación compacta en teléfono
 
-El cajón actual conserva las rutas y etiquetas accesibles y tiene ancho máximo de media pantalla. Para reducir su peso visual se recomiendan estas alternativas, sin ocultar módulos ni saltarse permisos:
-
-1. **Recomendada — barra inferior de cuatro accesos frecuentes + “Más”**: iconos lineales para Mesas, Inventario y las tareas elegidas; “Más” abre una hoja pequeña con el resto de las áreas en una cuadrícula de iconos. Etiquetas solo en el elemento activo o al mantener/enfocar; cada icono conserva nombre accesible. Es la opción más rápida y libera el cajón lateral.
-2. **Hoja inferior de áreas**: botón de menú abre una lámina corta con una cuadrícula de iconos y etiquetas breves. Familiar y fácil de descubrir; ocupa más alto mientras está abierta.
-3. **Riel angosto solo de iconos**: compacto, pero menos descubrible y más propenso a confusiones; usarlo solo con iconos inequívocos, `aria-label`, ayuda al enfocar y prueba con usuarios.
-
-La recomendación es prototipar la opción 1 antes de reemplazar la navegación; esta nota no cambia la navegación actual. La ruta Mesas ya aparece en el menú móvil para cuentas con `puede_lama` y sedes habilitadas. El permiso y las restricciones por sede siguen siendo la autoridad: no se habilita Mesas a cuentas no autorizadas desde CSS o por defecto.
+- La barra inferior conserva los cuatro accesos cotidianos de cada sede. Las rutas restantes se abren con un deslizamiento desde el borde izquierdo; no se añade un botón visible a la cabecera.
+- Durante el arrastre el cajón, el velo y el desenfoque siguen el dedo. Al abrir, el cajón se superpone al contenido sin cambiar su tamaño; al cerrar puede tocarse fuera, usar Escape o deslizar el panel hacia la izquierda.
+- El cajón tiene hasta `86vw` (máximo `344px`) para que las etiquetas completas sean legibles, incluidos módulos que no caben en la barra inferior. Los permisos y restricciones por sede siguen siendo la autoridad: no se habilita Mesas, Bodega ni ninguna ruta mediante CSS.
+- Respetar `prefers-reduced-motion`: las transiciones no son necesarias para comprender ni operar el menú.
 
 ## 2026-10-30 — Punto 1: selector de sede y modo oscuro
 
@@ -64,6 +61,13 @@ La recomendación es prototipar la opción 1 antes de reemplazar la navegación;
 - Los iconos usan la misma coordenada en ambos estados. Las etiquetas aparecen con opacidad y desplazamiento sutil; no hay reordenamiento, salto vertical ni títulos de grupo que empujen las acciones.
 - El riel conserva rutas, permisos, sede y estado activo existentes. En dispositivos táctiles no cambia todavía: el gesto de arrastre desde el borde izquierdo se implementará como el siguiente punto independiente.
 - La prueba visual cubre compacto, expansión por puntero, repliegue, ausencia de desborde y la consistencia del riel en Inventario, Mesas, Arqueo, Movimientos, Productos, Reparto, Recetas, Historial, Mermas y Ajustes.
+
+## 2026-10-30 — Punto 3B: navegación por gesto en teléfono
+
+- Se reemplazó el disparador visual del menú por el gesto desde los primeros `28 px` del borde izquierdo. El panel acompaña el arrastre en tiempo real; un gesto corto o vertical no interfiere con el scroll ni abre el menú.
+- Al revelarse, el contenido —incluida la barra inferior— queda atenuado y difuminado. El panel no redimensiona ni desplaza la vista que queda detrás. Se cierra tocando fuera, con Escape o arrastrándolo hacia la izquierda.
+- Se mantuvieron los mismos botones originales dentro del cajón, por lo que rutas, permisos, sede, estado activo y handlers siguen siendo únicos. La barra inferior permanece fija y sus cuatro rutas operativas no cambian.
+- Cobertura automatizada: 390×844, 320×700, horizontal, claro/oscuro, apertura/cierre por gesto, toque exterior, Escape, todas las rutas de Local 1 y las rutas de Bodega, permisos de Mesas, barra inferior, ausencia de errores JavaScript y riel de escritorio. Sin escrituras comerciales.
 
 ## 2026-10-23 — Corrección visual transversal: Ajustes, Productos y recepciones por área
 

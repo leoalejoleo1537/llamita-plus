@@ -5405,20 +5405,90 @@ function refrescarMenu(){
    un solo control de permisos y ninguna copia de la lógica de cada módulo. */
 function cerrarMenu(devolverFoco=false){
   cerrarPaleta();
-  document.body.classList.remove('mobile-menu-open');
+  document.body.classList.remove('mobile-menu-open','mobile-menu-gesturing');
+  document.body.style.removeProperty('--mobile-drawer-progress-global');
   $('mobileNavScrim').hidden=true;
   $('mobileMenuTrigger').setAttribute('aria-expanded','false');
   if(matchMedia('(max-width:719px)').matches) $('mobileNav').inert=true;
   if(devolverFoco) $('mobileMenuTrigger').focus();
 }
-function abrirMenuMovil(){
+function abrirMenuMovil(enfocar=true){
   if(!matchMedia('(max-width:719px)').matches) return;
+  document.body.classList.remove('mobile-menu-gesturing');
+  document.body.style.removeProperty('--mobile-drawer-progress-global');
   $('mobileNav').inert=false;
   $('mobileNavScrim').hidden=false;
   document.body.classList.add('mobile-menu-open');
   $('mobileMenuTrigger').setAttribute('aria-expanded','true');
-  $('mobileNavClose').focus();
+  if(enfocar) $('mobileNavClose').focus();
 }
+
+/* El menú móvil no ocupa una esquina de la interfaz: se revela desde el
+   borde izquierdo, como las aplicaciones de conversación. El progreso se
+   comparte entre cajón, velo y desenfoque, de modo que acompañan el dedo en
+   vez de aparecer de golpe al soltarlo. Sólo se toma un gesto que empieza en
+   el borde; el resto de la pantalla conserva su scroll y sus controles. */
+const GESTO_MENU_BORDE=28;
+let gestoMenu=null;
+function esTelefono(){ return matchMedia('(max-width:719px)').matches; }
+function progresoCajon(valor){
+  document.body.style.setProperty('--mobile-drawer-progress-global',String(Math.max(0,Math.min(1,valor))));
+}
+function terminarGestoMenu(cancelado=false){
+  const gesto=gestoMenu;
+  if(!gesto) return;
+  gestoMenu=null;
+  document.body.classList.remove('mobile-menu-gesturing');
+  if(gesto.tomado && !cancelado){
+    const abrir=gesto.sentido==='abrir' && gesto.progreso>=.32;
+    const mantener=gesto.sentido==='cerrar' && gesto.progreso>=.68;
+    if(abrir || mantener){
+      abrirMenuMovil(false);
+      return;
+    }
+  }
+  if(gesto.abierto) cerrarMenu(false);
+  else{
+    $('mobileNav').inert=true;
+    $('mobileNavScrim').hidden=true;
+    document.body.style.removeProperty('--mobile-drawer-progress-global');
+  }
+}
+document.addEventListener('pointerdown',e=>{
+  if(!esTelefono() || !e.isPrimary || (e.pointerType==='mouse' && e.button!==0)) return;
+  const abierto=document.body.classList.contains('mobile-menu-open');
+  const dentro=e.target.closest('#mobileNav');
+  if(!abierto && e.clientX>GESTO_MENU_BORDE) return;
+  if(abierto && !dentro) return;
+  gestoMenu={id:e.pointerId,inicioX:e.clientX,inicioY:e.clientY,abierto,sentido:abierto?'cerrar':'abrir',tomado:false,progreso:abierto?1:0};
+}, {passive:true});
+document.addEventListener('pointermove',e=>{
+  const gesto=gestoMenu;
+  if(!gesto || e.pointerId!==gesto.id || !esTelefono()) return;
+  const dx=e.clientX-gesto.inicioX, dy=e.clientY-gesto.inicioY;
+  const avance=gesto.sentido==='abrir' ? dx : -dx;
+  if(!gesto.tomado){
+    if(Math.abs(dy)>Math.abs(dx) && Math.abs(dy)>8){gestoMenu=null;return;}
+    if(avance<9) return;
+    gesto.tomado=true;
+    if(!gesto.abierto){
+      $('mobileNav').inert=false;
+      $('mobileNavScrim').hidden=false;
+    }
+    document.body.classList.add('mobile-menu-gesturing');
+    document.documentElement.setPointerCapture?.(e.pointerId);
+  }
+  e.preventDefault();
+  const ancho=Math.max(1,$('mobileNav').getBoundingClientRect().width);
+  gesto.progreso=Math.max(0,Math.min(1,gesto.abierto ? 1-avance/ancho : avance/ancho));
+  progresoCajon(gesto.progreso);
+}, {passive:false});
+document.addEventListener('pointerup',e=>{
+  if(gestoMenu?.id===e.pointerId) terminarGestoMenu(false);
+}, {passive:true});
+document.addEventListener('pointercancel',e=>{
+  if(gestoMenu?.id===e.pointerId) terminarGestoMenu(true);
+}, {passive:true});
 function tabDisponibleEnMovil(original){
   // La visibilidad real viene de los permisos y la sede, reflejados en el
   // atributo style del botón original; el menú móvil reutiliza este destino.

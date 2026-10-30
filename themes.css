@@ -220,7 +220,7 @@ body.navegacion-fija .top-actions{grid-column:3;grid-row:1;justify-self:end}
   .inv-limpiar{height:30px}
 }
 
-/* Un menú común: riel de escritorio compartido con Inventario y cajón compacto en teléfono. */
+/* Un menú común: riel de escritorio compartido con Inventario y cajón por gesto en teléfono. */
 .mobile-menu-trigger,.mobile-nav-heading,.mobile-bottom,.mobile-nav-scrim{display:none}
 @media(max-width:719px){
   /* Altura fija: Safari cambia su viewport visual al ocultar las barras del
@@ -233,25 +233,35 @@ body.navegacion-fija .top-actions{grid-column:3;grid-row:1;justify-self:end}
   body.navegacion-fija .top-tit{flex:1;align-items:flex-start;text-align:left;min-width:0}
   body.navegacion-fija .top-tit h1,body.navegacion-fija .top-sede{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   body.navegacion-fija .top-actions{flex:0 0 auto;justify-self:auto}
-  .mobile-menu-trigger{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;
-    border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);cursor:pointer}
+  /* La navegación se abre desde el borde izquierdo. El control se conserva
+     sólo para teclado/lector de pantalla, no como un botón que ensucie la barra. */
+  .mobile-menu-trigger{position:fixed;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+    clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
   .mobile-menu-trigger svg{width:22px;height:22px}
   .top-actions .sync-btn,.top-actions .icon-btn{min-width:44px;min-height:44px}
-  .mobile-nav-scrim:not([hidden]){display:block;position:fixed;inset:0;z-index:78;background:rgba(9,17,30,.5)}
-  body.navegacion-fija .tabs{z-index:79;width:min(320px,86vw);max-width:100%;padding:12px 14px calc(18px + env(safe-area-inset-bottom));
-    transform:translateX(-105%);transition:transform .18s ease;box-shadow:none}
-  body.mobile-menu-open.navegacion-fija .tabs{transform:translateX(0);box-shadow:12px 0 36px rgba(9,17,30,.22)}
-  /* El cajón del teléfono es compacto, pero incluye también las rutas que
-     aparecen en la barra inferior. La visibilidad real sigue viniendo de los
-     permisos y de la sede en el atributo style del botón original. */
-  body.navegacion-fija .tabs{width:min(240px,50vw);padding:9px 9px calc(12px + env(safe-area-inset-bottom))}
-  .mobile-nav-heading{display:flex;align-items:center;justify-content:space-between;min-height:42px;
-    padding:0 3px 7px;margin:0 3px 7px;border-bottom:1px solid var(--nav-line);font-size:14px;font-weight:700;color:var(--nav-text)}
-  .mobile-nav-heading button{width:44px;height:44px;border:0;border-radius:8px;background:transparent;
-    color:var(--nav-text);font:inherit;font-size:28px;cursor:pointer}
+  .mobile-nav-scrim:not([hidden]){display:block;position:fixed;inset:0;z-index:78;
+    background:rgb(9 17 30 / calc(var(--mobile-drawer-progress-global, 1) * .46));
+    opacity:var(--mobile-drawer-progress-global, 1);backdrop-filter:blur(calc(var(--mobile-drawer-progress-global, 1) * 6px));
+    -webkit-backdrop-filter:blur(calc(var(--mobile-drawer-progress-global, 1) * 6px));
+    transition:opacity .22s ease,background .22s ease,backdrop-filter .22s ease}
+  body.navegacion-fija .tabs{--mobile-drawer-progress:var(--mobile-drawer-progress-global, 0);z-index:79;width:min(344px,86vw);max-width:100%;
+    padding:12px 14px calc(18px + env(safe-area-inset-bottom));
+    transform:translateX(calc((var(--mobile-drawer-progress) - 1) * 100%));
+    transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s ease;box-shadow:none;will-change:transform}
+  body.mobile-menu-open.navegacion-fija{--mobile-drawer-progress-global:1}
+  body.mobile-menu-open.navegacion-fija .tabs{box-shadow:12px 0 36px rgba(9,17,30,.22)}
+  body.mobile-menu-gesturing .tabs,body.mobile-menu-gesturing .mobile-nav-scrim{transition:none}
+  body.mobile-menu-gesturing{user-select:none;-webkit-user-select:none}
+  /* El cajón incluye todas las rutas permitidas. Es ancho para conservar
+     etiquetas completas, sin alterar ni encoger la pantalla que queda detrás. */
+  body.navegacion-fija .tabs{padding:9px 10px calc(14px + env(safe-area-inset-bottom))}
+  .mobile-nav-heading{display:flex;align-items:center;justify-content:flex-start;min-height:42px;
+    padding:0 5px 8px;margin:0 3px 7px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700;color:var(--text)}
+  .mobile-nav-heading button{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+    clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
   body.navegacion-fija .tabs .inner{gap:2px}
   body.navegacion-fija .tab,body.navegacion-fija .drawer-item{flex-direction:row;justify-content:flex-start;
-    gap:9px;min-height:42px;padding:8px 9px;font-size:14.5px;line-height:1.2;text-align:left;white-space:normal}
+    gap:10px;min-height:44px;padding:9px 10px;font-size:15px;line-height:1.2;text-align:left;white-space:normal}
   body.navegacion-fija .tab svg,body.navegacion-fija .drawer-item svg{width:18px;height:18px;flex-basis:18px}
   body.navegacion-fija .drawer.en-riel{flex:0 0 auto;padding-top:7px}
   .drawer-sec{display:block;padding:10px 9px 4px;font-size:10px;letter-spacing:.04em}
@@ -272,6 +282,9 @@ body.navegacion-fija .top-actions{grid-column:3;grid-row:1;justify-self:end}
   .top-actions .sync-btn .onda{animation:none!important;opacity:0;box-shadow:none}
   .mobile-bottom-item:focus-visible,.mobile-menu-trigger:focus-visible,.mobile-nav-heading button:focus-visible{
     outline:2px solid var(--orange-dark);outline-offset:2px}
+}
+@media(max-width:719px) and (prefers-reduced-motion:reduce){
+  body.navegacion-fija .tabs,.mobile-nav-scrim{transition:none!important}
 }
 @media(min-width:1080px){
   body.ux-module-active.navegacion-fija{--riel:208px}
